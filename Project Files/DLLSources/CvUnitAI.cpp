@@ -80,6 +80,7 @@ void CvUnitAI::AI_reset()
 // Note that the PF is not reset here anymore since K-Mod PF will do that as needed in KmodPathFinder::SetSettings
 bool CvUnitAI::AI_update()
 {
+	WtpTiming::UnitScope wtpTimer((int)AI_getUnitAIType(), isNative());
 	PROFILE_FUNC();
 
 	//FAssertMsg(getUnitTravelState() != NO_UNIT_TRAVEL_STATE || canMove(), "canMove is expected to be true");

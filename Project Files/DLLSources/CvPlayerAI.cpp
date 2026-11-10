@@ -225,6 +225,7 @@ void CvPlayerAI::AI_reset()
 
 void CvPlayerAI::AI_doTurnPre()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPRE);
 	PROFILE_FUNC();
 
 	FAssertMsg(getPersonalityType() != NO_LEADER, "getPersonalityType() is not expected to be equal with NO_LEADER");
@@ -263,6 +264,7 @@ void CvPlayerAI::AI_doTurnPre()
 
 void CvPlayerAI::AI_doTurnPost()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPOST);
 	PROFILE_FUNC();
 
 	if (isHuman())
@@ -477,6 +479,7 @@ void CvPlayerAI::AI_doFleetModernization()
 
 void CvPlayerAI::AI_doTurnUnitsPre()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPRE);
 	PROFILE_FUNC();
 	AI_updateBestYieldPlots();
 	AI_updateFoundValues();
@@ -515,6 +518,7 @@ void CvPlayerAI::AI_doTurnUnitsPre()
 
 void CvPlayerAI::AI_doTurnUnitsPost()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPOST);
 	PROFILE_FUNC();
 
 	CvUnit* pLoopUnit;
@@ -1024,6 +1028,7 @@ int CvPlayerAI::AI_movementPriority(CvSelectionGroup* pGroup)
 
 void CvPlayerAI::AI_unitUpdate()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_UNITUPDATE);
 	PROFILE_FUNC();
 
 	CLLNode<int>* pCurrUnitNode;
@@ -1409,6 +1414,7 @@ struct ApplyAssignWorkingPlots
 
 void CvPlayerAI::AI_assignWorkingPlots()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_ASSIGN_WORKING_PLOTS);
 	AI_manageEconomy();
 
 	// Collect cities

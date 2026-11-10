@@ -5450,6 +5450,8 @@ void CvGame::addShipName(const CvWString& szName)
 
 void CvGame::doTurn()
 {
+	WtpTiming::flush(getGameTurn());
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_DOTURN);
 	PROFILE_FUNC();
 
 	int iLoopPlayer;
@@ -6023,6 +6025,7 @@ void CvGame::updateWar()
 
 void CvGame::updateMoves()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_UPDATEMOVES);
 	MOD_PROFILE("CvGame::updateMoves");
 
 	CvSelectionGroup* pLoopSelectionGroup;
