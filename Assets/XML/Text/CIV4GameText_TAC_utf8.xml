@@ -3333,4 +3333,9 @@
 		<Russian>Испанским</Russian>
 		<Hungarian>Spanyol Királyi:Spanyol Királyi</Hungarian>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_EDUCATION_ASK_LATER</Tag>
+		<English>Ask me again at the end of the turn</English>
+		<German>Zum Ende der Runde noch einmal fragen</German>
+	</TEXT>
 </Civ4GameText>
