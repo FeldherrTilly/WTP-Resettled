@@ -1753,6 +1753,16 @@
 		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Egy nem szabad telepes fellázadt. Úgy vélik, hogy a vadonba menekült.</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_EXPAND</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to expand)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Aufklappen)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_COLLAPSE</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to collapse)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Zuklappen)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
 		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</English>
 		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Portuguese>
