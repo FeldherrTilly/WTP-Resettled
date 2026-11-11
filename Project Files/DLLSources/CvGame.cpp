@@ -1766,6 +1766,11 @@ void CvGame::updateTestEndTurn()
 				{
 					return;
 				}
+				// WTP: the cities whose project is finished next turn with missing materials: the panel to buy them
+				if (WtpBuyMaterialsPanel::relaunch())
+				{
+					return;
+				}
 				if (!(gDLL->getInterfaceIFace()->isForcePopup()))
 				{
 					gDLL->getInterfaceIFace()->setForcePopup(true);
