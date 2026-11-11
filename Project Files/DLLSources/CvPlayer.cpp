@@ -597,7 +597,7 @@ int CvPlayer::startingPlotRange() const
 
 	// PatchMod: Spread out start locs START
 	iRange = (GC.getMap().maxStepDistance() + 60);
-//	iRange = (GC.getMapINLINE().maxStepDistance() + 40);
+//	iRange = (GC.getMap().maxStepDistance() + 40);
 	// PatchMod: Spread out start locs END
 
 	iRange *= GLOBAL_DEFINE_STARTING_DISTANCE_PERCENT;
@@ -19970,7 +19970,7 @@ int CvPlayer::getNativeWaypoint(int iPlotIndex) const
 void CvPlayer::setNativeWaypoint(int iPlotIndex, int iCityId)
 {
 	// the banner of the settlement shows the waypoint marker
-	CvPlot* pWpPlot = GC.getMapINLINE().plotByIndexINLINE(iPlotIndex);
+	CvPlot* pWpPlot = GC.getMap().plotByIndexINLINE(iPlotIndex);
 	if (pWpPlot != NULL && pWpPlot->isCity())
 	{
 		pWpPlot->getPlotCity()->setBillboardDirty(true);
@@ -20007,7 +20007,7 @@ CvWString CvPlayer::sendUnitToNativeWaypoint(CvUnit* pUnit, const CvCity* pNativ
 	{
 		return szResult;
 	}
-	const int iCityId = getNativeWaypoint(GC.getMapINLINE().plotNum(pNativeCity->getX_INLINE(), pNativeCity->getY_INLINE()));
+	const int iCityId = getNativeWaypoint(GC.getMap().plotNum(pNativeCity->getX_INLINE(), pNativeCity->getY_INLINE()));
 	if (iCityId < 0)
 	{
 		return szResult;
