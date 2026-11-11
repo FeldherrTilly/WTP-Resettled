@@ -1844,7 +1844,7 @@ bool CvDLLButtonPopup::launchTextPopup(CvPopup* pPopup, CvPopupInfo &info)
 
 static bool launchNativeWaypointPopup(CvPopup* pPopup, CvPopupInfo& info)
 {
-	CvPlot* pPlot = GC.getMapINLINE().plotByIndexINLINE(info.getData1());
+	CvPlot* pPlot = GC.getMap().plotByIndexINLINE(info.getData1());
 	CvPlayer& kPlayer = GET_PLAYER(GC.getGameINLINE().getActivePlayer());
 	if (pPlot == NULL || !pPlot->isCity())
 	{
