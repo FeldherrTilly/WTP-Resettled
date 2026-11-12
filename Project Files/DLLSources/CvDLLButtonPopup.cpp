@@ -3955,6 +3955,7 @@ bool CvDLLButtonPopup::launchSelectYieldAmountPopup(CvPopup* pPopup, CvPopupInfo
 	}
 
 	int iMaxAmount = 0;
+	int iFromPlayer = -1; // WTP: diplomacy: the player whose goods are traded
 	bool bPlayerAction = false; // WTP: Europe / Africa / Port Royal: the transfer is a player action, otherwise a command of the unit
 	if ((PlayerActionTypes)info.getData3() == PLAYER_ACTION_SET_DIPLO_YIELD_AMOUNT)
 	{
@@ -3965,6 +3966,7 @@ bool CvDLLButtonPopup::launchSelectYieldAmountPopup(CvPopup* pPopup, CvPopupInfo
 		}
 
 		iMaxAmount = GET_PLAYER(eFromPlayer).getTradeYieldAmount(eYield, pUnit);
+		iFromPlayer = (int)eFromPlayer;
 	}
 	else
 	{
@@ -3992,9 +3994,8 @@ bool CvDLLButtonPopup::launchSelectYieldAmountPopup(CvPopup* pPopup, CvPopupInfo
 		return false;
 	}
 
-	// WTP: the transfers (not the amounts of the diplomacy) are asked in an own dialog (python: keys and mouse wheel); if it cannot be
+	// WTP: the amounts of the transfers and of the diplomacy are asked in an own dialog (python: keys and mouse wheel); if it cannot be
 	// opened the spin box popup of the game is used as before
-	if ((PlayerActionTypes)info.getData3() != PLAYER_ACTION_SET_DIPLO_YIELD_AMOUNT)
 	{
 		CyArgsList argsList;
 		argsList.add((int)eYield);
@@ -4002,6 +4003,7 @@ bool CvDLLButtonPopup::launchSelectYieldAmountPopup(CvPopup* pPopup, CvPopupInfo
 		argsList.add(iMaxAmount);
 		argsList.add(info.getData3());
 		argsList.add(bPlayerAction ? 1 : 0);
+		argsList.add(iFromPlayer);
 		long lOpened = 0;
 		gDLL->getPythonIFace()->callFunction(PYScreensModule, "askYieldAmount", argsList.makeFunctionArgs(), &lOpened);
 		if (lOpened != 0)
