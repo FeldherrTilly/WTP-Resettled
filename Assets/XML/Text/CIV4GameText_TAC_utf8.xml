@@ -1773,6 +1773,26 @@
 		<German>[COLOR_CYAN]Holt %F1_Icon %s2_yield[NEWLINE]von %s3_from nach %s4_to[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TITLE</Tag>
+		<English>Trade routes of all transports</English>
+		<German>Handelsrouten aller Transporter</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_BUTTON</Tag>
+		<English>Overview of all transports</English>
+		<German>Uebersicht aller Transporter</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_POSITION</Tag>
+		<English>Transports %d1 - %d2 of %d3</English>
+		<German>Transporter %d1 - %d2 von %d3</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_ASSIGNED</Tag>
+		<English>%d1 of %d2 routes assigned</English>
+		<German>%d1 von %d2 Routen zugewiesen</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
 		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</English>
 		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Portuguese>
