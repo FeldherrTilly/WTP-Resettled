@@ -1828,6 +1828,31 @@
 		<German>Tippen zum Suchen nach Stadt oder Ware (Tab vervollstaendigt)</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TYPE_ROUTES</Tag>
+		<English>Trade routes (R)</English>
+		<German>Handelsrouten (R)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TYPE_AUTO</Tag>
+		<English>Fully automatic (Shift+Alt+C)</English>
+		<German>Vollautomatisch (Shift+Alt+C)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_NAME_ROUTE</Tag>
+		<English>Trade route</English>
+		<German>Handelsroute</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_NAME_AUTO</Tag>
+		<English>Auto route</English>
+		<German>Autoroute</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_RENAME</Tag>
+		<English>Rename %s1_name? OK takes the name below (you can change it), ESC keeps the old name.</English>
+		<German>%s1_name umbenennen? OK uebernimmt den Namen unten (du kannst ihn aendern), ESC behaelt den alten Namen.</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
 		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</English>
 		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Portuguese>
