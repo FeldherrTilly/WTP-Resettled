@@ -896,6 +896,39 @@ int CvSelectionGroupAI::AI_getYieldsLoaded(short* piYields) const
 	return iAmount;
 }
 
+int CvSelectionGroupAI::getPartialYieldSpace(YieldTypes eYield) const
+{
+	int iSpace = 0;
+	CLinkList<IDInfo> unitList;
+	buildCargoUnitList(unitList);
+	CLLNode<IDInfo>* pUnitNode = unitList.head();
+	while (pUnitNode != NULL)
+	{
+		CvUnit* pLoopUnit = ::getUnit(pUnitNode->m_data);
+		pUnitNode = unitList.next(pUnitNode);
+		if (pLoopUnit != NULL && pLoopUnit->getYield() != NO_YIELD && !pLoopUnit->getUnitInfo().isTreasure() && (eYield == NO_YIELD || pLoopUnit->getYield() == eYield))
+		{
+			iSpace += std::max(0, GC.getGameINLINE().getCargoYieldCapacity() - pLoopUnit->getYieldStored());
+		}
+	}
+	return iSpace;
+}
+
+bool CvSelectionGroupAI::canLoadYieldHere(YieldTypes eYield) const
+{
+	CLLNode<IDInfo>* pUnitNode = headUnitNode();
+	while (pUnitNode != NULL)
+	{
+		CvUnit* pLoopUnit = ::getUnit(pUnitNode->m_data);
+		pUnitNode = nextUnitNode(pUnitNode);
+		if (pLoopUnit != NULL && pLoopUnit->canLoadYield(plot(), eYield, false))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void CvSelectionGroupAI::processTradeRoute(CvTradeRoute* pRoute, std::map<IDInfo, int>& cityValues, std::vector<CvTradeRoute*>& routes, std::vector<int>& routeValues, std::vector<bool>& yieldsDelivered, std::vector<bool>& yieldsToUnload)
 {
 	routes.push_back(pRoute);
@@ -1641,7 +1674,7 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 		{
 		if (iPass == 1)
 		{
-			if (!bFillHold || isFull())
+			if (!bFillHold || (isFull() && getPartialYieldSpace(NO_YIELD) <= 0))
 			{
 				break;
 			}
@@ -1706,7 +1739,8 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 				break;
 			}
 		}
-		while (!isFull())
+		// WTP: also a full transport loads into a partly filled slot of the same yield (the game merges the load into it)
+		while (!isFull() || (bFillHold && getPartialYieldSpace(NO_YIELD) > 0))
 		{
 			int iBestRoute = -1;
 			int iBestRouteValue = 0;
@@ -1722,6 +1756,7 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 
 				const CvCity* pSourceCity = ::getCity(routes[i]->getSourceCity());
 				if ((pSourceCity != NULL && pSourceCity == pPlotCity) // R&R mod, vetiarvind, max yield import limit (move plot==srcCity check outside as optmztn)
+					&& (!bFillHold || canLoadYieldHere(routes[i]->getYield())) // WTP: nothing that cannot be loaded (partly filled slots of other yields)
 					&& (iPass == 0 ? (routes[i]->getDestinationCity() == kBestDestination) : (aFillDestinations.find(routes[i]->getDestinationCity()) != aFillDestinations.end())))
 				{
 					const CvCity* pDestinationCity = ::getCity(routes[i]->getDestinationCity());
@@ -1769,6 +1804,7 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 
 			if (iBestRouteValue > 0)
 			{
+				bool bLoadedAny = false; // WTP: a round without any load ends the loading (nothing could be loaded)
 				CLLNode<IDInfo>* pUnitNode = headUnitNode();
 				while (pUnitNode != NULL)
 				{
@@ -1782,15 +1818,20 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 							//pLoopUnit->loadYield(routes[iBestRoute]->getYield(), false);
 							int loaded = 0;
 							if(bImportLimitUsed)
-								loaded = pLoopUnit->loadYieldAmount(routes[iBestRoute]->getYield(), iBestRouteYieldAmount, false);
+								loaded = pLoopUnit->loadYieldAmount(routes[iBestRoute]->getYield(), std::min(iBestRouteYieldAmount, pLoopUnit->getMaxLoadYieldAmount(routes[iBestRoute]->getYield())), false);
 							else
 								loaded = pLoopUnit->loadYield(routes[iBestRoute]->getYield(), false);
 
 							// R&R mod, vetiarvind, max yield import limit - end
 							aiYieldsLoaded[routes[iBestRoute]->getYield()] += loaded;
+							bLoadedAny = (loaded > 0);
 							break;
 						}
 					}
+				}
+				if (!bLoadedAny)
+				{
+					break;
 				}
 			}
 			else
@@ -1824,7 +1865,7 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 	// destination (the trip over it takes at most WTP_FILL_HOLD_MAX_DETOUR_TURNS turns more). This applies to the way to a colony that
 	// receives cargo as well as to the empty way to a colony whose yields are fetched (the colonies on the way that deliver to it).
 	CvCity* pPickupStop = NULL;
-	if (bFillHold && !isFull() && kBestDestination.eOwner != NO_PLAYER && kBestDestination != kEurope)
+	if (bFillHold && (!isFull() || getPartialYieldSpace(NO_YIELD) > 0) && kBestDestination.eOwner != NO_PLAYER && kBestDestination != kEurope)
 	{
 		CvCity* const pTargetCity = ::getCity(kBestDestination);
 		if (pTargetCity != NULL && !atPlot(pTargetCity->plot()))
@@ -1845,6 +1886,23 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 			}
 			if (bTargetOk)
 			{
+				// free cargo space of the group in units of yield: the free slots times the capacity of a slot, plus per yield the free
+				// space in its partly filled slots (a new load of the same yield is merged into them by the game)
+				int iFreeSlots = 0;
+				CLLNode<IDInfo>* pFreeNode = headUnitNode();
+				while (pFreeNode != NULL)
+				{
+					CvUnit* const pFreeUnit = ::getUnit(pFreeNode->m_data);
+					pFreeNode = nextUnitNode(pFreeNode);
+					if (pFreeUnit != NULL && !pFreeUnit->isCargo() && pFreeUnit->cargoSpace() > pFreeUnit->getCargo())
+					{
+						iFreeSlots += pFreeUnit->cargoSpace() - pFreeUnit->getCargo();
+					}
+				}
+				const int iSlotCapacity = GC.getGameINLINE().getCargoYieldCapacity();
+				const int iFreeSlotCapacity = iFreeSlots * iSlotCapacity;
+				const int iFreeCapacity = iFreeSlotCapacity + getPartialYieldSpace(NO_YIELD);
+				const int iMinPickup = std::max(1, iSlotCapacity / WTP_PICKUP_STOP_MIN_SLOT_DIVISOR);
 				std::map<int, int> aPickupAmounts; // source city ID -> units that could be loaded for the target
 				for (uint i = 0; i < routes.size(); ++i)
 				{
@@ -1863,26 +1921,13 @@ bool CvSelectionGroupAI::AI_tradeRoutes()
 					{
 						iPickupAmount = estimateYieldsToLoad(pTargetCity, iPickupAmount, ePickupYield, iToTarget, aiYieldsLoaded[ePickupYield]);
 					}
+					// not more than the free slots and the partly filled slots of this yield can take
+					iPickupAmount = std::min(iPickupAmount, iFreeSlotCapacity + getPartialYieldSpace(ePickupYield));
 					if (iPickupAmount > 0)
 					{
 						aPickupAmounts[pPickupCity->getID()] += iPickupAmount;
 					}
 				}
-				// free cargo space of the group in units of yield (the free slots times the capacity of a slot)
-				int iFreeSlots = 0;
-				CLLNode<IDInfo>* pFreeNode = headUnitNode();
-				while (pFreeNode != NULL)
-				{
-					CvUnit* const pFreeUnit = ::getUnit(pFreeNode->m_data);
-					pFreeNode = nextUnitNode(pFreeNode);
-					if (pFreeUnit != NULL && !pFreeUnit->isCargo() && pFreeUnit->cargoSpace() > pFreeUnit->getCargo())
-					{
-						iFreeSlots += pFreeUnit->cargoSpace() - pFreeUnit->getCargo();
-					}
-				}
-				const int iSlotCapacity = GC.getGameINLINE().getCargoYieldCapacity();
-				const int iFreeCapacity = iFreeSlots * iSlotCapacity;
-				const int iMinPickup = std::max(1, iSlotCapacity / WTP_PICKUP_STOP_MIN_SLOT_DIVISOR);
 				// the detours of all stops on the way to the priority target together stay within the limit
 				const int iDetourLeft = WTP_FILL_HOLD_MAX_DETOUR_TURNS - m_iPriorityDetour;
 				int iBestPickupAmount = 0;
