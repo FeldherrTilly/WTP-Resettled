@@ -1109,6 +1109,8 @@ class CvDomesticAdvisor:
 		try:
 			if len(self.Transports) == 0:
 				return False
+			import CvTransportRoutesOverview
+			CvTransportRoutesOverview.g_FromHotkey = False
 			screen = CyGInterfaceScreen( "DomesticAdvisor", CvScreenEnums.DOMESTIC_ADVISOR )
 			screen.hideScreen()
 			popupInfo = CyPopupInfo()
