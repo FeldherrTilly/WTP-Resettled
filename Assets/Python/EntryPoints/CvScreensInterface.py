@@ -581,6 +581,11 @@ def handleInput (argsList):
 	' handle input is called when a screen is up '
 	inputClass = PyScreenInput.ScreenInput(argsList)
 
+	# WTP: the buttons of the amount dialog when it is drawn on a harbor screen
+	if (yieldAmountScreen.isOpen() and yieldAmountScreen.isEmbedded()):
+		if (yieldAmountScreen.handleEmbeddedInput(inputClass)):
+			return 0
+
 	# allows overides for mods
 	ret = CvScreenUtilsInterface.getScreenUtils().handleInput( (inputClass.getPythonFile(),inputClass) )
 
