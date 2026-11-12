@@ -2573,7 +2573,7 @@ class CvMainInterface:
 					iDigits = len([c for c in unicode(szText) if c.isdigit()])
 					iPileX = 60
 					if iDigits > 5:
-						iPileX = 76 + (iDigits - 6) * 10
+						iPileX = 86 + (iDigits - 6) * 10
 					screen.moveItem("GoldPile", iPileX, 8, -0.3)
 				except:
 					pass
