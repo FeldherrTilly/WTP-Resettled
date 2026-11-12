@@ -1793,6 +1793,41 @@
 		<German>%d1 von %d2 Routen zugewiesen</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_LAND_SEA</Tag>
+		<English>Land and sea</English>
+		<German>Land und See</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_LAND</Tag>
+		<English>Land only</English>
+		<German>Nur Land</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SEA</Tag>
+		<English>Sea only</English>
+		<German>Nur See</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_ALL</Tag>
+		<English>All transports</English>
+		<German>Alle Transporter</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_WITH_ROUTES</Tag>
+		<English>Only with trade routes</English>
+		<German>Nur mit Handelsrouten</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_WITHOUT_ROUTES</Tag>
+		<English>Only without trade routes</English>
+		<German>Nur ohne Handelsrouten</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SEARCH_HINT</Tag>
+		<English>Type to search a city or goods (Tab completes)</English>
+		<German>Tippen zum Suchen nach Stadt oder Ware (Tab vervollstaendigt)</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
 		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</English>
 		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Portuguese>
