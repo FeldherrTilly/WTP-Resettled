@@ -3925,7 +3925,7 @@ class CvMainInterface:
 		except:
 			pass
 
-	# the message panel is moved with Shift and the arrow keys (two keys at once: diagonal)
+	# the message panel is moved with Ctrl + Shift + W A S D (two keys at once: diagonal)
 	def isMessagePanelShown(self):
 		return self.tMessagePanelKey is not None
 
@@ -3967,7 +3967,7 @@ class CvMainInterface:
 		if len(self.aMsgHeld) == 0:
 			return
 		try:
-			bShift = CyInterface().shiftKey()
+			bShift = CyInterface().shiftKey() and CyInterface().ctrlKey()
 		except:
 			bShift = True
 		if not bShift:
