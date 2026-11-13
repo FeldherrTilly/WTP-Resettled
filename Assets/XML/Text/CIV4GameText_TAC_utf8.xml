@@ -3413,4 +3413,14 @@
 		<English>[COLOR_HIGHLIGHT_TEXT]Auto expand[COLOR_REVERT][NEWLINE]Click: the message panel opens expanded at the start of every turn (on) or stays collapsed (off).[NEWLINE]Move the panel: hold Ctrl and Shift and press W, A, S, D (two keys: diagonal).[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Strg und Umschalt gedrückt halten und W, A, S, D drücken (zwei Tasten: diagonal).[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_LIST</Tag>
+		<English>[COLOR:140:255:40:255]All hits (Shift + mouse wheel: choose):[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Alle Treffer (Shift + Mausrad: auswählen):[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP_MORE</Tag>
+		<English>Shift + mouse wheel: choose among the %d1 hits</English>
+		<German>Shift + Mausrad: unter den %d1 Treffern auswählen</German>
+	</TEXT>
 </Civ4GameText>

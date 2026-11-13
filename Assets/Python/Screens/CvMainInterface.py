@@ -304,6 +304,14 @@ class CvMainInterface:
 	BUTTON_MESSAGE_AUTO = 761 # WTP: message panel: auto expand at the start of a turn on / off
 	BUTTON_MESSAGE_LINE = 757 # WTP: a line of a message of the message panel (click: center the map on its place)
 	dMessageLineIndex = {}
+	dMessageRects = {} # message -> (x, y, width, height) of its rows in the panel
+	tMsgPanelRect = None
+	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
+	iMsgSelIdx = 0
+	bMsgWheel = False
+	tMsgPickKey = None
+	bMsgPickShown = False
+	iMsgPickLines = 0
 	aszMessageTexts = []
 
 	def numPlotListButtons( self ):
@@ -4510,6 +4518,8 @@ class CvMainInterface:
 			self.aszMessageLines = []
 			self.dMessageCapitals = {}
 			self.dMessageLineIndex = {}
+			self.dMessageRects = {}
+			self.tMsgPanelRect = (iX, iY, iWidth, iHeight)
 
 			# a denser background: the panel style is semi-transparent, several of them on top of each other are better to read
 			# (two when collapsed, three when expanded)
@@ -4533,6 +4543,7 @@ class CvMainInterface:
 			fRow = 0.0
 			for i in aiShow:
 				iTargetX, iTargetY, eContact = atTargets[i]
+				self.dMessageRects[i] = (iX, iTextY + int(fRow * iLine), iWidth, max(1, int(len(aatLines[i]) * iLine)))
 				if eContact >= 0:
 					# a native tribe: contact (diplomacy), the click also centers its main settlement (handleInput)
 					eWidget = WidgetTypes.WIDGET_CONTACT_CIV
@@ -4612,20 +4623,162 @@ class CvMainInterface:
 				self.bMessagePanelErrorShown = True
 				CvUtil.pyPrint("Message panel failed: " + str(sys.exc_info()[1]))
 
+	# WTP: shift + mouse wheel on a message line chooses among all the things named in it: a window beside the panel lists them (the chosen one
+	# in yellow), the right click opens the chosen one. The rows of every message are kept when the panel is drawn.
+	def isMessageSelected( self, iMessage ):
+		try:
+			return self.aszMessageTexts[iMessage] == self.szMsgSelText
+		except:
+			return False
+
+	def getMessagePickNames( self ):
+		aszNames = ["HudMsgPickBack1", "HudMsgPickBack2"]
+		for i in range(self.iMsgPickLines):
+			aszNames.append("HudMsgPickLine%d" % i)
+		return aszNames
+
+	def hideMessagePick( self, screen ):
+		try:
+			if self.bMsgPickShown:
+				for szName in self.getMessagePickNames():
+					screen.hide(szName)
+					screen.deleteWidget(szName)
+		except:
+			pass
+		self.bMsgPickShown = False
+		self.iMsgPickLines = 0
+
+	def showMessagePick( self, screen, szText, iCursorY ):
+		try:
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			iLine = max(16, int(yRes * 0.0153)) # as in the message panel
+			iPad = max(6, iLine / 2)
+			iChar = iLine * 0.32
+			iMaxWidth = max(300, int(xRes * 0.2))
+			iCharsPerLine = max(20, int((iMaxWidth - 2 * iPad) / iChar))
+			aszLines = []
+			for szPart in szText.split(u"\n"):
+				aszLines += self.wrapMessage(szPart, iCharsPerLine)
+			iLongest = 0
+			for szLine in aszLines:
+				iLongest = max(iLongest, len(re.sub(u"<[^>]*>", u"", szLine)))
+			iWidth = max(120, min(iMaxWidth, int(iLongest * iChar) + 2 * iPad + 8))
+			iHeight = len(aszLines) * iLine + 2 * iPad
+			(iPX, iPY, iPW, iPH) = self.tMsgPanelRect
+			# beside the panel (right of it, left if there is no room) at the height of the cursor
+			iX = iPX + iPW + 12
+			if iX + iWidth > xRes - 4:
+				iX = iPX - 12 - iWidth
+			iX = max(4, iX)
+			iY = max(4, min(yRes - iHeight - 4, iCursorY - iHeight / 2))
+			screen.addPanel("HudMsgPickBack1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			screen.addPanel("HudMsgPickBack2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			self.iMsgPickLines = len(aszLines)
+			for i in range(len(aszLines)):
+				screen.setText("HudMsgPickLine%d" % i, "Background", self.setFontSize(aszLines[i], -1), CvUtil.FONT_LEFT_JUSTIFY, iX + iPad, iY + iPad + i * iLine, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			for szName in self.getMessagePickNames():
+				screen.show(szName)
+				screen.moveToFront(szName)
+			self.bMsgPickShown = True
+		except:
+			self.bMsgPickShown = False
+
+	# every frame: the message line under the cursor, the shift key and the mouse wheel
+	def updateMessageScroll( self ):
+		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+		iMsg = -1
+		if len(self.aszMessageLines) > 0 and self.tMsgPanelRect is not None:
+			iCX = gc.getGame().getCursorClientX()
+			iCY = gc.getGame().getCursorClientY()
+			for iIndex in self.dMessageRects.keys():
+				(iRX, iRY, iRW, iRH) = self.dMessageRects[iIndex]
+				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
+					iMsg = iIndex
+					break
+		aAll = []
+		if iMsg >= 0:
+			aAll = self.getMessagePediaAllTargets(iMsg)
+		bShift = False
+		try:
+			bShift = CyInterface().shiftKey()
+		except:
+			pass
+		# the wheel is only taken (the map does not zoom) while shift is down and the line names more than one thing
+		bWheel = (iMsg >= 0 and bShift and len(aAll) > 1)
+		if bWheel != self.bMsgWheel:
+			self.bMsgWheel = bWheel
+			try:
+				gc.getGame().setWheelCapture(bWheel)
+			except:
+				pass
+		if bWheel:
+			iNotches = gc.getGame().takeWheelNotches()
+			if iNotches != 0:
+				szText = self.aszMessageTexts[iMsg]
+				if szText != self.szMsgSelText:
+					self.szMsgSelText = szText
+					self.iMsgSelIdx = 0
+				# the wheel towards the user: the next one, away from the user: the one before
+				self.iMsgSelIdx = (self.iMsgSelIdx - iNotches) % len(aAll)
+		# the window: while shift is down, or while a chosen one is kept (as long as the cursor stays on the line)
+		bShow = (iMsg >= 0 and len(aAll) > 1 and (bShift or self.isMessageSelected(iMsg)))
+		iSel = -1
+		if bShow:
+			iSel = 0
+			if self.isMessageSelected(iMsg):
+				iSel = self.iMsgSelIdx
+		tKey = (iMsg, iSel, bShow)
+		if iMsg >= 0:
+			tKey = (self.aszMessageTexts[iMsg], iSel, bShow)
+		if tKey == self.tMsgPickKey:
+			return
+		self.tMsgPickKey = tKey
+		self.hideMessagePick(screen)
+		if bShow:
+			szText = localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_LIST", ())
+			for i in range(len(aAll)):
+				if i == iSel:
+					szText += u"\n  <color=255,255,0,255>" + aAll[i][0] + u"</color>"
+				else:
+					szText += u"\n  " + aAll[i][0]
+			self.showMessagePick(screen, szText, gc.getGame().getCursorClientY())
+
 	def getMessagePediaTargets(self, iMessage):
 		try:
 			return self.getTextPediaTargets(self.aszMessageTexts[iMessage])
 		except:
 			return []
 
+	def getMessagePediaAllTargets(self, iMessage):
+		# (the list for the mouse wheel keeps gold, at the end)
+		try:
+			return self.getTextPediaAllTargets(self.aszMessageTexts[iMessage])
+		except:
+			return []
 
 	def openMessagePedia(self, iMessage, bSecond):
-		self.openPediaTargets(self.getMessagePediaTargets(iMessage), bSecond)
-
+		if self.isMessageSelected(iMessage):
+			# the target chosen with shift + mouse wheel
+			self.openPediaTargetIndex(self.getMessagePediaAllTargets(iMessage), self.iMsgSelIdx)
+		else:
+			self.openPediaTargets(self.getMessagePediaTargets(iMessage), bSecond)
 
 	def getMessagePediaHelp(self, iMessage):
-		return self.getPediaHelpForTargets(self.getMessagePediaTargets(iMessage))
-
+		try:
+			aTargets = self.getMessagePediaTargets(iMessage)
+			if len(aTargets) == 0:
+				return u""
+			aAll = self.getMessagePediaAllTargets(iMessage)
+			if self.isMessageSelected(iMessage):
+				szText = localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP", (aAll[self.iMsgSelIdx][0],))
+			else:
+				szText = self.getPediaHelpForTargets(aTargets)
+			if len(aAll) > 1:
+				szText += u"\n" + localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP_MORE", (len(aAll),))
+			return szText
+		except:
+			return u""
 
 	def clickMessageLine(self, iMessage):
 		# centers the map on the place of the message
@@ -4728,6 +4881,10 @@ class CvMainInterface:
 	def update( self, fDelta ):
 		self.updateTerritorialInfluenceEditor()
 		self.updateMessageMove()
+		try:
+			self.updateMessageScroll()
+		except:
+			pass
 		return
 
 	# Adds Mouse Over Help to General Widgets
