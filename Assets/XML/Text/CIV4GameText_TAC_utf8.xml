@@ -3674,6 +3674,16 @@
 		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Strg und Umschalt gedrückt halten und W, A, S, D drücken (zwei Tasten: diagonal).[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_LIST</Tag>
+		<English>[COLOR:140:255:40:255]All hits (Shift + mouse wheel: choose):[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Alle Treffer (Shift + Mausrad: auswählen):[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP_MORE</Tag>
+		<English>Shift + mouse wheel: choose among the %d1 hits</English>
+		<German>Shift + Mausrad: unter den %d1 Treffern auswählen</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
 		<English>Left click: show the place on the map[NEWLINE]Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
