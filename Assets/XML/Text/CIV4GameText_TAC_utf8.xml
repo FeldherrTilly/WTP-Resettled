@@ -3378,4 +3378,14 @@
 		<English>[COLOR_FONT_CREAM]Messages of the previous turn: %d1_Num[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Meldungen der vorherigen Runde: %d1_Num[COLOR_REVERT]</German>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON</Tag>
+		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_OFF</Tag>
+		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+	</TEXT>
 </Civ4GameText>
