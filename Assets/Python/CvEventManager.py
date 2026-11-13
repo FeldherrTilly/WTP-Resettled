@@ -220,7 +220,7 @@ class CvEventManager:
 		if (CvScreensInterface.yieldAmountScreen.isOpen()):
 			if (eventType == self.EventKeyDown):
 				try:
-					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl)
+					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
 				except:
 					pass
 			return 1
