@@ -3388,4 +3388,14 @@
 		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
+		<English>Left click: show the place on the map[NEWLINE]Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP2</Tag>
+		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
 </Civ4GameText>
