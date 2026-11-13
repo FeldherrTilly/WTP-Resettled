@@ -3390,8 +3390,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP</Tag>
-		<English>If switched on, the message panel opens expanded at the start of each turn.</English>
-		<German>Wenn eingeschaltet, öffnet sich das Meldungsfenster zu Beginn jeder Runde ausgeklappt.</German>
+		<English>[COLOR_HIGHLIGHT_TEXT]Auto expand[COLOR_REVERT][NEWLINE]Click: the message panel opens expanded at the start of every turn (on) or stays collapsed (off).[NEWLINE]Move the panel: hold Shift and press the arrow keys (two keys: diagonal).[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Umschalt gedrückt halten und Pfeiltasten drücken (zwei Tasten: diagonal).[NEWLINE]Position: %d1, %d2</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
