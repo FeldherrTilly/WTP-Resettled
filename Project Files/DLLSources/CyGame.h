@@ -173,6 +173,8 @@ public:
 	bool isShiftKeyPressed() const; // WTP: is the shift key down
 	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
 	int getCursorClientY() const;
+	void sendDiploYieldAmount(int iYield, int iAmount, int iFromPlayer) const; // WTP: the amount dialog (python) sets the amount of goods of a diplomacy deal
+	void sendYieldTransfer(int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) const; // WTP: the amount dialog (python) sends the transfer of goods
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);
