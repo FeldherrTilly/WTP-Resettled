@@ -5349,7 +5349,7 @@ class CvMainInterface:
 		return None
 
 	def getCursorTipNames( self ):
-		aszNames = ["HudTipBack1", "HudTipBack2"]
+		aszNames = ["HudTipBack1", "HudTipBack2", "HudTipBack3"]
 		for i in range(self.iCursorTipLines):
 			aszNames.append("HudTipLine%d" % i)
 		return aszNames
