@@ -15,6 +15,17 @@ gc = CyGlobalContext()
 ArtFileMgr = CyArtFileMgr()
 localText = CyTranslator()
 
+def logWaypoint(szText):
+	try:
+		f = open("WTP_Waypoint.log", "a")
+		f.write(szText + "\n")
+		f.close()
+	except:
+		pass
+
+# the order of the rows (names) when the table was left: the sorting is kept when the advisor is opened again
+g_NativeRowOrder = []
+
 class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 	def __init__(self, parent):
 		BaseAdvisorWindow.BaseAdvisorWindow.__init__(self, parent, "NativeStateClass")
@@ -47,6 +58,32 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 				knownList.append(pLoopCity)
 		return knownList
 
+	def saveRowOrder(self):
+		global g_NativeRowOrder
+		try:
+			iRows = len(self.getKnownSettlementList())
+			aNames = []
+			for iRow in range(iRows):
+				aNames.append(self.tableManager.getScreen().getTableText(self.tableManager.currentPageName(), 1, iRow))
+			g_NativeRowOrder = aNames
+		except:
+			pass
+
+	def getCityOfRow(self, iRow):
+		# the table can be sorted: the row is found by the name that is displayed in it
+		citylist = self.getKnownSettlementList()
+		try:
+			szName = self.tableManager.getScreen().getTableText(self.tableManager.currentPageName(), 1, iRow)
+			for pCity in citylist:
+				if pCity.getName() == szName:
+					return pCity
+		except:
+			import traceback
+			logWaypoint(traceback.format_exc())
+		if iRow >= 0 and iRow < len(citylist):
+			return citylist[iRow]
+		return None
+
 	def lookAtSettlement(self, iPlotID):
 		plot = gc.getMap().plotByIndex(iPlotID)
 		if plot is None or plot.isNone():
@@ -55,7 +92,20 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 		CyCamera().JustLookAtPlot(plot)
 		
 	def drawTableContent(self):
-		citylist = self.getKnownSettlementList()		
+		citylist = self.getKnownSettlementList()
+		# keep the sorting of the last visit
+		if len(g_NativeRowOrder) > 0:
+			aSorted = []
+			aRest = []
+			for szName in g_NativeRowOrder:
+				for pCity in citylist:
+					if pCity.getName() == szName and pCity not in aSorted:
+						aSorted.append(pCity)
+						break
+			for pCity in citylist:
+				if pCity not in aSorted:
+					aRest.append(pCity)
+			citylist = aSorted + aRest
 		
 		self.tableManager.setNumRows(len(citylist))
 		
@@ -117,6 +167,7 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 	
 	def handleInput (self, inputClass):
 		if (inputClass.getNotifyCode() == NotifyCode.NOTIFY_LISTBOX_ITEM_SELECTED):
+			self.saveRowOrder()
 			if (inputClass.getMouseX() == 0):
 				self.lookAtSettlement(inputClass.getData1())
 				return 0

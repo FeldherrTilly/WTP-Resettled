@@ -167,6 +167,12 @@ public:
 	ColorTypes getReplayMessageColor(int i) const;
 	std::wstring getReplayMessageText(int i) const;
 	uint getNumReplayMessages() const;
+	void setWheelCapture(bool bOn) const; // WTP: the mouse wheel is collected for a python window instead of zooming the map
+	int takeWheelNotches() const; // WTP: the notches of the wheel since the last call (positive: away from the user)
+	bool isCtrlKeyPressed() const; // WTP: is the control key down
+	bool isShiftKeyPressed() const; // WTP: is the shift key down
+	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
+	int getCursorClientY() const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);

@@ -16,6 +16,8 @@ import CvScreensInterface
 # Achievements END
 import CvEventInterface
 import time
+import re
+import sys
 import math
 
 # GLOBAL SYSTEM SHORTCUTS
@@ -284,6 +286,16 @@ class CvMainInterface:
 	"Main Interface Screen"
 
 	BUTTON_TERRITORIAL_INFLUENCE = 750
+	# WTP: Colopedia links of texts (getTextPediaTargets): caches and lists, built at the first use
+	dMessagePediaChars = {}
+	aMessageConceptPatterns = []
+	aMessageNameList = []
+	aMessageSpecial = []
+	dMessageConcepts = {}
+	dMessagePediaCache = {}
+	dMessagePediaAll = {} # the same with gold at the end instead of left out (mouse wheel list of the frozen tooltip)
+	dMessagePediaNames = None # WTP: lower case name -> (name, Colopedia screen, id), built at the first use
+	aiWrapIndent = [] # the indent of every line of the last wrapMessage (in characters)
 
 	def numPlotListButtons( self ):
 		return NUM_PLOT_LIST_BUTTONS
@@ -3704,6 +3716,420 @@ class CvMainInterface:
 				self.toggleTerritorialInfluence()
 
 		return 0
+
+	# WTP: Colopedia links of texts: the things named in a text (colored names, symbols of goods and bonuses, game concepts, other names)
+	# and their Colopedia pages; used by the message panel and the tooltips
+	def getMessageWidth(self, szText):
+		# width in characters: the symbols of the game font (icons) are wider than letters
+		iWidth = 0
+		# the help texts contain &lt; &gt; &amp; for the signs that are shown (&lt;F1&gt; is 4 characters wide)
+		szText = szText.replace(u"&lt;", u"<").replace(u"&gt;", u">").replace(u"&amp;", u"&")
+		for szChar in szText:
+			if ord(szChar) >= 0x2000:
+				iWidth += 3.4
+			else:
+				iWidth += 1
+		return iWidth
+
+	# WTP: line wrapping of texts with color markup and icons (message panel, hover tooltips)
+	def wrapMessage(self, szMessage, iCharsPerLine, bIconIndent = False):
+		# splits a message with color markup into lines of about iCharsPerLine visible characters; the colors that are open at the end of
+		# a line are closed there and opened again at the start of the next line.
+		# bIconIndent (hover tooltip): a row of icons (promotions) that does not fit is continued in the next line, under the first icon;
+		# the indent of every line (in characters) is in self.aiWrapIndent afterwards
+		aszLines = []
+		aiIndent = []
+		aszOpen = []
+		szLine = u""
+		iVisible = 0
+		iLineIndent = 0
+		bImgRun = False
+		iImgIndent = 0
+		aszTokens = re.split(u"(<[^>]*>)", szMessage)
+		for iToken in range(len(aszTokens)):
+			szToken = aszTokens[iToken]
+			if not szToken:
+				continue
+			if szToken[0] == u"<" and szToken[-1] == u">":
+				szLower = szToken.lower()
+				if szLower.startswith(u"<img="):
+					# a picture (the promotions of a unit): about as wide as an icon of the game font. A row of them that does not fit into the
+					# rest of the line goes into the next line as a whole (a row longer than a line is broken there)
+					if not bImgRun:
+						bImgRun = True
+						iImgIndent = 0
+						if bIconIndent:
+							fRun = 0
+							for szNext in aszTokens[iToken:]:
+								if szNext.lower().startswith(u"<img="):
+									fRun += self.fImgWidth
+								elif szNext and szNext.lower() != u"</img>" and szNext.strip():
+									break
+							# the promotions of a unit always go into a line of their own (not behind a number: that is a counted group)
+							szBefore = re.sub(u"<[^>]*>", u"", szLine).rstrip()
+							bOwnLine = (len(szBefore) > 0 and not szBefore[-1:].isdigit())
+							if iVisible > iLineIndent and (bOwnLine or iVisible + fRun > iCharsPerLine):
+								aszLines.append(szLine + u"</color>" * len(aszOpen))
+								aiIndent.append(iLineIndent)
+								szLine = u"".join(aszOpen)
+								iVisible = 0
+								iLineIndent = 0
+					if iVisible > iLineIndent and iVisible + self.fImgWidth > iCharsPerLine:
+						aszLines.append(szLine + u"</color>" * len(aszOpen))
+						aiIndent.append(iLineIndent)
+						szLine = u"".join(aszOpen)
+						iVisible = iImgIndent
+						iLineIndent = iImgIndent
+					szLine += szToken
+					iVisible += self.fImgWidth
+					continue
+				if szLower.startswith(u"<color"):
+					aszOpen.append(szToken)
+				elif szLower == u"</color>":
+					if aszOpen:
+						aszOpen.pop()
+				szLine += szToken
+				continue
+			if szToken.strip():
+				bImgRun = False
+			szLead = szToken[:len(szToken) - len(szToken.lstrip())]
+			szLine += szLead
+			iVisible += len(szLead)
+			aszWords = []
+			for szWord in re.findall(u"\\S+\\s*", szToken, re.UNICODE):
+				if bIconIndent:
+					# a row of icons at the end of a word (\"(26/37)\" + promotions) is a word of its own
+					aszWords += self.splitIconRow(szWord)
+				else:
+					aszWords.append(szWord)
+			for szWord in aszWords:
+				szCore = szWord.rstrip()
+				iWord = self.getMessageWidth(szCore)
+				if bIconIndent and len(szCore) > 1 and self.isIconRow(szCore):
+					# the row of icons starts where it is and goes on under its first icon
+					iIndent = iVisible
+					if iIndent + 4 * 3.4 > iCharsPerLine:
+						iIndent = 0
+					bHas = iVisible > 0
+					for szChar in szCore:
+						iChar = self.getMessageWidth(szChar)
+						if bHas and iVisible + iChar > iCharsPerLine:
+							aszLines.append(szLine + u"</color>" * len(aszOpen))
+							aiIndent.append(iLineIndent)
+							szLine = u"".join(aszOpen)
+							iVisible = iIndent
+							iLineIndent = iIndent
+							bHas = False
+						szLine += szChar
+						iVisible += iChar
+						bHas = True
+					szLine += szWord[len(szCore):]
+					iVisible += len(szWord) - len(szCore)
+					continue
+				if iVisible > 0 and iVisible + iWord > iCharsPerLine:
+					aszLines.append(szLine + u"</color>" * len(aszOpen))
+					aiIndent.append(iLineIndent)
+					szLine = u"".join(aszOpen)
+					iVisible = 0
+					iLineIndent = 0
+				if iWord > iCharsPerLine:
+					# a word without blanks that is longer than a line (e.g. a row of icons): broken between the characters
+					for szChar in szWord:
+						iChar = self.getMessageWidth(szChar)
+						if iVisible > 0 and iVisible + iChar > iCharsPerLine:
+							aszLines.append(szLine + u"</color>" * len(aszOpen))
+							aiIndent.append(iLineIndent)
+							szLine = u"".join(aszOpen)
+							iVisible = 0
+							iLineIndent = 0
+						szLine += szChar
+						iVisible += iChar
+					continue
+				szLine += szWord
+				iVisible += self.getMessageWidth(szWord)
+		aszLines.append(szLine)
+		aiIndent.append(iLineIndent)
+		self.aiWrapIndent = aiIndent
+		return aszLines
+
+	def splitIconRow(self, szWord):
+		szCore = szWord.rstrip()
+		iStart = len(szCore)
+		while iStart > 0 and ord(szCore[iStart - 1]) >= 0x2000:
+			iStart -= 1
+		if iStart > 0 and len(szCore) - iStart >= 2:
+			return [szWord[:iStart], szWord[iStart:]]
+		return [szWord]
+
+	fImgWidth = 3.6 # width of a picture (<img=...>) in characters
+
+	# visible width of a line in characters (pictures and icons of the game font count more than a letter)
+	def getLineWidth(self, szLine):
+		return self.getMessageWidth(re.sub(u"<[^>]*>", u"", szLine)) + self.fImgWidth * len(re.findall(u"<img=", szLine.lower()))
+
+	def isIconRow(self, szText):
+		for szChar in szText:
+			if ord(szChar) < 0x2000:
+				return False
+		return True
+
+	def getTextPediaAllTargets(self, szMessage):
+		# all things named in a text, in the order of priority (colored names and symbols, game concepts, other names; gold last)
+		aResult = self.getTextPediaTargets(szMessage)
+		return self.dMessagePediaAll.get(szMessage, aResult)
+
+	def getTextPediaTargets(self, szMessage):
+		# the things named (colored) in a text that have a Colopedia page: [(name, screen, id)] in the order of the text
+		aResult = []
+		try:
+			if szMessage in self.dMessagePediaCache:
+				return self.dMessagePediaCache[szMessage]
+			if len(self.dMessagePediaCache) > 300:
+				self.dMessagePediaCache = {}
+				self.dMessagePediaAll = {}
+			if self.dMessagePediaNames is None:
+				dNames = {}
+				# later entries must not overwrite earlier ones: units first, then professions, buildings, goods, bonuses, promotions
+				aKinds = ((CvScreenEnums.PEDIA_UNIT, gc.getNumUnitInfos, gc.getUnitInfo),
+					(CvScreenEnums.PEDIA_PROFESSION, gc.getNumProfessionInfos, gc.getProfessionInfo),
+					(CvScreenEnums.PEDIA_BUILDING, gc.getNumBuildingInfos, gc.getBuildingInfo),
+					(CvScreenEnums.PEDIA_YIELDS, gc.getNumYieldInfos, gc.getYieldInfo),
+					(CvScreenEnums.PEDIA_BONUS, gc.getNumBonusInfos, gc.getBonusInfo),
+					(CvScreenEnums.PEDIA_PROMOTION, gc.getNumPromotionInfos, gc.getPromotionInfo),
+					(CvScreenEnums.PEDIA_TERRAIN, gc.getNumTerrainInfos, gc.getTerrainInfo),
+					(CvScreenEnums.PEDIA_FEATURE, gc.getNumFeatureInfos, gc.getFeatureInfo),
+					(CvScreenEnums.PEDIA_IMPROVEMENT, gc.getNumImprovementInfos, gc.getImprovementInfo))
+				for (eScreen, fNum, fInfo) in aKinds:
+					for i in range(fNum()):
+						# (the names of some infos have color tags: [COLOR_CAT_ROAD]Paved Country Road[COLOR_REVERT])
+						szName = re.sub(u"<[^>]*>", u"", fInfo(i).getDescription() or u"")
+						if szName and len(szName) >= 3:
+							szKey = szName.lower()
+							if not szKey in dNames:
+								dNames[szKey] = (szName, eScreen, i)
+				# the roads have no page of their own: the concept "Pioneers and improvements" tells about them
+				try:
+					iImprovements = -1
+					for i in range(gc.getNumConceptInfos()):
+						if gc.getConceptInfo(i).getType() == "CONCEPT_IMPROVEMENTS":
+							iImprovements = i
+					if iImprovements >= 0:
+						for i in range(gc.getNumRouteInfos()):
+							szName = re.sub(u"<[^>]*>", u"", gc.getRouteInfo(i).getDescription() or u"")
+							if szName and len(szName) >= 3 and not szName.lower() in dNames:
+								dNames[szName.lower()] = (szName, "CONCEPT", iImprovements)
+				except:
+					pass
+				# the symbols (font characters) of goods and bonus resources
+				dChars = {}
+				for (eScreen, fNum, fInfo) in ((CvScreenEnums.PEDIA_YIELDS, gc.getNumYieldInfos, gc.getYieldInfo), (CvScreenEnums.PEDIA_BONUS, gc.getNumBonusInfos, gc.getBonusInfo)):
+					for i in range(fNum()):
+						try:
+							iChar = fInfo(i).getChar()
+							if iChar > 0:
+								dChars[unichr(iChar)] = (re.sub(u"<[^>]*>", u"", fInfo(i).getDescription()), eScreen, i)
+						except:
+							pass
+				# concepts (Colopedia: game concepts): by their name and by the key words of the text MESSAGE_CONCEPT_WORDS ("stem=CONCEPT_TYPE;...")
+				dConcepts = {}
+				aConceptNames = []
+				for i in range(gc.getNumConceptInfos()):
+					try:
+						szName = re.sub(u"<[^>]*>", u"", gc.getConceptInfo(i).getDescription() or u"")
+						dConcepts[gc.getConceptInfo(i).getType()] = (szName, "CONCEPT", i)
+						if szName and len(szName) >= 4:
+							aConceptNames.append((szName, i))
+					except:
+						pass
+				aAliases = []
+				for szEntry in localText.getText("TXT_KEY_WTP_MESSAGE_CONCEPT_WORDS", ()).split(u";"):
+					aParts = szEntry.strip().split(u"=")
+					if len(aParts) == 2 and aParts[1].strip() in dConcepts:
+						aAliases.append((re.compile(u"(?<!\\w)" + re.escape(aParts[0].strip()) + u"\\w*", re.UNICODE | re.IGNORECASE), dConcepts[aParts[1].strip()]))
+				for (szName, i) in aConceptNames:
+					aAliases.append((re.compile(u"(?<!\\w)" + re.escape(szName) + u"(?!\\w)", re.UNICODE | re.IGNORECASE), dConcepts[gc.getConceptInfo(i).getType()]))
+				self.aMessageConceptPatterns = aAliases
+				self.dMessageConcepts = dConcepts
+				# the summarized storage messages (surplus sold / lost): fixed Colopedia entries instead of the many goods symbols
+				aSpecial = []
+				for (szKey, aTypes) in (("TXT_KEY_WTP_SURPLUS_SOLD", ("CONCEPT_DOMESTIC_MARKETS", "CONCEPT_NEW_STORAGE")), ("TXT_KEY_WTP_SURPLUS_LOST", ("CONCEPT_NEW_STORAGE",))):
+					try:
+						szText = localText.getText(szKey, (u"\x01", u"\x02", 0))
+						szText = szText[szText.index(u"\x01") + 1:szText.index(u"\x02")]
+						szText = re.sub(u"<[^>]*>", u"", szText).strip()
+						if len(szText) > 10:
+							aSpecial.append((szText, [dConcepts[t] for t in aTypes if t in dConcepts], None))
+					except:
+						pass
+				# the messages about a new great person (great general / admiral, brave lieutenant, able captain): the unit page and the concept
+				try:
+					tConcept = dConcepts.get("CONCEPT_GREAT_GENERALS")
+					dUnits = {}
+					for szUnit in ("UNIT_GREAT_GENERAL", "UNIT_GREAT_ADMIRAL", "UNIT_BRAVE_LIEUTENANT", "UNIT_CAPABLE_CAPTAIN"):
+						eUnit = gc.getInfoTypeForString(szUnit)
+						if eUnit >= 0:
+							dUnits[szUnit] = (gc.getUnitInfo(eUnit).getDescription(), CvScreenEnums.PEDIA_UNIT, eUnit)
+					aGroups = []
+					for szKey in ("TXT_KEY_MISC_GP_BORN", "TXT_KEY_MISC_GP_BORN_SOMEWHERE", "TXT_KEY_MISC_GP_BORN_FIELD"):
+						aGroups.append((szKey, "UNIT_GREAT_GENERAL"))
+					for szKey in ("TXT_KEY_MISC_BL_BORN", "TXT_KEY_MISC_BL_BORN_SOMEWHERE", "TXT_KEY_MISC_BL_BORN_FIELD"):
+						aGroups.append((szKey, "UNIT_BRAVE_LIEUTENANT"))
+					for szKey in ("TXT_KEY_MISC_CC_BORN", "TXT_KEY_MISC_CC_BORN_SOMEWHERE", "TXT_KEY_MISC_CC_BORN_FIELD"):
+						aGroups.append((szKey, "UNIT_CAPABLE_CAPTAIN"))
+					for (szKey, szUnit) in aGroups:
+						if not szUnit in dUnits:
+							continue
+						aPieces = re.split(u"[\x01\x02]", localText.getText(szKey, (u"\x01", u"\x02")))
+						aPieces = [re.sub(u"<[^>]*>", u"", t).strip() for t in aPieces]
+						aPieces.sort(key = lambda t: -len(t))
+						if len(aPieces[0]) > 10:
+							aTargets = [dUnits[szUnit]]
+							if tConcept is not None:
+								aTargets.append(tConcept)
+							# great generals: the admiral instead of the general if the text names him
+							aSpecial.append((aPieces[0], aTargets, szUnit == "UNIT_GREAT_GENERAL" and "UNIT_GREAT_ADMIRAL" in dUnits and dUnits["UNIT_GREAT_ADMIRAL"]))
+				except:
+					pass
+				self.aMessageSpecial = aSpecial
+				self.dMessagePediaChars = dChars
+				aNameList = [(k, v) for (k, v) in dNames.items() if len(k) >= 3]
+				aNameList.sort(key = lambda t: -len(t[0]))
+				self.aMessageNameList = aNameList
+				self.dMessagePediaNames = dNames
+			szPlainAll = re.sub(u"<[^>]*>", u"", szMessage)
+			for (szFragment, aSpecialTargets, bGreat) in self.aMessageSpecial:
+				if szFragment in szPlainAll:
+					aResult = list(aSpecialTargets)
+					if bGreat and bGreat[0].lower() in szPlainAll.lower() and len(aResult) > 0:
+						aResult[0] = bGreat
+					self.dMessagePediaCache[szMessage] = aResult
+					return aResult
+			# the names of settlements are cut out of the text (Fort Nassau is a city, not a fort)
+			# exception: a settlement named like a Colopedia concept (Port Royal) keeps its link
+			aConceptNames = [t[0].lower() for t in self.dMessageConcepts.values()]
+			aCityNames = []
+			for ePlayer in range(gc.getMAX_PLAYERS()):
+				pPlayer = gc.getPlayer(ePlayer)
+				if not pPlayer.isAlive():
+					continue
+				for iCity in range(pPlayer.getNumCities()):
+					pCity = pPlayer.getCity(iCity)
+					if pCity is not None and not pCity.isNone():
+						szCity = pCity.getName().lower()
+						if len(szCity) >= 3 and not szCity in aCityNames and not szCity in aConceptNames:
+							aCityNames.append(szCity)
+			aCityNames.sort(key = lambda t: -len(t))
+			def maskCities(szText):
+				szLower = szText.lower()
+				for szCity in aCityNames:
+					iPos = szLower.find(szCity)
+					while iPos >= 0:
+						szText = szText[:iPos] + u" " * len(szCity) + szText[iPos + len(szCity):]
+						szLower = szLower[:iPos] + u" " * len(szCity) + szLower[iPos + len(szCity):]
+						iPos = szLower.find(szCity, iPos + len(szCity))
+				return szText
+			dNames = self.dMessagePediaNames
+			dChars = self.dMessagePediaChars
+			aFound = [] # (position in the text, target)
+			for oMatch in re.finditer(u"<color=[^>]*>(.*?)</color>", szMessage):
+				szSegment = re.sub(u"<[^>]*>", u"", oMatch.group(1))
+				szSegment = re.compile(u"^[^\\w]+|[^\\w]+$", re.UNICODE).sub(u"", szSegment).lower()
+				if len(szSegment) < 3 or szSegment in aCityNames:
+					continue
+				tFound = dNames.get(szSegment)
+				if tFound is None:
+					# plural forms
+					if szSegment.endswith(u"ies"):
+						tFound = dNames.get(szSegment[:-3] + u"y")
+					if tFound is None and szSegment.endswith(u"es"):
+						tFound = dNames.get(szSegment[:-2])
+					if tFound is None and szSegment.endswith(u"s"):
+						tFound = dNames.get(szSegment[:-1])
+				if tFound is not None:
+					aFound.append((oMatch.start(), tFound))
+			# symbols
+			for iPos in range(len(szMessage)):
+				tFound = dChars.get(szMessage[iPos])
+				if tFound is not None:
+					aFound.append((iPos, tFound))
+			aFound.sort(key = lambda t: t[0])
+			for (iPos, tFound) in aFound:
+				if not tFound in aResult:
+					aResult.append(tFound)
+			# names in the whole text (marked or not): whole words only (at least 3 letters), the longest names first, a found name is cut out of the text
+			szRest = maskCities(re.sub(u"<[^>]*>", u"", szMessage)).lower()
+			aRest = []
+			oWord = re.compile(u"\\w", re.UNICODE)
+			for (szKey, tFound) in self.aMessageNameList:
+				iStart = 0
+				while True:
+					iPos = szRest.find(szKey, iStart)
+					if iPos < 0:
+						break
+					iEnd = iPos + len(szKey)
+					bOk = (iPos == 0 or oWord.match(szRest[iPos - 1]) is None) and (iEnd >= len(szRest) or oWord.match(szRest[iEnd]) is None)
+					if bOk:
+						aRest.append((iPos, tFound))
+						szRest = szRest[:iPos] + u" " * len(szKey) + szRest[iEnd:]
+						break
+					iStart = iPos + 1
+			aRest.sort(key = lambda t: t[0])
+			# game concepts in the plain text (after the marked names and symbols, before the other names)
+			szPlain = maskCities(re.sub(u"<[^>]*>", u"", szMessage))
+			aConcepts = []
+			for (oPattern, tConcept) in self.aMessageConceptPatterns:
+				oMatch = oPattern.search(szPlain)
+				if oMatch is not None:
+					aConcepts.append((oMatch.start(), tConcept))
+			aConcepts.sort(key = lambda t: t[0])
+			for (iPos, tFound) in aConcepts:
+				if not tFound in aResult:
+					aResult.append(tFound)
+			# the names found in the whole text come last (the game concepts have priority)
+			for (iPos, tFound) in aRest:
+				if not tFound in aResult:
+					aResult.append(tFound)
+			# gold is mentioned in many messages: with more than two hits it is left out
+			# (the list for the mouse wheel of the frozen tooltip keeps gold, at the end)
+			aAll = list(aResult)
+			if len(aResult) > 2:
+				szGold = gc.getYieldInfo(YieldTypes.YIELD_GOLD).getDescription().lower()
+				aResult = [t for t in aResult if t[0].lower() != szGold]
+				aAll = aResult + [t for t in aAll if t[0].lower() == szGold]
+			self.dMessagePediaAll[szMessage] = aAll
+			self.dMessagePediaCache[szMessage] = aResult
+		except:
+			pass
+		return aResult
+
+	def openPediaTargets(self, aTargets, bSecond):
+		iIndex = 0
+		if bSecond:
+			iIndex = 1
+		self.openPediaTargetIndex(aTargets, iIndex)
+
+	def openPediaTargetIndex(self, aTargets, iIndex):
+		try:
+			if iIndex >= 0 and iIndex < len(aTargets):
+				szName, eScreen, iEntry = aTargets[iIndex]
+				if eScreen == "CONCEPT":
+					iEntryId = CvScreensInterface.pediaMainScreen.pediaHistorical.getIdFromEntryInfo(CivilopediaPageTypes.CIVILOPEDIA_PAGE_CONCEPT, iEntry)
+					CvScreensInterface.pediaMainScreen.pediaJump(CvScreenEnums.PEDIA_HISTORY, iEntryId, True)
+				else:
+					CvScreensInterface.pediaMainScreen.pediaJump(eScreen, iEntry, True)
+		except:
+			pass
+
+	def getPediaHelpForTargets(self, aTargets):
+		try:
+			if len(aTargets) == 0:
+				return u""
+			szText = localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP", (aTargets[0][0],))
+			if len(aTargets) > 1:
+				szText += u"\n" + localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP2", (aTargets[1][0],))
+			return szText
+		except:
+			return u""
 
 	def updateTerritorialInfluenceEditor(self):
 
