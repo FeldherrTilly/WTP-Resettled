@@ -167,6 +167,8 @@ public:
 	ColorTypes getReplayMessageColor(int i) const;
 	std::wstring getReplayMessageText(int i) const;
 	uint getNumReplayMessages() const;
+	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
+	int getCursorClientY() const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);
