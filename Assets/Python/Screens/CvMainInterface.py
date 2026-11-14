@@ -211,8 +211,8 @@ GO_TO_CITY = 1003
 
 # Achievements START
 ACHIEVE_ADVISOR_SCREEN_MI = 4200
-WTP_CYCLE_PREV = 4300 # arrows above the R / C button: the previous / next automated transport (data2: the automate type)
-WTP_CYCLE_NEXT = 4301
+WTP_CYCLE_PREV = 4350 # arrows above the R / C button: the previous / next automated transport (data2: the automate type)
+WTP_CYCLE_NEXT = 4351 # (4300-4305 are used by the HUD help texts below)
 # Achievements END
 
 # R&R, Robert Surcouf VET NewCapacity Help - Start
