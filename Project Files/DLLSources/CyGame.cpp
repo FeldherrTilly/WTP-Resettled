@@ -4,6 +4,9 @@
 
 #include "CvGameCoreDLL.h"
 #include "CyGame.h"
+#include "CvPopupInfo.h"
+#include "CvDLLInterfaceIFaceBase.h"
+#include "CvDLLWidgetData.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
 #include "CyPlayer.h"
@@ -669,6 +672,216 @@ ColorTypes CyGame::getReplayMessageColor(int i) const
 std::wstring CyGame::getReplayMessageText(int i) const
 {
 	return (NULL != m_pGame ? m_pGame->getReplayMessageText(i) : L"");
+}
+void CyGame::openDomesticMarket(int iCityID) const
+{
+	CvCity* pCity = GET_PLAYER(GC.getGameINLINE().getActivePlayer()).getCity(iCityID);
+	if (pCity != NULL)
+	{
+		CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_DOMESTIC_MARKET, iCityID);
+		gDLL->getInterfaceIFace()->addPopup(pInfo, NO_PLAYER, true);
+	}
+}
+
+// WTP: the mouse wheel for the amount dialog: the window procedure of the game window is replaced while the dialog is open,
+// the wheel messages are counted (and not passed on: the map does not zoom), everything else goes to the original procedure
+#ifndef WM_MOUSEWHEEL
+#define WM_MOUSEWHEEL 0x020A
+#endif
+#ifndef WHEEL_DELTA
+#define WHEEL_DELTA 120
+#endif
+static HWND s_hWheelWnd = NULL;
+static WNDPROC s_pOldWheelProc = NULL;
+static LONG s_iWheelDelta = 0;
+
+static LRESULT CALLBACK wtpWheelProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (uMsg == WM_MOUSEWHEEL)
+	{
+		s_iWheelDelta += (short)HIWORD(wParam);
+		return 0;
+	}
+	return CallWindowProc(s_pOldWheelProc, hWnd, uMsg, wParam, lParam);
+}
+
+void CyGame::setWheelCapture(bool bOn) const
+{
+	if (bOn)
+	{
+		if (s_hWheelWnd != NULL)
+		{
+			return;
+		}
+		HWND hWnd = GetForegroundWindow();
+		DWORD iProcess = 0;
+		if (hWnd == NULL || GetWindowThreadProcessId(hWnd, &iProcess) == 0 || iProcess != GetCurrentProcessId())
+		{
+			return;
+		}
+		s_iWheelDelta = 0;
+		s_pOldWheelProc = (WNDPROC)SetWindowLong(hWnd, GWL_WNDPROC, (LONG)wtpWheelProc);
+		if (s_pOldWheelProc != NULL)
+		{
+			s_hWheelWnd = hWnd;
+		}
+	}
+	else if (s_hWheelWnd != NULL)
+	{
+		// (only given back if nobody else has replaced the procedure meanwhile)
+		if ((WNDPROC)GetWindowLong(s_hWheelWnd, GWL_WNDPROC) == wtpWheelProc)
+		{
+			SetWindowLong(s_hWheelWnd, GWL_WNDPROC, (LONG)s_pOldWheelProc);
+		}
+		s_hWheelWnd = NULL;
+		s_pOldWheelProc = NULL;
+		s_iWheelDelta = 0;
+	}
+}
+
+int CyGame::takeWheelNotches() const
+{
+	const int iNotches = s_iWheelDelta / WHEEL_DELTA;
+	s_iWheelDelta -= iNotches * WHEEL_DELTA;
+	return iNotches;
+}
+
+bool CyGame::isCtrlKeyPressed() const
+{
+	return (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+}
+
+bool CyGame::isShiftKeyPressed() const
+{
+	return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+}
+
+// WTP: the amount of goods of a diplomacy deal (the same as CvDLLButtonPopup::handleSelectYieldAmountPopup does)
+void CyGame::sendDiploYieldAmount(int iYield, int iAmount, int iFromPlayer) const
+{
+	const PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
+	if (ePlayer == NO_PLAYER || iAmount <= 0 || iYield < 0 || iYield >= NUM_YIELD_TYPES || iFromPlayer < 0 || iFromPlayer >= MAX_PLAYERS)
+	{
+		return;
+	}
+	gDLL->sendPlayerAction(ePlayer, PLAYER_ACTION_SET_DIPLO_YIELD_AMOUNT, iYield, iAmount, iFromPlayer);
+	gDLL->updateDiplomacyAttitude(true);
+}
+
+// WTP: the amount dialog (python, CvYieldAmountScreen) replaces the spin box popup of the transfer with the shift key: the same actions
+// as CvDLLButtonPopup::handleSelectYieldAmountPopup (iData3: the command, or the player action in Europe / Africa / Port Royal)
+void CyGame::sendYieldTransfer(int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) const
+{
+	const PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
+	if (ePlayer == NO_PLAYER || iAmount <= 0 || iYield < 0 || iYield >= NUM_YIELD_TYPES)
+	{
+		return;
+	}
+	if (GET_PLAYER(ePlayer).getUnit(iUnitID) == NULL)
+	{
+		return;
+	}
+	if (bPlayerAction)
+	{
+		gDLL->sendPlayerAction(ePlayer, (PlayerActionTypes)iData3, iYield, iAmount, iUnitID);
+	}
+	else
+	{
+		gDLL->sendDoCommand(iUnitID, (CommandTypes)iData3, iYield, iAmount, false);
+	}
+}
+
+static bool wtpGetCursor(POINT& pt)
+{
+	if (!GetCursorPos(&pt)) return false;
+	HWND hWnd = GetForegroundWindow();
+	if (hWnd == NULL || !ScreenToClient(hWnd, &pt)) return false;
+	return true;
+}
+
+// WTP: the last help text of a widget of the interface (see CvDLLWidgetData::parseHelp)
+extern CvWString wtpGetWidgetHelpText();
+extern int wtpGetWidgetHelpCount();
+extern int wtpGetWidgetHelpType();
+std::wstring CyGame::getWidgetHelpText() const
+{
+	return std::wstring(wtpGetWidgetHelpText().GetCString());
+}
+int CyGame::getWidgetHelpCount() const
+{
+	return wtpGetWidgetHelpCount();
+}
+int CyGame::getWidgetHelpType() const
+{
+	return wtpGetWidgetHelpType();
+}
+std::wstring CyGame::getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const
+{
+	// the same text the game gets from CvDLLWidgetData::parseHelp for this widget; asked for inside the Python help callback, so that the
+	// own tooltip window is made before the game shows its own tooltip (changing the screen afterwards makes the game tooltip disappear)
+	CvWidgetDataStruct widgetData;
+	widgetData.m_iData1 = iData1;
+	widgetData.m_iData2 = iData2;
+	widgetData.m_bOption = bOption;
+	widgetData.m_eWidgetType = (WidgetTypes)eWidgetType;
+	CvWStringBuffer szBuffer;
+	CvDLLWidgetData::getInstance().parseHelp(szBuffer, widgetData);
+	return std::wstring(szBuffer.getCString());
+}
+
+int CyGame::getCursorClientX() const
+{
+	POINT pt;
+	return wtpGetCursor(pt) ? (int)pt.x : -1;
+}
+
+int CyGame::getCursorClientY() const
+{
+	POINT pt;
+	return wtpGetCursor(pt) ? (int)pt.y : -1;
+}
+
+int CyGame::getNumHudMessages() const
+{
+	return WtpHudMessages::getNum();
+}
+std::wstring CyGame::getHudMessageText(int i) const
+{
+	return std::wstring(WtpHudMessages::getText(i).GetCString());
+}
+int CyGame::getHudMessageX(int i) const
+{
+	return WtpHudMessages::getX(i);
+}
+int CyGame::getHudMessageY(int i) const
+{
+	return WtpHudMessages::getY(i);
+}
+int CyGame::getNumHudPriority() const
+{
+	return WtpHudMessages::getNumPriority();
+}
+
+int CyGame::getNumHudPriorityPrevious() const
+{
+	return WtpHudMessages::getNumPriorityPrevious();
+}
+
+int CyGame::getNumHudMessagesPrevious() const
+{
+	return WtpHudMessages::getNumPrevious();
+}
+std::wstring CyGame::getHudMessagePreviousText(int i) const
+{
+	return std::wstring(WtpHudMessages::getPreviousText(i).GetCString());
+}
+int CyGame::getHudMessagePreviousX(int i) const
+{
+	return WtpHudMessages::getPreviousX(i);
+}
+int CyGame::getHudMessagePreviousY(int i) const
+{
+	return WtpHudMessages::getPreviousY(i);
 }
 uint CyGame::getNumReplayMessages() const
 {

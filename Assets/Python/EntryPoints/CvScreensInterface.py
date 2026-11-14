@@ -10,6 +10,9 @@ import CvAchieveAdvisor
 # Achievements END
 # TAC - Trade Route Advisor - koma13 - START
 import CvTradeRoutesAdvisor
+import CvTransportRoutesOverview
+import CvTradeRouteScreen
+import CvYieldAmountScreen
 # TAC - Trade Route Advisor - koma13 - END
 
 import CvRevolutionAdvisor
@@ -118,6 +121,37 @@ def showTradeRoutesAdvisor(argsList):
 	if (-1 != CyGame().getActivePlayer()):
 		tradeRoutesAdvisor.interfaceScreen()
 # TAC - Trade Routes Advisor - koma13 - END
+
+# WTP: overview of the trade route assignments of all transports (button of the trade routes tab of the domestic advisor)
+transportRoutesOverview = CvTransportRoutesOverview.CvTransportRoutesOverview()
+# WTP: the DLL offers a numbered name for a transport that was just automated / got its first trade route
+def askTransportName(argsList):
+	CvTransportRoutesOverview.offerTransportName(argsList[0], argsList[1])
+
+# WTP: the DLL asks for the import / export settings of a city (instead of its popup); returns 1 if the window is open
+tradeRouteScreen = CvTradeRouteScreen.CvTradeRouteScreen()
+def askTradeRouteSetup(argsList):
+	try:
+		return tradeRouteScreen.open(argsList[0], argsList[1] != 0)
+	except:
+		import traceback
+		CvTradeRouteScreen.logTrade(traceback.format_exc())
+		return 0
+
+# WTP: the DLL asks for the amount of goods to transfer (instead of the spin box popup of the game); returns 1 if the dialog is open
+yieldAmountScreen = CvYieldAmountScreen.CvYieldAmountScreen()
+def askYieldAmount(argsList):
+	try:
+		return yieldAmountScreen.open(argsList[0], argsList[1], argsList[2], argsList[3], argsList[4] != 0, argsList[5])
+	except:
+		import traceback
+		CvYieldAmountScreen.logYield(traceback.format_exc())
+		return 0
+
+def showTransportRoutesOverview(argsList):
+	DesyncDetectorInstance = gc.startDesyncMonitor()
+	if (-1 != CyGame().getActivePlayer()):
+		transportRoutesOverview.interfaceScreen()
 
 revolutionAdvisor = CvRevolutionAdvisor.CvRevolutionAdvisor()
 def showRevolutionAdvisorScreen(argsList):
@@ -581,6 +615,16 @@ def handleInput (argsList):
 	' handle input is called when a screen is up '
 	inputClass = PyScreenInput.ScreenInput(argsList)
 
+	# WTP: the buttons of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen()):
+		if (tradeRouteScreen.handleEmbeddedInput(inputClass)):
+			return 0
+
+	# WTP: the buttons of the amount dialog when it is drawn on a harbor screen
+	if (yieldAmountScreen.isOpen() and yieldAmountScreen.isEmbedded()):
+		if (yieldAmountScreen.handleEmbeddedInput(inputClass)):
+			return 0
+
 	# allows overides for mods
 	ret = CvScreenUtilsInterface.getScreenUtils().handleInput( (inputClass.getPythonFile(),inputClass) )
 
@@ -601,7 +645,33 @@ def update (argsList):
 		screen = HandleInputMap.get(argsList[0])
 		screen.update(argsList[1])
 
+	# WTP: the mouse wheel of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen()):
+		tradeRouteScreen.update(argsList[1])
+
+	# WTP: the mouse wheel of the amount dialog when it is drawn on a harbor screen
+	if (yieldAmountScreen.isOpen() and yieldAmountScreen.isEmbedded() and argsList[0] != YIELD_AMOUNT):
+		yieldAmountScreen.update(argsList[1])
+
+# WTP: diplomacy opened from the native info tab of the domestic advisor
+bReturnToDomesticAfterDiplomacy = False
+
+# WTP: screen id of a trade screen opened from the exported goods tab of the domestic advisor (-1: none)
+iReturnToDomesticScreen = -1
+
 def onClose (argsList):
+	global iReturnToDomesticScreen
+	# WTP: back to the domestic advisor (exported goods tab) when the trade screen opened from there is closed
+	if (iReturnToDomesticScreen != -1 and argsList[0] == iReturnToDomesticScreen):
+		iReturnToDomesticScreen = -1
+		try:
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+			popupInfo.setText(u"showDomesticAdvisor")
+			popupInfo.addPopup(CyGame().getActivePlayer())
+		except:
+			pass
+
 	# allows overides for mods
 	if (CvScreenUtilsInterface.getScreenUtils().onClose(argsList)):
 		return
@@ -667,7 +737,24 @@ def handleForward(screens):
 	return 0
 
 def getWidgetHelp(argsList):
+	szText = getWidgetHelpText(argsList)
+	# WTP: the own tooltip window at the cursor shows the same text
+	try:
+		mainInterface.widgetHelpSeen(szText, argsList[1])
+	except:
+		pass
+	return szText
+
+def getWidgetHelpText(argsList):
 	iScreen = argsList[0]
+	# WTP: the tooltips of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen() and argsList[1] == WidgetTypes.WIDGET_GENERAL and argsList[2] >= 41001 and argsList[2] < 43000):
+		return tradeRouteScreen.getHelp(argsList[2])
+	# WTP: the move buttons of the amount dialog
+	if (yieldAmountScreen.isOpen() and argsList[1] == WidgetTypes.WIDGET_GENERAL and argsList[2] >= 40010 and argsList[2] < 40014):
+		if (yieldAmountScreen.iFromPlayer >= 0):
+			return CyTranslator().getText("TXT_KEY_WTP_YIELD_AMOUNT_MOVE_HELP", (yieldAmountScreen.iGX, yieldAmountScreen.iGY)) # (the diplomacy gets no keys)
+		return CyTranslator().getText("TXT_KEY_WTP_YIELD_AMOUNT_MOVE_HELP_KEYS", (yieldAmountScreen.iGX, yieldAmountScreen.iGY))
 	if (HandleMouseoverMap.has_key(iScreen)):
 		screen = HandleMouseoverMap.get(iScreen)
 		return screen.getWidgetHelp(argsList)
@@ -779,6 +866,8 @@ HandleCloseMap = {  DAWN_OF_MAN : dawnOfMan,
 				# TAC - Trade Routes Advisor - koma13 - START
 					TRADE_ROUTES_ADVISOR : tradeRoutesAdvisor,
 				# TAC - Trade Routes Advisor - koma13 - END
+					TRANSPORT_ROUTES_OVERVIEW : transportRoutesOverview,
+					YIELD_AMOUNT : yieldAmountScreen,
 				}
 #######################################################################################
 ## Handle Mouseover Map
@@ -853,6 +942,8 @@ HandleInputMap = {  MAIN_INTERFACE : mainInterface,
 				# TAC - Trade Routes Advisor - koma13 - START
 					TRADE_ROUTES_ADVISOR : tradeRoutesAdvisor,
 				# TAC - Trade Routes Advisor - koma13 - END
+					TRANSPORT_ROUTES_OVERVIEW : transportRoutesOverview,
+					YIELD_AMOUNT : yieldAmountScreen,
 					XML_EDITOR : xmlEditor,
 				}
 
@@ -909,3 +1000,13 @@ def selectOneEvent(argsList):
 	pPlayer.trigger(eventTriggerNumber)
 
 #TAC: EventTriggerMenu END
+
+# WTP debug log: every show... function (a screen or a menu that is opened) is logged with its arguments
+def wtpLoggedShow(szName, fxn):
+	def logged(*args):
+		return fxn(*args)
+	return logged
+
+for szWtpName in globals().keys():
+	if szWtpName.startswith("show") and callable(globals()[szWtpName]):
+		globals()[szWtpName] = wtpLoggedShow(szWtpName, globals()[szWtpName])

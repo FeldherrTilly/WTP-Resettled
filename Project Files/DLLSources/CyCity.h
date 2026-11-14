@@ -74,6 +74,7 @@ public:
 	int getFirstBuildingOrder(int /*BuildingTypes*/ eBuilding);
 	int getProduction();
 	int getProductionNeeded(int /*YieldTypes*/ eYield);
+	int getBuildingYieldProductionNeeded(int /*BuildingTypes*/ eBuilding, int /*YieldTypes*/ eYield); // WTP: cost of a building for this city
 	int getProductionTurnsLeft();
 	int getUnitProductionTurnsLeft(int /*UnitTypes*/ iUnit, int iNum);
 	int getBuildingProductionTurnsLeft(int /*BuildingTypes*/ iBuilding, int iNum);								
@@ -381,6 +382,13 @@ public:
 	int getImportsLimit(int /*YieldTypes*/ eYield) const;	// R&R mod, vetiarvind, max yield import limit
 	// transport feeder - start - Nightinggale
 	bool isImportFeeder(int /*YieldTypes*/ eYield) const;
+	// WTP: for the trade route screen (python)
+	bool isAutoExport(int /*YieldTypes*/ eYield) const;
+	int getImportDomains(int /*YieldTypes*/ eYield) const;
+	int getExportDomains(int /*YieldTypes*/ eYield) const;
+	bool isAutoMarketImport() const;
+	bool isMarketDemandYield(int /*YieldTypes*/ eYield) const;
+	bool isYieldInTradeRouteCondensedList(int /*YieldTypes*/ eYield) const;
 	bool isAutoImportStopped(int /*YieldTypes*/ eYield) const;
 	int getAutoMaintainThreshold(int /*YieldTypes*/ eYield) const;
 	// transport feeder - end - Nightinggale

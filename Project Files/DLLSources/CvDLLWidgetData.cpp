@@ -1,6 +1,7 @@
 #include "CvGameCoreDLL.h"
 #include "CvGameCoreUtils.h"
 #include "CvCity.h"
+#include "CvDLLButtonPopup.h"
 #include "CvUnit.h"
 #include "CvGlobals.h"
 #include "CvGameAI.h"
@@ -225,7 +226,23 @@ void CvDLLWidgetData::freeInstance()
 	m_pInst = NULL;
 }
 
+// WTP: the last help text the game asked for (every widget of the interface), for the own tooltip window of the main interface (python)
+static CvWString g_szWtpWidgetHelp;
+static int g_iWtpWidgetHelpCount = 0;
+static int g_iWtpWidgetHelpType = 0;
+CvWString wtpGetWidgetHelpText() { return g_szWtpWidgetHelp; }
+int wtpGetWidgetHelpCount() { return g_iWtpWidgetHelpCount; }
+int wtpGetWidgetHelpType() { return g_iWtpWidgetHelpType; }
+
 void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
+{
+	parseHelpInner(szBuffer, widgetDataStruct);
+	g_szWtpWidgetHelp = szBuffer.getCString();
+	g_iWtpWidgetHelpType = (int)widgetDataStruct.m_eWidgetType;
+	g_iWtpWidgetHelpCount++;
+}
+
+void CvDLLWidgetData::parseHelpInner(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
 {
 	CxDesyncMonitor StartAsyncExecution;
 
@@ -917,7 +934,6 @@ bool CvDLLWidgetData::executeAltAction(const CvWidgetDataStruct &widgetDataStruc
 	}
 
 	CvWidgetDataStruct widgetData = widgetDataStruct;
-
 	bool bHandled = true;
 	switch (widgetDataStruct.m_eWidgetType)
 	{
@@ -1229,7 +1245,8 @@ void CvDLLWidgetData::doConstruct(const CvWidgetDataStruct &widgetDataStruct)
 
 	if (widgetDataStruct.m_iData2 != FFreeList::INVALID_INDEX)
 	{
-		gDLL->sendPushOrder(widgetDataStruct.m_iData2, ORDER_CONSTRUCT, eBuilding, false, false, false);
+		// WTP: like a ctrl click on the construction list: put the building on top of the queue, the current project stays in the queue
+		gDLL->sendPushOrder(widgetDataStruct.m_iData2, ORDER_CONSTRUCT, eBuilding, false, false, true);
 	}
 	else
 	{

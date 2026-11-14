@@ -337,6 +337,8 @@ void CvCity::uninit()
 	// transport feeder - start - Nightinggale
 	m_em_bTradeImportsMaintain.reset();
 	// transport feeder - end - Nightinggale
+	m_em_iTradeImportDomains.reset(); // WTP
+	m_em_iTradeExportDomains.reset(); // WTP
 }
 
 // FUNCTION: reset()
@@ -915,7 +917,15 @@ void CvCity::doTask(TaskTypes eTask, int iData1, int iData2, bool bOption, bool 
 		break;
 
 	case TASK_HURRY:
-		hurry((HurryTypes)iData1);
+		if (iData2 == 1)
+		{
+			// WTP: only the missing materials are bought (popups of the missing materials)
+			buyMissingYields();
+		}
+		else
+		{
+			hurry((HurryTypes)iData1);
+		}
 		break;
 
 	case TASK_CLEAR_ORDERS:
@@ -958,6 +968,10 @@ void CvCity::doTask(TaskTypes eTask, int iData1, int iData2, bool bOption, bool 
 
 	// transport feeder - start - Nightinggale
 	case TASK_YIELD_TRADEROUTE:
+		// WTP: iData1 holds the yield (lowest 8 bits), the land / sea settings of the import (bits 8-9) and of the export (bits 10-11)
+		setImportDomains((YieldTypes)(iData1 & 0xFF), (iData1 >> 8) & 3);
+		setExportDomains((YieldTypes)(iData1 & 0xFF), (iData1 >> 10) & 3);
+		iData1 &= 0xFF;
 		setAutoExport((YieldTypes)iData1, bCtrl); // auto traderoute - Nightinggale
 
 		// change all traderoute settings for a single yield in one go as setImportsMaintain() needs to be called after updating the other settings
@@ -2748,6 +2762,103 @@ bool CvCity::canHurry(HurryTypes eHurry, bool bTestVisible) const
 #endif
 	}
 	return true;
+}
+
+int CvCity::getBuyMissingYieldsPrice(UnitTypes eUnit, BuildingTypes eBuilding, bool& bPossible, const int* aiExpected) const
+{
+	bPossible = false;
+	if (eUnit == NO_UNIT && eBuilding == NO_BUILDING)
+	{
+		return 0;
+	}
+	const PlayerTypes eParent = GET_PLAYER(getOwnerINLINE()).getParent();
+	const HurryTypes eHurry = (HurryTypes)GC.getInfoTypeForString("HURRY_GOLD");
+	if (eParent == NO_PLAYER || eHurry == NO_HURRY)
+	{
+		return 0;
+	}
+	bPossible = true;
+	int iPrice = 0;
+	bool bMissing = false;
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (GC.getYieldInfo(eYield).isCargo())
+		{
+			const int iNeeded = (eUnit != NO_UNIT) ? getYieldProductionNeeded(eUnit, eYield) : getYieldProductionNeeded(eBuilding, eYield);
+			int iDeficit = iNeeded - getYieldStored(eYield) - getYieldRushed(eYield);
+			if (aiExpected != NULL && aiExpected[eYield] > 0)
+			{
+				iDeficit -= aiExpected[eYield];
+			}
+			if (iDeficit > 0)
+			{
+				if (!GET_PLAYER(getOwnerINLINE()).isYieldEuropeTradable(eYield))
+				{
+					bPossible = false;
+					return 0;
+				}
+				bMissing = true;
+				iPrice += iDeficit * GET_PLAYER(eParent).getYieldSellPrice(eYield) * GC.getHurryInfo(eHurry).getYieldCostEuropePercent() / 100;
+			}
+		}
+	}
+	if (!bMissing)
+	{
+		bPossible = false;
+	}
+	return iPrice;
+}
+
+bool CvCity::buyMissingYields()
+{
+	const UnitTypes eUnit = getProductionUnit();
+	const BuildingTypes eBuilding = getProductionBuilding();
+	bool bPossible = false;
+	const int iPrice = getBuyMissingYieldsPrice(eUnit, eBuilding, bPossible);
+	if (!bPossible || iPrice <= 0 || GET_PLAYER(getOwnerINLINE()).getGold() < iPrice)
+	{
+		return false;
+	}
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (GC.getYieldInfo(eYield).isCargo())
+		{
+			const int iNeeded = (eUnit != NO_UNIT) ? getYieldProductionNeeded(eUnit, eYield) : getYieldProductionNeeded(eBuilding, eYield);
+			const int iDeficit = iNeeded - getYieldStored(eYield) - getYieldRushed(eYield);
+			if (iDeficit > 0)
+			{
+				changeYieldRushed(eYield, iDeficit);
+			}
+		}
+	}
+	OOS_LOG_3("BuyMissingYields", CvString(getName()).c_str(), iPrice);
+	GET_PLAYER(getOwnerINLINE()).changeGold(-iPrice);
+	return true;
+}
+
+// WTP: at the end of the turn: is the project finished next turn while materials will be missing then (and can they be bought)?
+bool CvCity::isBuyMaterialsPanelWanted() const
+{
+	if (!isHuman() || isNative() || isDisorder() || isProductionAutomated() || !isProduction() || getOwnerINLINE() != GC.getGameINLINE().getActivePlayer())
+	{
+		return false;
+	}
+	const UnitTypes eUnit = getProductionUnit();
+	const BuildingTypes eBuilding = getProductionBuilding();
+	if (eUnit == NO_UNIT && eBuilding == NO_BUILDING)
+	{
+		return false;
+	}
+	const int iTurns = (eUnit != NO_UNIT) ? getProductionTurnsLeft(eUnit, 0) : getProductionTurnsLeft(eBuilding, 0);
+	if (iTurns != 1)
+	{
+		return false;
+	}
+	int aiYields[NUM_YIELD_TYPES];
+	calculateNetYields(aiYields, NULL, NULL, false);
+	bool bPossible = false;
+	const int iPrice = getBuyMissingYieldsPrice(eUnit, eBuilding, bPossible, aiYields);
+	return bPossible && iPrice > 0 && GET_PLAYER(getOwnerINLINE()).getGold() >= iPrice;
 }
 
 void CvCity::hurry(HurryTypes eHurry)
@@ -5758,8 +5869,13 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 						 eYieldConsumed = eYieldConsumed2;
 					}
 				}
-				CvWString szBuffer = gDLL->getText("TXT_KEY_NO_RAW", getNameKey(),GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar());
+				// WTP: the message names the amount that is missing per turn (consumption minus what is produced and stored)
+				int iMissing = aiConsumedYields[eYieldConsumed] - aiProducedYields[eYieldConsumed] * getBaseYieldRateModifier(eYieldConsumed) / 100 - getYieldStored(eYieldConsumed);
+				iMissing = std::max(1, iMissing);
+				CvWString szBuffer = gDLL->getText("TXT_KEY_WTP_NO_RAW_AMOUNT", getNameKey(), GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar(), iMissing);
+				WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 				gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldConsumed).getButton(), COLOR_RED, true, true);
+				WtpHudMessages::setPriority(false);
 			}
 		}
 	}
@@ -5784,7 +5900,9 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 					}
 				}
 				CvWString szBuffer = gDLL->getText("TXT_KEY_ALMOST_NO_RAW", getNameKey(),GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar());
+				WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 				gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldConsumed).getButton(), COLOR_RED, true, true);
+				WtpHudMessages::setPriority(false);
 			}
 		}
 	}
@@ -5807,7 +5925,9 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 						 eYieldConsumed = eYieldConsumed2;
 					}
 					CvWString szBuffer = gDLL->getText("TXT_KEY_NOT_ENOUGH_RAW", getNameKey(),GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar());
+					WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 					gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldConsumed).getButton(), COLOR_RED, true, true);
+					WtpHudMessages::setPriority(false);
 				}
 			}
 		}
@@ -8168,6 +8288,46 @@ void CvCity::doYields()
 	// R&R, ray, adjustment Domestic Markets
 
 
+	// WTP: the materials of the project in production are kept (not sold to the domestic market, not lost to a storage overflow) while the project is
+	// finished within two turns or materials of it were bought: aiProjectReserve is the amount of every material that is kept
+	int aiProjectReserve[NUM_YIELD_TYPES];
+	for (int iReserve = 0; iReserve < NUM_YIELD_TYPES; ++iReserve)
+	{
+		aiProjectReserve[iReserve] = 0;
+	}
+	bool bProtectProject = false;
+	if (isHuman() && !isNative() && !isProductionAutomated() && isProduction())
+	{
+		const UnitTypes eProjectUnit = getProductionUnit();
+		const BuildingTypes eProjectBuilding = getProductionBuilding();
+		if (eProjectUnit != NO_UNIT || eProjectBuilding != NO_BUILDING)
+		{
+			bool bBought = false;
+			for (YieldTypes eRushed = FIRST_YIELD; eRushed < NUM_YIELD_TYPES; ++eRushed)
+			{
+				if (GC.getYieldInfo(eRushed).isCargo() && getYieldRushed(eRushed) > 0)
+				{
+					bBought = true;
+					break;
+				}
+			}
+			const int iProjectTurns = (eProjectUnit != NO_UNIT) ? getProductionTurnsLeft(eProjectUnit, 0) : getProductionTurnsLeft(eProjectBuilding, 0);
+			if (bBought || iProjectTurns <= 2)
+			{
+				bProtectProject = true;
+				for (YieldTypes eReserve = FIRST_YIELD; eReserve < NUM_YIELD_TYPES; ++eReserve)
+				{
+					if (GC.getYieldInfo(eReserve).isCargo() && !GC.getYieldInfo(eReserve).isIgnoredForStorageCapacity())
+					{
+						const int iNeeded = (eProjectUnit != NO_UNIT) ? getYieldProductionNeeded(eProjectUnit, eReserve) : getYieldProductionNeeded(eProjectBuilding, eReserve);
+						const int iStoredAfter = std::max(0, getYieldStored(eReserve) + aiYields[eReserve]);
+						aiProjectReserve[eReserve] = std::min(iStoredAfter, std::max(0, iNeeded - getYieldRushed(eReserve)));
+					}
+				}
+			}
+		}
+	}
+
 	if (getMarketModifier() > 0)
 	{
 		int iTotalProfitFromDomesticMarket = 0;
@@ -8180,9 +8340,9 @@ void CvCity::doYields()
 
 			FAssert(validEnumRange(eYield));
 			int iAmount = aYields.get(eYield);
-			if (iAmount > 0 && (getYieldStored(eYield) + aiYields[eYield]) > getMaintainLevel(eYield)) // R&R, ray, improvment from vetiarvind
+			if (iAmount > 0 && (getYieldStored(eYield) + aiYields[eYield]) > std::max(getMaintainLevel(eYield), aiProjectReserve[eYield])) // R&R, ray, improvment from vetiarvind (WTP: the materials of the project are kept)
 			{
-				const int iAmountForSale = getYieldStored(eYield) + aiYields[eYield] - getMaintainLevel(eYield);
+				const int iAmountForSale = getYieldStored(eYield) + aiYields[eYield] - std::max(getMaintainLevel(eYield), aiProjectReserve[eYield]);
 				if (iAmount > iAmountForSale)
 				{
 					iAmount = iAmountForSale;
@@ -8215,7 +8375,80 @@ void CvCity::doYields()
 
 	// R&R, ray, adjustment for less Custom House messages
 	int iCustomHouseProfit = 0;
+	// WTP: the messages about the storage surplus (sold / lost) of one city are merged to one message each: all yield icons, then the sum
+	CvWString szSurplusSoldYields;
+	int iSurplusSoldGold = 0;
+	CvWString szSurplusLostYields;
 	bool bPrintOnce = false;
+
+	// WTP: the materials of the project are not lost to a storage overflow. Goods that are worth more are lost in the same number instead
+	// (the most valuable first)
+	int aiProtectedCut[NUM_YIELD_TYPES];
+	int aiExtraLoss[NUM_YIELD_TYPES];
+	for (int iProtect = 0; iProtect < NUM_YIELD_TYPES; ++iProtect)
+	{
+		aiProtectedCut[iProtect] = 0;
+		aiExtraLoss[iProtect] = 0;
+	}
+	if (bProtectProject && iTotalYields > iMaxCapacity && !(getHasUnlockedStorageLossTradeSettings() && iTotalYields < iMaxCapacity))
+	{
+		int aiStoredAfter[NUM_YIELD_TYPES];
+		int aiOwnLoss[NUM_YIELD_TYPES];
+		int iTotalCut = 0;
+		for (YieldTypes eProtectYield = FIRST_YIELD; eProtectYield < NUM_YIELD_TYPES; ++eProtectYield)
+		{
+			aiStoredAfter[eProtectYield] = 0;
+			aiOwnLoss[eProtectYield] = 0;
+			if (!GC.getYieldInfo(eProtectYield).isCargo() || GC.getYieldInfo(eProtectYield).isIgnoredForStorageCapacity())
+			{
+				continue;
+			}
+			const int iStoredAfter = std::max(0, getYieldStored(eProtectYield) + aiYields[eProtectYield]);
+			aiStoredAfter[eProtectYield] = iStoredAfter;
+			if (iStoredAfter > 0)
+			{
+				int iExcess = (iTotalYields - iMaxCapacity) * iStoredAfter / iTotalYields;
+				if (iExcess == 0)
+				{
+					iExcess = 1;
+				}
+				int iLoss = std::max(GC.getCITY_YIELD_DECAY_PERCENT() * iExcess / 100, GC.getMIN_CITY_YIELD_DECAY());
+				iLoss = std::min(iLoss, iExcess);
+				const int iCut = std::max(0, iLoss - (iStoredAfter - aiProjectReserve[eProtectYield]));
+				aiProtectedCut[eProtectYield] = iCut;
+				aiOwnLoss[eProtectYield] = iLoss - iCut;
+				iTotalCut += iCut;
+			}
+		}
+		while (iTotalCut > 0)
+		{
+			YieldTypes eBest = NO_YIELD;
+			int iBestPrice = -1;
+			int iBestRoom = 0;
+			for (YieldTypes eReplace = FIRST_YIELD; eReplace < NUM_YIELD_TYPES; ++eReplace)
+			{
+				if (!GC.getYieldInfo(eReplace).isCargo() || GC.getYieldInfo(eReplace).isIgnoredForStorageCapacity())
+				{
+					continue;
+				}
+				const int iRoom = aiStoredAfter[eReplace] - aiProjectReserve[eReplace] - aiOwnLoss[eReplace] - aiExtraLoss[eReplace];
+				const int iReplacePrice = GC.getYieldInfo(eReplace).price(FIRST_TRADELOCATION).buyLow;
+				if (iRoom > 0 && iReplacePrice > iBestPrice)
+				{
+					eBest = eReplace;
+					iBestPrice = iReplacePrice;
+					iBestRoom = iRoom;
+				}
+			}
+			if (eBest == NO_YIELD)
+			{
+				break;
+			}
+			const int iTake = std::min(iBestRoom, iTotalCut);
+			aiExtraLoss[eBest] += iTake;
+			iTotalCut -= iTake;
+		}
+	}
 
 	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
 	{
@@ -8259,7 +8492,9 @@ void CvCity::doYields()
 
 							if (iTurns == 2 || iTurns == 1) {
 								CvWString szBuffer = gDLL->getText("TXT_KEY_MISC_STUDENT_ALMOST_GRADUATED", iTurns, getNameKey(), GC.getBuildingInfo(eSchoolBuilding).getTextKeyWide());
+								WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 								gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_CULTUREEXPANDS", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(YIELD_EDUCATION).getButton(), COLOR_WHITE, true, true);
+								WtpHudMessages::setPriority(false);
 
 							}
 							// TAC - Messages - Ray - END
@@ -8313,12 +8548,21 @@ void CvCity::doYields()
 					}
 				}
 
-				if (iExcess > 0)
+				if (iExcess > 0 || aiExtraLoss[eYield] > 0)
 				{
-					int iLoss = std::max(GC.getCITY_YIELD_DECAY_PERCENT() * iExcess / 100, GC.getMIN_CITY_YIELD_DECAY());
-					iLoss = std::min(iLoss, iExcess);
+					int iLoss = 0;
+					if (iExcess > 0)
+					{
+						iLoss = std::max(GC.getCITY_YIELD_DECAY_PERCENT() * iExcess / 100, GC.getMIN_CITY_YIELD_DECAY());
+						iLoss = std::min(iLoss, iExcess);
+						iLoss -= aiProtectedCut[eYield]; // WTP: not the materials of a project that is finished soon
+					}
+					iLoss += aiExtraLoss[eYield]; // WTP: instead of the protected materials
+					iLoss = std::max(0, std::min(iLoss, getYieldStored(eYield)));
 					changeYieldStored(eYield, -iLoss);
 					
+					if (iLoss > 0)
+					{
 					// compare possible profits from selling Europe and Africa, and use the best possible
 					const int iEuropeProfit = GET_PLAYER(getOwnerINLINE()).getSellToEuropeProfit(eYield, iLoss);
 					const int iAfricaProfit = GET_PLAYER(getOwnerINLINE()).getSellToAfricaProfit(eYield, iLoss);
@@ -8376,15 +8620,15 @@ void CvCity::doYields()
 						}
 						else
 						{
-							CvWString szBuffer = gDLL->getText("TXT_KEY_GOODS_LOST_SOLD", iLoss, GC.getYieldInfo(eYield).getChar(), getNameKey(), iProfit);
-							gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), NULL, MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYield).getButton(), COLOR_WHITE, true, true);
+							szSurplusSoldYields.append(CvWString::format(L"%c", GC.getYieldInfo(eYield).getChar()));
+							iSurplusSoldGold += iProfit;
 						}
 						// R&R, ray , Changes to Custom House - END
 					}
 					else
 					{
-						CvWString szBuffer = gDLL->getText("TXT_KEY_GOODS_LOST", iLoss, GC.getYieldInfo(eYield).getChar(), getNameKey());
-						gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYield).getButton(), COLOR_RED, true, true);
+						szSurplusLostYields.append(CvWString::format(L"%c", GC.getYieldInfo(eYield).getChar()));
+					}
 					}
 				}
 				else if (!bPrintOnce && (iMaxCapacity - iTotalYields) > 0 && (iMaxCapacity - iTotalYields) < (iMaxCapacity / 10)) //only do this message once
@@ -8407,6 +8651,21 @@ void CvCity::doYields()
 			}
 		}
 		doAutoExport(eYield); // auto traderoute - Nightinggale
+	}
+
+	if (!szSurplusSoldYields.empty())
+	{
+		CvWString szBuffer = gDLL->getText("TXT_KEY_WTP_SURPLUS_SOLD", getNameKey(), szSurplusSoldYields.GetCString(), iSurplusSoldGold);
+		WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
+		gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), NULL, MESSAGE_TYPE_MINOR_EVENT, NULL, COLOR_WHITE, true, true);
+		WtpHudMessages::setPriority(false);
+	}
+	if (!szSurplusLostYields.empty())
+	{
+		CvWString szBuffer = gDLL->getText("TXT_KEY_WTP_SURPLUS_LOST", getNameKey(), szSurplusLostYields.GetCString());
+		WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
+		gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, NULL, COLOR_RED, true, true);
+		WtpHudMessages::setPriority(false);
 	}
 
 	// R&R, ray, adjustment for less Custom House messages
@@ -8843,6 +9102,12 @@ void CvCity::doNativeTradePost()
 
 			// we send a message now
 			CvWString szBuffer = gDLL->getText("TXT_KEY_TRADE_POST_CREATED_TREASURE", getNameKey());
+			// WTP: the treasure goes to the waypoint of the settlement, the message tells it
+			const CvWString szWaypoint = GET_PLAYER(ePlayer).sendUnitToNativeWaypoint(pTreasure, this);
+			if (!szWaypoint.empty())
+			{
+				szBuffer += L" " + szWaypoint;
+			}
 			gDLL->UI().addPlayerMessage(ePlayer, false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, pTreasure->getButton(), COLOR_WHITE, true, true);
 		}
 	}
@@ -14333,6 +14598,52 @@ void CvCity::setAutoThresholdCache()
 // transport feeder - end - Nightinggale
 
 // auto traderoute - start - Nightinggale
+// WTP: land only / sea only imports and exports
+void CvCity::setImportDomains(YieldTypes eYield, int iDomains)
+{
+	m_em_iTradeImportDomains.set(eYield, (unsigned short)(iDomains & 3));
+}
+
+void CvCity::setExportDomains(YieldTypes eYield, int iDomains)
+{
+	m_em_iTradeExportDomains.set(eYield, (unsigned short)(iDomains & 3));
+}
+
+namespace
+{
+	bool isDomainAllowed(int iDomains, DomainTypes eDomain)
+	{
+		if (iDomains == 0 || iDomains == 3)
+		{
+			return true;
+		}
+		if (eDomain == DOMAIN_LAND)
+		{
+			return (iDomains & 1) != 0;
+		}
+		if (eDomain == DOMAIN_SEA)
+		{
+			return (iDomains & 2) != 0;
+		}
+		return true;
+	}
+}
+
+bool CvCity::isImportAllowedForDomain(YieldTypes eYield, DomainTypes eDomain) const
+{
+	return isDomainAllowed(m_em_iTradeImportDomains.get(eYield), eDomain);
+}
+
+bool CvCity::isExportAllowedForDomain(YieldTypes eYield, DomainTypes eDomain) const
+{
+	return isDomainAllowed(m_em_iTradeExportDomains.get(eYield), eDomain);
+}
+
+int CvCity::getTradeRouteTaskData(YieldTypes eYield) const
+{
+	return ((int)eYield & 0xFF) | ((m_em_iTradeImportDomains.get(eYield) & 3) << 8) | ((m_em_iTradeExportDomains.get(eYield) & 3) << 10);
+}
+
 void CvCity::setAutoExport(YieldTypes eYield, bool bExport)
 {
 	m_em_bTradeAutoExport.set(eYield, bExport);
@@ -14385,7 +14696,7 @@ void CvCity::handleAutoTraderouteSetup(bool bReset, bool bImportAll, bool bAutoE
 				int iBuffer = iMaintainLevel & 0xFFFF; // lowest 16 bits
 				iBuffer |= (iImportLimitLevel & 0xFFFF) << 16; // next 16 bits
 
-				doTask(TASK_YIELD_TRADEROUTE, eYield, iBuffer, bImport, bExport, bMaintainImport, bAutoExport);
+				doTask(TASK_YIELD_TRADEROUTE, getTradeRouteTaskData(eYield), iBuffer, bImport, bExport, bMaintainImport, bAutoExport);
 			}
 		}
 	}
@@ -16112,5 +16423,5 @@ void CvCity::setImportFeeder(YieldTypes eYield, int iMaintainLevel, int iImportL
 	NetworkDataTradeRouteInts buffer;
 	buffer.iImportLimitLevel = (unsigned short)iImportLimit;
 	buffer.iMaintainLevel = (unsigned short)iMaintainLevel;
-	doTask(TASK_YIELD_TRADEROUTE, eYield, buffer.iNetwork, true, isExport(eYield), true, isAutoExport(eYield));
+	doTask(TASK_YIELD_TRADEROUTE, getTradeRouteTaskData(eYield), buffer.iNetwork, true, isExport(eYield), true, isAutoExport(eYield));
 }

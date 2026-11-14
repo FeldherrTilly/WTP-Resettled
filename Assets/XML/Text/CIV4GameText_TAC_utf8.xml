@@ -1336,21 +1336,21 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_ALMOST_NO_RAW</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]The stock of %F2_yield_icon is declining. We will soon have a problem with the production of %F3_yield_icon.</English>
+		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]The stock of %F2_yield_icon [COLOR_WARNING_TEXT]is declining[COLOR_REVERT]. We will soon have a problem with the production of %F3_yield_icon.</English>
 		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]O estoque de %F2_yield_icon está diminuindo. Em breve teremos um problema com a produção de %F3_yield_icon.</Portuguese>
 		<French>%s1_city est presque à cours de %F2_yield_icon et ne pourra en conséquence plus produire de %F3_yield_icon.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Es neigt sich der Lagervorrat an %F2_yield_icon. Bei der Herstellung von %F3_yield_icon werden wir bald ein Problem bekommen.</German>
+		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Es [COLOR_WARNING_TEXT]neigt sich[COLOR_REVERT] der Lagervorrat an %F2_yield_icon. Bei der Herstellung von %F3_yield_icon werden wir bald ein Problem bekommen.</German>
 		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Запас %F2_yield_icon снижается. Скоро у нас возникнут проблемы с производством %F3_yield_icon.</Russian>
 		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]%F2_yield_icon készlet csökken. %F3_yield_icon előállításával hamarosan gond lesz.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_NOT_ENOUGH_RAW</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]We could produce more %F3_yield_icon if we had more %F2_yield_icon available there.</English>
-		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Poderíamos produzir mais %F3_yield_icon se tivéssemos mais %F2_yield_icon disponível lá.</Portuguese>
+		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]We could produce more %F3_yield_icon [COLOR_RED]if we had more %F2_yield_icon available there.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Poderíamos produzir mais %F3_yield_icon [COLOR_RED]se tivéssemos mais %F2_yield_icon disponível lá.[COLOR_REVERT]</Portuguese>
 		<French>%s1_city est à cours de %F2_yield_icon et ne peut ainsi plus produire de %F3_yield_icon.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Wir könnten mehr %F3_yield_icon herstellen, stünde uns dort mehr %F2_yield_icon zur Verfügung.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Мы могли бы производить больше %F3_yield_icon, если бы у нас было больше %F2_yield_icon.</Russian>
-		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Több %F3_yield_icon-t tudnánk előállítani, ha több %F2_yield_icon állna rendelkezésre.</Hungarian>
+		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Wir könnten mehr %F3_yield_icon herstellen, [COLOR_RED]stünde uns dort mehr %F2_yield_icon zur Verfügung.[COLOR_REVERT]</German>
+		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Мы могли бы производить больше %F3_yield_icon, [COLOR_RED]если бы у нас было больше %F2_yield_icon.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Több %F3_yield_icon-t tudnánk előállítani, [COLOR_RED]ha több %F2_yield_icon állna rendelkezésre.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TRADE_WORLD_MAP_STRING</Tag>
@@ -1691,75 +1691,195 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_STUDENT_ALMOST_GRADUATED</Tag>
-		<English>%s2_city : A striving citizen will finish his education at the %s3_building in %d1_Num [NUM1:turn:turns].</English>
+		<English>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : A striving citizen will finish his education at the %s3_building in %d1_Num [NUM1:turn:turns].[COLOR_REVERT]</English>
 		<Portuguese>%s2_city: Um cidadão esforçado terminará seus estudos no %s3_building em %d1_Num [NUM1:turno:turnos].</Portuguese>
 		<French>%s2_city : Un étudiant va bientôt achever sa formation dans l'%s3_building : %d1_Num [NUM1:tour:tours].</French>
-		<German>%s2_city : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.</German>
+		<German>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.[COLOR_REVERT]</German>
 		<Russian>[COLOR_SELECTED_TEXT]%s2_city :[COLOR_REVERT] Способный горожанин закончит обучение в [COLOR_FONT_CREAM]%s3_building[COLOR_REVERT] через %d1_Num [NUM1:ход:хода].</Russian>
 		<Hungarian>%s2_city : Egy ügyes lakos %d1_Num [NUM1:kör:kör] múlva befejezi a városi %s3_building falai között a tanulmányait.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_EXPERT</Tag>
-		<English>A free colonist who has worked in his profession for many years now has enough knowledge to be considered an [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT].</English>
-		<Portuguese>Um colono livre que atua em sua profissão há muitos anos agora possui conhecimento suficiente para ser considerado um [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT].</Portuguese>
-		<French>Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour [COLOR_UNIT_TEXT]%s1_expert.[COLOR_REVERT].</French>
-		<German>Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT] zu gelten.</German>
-		<Russian>Свободный колонист, который долгое время работал по своей профессии, теперь получил достаточно знаний, чтобы считаться [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT].</Russian>
-		<Hungarian>Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT] legyen.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]A free colonist who has worked in his profession for many years now has enough knowledge to be considered an %s1_expert.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre que atua em sua profissão há muitos anos agora possui conhecimento suficiente para ser considerado um %s1_expert.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour %s1_expert.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als %s1_expert zu gelten.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]Свободный колонист, который долгое время работал по своей профессии, теперь получил достаточно знаний, чтобы считаться %s1_expert.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy %s1_expert legyen.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_EXPERT_IN_CITY</Tag>
-		<English>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]A free colonist who has worked in his profession for many years now knows enough to be considered an [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</English>
-		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Um colono livre que trabalhou em sua profissão por muitos anos agora sabe o suficiente para ser considerado um [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</Portuguese>
-		<French>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT] Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</French>
-		<German>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT] zu gelten.</German>
-		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Свободный колонист, долго трудившийся по своей профессии, теперь получил достаточно знаний, чтобы стать [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</Russian>
-		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT] legyen.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]%s1_city : A free colonist who has worked in his profession for many years now knows enough to be considered an %s2_expert.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : Um colono livre que trabalhou em sua profissão por muitos anos agora sabe o suficiente para ser considerado um %s2_expert.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]%s1_city :  Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour %s2_expert.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]%s1_city : Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als %s2_expert zu gelten.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : Свободный колонист, долго трудившийся по своей профессии, теперь получил достаточно знаний, чтобы стать %s2_expert.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy %s2_expert legyen.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_FREE</Tag>
-		<English>An unfree colonist has earned his [COLOR_POSITIVE_TEXT]freedom[COLOR_REVERT] through hard work.</English>
-		<Portuguese>Um colono não-livre conquistou sua [COLOR_POSITIVE_TEXT]liberdade[COLOR_REVERT] através de trabalho duro.</Portuguese>
-		<French>Un colon sous servitude a gagné sa [COLOR_POSITIVE_TEXT]liberté[COLOR_REVERT] en travaillant dur.</French>
-		<German>Ein Unfreier hat sich durch harte Arbeit seine [COLOR_POSITIVE_TEXT]Freiheit[COLOR_REVERT] verdient.</German>
-		<Russian>Несвободный колонист тяжелым трудом заработал себе [COLOR_POSITIVE_TEXT]свободу[COLOR_REVERT].</Russian>
-		<Hungarian>Egy nem szabad lakos kemény munkával kiérdemelte a [COLOR_POSITIVE_TEXT]szabadságát[COLOR_REVERT].</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]An unfree colonist has earned his freedom through hard work.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono não-livre conquistou sua liberdade através de trabalho duro.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]Un colon sous servitude a gagné sa liberté en travaillant dur.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]Ein Unfreier hat sich durch harte Arbeit seine Freiheit verdient.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]Несвободный колонист тяжелым трудом заработал себе свободу.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]Egy nem szabad lakos kemény munkával kiérdemelte a szabadságát.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_FREE_IN_CITY</Tag>
-		<English>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]An unfree colonist has earned his freedom through hard work.</English>
-		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Um colono não-livre conquistou sua liberdade através do trabalho duro.</Portuguese>
-		<French>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT] Un colon sous servitude a gagné sa liberté en travaiilant dur.</French>
-		<German>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Ein Unfreier hat sich durch harte Arbeit seine Freiheit verdient.</German>
-		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Несвободный колонист добился освобождения своим упорным трудом.</Russian>
-		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]A nem szabad lakos kemény munkával kiérdemelte a szabadságát.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]%s1_city : An unfree colonist has earned his freedom through hard work.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : Um colono não-livre conquistou sua liberdade através do trabalho duro.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]%s1_city :  Un colon sous servitude a gagné sa liberté en travaiilant dur.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]%s1_city : Ein Unfreier hat sich durch harte Arbeit seine Freiheit verdient.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : Несвободный колонист добился освобождения своим упорным трудом.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : A nem szabad lakos kemény munkával kiérdemelte a szabadságát.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_ESCAPE</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]An unfree colonist has disappeared. We suspect he's fled into the wilderness.</English>
-		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Um colono não-livre desapareceu. Suspeitamos que ele fugiu para o deserto.</Portuguese>
-		<French>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT] Un captif a disparu. On soupçonne qu'il a fui dans la nature.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Ein Unfreier ist verschwunden. Man vermutet, dass er in die Wildnis geflohen ist.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Несвободный колонист сбежал из колонии! Срочно собрать поисковую партию, он не мог далеко уйти!</Russian>
-		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Eltűnt egy nem szabad telepes. A gyanú szerint a vadonba menekült.</Hungarian>
+		<English>[COLOR_RED]%s1_city : An unfree colonist has disappeared. We suspect he's fled into the wilderness.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_RED]%s1_city : Um colono não-livre desapareceu. Suspeitamos que ele fugiu para o deserto.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_RED]%s1_city :  Un captif a disparu. On soupçonne qu'il a fui dans la nature.[COLOR_REVERT]</French>
+		<German>[COLOR_RED]%s1_city : Ein Unfreier ist verschwunden. Man vermutet, dass er in die Wildnis geflohen ist.[COLOR_REVERT]</German>
+		<Russian>[COLOR_RED]%s1_city : Несвободный колонист сбежал из колонии! Срочно собрать поисковую партию, он не мог далеко уйти![COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_RED]%s1_city : Eltűnt egy nem szabad telepes. A gyanú szerint a vadonba menekült.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_REVOLT</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]An unfree colonist has revolted. We believe he's fled into the wilderness.</English>
-		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Um colono não-livre se revoltou. Acreditamos que ele fugiu para o deserto.</Portuguese>
-		<French>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT] Un captif s'est soulevé. On soupçonne qu'il a fui dans la nature.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Ein Unfreier hat revoltiert. Man vermutet, dass er in die Wildnis geflohen ist.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Несвободный колонист взбунтовался, где-то раздобыл оружие и сбежал из колонии! Все, кто свободен от работ, к оружию! Убьем негодяя!</Russian>
-		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Egy nem szabad telepes fellázadt. Úgy vélik, hogy a vadonba menekült.</Hungarian>
+		<English>[COLOR_RED]%s1_city : An unfree colonist has revolted. We believe he's fled into the wilderness.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_RED]%s1_city : Um colono não-livre se revoltou. Acreditamos que ele fugiu para o deserto.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_RED]%s1_city :  Un captif s'est soulevé. On soupçonne qu'il a fui dans la nature.[COLOR_REVERT]</French>
+		<German>[COLOR_RED]%s1_city : Ein Unfreier hat revoltiert. Man vermutet, dass er in die Wildnis geflohen ist.[COLOR_REVERT]</German>
+		<Russian>[COLOR_RED]%s1_city : Несвободный колонист взбунтовался, где-то раздобыл оружие и сбежал из колонии! Все, кто свободен от работ, к оружию! Убьем негодяя![COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_RED]%s1_city : Egy nem szabad telepes fellázadt. Úgy vélik, hogy a vadonba menekült.[COLOR_REVERT]</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADE_ORDER_STOP</Tag>
+		<English>[COLOR_CYAN]Stop on the way: %s1_city[NEWLINE]loads%s2_yields[COLOR_REVERT]</English>
+		<German>[COLOR_CYAN]Zwischenstopp: %s1_city[NEWLINE]lädt%s2_yields[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADE_ORDER_WAIT</Tag>
+		<English>[COLOR_CYAN]Waits in %s1_city[NEWLINE]for the production of%s2_yields[COLOR_REVERT]</English>
+		<German>[COLOR_CYAN]Wartet in %s1_city[NEWLINE]auf die Produktion von%s2_yields[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TITLE</Tag>
+		<English>Trade Route Manager</English>
+		<German>Handelsrouten-Manager</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_BUTTON</Tag>
+		<English>Trade Route Manager: overview of all transports ([COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT])</English>
+		<German>Handelsrouten-Manager: Uebersicht aller Transporter ([COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT])</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_POSITION</Tag>
+		<English>Transports %d1 - %d2 of %d3</English>
+		<German>Transporter %d1 - %d2 von %d3</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_ASSIGNED</Tag>
+		<English>%d1 of %d2 routes assigned</English>
+		<German>%d1 von %d2 Routen zugewiesen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_LAND_SEA</Tag>
+		<English>Land and sea</English>
+		<German>Land und See</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_LAND</Tag>
+		<English>Land only</English>
+		<German>Nur Land</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SEA</Tag>
+		<English>Sea only</English>
+		<German>Nur See</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_ALL</Tag>
+		<English>All transports</English>
+		<German>Alle Transporter</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_WITH_ROUTES</Tag>
+		<English>Only with trade routes</English>
+		<German>Nur mit Handelsrouten</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_WITHOUT_ROUTES</Tag>
+		<English>Only without trade routes</English>
+		<German>Nur ohne Handelsrouten</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SEARCH_HINT</Tag>
+		<English>Type to search a city, goods or transport (Tab completes)</English>
+		<German>Tippen zum Suchen nach Stadt, Ware oder Transporter (Tab vervollstaendigt)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TYPE_ROUTES</Tag>
+		<English>Trade routes (R)</English>
+		<German>Handelsrouten (R)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TYPE_AUTO</Tag>
+		<English>Fully automatic (Shift+Alt+C)</English>
+		<German>Vollautomatisch (Shift+Alt+C)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_NAME_ROUTE</Tag>
+		<English>Trade route</English>
+		<German>Handelsroute</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_NAME_AUTO</Tag>
+		<English>Auto route</English>
+		<German>Autoroute</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_RENAME</Tag>
+		<English>Rename %s1_name? OK takes the name below (you can change it), Cancel keeps the old name.</English>
+		<German>%s1_name umbenennen? OK uebernimmt den Namen unten (du kannst ihn ändern), Abbrechen behält den alten Namen.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_MANUAL</Tag>
+		<English>Set to manual</English>
+		<German>Auf manuell setzen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_MANUAL_DONE</Tag>
+		<English>Set to manual</English>
+		<German>Auf manuell gesetzt</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADE_ORDER_BRING</Tag>
+		<English>[COLOR_CYAN]Brings %F1_Icon %s2_yield[NEWLINE]from %s3_from to %s4_to[COLOR_REVERT]</English>
+		<German>[COLOR_CYAN]Bringt %F1_Icon %s2_yield[NEWLINE]von %s3_from nach %s4_to[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADE_ORDER_FETCH</Tag>
+		<English>[COLOR_CYAN]Fetches %F1_Icon %s2_yield[NEWLINE]from %s3_from to %s4_to[COLOR_REVERT]</English>
+		<German>[COLOR_CYAN]Holt %F1_Icon %s2_yield[NEWLINE]von %s3_from nach %s4_to[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_EXPAND</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to expand)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Aufklappen)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_COLLAPSE</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to collapse)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Zuklappen)[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
-		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</English>
-		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Portuguese>
-		<French>[COLOR_POSITIVE_TEXT]Un colon libre a gagné suffisamment d'expérience pour devenir [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</French>
-		<German>[COLOR_POSITIVE_TEXT]Ein Freier Kolonist hat im Kampf genug Erfahrung gesammelt, um jetzt als [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT][COLOR_POSITIVE_TEXT] zu gelten.[COLOR_REVERT]</German>
-		<Russian>[COLOR_POSITIVE_TEXT]Свободный колонист набрал в боях достаточно опыта, чтобы стать [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Russian>
-		<Hungarian>[COLOR_POSITIVE_TEXT]Egy szabad telepes elég tapasztalatot szerzett a harcok során ahhoz, hogy [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT] legyen.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a %s1_expert[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um %s1_expert[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]Un colon libre a gagné suffisamment d'expérience pour devenir %s1_expert[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]Ein Freier Kolonist hat im Kampf genug Erfahrung gesammelt, um jetzt als %s1_expert zu gelten.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]Свободный колонист набрал в боях достаточно опыта, чтобы стать %s1_expert[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]Egy szabad telepes elég tapasztalatot szerzett a harcok során ahhoz, hogy %s1_expert legyen.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_FREE_BY_MILITARY_SERVICE</Tag>
@@ -3332,5 +3452,500 @@
 		</Spanish>
 		<Russian>Испанским</Russian>
 		<Hungarian>Spanyol Királyi:Spanyol Királyi</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_SURPLUS_SOLD</Tag>
+		<English>%s1_city : Due to limited storage capacity a surplus was sold: %s2_yields for a total of %d3[ICON_GOLD].</English>
+		<German>%s1_city : Wegen begrenzter Lagerkapazität wurde ein Überschuss verkauft: %s2_yields für insgesamt %d3[ICON_GOLD].</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_SURPLUS_LOST</Tag>
+		<English>[COLOR_RED]%s1_city[COLOR_REVERT] : Lost due to limited storage capacity: %s2_yields</English>
+		<German>[COLOR_RED]%s1_city[COLOR_REVERT] : Wegen begrenzter Lagerkapazität verloren gegangen: %s2_yields</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_NO_RAW_AMOUNT</Tag>
+		<English>[COLOR_RED]%s1_city[COLOR_REVERT] : Production stopped, [COLOR_RED]%d4%F2_yield_icon per turn[COLOR_REVERT] missing to produce %F3_yield_icon</English>
+		<German>[COLOR_RED]%s1_city[COLOR_REVERT] : Produktion steht still, es fehlen [COLOR_RED]%d4%F2_yield_icon pro Runde[COLOR_REVERT] für die Produktion von %F3_yield_icon</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_MORE</Tag>
+		<English>[COLOR_FONT_CREAM]%d1_Num older messages: click to see them (page %d2_Num of %d3_Num)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]%d1_Num ältere Meldungen: Klick zum Anzeigen (Seite %d2_Num von %d3_Num)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS</Tag>
+		<English>[COLOR_FONT_CREAM]Show the messages of the previous turn[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen der vorherigen Runde anzeigen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_CURRENT</Tag>
+		<English>[COLOR_FONT_CREAM]Back to the messages of this turn[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Zurück zu den Meldungen dieser Runde[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS_HEADER</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of the previous turn: %d1_Num[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen der vorherigen Runde: %d1_Num[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_EDUCATION_ASK_LATER</Tag>
+		<English>Ask me again at the end of the turn</English>
+		<German>Zum Ende der Runde noch einmal fragen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_BUILDING_UPGRADE_HEADER</Tag>
+		<English>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]Upgrade %s1_building to:</English>
+		<German>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]%s1_building ausbauen zu:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_MAX</Tag>
+		<English>Max</English>
+		<German>Max</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_HINT1</Tag>
+		<English>[COLOR:140:255:40:255]Page Up[COLOR_REVERT] / [COLOR:140:255:40:255]Page Down[COLOR_REVERT] or [COLOR:140:255:40:255]mouse wheel[COLOR_REVERT]: +/- 25   ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 50)</English>
+		<German>[COLOR:140:255:40:255]Bild auf[COLOR_REVERT] / [COLOR:140:255:40:255]Bild ab[COLOR_REVERT] oder [COLOR:140:255:40:255]Mausrad[COLOR_REVERT]: +/- 25   ([COLOR:140:255:40:255]Strg[COLOR_REVERT]: +/- 50)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_HINT2</Tag>
+		<English>[COLOR:140:255:40:255]Digits[COLOR_REVERT]: type an amount    [COLOR:140:255:40:255]Enter[COLOR_REVERT]: OK    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: cancel</English>
+		<German>[COLOR:140:255:40:255]Ziffern[COLOR_REVERT]: Betrag eintippen    [COLOR:140:255:40:255]Enter[COLOR_REVERT]: OK    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: Abbrechen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_HINT</Tag>
+		<English>[COLOR:140:255:40:255]Mouse wheel[COLOR_REVERT] over a number: +/- 50 ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 10), elsewhere it turns the page    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: cancel</English>
+		<German>[COLOR:140:255:40:255]Mausrad[COLOR_REVERT] über einer Zahl: +/- 50 ([COLOR:140:255:40:255]Strg[COLOR_REVERT]: +/- 10), sonst blättert es um    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: Abbrechen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_IMPORT_OPTIONS</Tag>
+		<English>Import options</English>
+		<German>Import-Optionen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_EXPORT_OPTIONS</Tag>
+		<English>Export options</English>
+		<German>Export-Optionen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE</Tag>
+		<English>Page %d1 / %d2</English>
+		<German>Seite %d1 / %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_FAVORITE</Tag>
+		<English>Favorite</English>
+		<German>Favorit</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_FAVORITE_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Favorite[COLOR_REVERT][NEWLINE]Marks this good as a favorite. The favorites view (drop down at the bottom right) lists only the favorite goods. Favorites apply to all cities and are saved with the game.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Favorit[COLOR_REVERT][NEWLINE]Markiert diese Ware als Favorit. Die Favoritenansicht (Auswahlmenü unten rechts) zeigt nur die Favoriten. Favoriten gelten für alle Städte und werden mit dem Spielstand gespeichert.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_ALL</Tag>
+		<English>All goods</English>
+		<German>Alle Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_FAV</Tag>
+		<English>Favorites</English>
+		<German>Favoriten</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]View[COLOR_REVERT][NEWLINE]Switches between all goods, your favorite goods, only the goods that are marked (import, feeder, export or auto export) in this city, the goods the presets Building material and Market automatic ask for, the goods this city produces, and the goods its current production needs.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Ansicht[COLOR_REVERT][NEWLINE]Wechselt zwischen allen Waren, deinen Favoriten, nur den Waren, die in dieser Stadt markiert sind (Import, Feeder, Export oder Auto-Export), den Waren, die die Presets Baumaterial und Markt-Automatik anfordern, den Waren, die diese Stadt produziert, und den Waren, die ihre aktuelle Produktion benötigt.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE_PREV_HELP</Tag>
+		<English>Previous page</English>
+		<German>Vorherige Seite</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE_NEXT_HELP</Tag>
+		<English>Next page</English>
+		<German>Nächste Seite</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Clear All[COLOR_REVERT][NEWLINE]Removes all import and export settings of this city.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alles löschen[COLOR_REVERT][NEWLINE]Entfernt alle Import- und Export-Einstellungen dieser Stadt.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Import all goods[COLOR_REVERT][NEWLINE]Turns import on for all goods.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren importieren[COLOR_REVERT][NEWLINE]Schaltet den Import für alle Waren ein.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Auto-export all goods[COLOR_REVERT][NEWLINE]Turns automatic export on for all goods.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren automatisch exportieren[COLOR_REVERT][NEWLINE]Schaltet den automatischen Export für alle Waren ein.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Building material[COLOR_REVERT][NEWLINE]Sets the import of the goods for building: clay, stone and tools with the feeder (at least 100, at most 150) and horses, sailcloth, hardwood and rope with the feeder, their levels unchanged. Export settings stay as they are.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Baumaterial[COLOR_REVERT][NEWLINE]Stellt den Import der Baumaterialien ein: Lehm, Stein und Werkzeug mit dem Feeder (mindestens 100, höchstens 150) sowie Pferde, Segeltuch, Hartholz und Seil mit dem Feeder, ihre Mengen bleiben unverändert. Die Export-Einstellungen bleiben unverändert.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET4_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Market automatic[COLOR_REVERT][NEWLINE]Switches the automatic import of the goods the domestic market asks for on or off. The levels follow the demand.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Markt-Automatik[COLOR_REVERT][NEWLINE]Schaltet den automatischen Import der Waren, die der Heimatmarkt verlangt, ein oder aus. Die Mengen folgen dem Bedarf.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED</Tag>
+		<English>Marked only</English>
+		<German>Nur markierte</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT</Tag>
+		<English>Building material</English>
+		<German>Baumaterial</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT</Tag>
+		<English>Market automatic</English>
+		<German>Markt-Automatik</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT_ON</Tag>
+		<English>Market automatic: ON</English>
+		<German>Markt-Automatik: AN</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON</Tag>
+		<English>Building material: ON</English>
+		<German>Baumaterial: AN</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_HINT</Tag>
+		<English>Search goods</English>
+		<German>Ware suchen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Search goods[COLOR_REVERT][NEWLINE]Type the name of a good: all goods that contain it are listed. Tab completes the grey suggestion. Enter confirms the good (the exact one, or the nearest) and empties the field for the next one: all confirmed goods stay listed. Backspace on an empty field takes back the last one.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Ware suchen[COLOR_REVERT][NEWLINE]Name einer Ware tippen: alle Waren, die ihn enthalten, werden angezeigt. Tab übernimmt den grauen Vorschlag. Enter bestätigt die Ware (die genaue oder die nächstliegende) und leert das Feld für die nächste: alle bestätigten Waren bleiben angezeigt. Rücktaste bei leerem Feld nimmt die letzte zurück.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_CLEAR_HELP</Tag>
+		<English>Clear the search</English>
+		<German>Suche löschen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED</Tag>
+		<English>Produced goods</English>
+		<German>Produzierte Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED</Tag>
+		<English>Needed goods</English>
+		<German>Benötigte Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_MOVE_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Moves the window; hold the button to keep moving. The arrow keys do the same. Shift: double steps, Ctrl: half steps, both: a third.[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Verschiebt das Fenster; Knopf gedrückt halten, um weiterzuschieben. Die Pfeiltasten machen dasselbe. Umschalt: doppelte Schritte, Strg: halbe Schritte, beide: ein Drittel.[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_MOVE_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Click to move the window in this direction, hold the button to keep moving.[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Klick: Fenster in diese Richtung bewegen, Knopf gedrückt halten, um weiterzuschieben.[NEWLINE]Position: %d1, %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_MOVE_HELP_KEYS</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Moves the window; hold the button to keep moving. The arrow keys do the same. Shift: double steps, Ctrl: half steps, both: a third.[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Verschiebt das Fenster; Knopf gedrückt halten, um weiterzuschieben. Die Pfeiltasten machen dasselbe. Umschalt: doppelte Schritte, Strg: halbe Schritte, beide: ein Drittel.[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON</Tag>
+		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_OFF</Tag>
+		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Auto expand[COLOR_REVERT][NEWLINE]Click: the message panel opens expanded at the start of every turn (on) or stays collapsed (off).[NEWLINE]Move the panel: hold Ctrl and Shift and press W, A, S, D (two keys: diagonal).[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Strg und Umschalt gedrückt halten und W, A, S, D drücken (zwei Tasten: diagonal).[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
+		<English>Left click: show the place on the map[NEWLINE]Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP2</Tag>
+		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_CONCEPT_WORDS</Tag>
+		<English>happi=CONCEPT_HAPPINESS_UNHAPPINESS;unhappi=CONCEPT_HAPPINESS_UNHAPPINESS;educat=CONCEPT_TRAINING;grow=CONCEPT_FOOD;well-fed=CONCEPT_FOOD;fed=CONCEPT_FOOD;famine=CONCEPT_FOOD;starv=CONCEPT_FOOD;healthy=CONCEPT_HEALTH;sick=CONCEPT_HEALTH;disease=CONCEPT_HEALTH;rebel=CONCEPT_REBEL_SENTIMENT;independence=CONCEPT_INDEPENDENCE_WAR;tax=CONCEPT_TAX_RATE;storm=CONCEPT_WINDS_AND_STORMS;hurricane=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;smuggl=CONCEPT_SMUGGLING;domestic=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;emigrat=CONCEPT_IMMIGRATION;immigrat=CONCEPT_IMMIGRATION;upkeep=CONCEPT_MILITARY_UPKEEP;monaster=CONCEPT_MONASTERIES;livestock=CONCEPT_CATTLE_OR_SHEEP_BREEDING;whal=CONCEPT_WHALING;storage=CONCEPT_NEW_STORAGE;specialist=CONCEPT_SPECIALISTS;founding father=CONCEPT_FATHERS;raid=CONCEPT_NATIVES;forced labo=CONCEPT_SLAVES;slave=CONCEPT_SLAVES;servant=CONCEPT_SLAVES;unhealth=CONCEPT_HEALTH;fresh water=CONCEPT_HEALTH;defense bonus=CONCEPT_COMBAT;defence bonus=CONCEPT_COMBAT;barracks=CONCEPT_NEW_BARRACKS_SYSTEM;withdrawal=CONCEPT_COMBAT;withdraw=CONCEPT_COMBAT;fortify bonus=CONCEPT_COMBAT;social status=CONCEPT_TRAINING;harbour space=CONCEPT_NEW_HARBOUR_SYSTEM;harbor space=CONCEPT_NEW_HARBOUR_SYSTEM</English>
+		<German>zufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;unzufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;glück=CONCEPT_HAPPINESS_UNHAPPINESS;bildung=CONCEPT_TRAINING;ausbildung=CONCEPT_TRAINING;wachs=CONCEPT_FOOD;wächst=CONCEPT_FOOD;ernährt=CONCEPT_FOOD;hungersnot=CONCEPT_FOOD;verhungert=CONCEPT_FOOD;gesund=CONCEPT_HEALTH;krank=CONCEPT_HEALTH;seuche=CONCEPT_HEALTH;rebell=CONCEPT_REBEL_SENTIMENT;unabhängigkeit=CONCEPT_INDEPENDENCE_WAR;steuer=CONCEPT_TAX_RATE;sturm=CONCEPT_WINDS_AND_STORMS;orkan=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;schmuggel=CONCEPT_SMUGGLING;binnen=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;auswander=CONCEPT_IMMIGRATION;unterhalt=CONCEPT_MILITARY_UPKEEP;kloster=CONCEPT_MONASTERIES;vieh=CONCEPT_CATTLE_OR_SHEEP_BREEDING;walfang=CONCEPT_WHALING;lager=CONCEPT_NEW_STORAGE;spezialist=CONCEPT_SPECIALISTS;gründervater=CONCEPT_FATHERS;überfall=CONCEPT_NATIVES;stoßtrupp=CONCEPT_NATIVES;eindringling=CONCEPT_NATIVES;zwangsarbeit=CONCEPT_SLAVES;sklav=CONCEPT_SLAVES;leibeigen=CONCEPT_SLAVES;ungesund=CONCEPT_HEALTH;süßwasser=CONCEPT_HEALTH;defensivbonus=CONCEPT_COMBAT;verteidigungsbonus=CONCEPT_COMBAT;kasernenplatz=CONCEPT_NEW_BARRACKS_SYSTEM;kasernenplätze=CONCEPT_NEW_BARRACKS_SYSTEM;rückzug=CONCEPT_COMBAT;verschanzungsbonus=CONCEPT_COMBAT;sozialer status=CONCEPT_TRAINING;ankerplätze=CONCEPT_NEW_HARBOUR_SYSTEM;ankerplatz=CONCEPT_NEW_HARBOUR_SYSTEM</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_ON</Tag>
+		<English>Nested tooltips: on</English>
+		<German>Nested Tooltips: an</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_ORIGINAL</Tag>
+		<English>Nested tooltips: window at the original position</English>
+		<German>Nested Tooltips: Fenster an der ursprünglichen Position</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE</Tag>
+		<English>Tooltips:</English>
+		<German>Tooltips:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_0</Tag>
+		<English>Nested tooltips (at the cursor) (recommended)</English>
+		<German>Nested Tooltips (am Mauszeiger) (empfohlen)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_1</Tag>
+		<English>Own window at the original position</English>
+		<German>Eigenes Fenster an der ursprünglichen Position</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_2</Tag>
+		<English>Game tooltip</English>
+		<German>Spiel-Tooltip</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP</Tag>
+		<English>How tooltips are shown. Nested tooltips: a window right at the mouse cursor. Key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] freezes it (and again the tooltip beside it, and so on), right click opens the Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] unfreezes the last one, holding [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] all of them. Hotkey to switch between the three modes: [COLOR_HIGHLIGHT_TEXT]Ctrl + Shift + T[COLOR_REVERT].</English>
+		<German>Wie Tooltips angezeigt werden. Nested Tooltips: ein Fenster direkt am Mauszeiger. Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] friert es ein (und erneut den Tooltip daneben, und so weiter), Rechtsklick öffnet die Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] hebt das letzte Einfrieren auf, X gehalten alle. Tastenkombination zum Umschalten zwischen den drei Modi: [COLOR_HIGHLIGHT_TEXT]Strg + Umschalt + T[COLOR_REVERT].</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY</Tag>
+		<English>Tooltip delay:</English>
+		<German>Tooltip-Verzögerung:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_0</Tag>
+		<English>None</English>
+		<German>Keine</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_1</Tag>
+		<English>Short (0.25 s)</English>
+		<German>Kurz (0,25 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_2</Tag>
+		<English>Medium (0.5 s)</English>
+		<German>Mittel (0,5 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_3</Tag>
+		<English>Long (0.8 s)</English>
+		<German>Lang (0,8 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_4</Tag>
+		<English>Very long (1.2 s)</English>
+		<German>Sehr lang (1,2 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP</Tag>
+		<English>How long the cursor has to rest on something before the nested tooltip appears. While a tooltip is shown, the next one appears at once. Moving the cursor starts the time again. "Only on key X": the tooltip appears only when you press X.</English>
+		<German>Wie lange der Mauszeiger auf etwas ruhen muss, bevor der Nested Tooltip erscheint. Solange ein Tooltip angezeigt wird, erscheint der nächste sofort. Bewegt man den Mauszeiger, beginnt die Zeit neu. "Nur mit Taste X": Der Tooltip erscheint nur, wenn Sie X drücken.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK</Tag>
+		<English>Next tooltip without delay (while a tooltip is shown)</English>
+		<German>Nächster Tooltip ohne Verzögerung (solange ein Tooltip angezeigt wird)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK_HELP</Tag>
+		<English>Off: moving the cursor on to the next thing removes the tooltip and the delay starts again. On: while a tooltip is shown, the tooltip of the next thing appears at once. The key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] shows a tooltip that still waits for its delay at once.</English>
+		<German>Aus: Beim Weiterfahren zum nächsten Ziel verschwindet der Tooltip und die Verzögerung beginnt neu. An: Solange ein Tooltip angezeigt wird, erscheint der Tooltip des nächsten Ziels sofort. Die Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] zeigt einen Tooltip, der noch auf seine Verzögerung wartet, sofort an.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_5</Tag>
+		<English>Extra long (2 s)</English>
+		<German>Extra lang (2 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_6</Tag>
+		<English>Only on key X</English>
+		<German>Nur mit Taste X</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TOTAL_PRICE_HELP</Tag>
+		<English>[NEWLINE]	Total[TAB][TAB]</English>
+		<German>[NEWLINE]	Gesamt[TAB][TAB]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_OFF</Tag>
+		<English>Nested tooltips: off</English>
+		<German>Nested Tooltips: aus</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FROZEN_HINT</Tag>
+		<English>[COLOR:140:255:40:255]Frozen - Esc or hold X: close[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Eingefroren - Esc oder X halten: schließen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_RUN_COMMAND</Tag>
+		<English>Right click: run this command</English>
+		<German>Rechtsklick: diesen Befehl ausführen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PROMO_SUM</Tag>
+		<English>[COLOR_CAT_MILITARY]Promotion sum.[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_MILITARY]Bef.-Details[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORAGE</Tag>
+		<English>Storage : %d1 / %d2</English>
+		<German>Lager : %d1 / %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORAGE_FULL</Tag>
+		<English>[COLOR_NEGATIVE_TEXT]Storage : %d1 / %d2[COLOR_REVERT]</English>
+		<German>[COLOR_NEGATIVE_TEXT]Lager : %d1 / %d2[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_BUILDINGS</Tag>
+		<English>[COLOR_SELECTED_TEXT]Buildings...[COLOR_REVERT]</English>
+		<German>[COLOR_SELECTED_TEXT]Gebäude...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_FOLD</Tag>
+		<English>Stored...</English>
+		<German>Gelagert...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_FOLD</Tag>
+		<English>Produced...</English>
+		<German>Produziert...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_MISSING</Tag>
+		<English>Produced...missing</English>
+		<German>Produziert...missing</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT</Tag>
+		<English>Produced...need imp.</English>
+		<German>Produziert...bent. Imp.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_WOOD</Tag>
+		<English>Stored...wood</English>
+		<German>Gelagert...Holz</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_FOOD</Tag>
+		<English>Stored...food</English>
+		<German>Gelagert...Nahrung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_BOTH</Tag>
+		<English>Stored...wood&amp;food</English>
+		<German>Gelagert...Holz&amp;Nahrung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET</Tag>
+		<English>Produced...imp. set</English>
+		<German>Produziert...Imp. ges.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT</Tag>
+		<English>[COLOR:140:255:40:255]X: freeze this tooltip[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]X: Tooltip einfrieren[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_COMMANDS</Tag>
+		<English>[COLOR:140:255:40:255]Commands...[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Kommandos...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_GOODS</Tag>
+		<English>Carries goods only</English>
+		<German>Lädt nur Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_SLAVE</Tag>
+		<English>Carries slaves and goods only</English>
+		<German>Lädt nur Sklaven und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_TREASURE</Tag>
+		<English>Carries treasures and goods only</English>
+		<German>Lädt nur Schätze und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_TROOP</Tag>
+		<English>Carries military units and goods only</English>
+		<German>Lädt nur Militäreinheiten und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_ALL</Tag>
+		<English>Carries units and goods</English>
+		<German>Lädt Einheiten und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORTS</Tag>
+		<English>Ports: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Häfen: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_NO_OCEAN</Tag>
+		<English>[COLOR_WARNING_TEXT]Not ocean-going[COLOR_REVERT]</English>
+		<German>[COLOR_WARNING_TEXT]Nicht überseetauglich[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_EUROPE</Tag>
+		<English>Europe</English>
+		<German>Europa</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_AFRICA</Tag>
+		<English>Africa</English>
+		<German>Afrika</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_ROYAL</Tag>
+		<English>Port Royal</English>
+		<German>Port Royal</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_MORE</Tag>
+		<English>more...</English>
+		<German>mehr...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_DETAILS</Tag>
+		<English>[COLOR_CAT_MILITARY]Details[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_MILITARY]Details[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TALK</Tag>
+		<English>Right click: Talk to [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Rechtsklick: Mit [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] sprechen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP</Tag>
+		<English>Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP2</Tag>
+		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_LIST</Tag>
+		<English>[COLOR:140:255:40:255]All hits (Shift + mouse wheel: choose):[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Alle Treffer (Shift + Mausrad: auswählen):[COLOR_REVERT]</German>
 	</TEXT>
 </Civ4GameText>
