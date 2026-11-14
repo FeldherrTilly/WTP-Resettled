@@ -74,6 +74,7 @@ void CyGamePythonInterface2(python::class_<CyGame>& x)
 		.def("isShiftKeyPressed", &CyGame::isShiftKeyPressed, "bool () - is the shift key down")
 		.def("getCursorClientX", &CyGame::getCursorClientX, "int () - mouse x in the game window")
 		.def("getCursorClientY", &CyGame::getCursorClientY, "int () - mouse y in the game window")
+		.def("openDomesticMarket", &CyGame::openDomesticMarket, "void (int iCityID) - opens the domestic market popup of the city")
 		.def("getReplayInfo", &CyGame::getReplayInfo, python::return_value_policy<python::manage_new_object>())
 		;
 }

@@ -6,6 +6,7 @@ import CvUtil
 import ScreenInput
 import CvScreenEnums
 import sdToolKit
+import time
 
 
 #R&R mod, vetiarvind, trade groups - start
@@ -101,6 +102,10 @@ class CvTradeRoutesAdvisor:
 		
 		if self.CityList == []:
 			return
+
+		# WTP: opened from the trade routes tab of the domestic advisor: go back there when closed
+		self.bReturnToDomestic = (time.time() - getattr(self, "fReturnToDomesticTime", -100.0) < 5.0)
+		self.fReturnToDomesticTime = -100.0
 		
 		# Cargo list
 		self.YieldList = []
@@ -947,6 +952,15 @@ class CvTradeRoutesAdvisor:
 
 		
 	def onClose(self) :
+		if getattr(self, "bReturnToDomestic", False):
+			self.bReturnToDomestic = False
+			try:
+				popupInfo = CyPopupInfo()
+				popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+				popupInfo.setText(u"showDomesticAdvisor")
+				popupInfo.addPopup(gc.getGame().getActivePlayer())
+			except:
+				pass
 		for iRoute, bAssigned in self.AssignedRoutes.iteritems():
 			CyMessageControl().sendDoCommand(self.pTransport.getID(), CommandTypes.COMMAND_ASSIGN_TRADE_ROUTE, iRoute, bAssigned, False)
 		
