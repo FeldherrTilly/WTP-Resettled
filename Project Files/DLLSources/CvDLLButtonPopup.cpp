@@ -702,6 +702,23 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 		break;
 
 	case BUTTONPOPUP_CHOOSEPRODUCTION:
+		if (info.getData2() == WTP_BUY_MATERIALS_POPUP)
+		{
+			// WTP: the panel of the missing materials: 0 = buy, 1 = examine settlement
+			if (pPopupReturn->getButtonClicked() == 0)
+			{
+				gDLL->sendDoTask(info.getData1(), TASK_HURRY, NO_HURRY, 1, false, false, false, false); // 1: only the materials
+			}
+			else if (pPopupReturn->getButtonClicked() == 1)
+			{
+				CvCity* pBuyCity = GET_PLAYER(GC.getGameINLINE().getActivePlayer()).getCity(info.getData1());
+				if (pBuyCity != NULL)
+				{
+					gDLL->getInterfaceIFace()->selectCity(pBuyCity, true);
+				}
+			}
+			break;
+		}
 		iExamineCityID = 0;
 		iExamineCityID = std::max(iExamineCityID, GC.getNumUnitInfos());
 		iExamineCityID = std::max(iExamineCityID, GC.getNumBuildingInfos());
@@ -712,6 +729,27 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 			if (pCity != NULL)
 			{
 				gDLL->getInterfaceIFace()->selectCity(pCity, true);
+			}
+		}
+		else if (pPopupReturn->getButtonClicked() == iExamineCityID + 1)
+		{
+			// WTP: buy the missing materials: the project goes back on the order queue and is hurried with gold
+			const HurryTypes eBuyHurry = (HurryTypes)GC.getInfoTypeForString("HURRY_GOLD");
+			if (eBuyHurry != NO_HURRY)
+			{
+				if ((OrderTypes)info.getData2() == ORDER_TRAIN)
+				{
+					gDLL->sendDoTask(info.getData1(), TASK_PUSH_TRAIN_UNIT, info.getData3(), NO_UNITAI, false, false, false, false);
+				}
+				else if ((OrderTypes)info.getData2() == ORDER_CONSTRUCT)
+				{
+					gDLL->sendDoTask(info.getData1(), TASK_PUSH_CONSTRUCT_BUILDING, info.getData3(), -1, false, false, false, false);
+				}
+				else
+				{
+					break;
+				}
+				gDLL->sendDoTask(info.getData1(), TASK_HURRY, eBuyHurry, 1, false, false, false, false); // 1: only the materials
 			}
 		}
 		break;
@@ -1528,6 +1566,10 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 		{
 			break;
 		}
+		if (info.getData2() == WTP_BUY_MATERIALS_POPUP)
+		{
+			break; // WTP: the buy panel is wanted while the city is producing
+		}
 		{
 			PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
 			CvCity* pCity = GET_PLAYER(ePlayer).getCity(info.getData1());
@@ -1904,8 +1946,68 @@ static bool launchBuildingUpgradePopup(CvPopup* pPopup, CvPopupInfo& info)
 	return true;
 }
 
+// WTP: one turn before a project is finished: the materials that will be missing can be bought
+static bool launchBuyMaterialsPopup(CvPopup* pPopup, CvPopupInfo& info)
+{
+	CvCity* pCity = GET_PLAYER(GC.getGameINLINE().getActivePlayer()).getCity(info.getData1());
+	if (pCity == NULL || pCity->isProductionAutomated() || !pCity->isProduction())
+	{
+		return false;
+	}
+	const UnitTypes eUnit = pCity->getProductionUnit();
+	const BuildingTypes eBuilding = pCity->getProductionBuilding();
+	if (eUnit == NO_UNIT && eBuilding == NO_BUILDING)
+	{
+		return false;
+	}
+	int aiYields[NUM_YIELD_TYPES];
+	pCity->calculateNetYields(aiYields, NULL, NULL, false);
+	bool bPossible = false;
+	const int iPrice = pCity->getBuyMissingYieldsPrice(eUnit, eBuilding, bPossible, aiYields);
+	if (!bPossible || iPrice <= 0 || GET_PLAYER(pCity->getOwnerINLINE()).getGold() < iPrice)
+	{
+		return false;
+	}
+
+	CvWString szRequires;
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (GC.getYieldInfo(eYield).isCargo())
+		{
+			const int iNeeded = (eUnit != NO_UNIT) ? pCity->getYieldProductionNeeded(eUnit, eYield) : pCity->getYieldProductionNeeded(eBuilding, eYield);
+			const int iDeficit = iNeeded - pCity->getYieldStored(eYield) - pCity->getYieldRushed(eYield) - std::max(0, aiYields[eYield]);
+			if (iDeficit > 0)
+			{
+				if (!szRequires.empty())
+				{
+					szRequires += L", ";
+				}
+				szRequires += CvWString::format(L"%d %s", iDeficit, GC.getYieldInfo(eYield).getDescription());
+			}
+		}
+	}
+	if (!szRequires.empty())
+	{
+		szRequires = gDLL->getText("TXT_KEY_POPUP_REQUIRES", szRequires.GetCString());
+	}
+	const wchar* szProjectKey = (eUnit != NO_UNIT) ? GC.getUnitInfo(eUnit).getTextKeyWide() : GC.getBuildingInfo(eBuilding).getTextKeyWide();
+	gDLL->getInterfaceIFace()->popupSetHeaderString(pPopup, gDLL->getText("TXT_KEY_POPUP_BUY_MATERIALS_HEADER", szProjectKey, pCity->getNameKey(), szRequires.GetCString()), DLL_FONT_LEFT_JUSTIFY);
+
+	gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_POPUP_BUY_MISSING_YIELDS", iPrice).c_str(), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CITYSELECTION")->getPath(), 0, WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+	gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_POPUP_EXAMINE_CITY").c_str(), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CITYSELECTION")->getPath(), 1, WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+	gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_NEVER_MIND"), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CANCEL")->getPath(), 2, WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+	gDLL->getInterfaceIFace()->popupLaunch(pPopup, false, POPUPSTATE_MINIMIZED, 252);
+	return true;
+}
+
 bool CvDLLButtonPopup::launchProductionPopup(CvPopup* pPopup, CvPopupInfo &info)
 {
+	// WTP: the panel to buy the missing materials one turn before the project is finished
+	if (info.getData2() == WTP_BUY_MATERIALS_POPUP)
+	{
+		return launchBuyMaterialsPopup(pPopup, info);
+	}
+
 	// WTP: upgrade of a building (right click on a building of the city screen)
 	if (info.getData2() == WTP_BUILDING_UPGRADE_POPUP)
 	{
@@ -2037,6 +2139,18 @@ bool CvDLLButtonPopup::launchProductionPopup(CvPopup* pPopup, CvPopupInfo &info)
 		iExamineCityID = std::max(iExamineCityID, GC.getNumBuildingInfos());
 
 		gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_POPUP_EXAMINE_CITY").c_str(), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CITYSELECTION")->getPath(), iExamineCityID, WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+
+		// WTP: buy the missing materials of the project that cannot be continued with gold (the prices of the hurry of the city screen);
+		// the project is put back on the order queue and the materials are bought
+		if (!bFinish && (eTrainUnit != NO_UNIT || eConstructBuilding != NO_BUILDING))
+		{
+			bool bBuyPossible = false;
+			const int iBuyPrice = pCity->getBuyMissingYieldsPrice(eTrainUnit, eConstructBuilding, bBuyPossible);
+			if (bBuyPossible && iBuyPrice > 0 && GET_PLAYER(pCity->getOwnerINLINE()).getGold() >= iBuyPrice)
+			{
+				gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_POPUP_BUY_MISSING_YIELDS", iBuyPrice).c_str(), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CITYSELECTION")->getPath(), iExamineCityID + 1, WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+			}
+		}
 	}
 
 	UnitTypes eProductionUnit = pCity->getProductionUnit();
@@ -2477,6 +2591,49 @@ namespace WtpDeferredEducation
 			if (pUnit != NULL && kPlayer.getPopulationUnitCity(pUnit->getID()) == pCity && pUnit->getYieldStored() >= pCity->educationThreshold())
 			{
 				CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_CHOOSE_EDUCATION, aEntries[i].first, aEntries[i].second);
+				gDLL->getInterfaceIFace()->addPopup(pInfo, ePlayer, false, true);
+				bLaunched = true;
+			}
+		}
+		s_bWaiting = bLaunched;
+		return bLaunched;
+	}
+}
+
+namespace WtpBuyMaterialsPanel
+{
+	bool relaunch()
+	{
+		static bool s_bWaiting = false;
+		static int s_iTurn = -1;
+		static std::vector<int> s_aiAsked; // the cities that were asked in this turn
+		if (s_bWaiting)
+		{
+			if (gDLL->getInterfaceIFace()->isPopupUp() || gDLL->getInterfaceIFace()->isPopupQueued())
+			{
+				return true;
+			}
+			s_bWaiting = false;
+		}
+		if (s_iTurn != GC.getGameINLINE().getGameTurn())
+		{
+			s_iTurn = GC.getGameINLINE().getGameTurn();
+			s_aiAsked.clear();
+		}
+		const PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
+		CvPlayer& kPlayer = GET_PLAYER(ePlayer);
+		bool bLaunched = false;
+		int iLoop;
+		for (CvCity* pCity = kPlayer.firstCity(&iLoop); pCity != NULL; pCity = kPlayer.nextCity(&iLoop))
+		{
+			if (std::find(s_aiAsked.begin(), s_aiAsked.end(), pCity->getID()) != s_aiAsked.end())
+			{
+				continue;
+			}
+			if (pCity->isBuyMaterialsPanelWanted())
+			{
+				s_aiAsked.push_back(pCity->getID());
+				CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_CHOOSEPRODUCTION, pCity->getID(), WTP_BUY_MATERIALS_POPUP);
 				gDLL->getInterfaceIFace()->addPopup(pInfo, ePlayer, false, true);
 				bLaunched = true;
 			}
