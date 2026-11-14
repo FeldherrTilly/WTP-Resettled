@@ -129,7 +129,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>512</iModelCopies>
+				<iModelCopies>64</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,5,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -167,7 +167,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>384</iModelCopies>
+				<iModelCopies>48</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,3,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -185,7 +185,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>384</iModelCopies>
+				<iModelCopies>48</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,7,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -203,7 +203,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>384</iModelCopies>
+				<iModelCopies>48</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,8,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -223,7 +223,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>256</iModelCopies>
+				<iModelCopies>32</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,1,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -434,7 +434,7 @@
 						<Connections>NW NE SE SW</Connections>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>8</iModelCopies>
+				<iModelCopies>4</iModelCopies>
 				<VarietyButton>Art/Interface/Buttons/button_tropical_grove.dds</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
