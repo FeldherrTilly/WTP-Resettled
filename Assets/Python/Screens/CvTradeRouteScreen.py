@@ -179,9 +179,9 @@ BLD_OTHER = []
 # the livestock preset: import and feeder for all livestock, at most 100 imported (the maintain level stays as it is)
 LIV_PREFIX = "[[WTPLIV:"
 LIV_GOODS = ["YIELD_HORSES", "YIELD_CATTLE", "YIELD_GEESE", "YIELD_GOATS", "YIELD_PIGS", "YIELD_SHEEP", "YIELD_CHICKEN"]
-# the military goods preset: import and feeder for muskets, blades, cannons, black powder, food (provisions) and horses, at most 100 imported
+# the military goods preset: import and feeder for muskets, blades, cannons, black powder, bakery goods (provisions) and horses, at most 100 imported
 MIL_PREFIX = "[[WTPMIL:"
-MIL_GOODS = ["YIELD_MUSKETS", "YIELD_BLADES", "YIELD_CANNONS", "YIELD_BLACK_POWDER", "YIELD_FOOD", "YIELD_HORSES"]
+MIL_GOODS = ["YIELD_MUSKETS", "YIELD_BLADES", "YIELD_CANNONS", "YIELD_BLACK_POWDER", "YIELD_BAKERY_GOODS", "YIELD_HORSES"] # (the bakery goods are the provisions the soldier professions ask for)
 
 # the presets that switch goods on (the market automatic is a preset of its own, handled by the DLL): the data is kept per city in the script
 # data of the player (prefix), "maintain" -1: the level of the good stays, the preset protection (see below) works for all of them
@@ -356,6 +356,7 @@ class CvTradeRouteScreen:
 		self.sHover = ""
 		self.tWarn = None # the notice in the middle of the window: (line 1, line 2, the good of market automatic to reset or -1, the goods of a preset that were switched off)
 		self.aWarnQueue = [] # notices that wait for the one on the screen
+		self.dIgnored = {}
 		self.aWarnDrawn = []
 
 	def isOpen(self):
@@ -744,72 +745,88 @@ class CvTradeRouteScreen:
 
 	# --- PRESET PROTECTION (part 2): the building material preset (and presets to come): the goods it has set are reported when they are switched off again ---
 	# the goods of the preset (the ones it turned on) that are off / zero now, among the given goods
-	def getPresetLost(self, aGoods, p):
-		aLost = []
-		dBuild = loadBuild(p["prefix"])
-		if not dBuild.has_key(self.iCity):
-			return aLost
-		for aType in dBuild[self.iCity]:
-			iYield = self.getYieldByType(aType[0])
-			if iYield < 0 or not iYield in aGoods or self.isMarketLocked(iYield):
-				continue
-			d = self.dData[iYield]
-			if (not d["imp"] and not d["feeder"]) or (d["maintain"] == 0 and d["impLimit"] == 0):
-				aLost.append(iYield)
-		return aLost
-
-	# the names of the presets (switched on) that ask for the good
-	def getPresetNames(self, iYield):
-		aNames = []
+	# the presets (switched on) that ask for the good
+	def getPresetsOfGood(self, iYield):
+		aPresets = []
 		szType = gc.getYieldInfo(iYield).getType()
 		for p in PRESETS:
 			if szType in p["goods"] and self.isPresetOn(p):
-				aNames.append(localText.getText(p["text"], ()))
-		return aNames
+				aPresets.append(p)
+		return aPresets
 
+	def getPresetNames(self, iYield):
+		return [localText.getText(p["text"], ()) for p in self.getPresetsOfGood(iYield)]
+
+	# a good that a preset asks for (owned by it or not) is off / zero now; goods the player chose to ignore are left alone
+	def isPresetLost(self, iYield):
+		if not self.dData.has_key(iYield) or len(self.getPresetsOfGood(iYield)) == 0 or self.isMarketLocked(iYield):
+			return False
+		d = self.dData[iYield]
+		if (not d["imp"] and not d["feeder"]) or (d["maintain"] == 0 and d["impLimit"] == 0):
+			return not self.dIgnored.has_key(iYield)
+		if self.dIgnored.has_key(iYield):
+			del self.dIgnored[iYield] # active again: protected again
+		return False
+
+	# the notice lists every switched off good with all presets that ask for it
 	def checkPresetLost(self, aGoods, bQueue = False):
-		for p in PRESETS:
-			aLost = self.getPresetLost(aGoods, p)
-			if len(aLost) == 0:
-				continue
-			# every good with the presets that ask for it (a good can be part of several)
-			aNames = []
-			for i in aLost[:4]:
-				aNames.append(self.dNames[i] + " (" + ", ".join(self.getPresetNames(i)) + ")")
-			szNames = "; ".join(aNames)
-			if len(aLost) > 4:
-				szNames += "; ..."
-			szPreset = localText.getText(p["text"], ())
-			szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1", (szPreset, str(len(aLost))))
-			szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2", (szNames,))
-			self.showWarn(szLine1, szLine2, -1, aLost, bQueue or self.tWarn != None, p)
-			bQueue = True
+		aLost = [i for i in aGoods if self.isPresetLost(i)]
+		if len(aLost) == 0:
+			return
+		aNames = []
+		for i in aLost[:4]:
+			aNames.append(self.dNames[i] + " (" + ", ".join(self.getPresetNames(i)) + ")")
+		szNames = "; ".join(aNames)
+		if len(aLost) > 4:
+			szNames += "; ..."
+		szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1", (str(len(aLost)),))
+		szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2", (szNames,))
+		self.showWarn(szLine1, szLine2, -1, aLost, bQueue or self.tWarn != None)
 
-	# reset: the goods get the values of the preset again
-	def resetPresetGoods(self, aGoods, p):
+	# reset: the goods get the levels the presets ask for (the highest of them, so that every preset is satisfied)
+	def resetPresetGoods(self, aGoods):
 		for iYield in aGoods:
 			d = self.dData[iYield]
 			d["imp"] = True
 			d["feeder"] = True
-			self.setPresetLevels(d, p)
+			iMaintain = -1
+			iLimit = 0
+			for p in self.getPresetsOfGood(iYield):
+				iMaintain = max(iMaintain, p["maintain"])
+				iLimit = max(iLimit, p["limit"])
+			if iMaintain >= 0:
+				d["maintain"] = iMaintain
+			if iLimit > 0:
+				d["impLimit"] = iLimit
+			if d["maintain"] > d["impLimit"]:
+				d["maintain"] = d["impLimit"]
 		self.apply()
 		self.iReload = 60
 
-	# ignore: the goods are not part of the preset any more; when none is left the preset is off (its button shows it)
-	def ignorePresetGoods(self, aGoods, p):
-		dBuild = loadBuild(p["prefix"])
-		if not dBuild.has_key(self.iCity):
-			return
-		aTypes = [gc.getYieldInfo(i).getType() for i in aGoods]
-		aRest = []
-		for aType in dBuild[self.iCity]:
-			if not aType[0] in aTypes:
-				aRest.append(aType)
-		if len(aRest) == 0:
-			del dBuild[self.iCity]
-		else:
+	# ignore: the goods are not part of the presets any more (until they are switched on again); a preset none of whose goods is active
+	# any more is off (its button shows it)
+	def ignorePresetGoods(self, aGoods):
+		aTypes = []
+		for iYield in aGoods:
+			self.dIgnored[iYield] = True
+			aTypes.append(gc.getYieldInfo(iYield).getType())
+		for p in PRESETS:
+			dBuild = loadBuild(p["prefix"])
+			if not dBuild.has_key(self.iCity):
+				continue
+			aRest = []
+			for aType in dBuild[self.iCity]:
+				if not aType[0] in aTypes:
+					aRest.append(aType)
 			dBuild[self.iCity] = aRest
-		saveBuild(dBuild, p["prefix"])
+			bActive = False
+			for szType in p["goods"]:
+				iYield = self.getYieldByType(szType)
+				if iYield >= 0 and not self.isMarketLocked(iYield) and (self.dData[iYield]["imp"] or self.dData[iYield]["feeder"]):
+					bActive = True
+			if not bActive:
+				del dBuild[self.iCity]
+			saveBuild(dBuild, p["prefix"])
 		self.drawBuildButton()
 		if self.iView == VIEW_MARKED:
 			self.buildView()
@@ -950,6 +967,7 @@ class CvTradeRouteScreen:
 		self.sHover = ""
 		self.tWarn = None
 		self.aWarnQueue = []
+		self.dIgnored = {} # the goods the player ignored the preset protection for (until they are active again)
 		for iYield in range(YieldTypes.NUM_YIELD_TYPES):
 			if not gc.getYieldInfo(iYield).isCargo():
 				continue
@@ -1585,12 +1603,12 @@ class CvTradeRouteScreen:
 				self.resetMarketGood(self.tWarn[2])
 			elif self.tWarn != None and len(self.tWarn[3]) > 0:
 				aGoods = self.tWarn[3]
-				self.resetPresetGoods(aGoods, self.tWarn[4])
+				self.resetPresetGoods(aGoods)
 				self.hideWarn()
 				self.drawRows()
 		elif iData == BTN_WARN_OK:
 			if self.tWarn != None and len(self.tWarn[3]) > 0:
-				self.ignorePresetGoods(self.tWarn[3], self.tWarn[4])
+				self.ignorePresetGoods(self.tWarn[3])
 			self.hideWarn()
 			self.drawRows()
 		elif iData == BTN_CLEAR_SEARCH:

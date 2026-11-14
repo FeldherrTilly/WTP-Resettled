@@ -3521,18 +3521,18 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1</Tag>
-		<English>Preset protection (%s1_preset): %s2_count goods set by the preset are switched off</English>
-		<German>Preset-Schutz (%s1_preset): %s2_count Waren, die das Preset gesetzt hat, sind ausgeschaltet</German>
+		<English>Preset protection: %s1_count goods asked for by presets are switched off</English>
+		<German>Preset-Schutz: %s1_count Waren, die Presets anfordern, sind ausgeschaltet</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2</Tag>
-		<English>%s1_goods - Reset puts them back. Ignore: they no longer belong to the preset (when none is left, the preset switches itself off).</English>
-		<German>%s1_goods - Zurücksetzen stellt sie wieder her. Ignorieren: sie gehören dann nicht mehr zum Preset (bleibt keine übrig, schaltet sich das Preset selbst aus).</German>
+		<English>%s1_goods - Reset puts them back. Ignore: they no longer count for the presets (a preset none of whose goods is active any more switches itself off).</English>
+		<German>%s1_goods - Zurücksetzen stellt sie wieder her. Ignorieren: sie zählen dann nicht mehr für die Presets (ein Preset, von dem keine Ware mehr aktiv ist, schaltet sich selbst aus).</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT</Tag>
-		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] while the preset is on, you get a notice when its goods are switched off again (by hand or by Clear All), with a button to put them back. If you ignore it and none of its goods is left, the preset switches itself off.</English>
-		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] solange das Preset an ist, erscheint ein Hinweis, wenn seine Waren wieder ausgeschaltet werden (von Hand oder durch Alles löschen), mit einem Knopf, der sie zurücksetzt. Ignorierst du ihn und ist keine seiner Waren mehr übrig, schaltet sich das Preset selbst aus.</German>
+		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] while the preset is on, you get a notice when its goods are switched off again (by hand or by Clear All), with a button to put them back. If you ignore it and none of its goods is active any more, the preset switches itself off. The notice names every good with all the presets that ask for it.</English>
+		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] solange das Preset an ist, erscheint ein Hinweis, wenn seine Waren wieder ausgeschaltet werden (von Hand oder durch Alles löschen), mit einem Knopf, der sie zurücksetzt. Ignorierst du ihn und ist keine seiner Waren mehr aktiv, schaltet sich das Preset selbst aus. Der Hinweis nennt jede Ware mit allen Presets, die sie anfordern.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT</Tag>
@@ -3561,7 +3561,7 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_HELP</Tag>
-		<English>Military goods: import and feeder for muskets, blades, cannons, black powder, food (provisions) and horses, at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
-		<German>Militärgüter: Import und Feeder für Musketen, Säbel, Kanonen, Schießpulver, Proviant und Pferde, höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
+		<English>Military goods: import and feeder for muskets, blades, cannons, black powder, bakery goods (provisions) and horses, at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
+		<German>Militärgüter: Import und Feeder für Musketen, Säbel, Kanonen, Schießpulver, Proviant (Backwaren) und Pferde, höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
 	</TEXT>
 </Civ4GameText>
