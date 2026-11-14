@@ -1309,6 +1309,14 @@ class CvMainInterface:
 		except:
 			pass
 
+		# WTP: while the amount dialog is drawn on this screen the interface must not be redrawn: the redraw then treats the city
+		# screen like the map (minimap, date, money text, dark goods bar appear); the dirty bits stay set and are handled afterwards
+		try:
+			if CvScreensInterface.yieldAmountScreen.isHostMain():
+				return 0
+		except:
+			pass
+
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
 
 		if not INITIALIZED:
@@ -4360,6 +4368,10 @@ class CvMainInterface:
 	def update( self, fDelta ):
 		self.updateTerritorialInfluenceEditor()
 		self.updateAutomatedFollow()
+		try:
+			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
+		except:
+			pass
 		return
 
 	# WTP: the game selects the next unit when a transport gets automated: the transport stays selected (the game does its

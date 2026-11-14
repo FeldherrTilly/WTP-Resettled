@@ -231,6 +231,20 @@ class CvEventManager:
 					pass
 			return 1
 
+		# WTP: the amount dialog of the transfers (shift + transfer) takes all keys while it is open
+		if (CvScreensInterface.yieldAmountScreen.isOpen()):
+			if (eventType == self.EventKeyDown):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
+				except:
+					pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKeyUp(int(key))
+				except:
+					pass
+			return 1
+
 		if (self.bAllowCheats):
 			# notify debug tools of input to allow it to override the control
 			argsList = (eventType,key,self.bCtrl,self.bShift,self.bAlt,mx,my,px,py,gc.getGame().isNetworkMultiPlayer())
@@ -1024,6 +1038,12 @@ class CvEventManager:
 		iMax = argsList[2]
 		if iMax <= 0:
 			return
+		# WTP: the amount dialog with keys and mouse wheel (CvYieldAmountScreen), the popup below if it cannot be opened
+		try:
+			if CvScreensInterface.yieldAmountScreen.open(iYield, -1, iMax, -1, False, iFromPlayer) != 0:
+				return
+		except:
+			pass
 		popup = CyPopup(CvUtil.EventDiploYieldAmount, EventContextTypes.EVENTCONTEXT_ALL, True)
 		popup.setUserData((iFromPlayer, iYield))
 		popup.setBodyString(localText.getText("TXT_KEY_SELECT_YIELD_POPUP", (gc.getYieldInfo(iYield).getTextKey(),)), CvUtil.FONT_LEFT_JUSTIFY)
