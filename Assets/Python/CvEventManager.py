@@ -224,6 +224,11 @@ class CvEventManager:
 					CvScreensInterface.tradeRouteScreen.handleKey(int(key), self.bCtrl, self.bShift)
 				except:
 					pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.tradeRouteScreen.handleKeyUp(int(key))
+				except:
+					pass
 			return 1
 
 		# WTP: Ctrl + Shift + W A S D move the message panel (two keys at once: diagonal)
@@ -235,11 +240,27 @@ class CvEventManager:
 				pass
 		elif (eventType == self.EventKeyDown and self.bShift and self.bCtrl and not self.bAlt):
 			try:
+				if int(key) == int(InputTypes.KB_Q) and CvScreensInterface.mainInterface.isMessagePanelShown():
+					CvScreensInterface.mainInterface.resetMessagePanel()
+					return 1
 				if int(key) in aMoveKeys and CvScreensInterface.mainInterface.isMessagePanelShown():
 					CvScreensInterface.mainInterface.pressMessageArrow(aMoveKeys.index(int(key)))
 					return 1
 			except:
 				pass
+		# WTP: the amount dialog of the transfers (shift + transfer) takes all keys while it is open
+		if (CvScreensInterface.yieldAmountScreen.isOpen()):
+			if (eventType == self.EventKeyDown):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
+				except:
+					pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKeyUp(int(key))
+				except:
+					pass
+			return 1
 
 		if (self.bAllowCheats):
 			# notify debug tools of input to allow it to override the control
@@ -1034,6 +1055,12 @@ class CvEventManager:
 		iMax = argsList[2]
 		if iMax <= 0:
 			return
+		# WTP: the amount dialog with keys and mouse wheel (CvYieldAmountScreen), the popup below if it cannot be opened
+		try:
+			if CvScreensInterface.yieldAmountScreen.open(iYield, -1, iMax, -1, False, iFromPlayer) != 0:
+				return
+		except:
+			pass
 		popup = CyPopup(CvUtil.EventDiploYieldAmount, EventContextTypes.EVENTCONTEXT_ALL, True)
 		popup.setUserData((iFromPlayer, iYield))
 		popup.setBodyString(localText.getText("TXT_KEY_SELECT_YIELD_POPUP", (gc.getYieldInfo(iYield).getTextKey(),)), CvUtil.FONT_LEFT_JUSTIFY)
