@@ -280,16 +280,103 @@ iGlobeLayerOptionHeight = 24
 
 g_pSelectedUnit = 0
 
+# WTP: the tooltip settings (options screen / Ctrl+Shift+T) are kept in a file in the game folder, so they stay after a restart
+TIP_DELAYS = (0, 250, 500, 800, 1200, 2000, -1) # milliseconds, -1: never by itself, only the key X shows the tooltip
+TIP_SETTINGS_FILE = "WTP_TooltipSettings.ini"
+
+def wtpLoadTipSettings():
+	# (mode, delay index, quick): default is the game tooltip (2), the delay "medium" (2) for the case that the hover tooltip is chosen
+	aiValues = [2, 2, 0]
+	try:
+		f = open(TIP_SETTINGS_FILE, "r")
+		for szLine in f.readlines():
+			if "=" in szLine:
+				aszPart = szLine.strip().split("=")
+				try:
+					if aszPart[0] == "mode":
+						aiValues[0] = max(0, min(2, int(aszPart[1])))
+					elif aszPart[0] == "delay":
+						aiValues[1] = max(0, min(len(TIP_DELAYS) - 1, int(aszPart[1])))
+					elif aszPart[0] == "quick":
+						aiValues[2] = max(0, min(1, int(aszPart[1])))
+				except:
+					pass
+		f.close()
+	except:
+		pass
+	return aiValues
+
+aiTipSettings = wtpLoadTipSettings()
+
 class CvMainInterface:
 	"Main Interface Screen"
 
 	BUTTON_TERRITORIAL_INFLUENCE = 750
+	BUTTON_TIP_LINE = 762 # WTP: a line of a frozen hover tooltip (right click: Colopedia)
 	dMessagePediaChars = {}
 	aMessageConceptPatterns = []
 	aMessageNameList = []
 	aMessageSpecial = []
 	dMessageConcepts = {}
 	dMessagePediaCache = {}
+	dMessagePediaAll = {} # the same with gold at the end instead of left out (mouse wheel list of the frozen tooltip)
+	tMsgRect = (0, 0, 0, 0)
+	iMsgW = 0
+	iWidgetHelpCount = 0
+	bCursorTipShown = False
+	iCursorTipLines = 0
+	iPreviewPrefDY = 0
+	dFrozenPrefDY = {}
+	iRedrawFrozen = 0
+	dUnitTypeByName = {}
+	# the lists of units of the child windows "more...units": the units of a window (by its lines) and the groups of units of its lines
+	dUnitWin = {}
+	dUnitGroups = {}
+	iUnitGroupCounter = 0
+	iTipHintLines = 0
+	iPreviewHintLines = 0
+	iTick = 0 # counted in update() (time.time() of the game is far too coarse)
+	iWidgetHelpTick = -1000
+	bTipFrozen = False # the hover tooltip is frozen (key X): the cursor can be moved onto it, right click: Colopedia, Esc: close
+	tTipLayout = None
+	aFrozen = [] # the frozen windows (key X), the last one on top: (widget name prefix, layout, paragraphs, indents, details)
+	iFzCounter = 0
+	szSuppressHelp = u"" # the text of the window that was just frozen: the tooltip of the same thing does not appear again at once
+	iTipSelLevel = -1
+	iPreviewParent = -1
+	tScoreRect = None
+	tPreviewLayout = None # the window beside the top frozen window (it can be frozen too): layout, paragraphs, widget name prefix
+	aszPreviewParas = []
+	szPreviewPrefix = "HudTipC1"
+	bXHeld = False # key X is down: a short press freezes, holding it (0.6 s) closes all frozen windows
+	bXHoldDone = False
+	fXStart = 0.0
+	tTipPlacedAt = (-1000, -1000)
+	iTipDelay = TIP_DELAYS[aiTipSettings[1]] # (-1: only on the key X) milliseconds the cursor has to rest before the first tooltip appears (options screen, Game tab)
+	szPendingHelp = None
+	bPendingWidget = False
+	fPendingStart = 0.0
+	tPendingPos = (0, 0)
+	fLastClock = -1.0
+	iClockSame = 0
+	bClockDead = False
+	iTipMode = aiTipSettings[0] # Ctrl+Shift+T: 0 hover tooltip at the cursor, 1 own window at the place of the game tooltip, 2 off (the game tooltip)
+	aiTipIndent = []
+	dTipDetails = {}
+	aiWrapIndent = []
+	bSecondTipShown = False # the window with the Colopedia hint of the line under the cursor in the frozen tooltip
+	tSecondTipKey = None
+	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
+	iTipSelIdx = 0
+	bTipWheel = False
+	iSecondTipLines = 0
+	aszTipParas = []
+	bHoverTip = (aiTipSettings[0] != 2) # false: the game tooltip
+	bHudHover = False # the cursor is on a HUD element / widget with its own help text (until the game reports "no widget" again)
+	tHudHoverAt = (0, 0)
+	szHudHelp = u"" # the text of the HUD element under the cursor: kept in the help area of the game ourselves (the tooltip of the game is lost when the screen changes)
+	szCursorTipText = u""
+	tCursorTipAt = (-1000, -1000)
 	dMessagePediaNames = None # WTP: lower case name -> (name, Colopedia screen, id), built at the first use
 	aszMessageTexts = []
 
@@ -697,7 +784,7 @@ class CvMainInterface:
 			screen.appendTableRow("EmphasizeTable")
 
 	# HELP TEXT AREA
-		screen.setHelpTextArea( HELPTEXT_AREA_MAX_WIDTH, FontTypes.SMALL_FONT, HELTTEXT_AREA_X_MARGIN, yResolution - SADDLE_HEIGHT, -0.1, False, "", True, False, CvUtil.FONT_LEFT_JUSTIFY, HELPTEXT_AREA_MIN_WIDTH)
+		self.setGameHelpArea(screen, yResolution - SADDLE_HEIGHT)
 
 	# ADVISOR BUTTONS
 
@@ -2911,7 +2998,7 @@ class CvMainInterface:
 		else: # CITY SCREEN IS DOWN
 			self.MINIMAP_SIDE_MARGIN = MINIMAP_HEIGHT * 13 / 100
 			screen.placeMinimap(self.MINIMAP_SIDE_MARGIN, MINIMAP_HEIGHT - self.MINIMAP_SIDE_MARGIN, yResolution - MINIMAP_HEIGHT + self.MINIMAP_SIDE_MARGIN * 2, yResolution)
-			screen.setHelpTextArea( HELPTEXT_AREA_MAX_WIDTH, FontTypes.SMALL_FONT, HELTTEXT_AREA_X_MARGIN, yResolution - SADDLE_HEIGHT+HELPTEXT_AREA_Y_MARGIN, -0.1, False, "", True, False, CvUtil.FONT_LEFT_JUSTIFY, HELPTEXT_AREA_MIN_WIDTH )
+			self.setGameHelpArea(screen, yResolution - SADDLE_HEIGHT+HELPTEXT_AREA_Y_MARGIN)
 
 			if ( CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW ):
 				self.setMinimapButtonVisibility(True)
@@ -3348,6 +3435,7 @@ class CvMainInterface:
 
 				# Scrollable Scoreboard
 				if (not pHeadSelectedCity):
+					self.tScoreRect = (xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, yCoord - (iBtnHeight * (iCount - 1)), iWidth, (iBtnHeight * (iCount - 1)))
 					screen.addTableControlGFC("ScoreBackground", 1, xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, yCoord - (iBtnHeight * (iCount - 1)), iWidth, (iBtnHeight * (iCount - 1)), False, False, 0, 0, TableStyles.TABLE_STYLE_STANDARD)
 					screen.enableSelect("ScoreBackground", False)
 					screen.setTableColumnHeader("ScoreBackground", 0, "", iWidth - 10)
@@ -3462,6 +3550,2009 @@ class CvMainInterface:
 				if not pHeadSelectedCity:
 					screen.show("ScoreBackground")
 
+	# WTP: own tooltip window at the mouse cursor (the tooltip of the game stays at its place). It shows the same text, is vertically
+	# centered on the cursor, right of it (left if there is no room) and lies in front of the HUD elements.
+	def showCursorTooltip( self, screen, szHelp, bWidget = False, bFromPending = False ):
+		if not self.bHoverTip:
+			return
+		# (the cursor on a frozen window: its lines have tooltips of their own, the plot under the window is not interesting)
+		if self.bTipFrozen and self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
+			return
+		try:
+			# the help of the map plot is not shown while the cursor is on a HUD element (the game reports the plot behind it)
+			if not bWidget and self.isHudHover():
+				return
+			if CyInterface().isCityScreenUp() or len(szHelp) == 0:
+				self.szSuppressHelp = u""
+				self.hideCursorTooltip(screen)
+				return
+			# the tooltip of the thing that was just frozen does not appear a second time at once
+			if szHelp == self.szSuppressHelp:
+				return
+			self.szSuppressHelp = u""
+			iCursorX = gc.getGame().getCursorClientX()
+			iCursorY = gc.getGame().getCursorClientY()
+			# the same text again with the cursor near the last place: the window stays as it is (no flicker)
+			if self.bCursorTipShown and szHelp == self.szCursorTipText and abs(iCursorX - self.tCursorTipAt[0]) < 80 and abs(iCursorY - self.tCursorTipAt[1]) < 80:
+				return
+			# tooltip delay: a tooltip waits until the cursor has rested for the time of the option. Another text (the cursor has gone from one
+			# thing to the next) removes the tooltip that is shown and starts the time again
+			if self.iTipDelay != 0 and not bFromPending and (not self.bCursorTipShown or (szHelp != self.szCursorTipText and not self.bTipQuick)):
+				if self.bCursorTipShown:
+					self.hideCursorTooltip(screen)
+				if self.szPendingHelp is None:
+					self.fPendingStart = self.getTipNow()
+					self.tPendingPos = (iCursorX, iCursorY)
+				self.szPendingHelp = szHelp
+				self.bPendingWidget = bWidget
+				return
+			self.szPendingHelp = None
+			self.hideCursorTooltip(screen)
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			iLine = max(16, int(yRes * 0.0153)) # distance of the text lines (as in the message panel)
+			iPad = max(6, iLine / 2)
+			iChar = iLine * 0.32 # width of a character (measured in the message panel)
+			iMaxWidth = max(300, int(xRes * 0.2))
+			if bWidget:
+				# texts of HUD elements are long sentences: narrower window, more lines (as the tooltip of the game)
+				iMaxWidth = max(300, int(xRes * 0.14))
+			iCharsPerLine = max(20, int((iMaxWidth - 2 * iPad) / iChar))
+			aszLines = []
+			aiPara = [] # the paragraph (text between two line breaks of the help) of every line: right click in the frozen window
+			aiIndent = [] # indent of continued rows of icons (pixels)
+			aszRaw = self.carryColors(szHelp.split(u"\n"))
+			aszParas = self.foldCityDetails(aszRaw)
+			if aszParas is None:
+				aszParas = self.foldUnitDetails(aszRaw)
+			for iPara in range(len(aszParas)):
+				aszWrapped = self.wrapMessage(aszParas[iPara], iCharsPerLine, True)
+				aszLines += aszWrapped
+				aiPara += [iPara] * len(aszWrapped)
+				for fIndent in self.aiWrapIndent:
+					aiIndent.append(int(fIndent * iChar))
+			# the hint at the end: the tooltip can be frozen with X (the frozen window does not have it)
+			aszHint = self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT", ()), iCharsPerLine)
+			aszLines += aszHint
+			aiPara += [-1] * len(aszHint)
+			aiIndent += [0] * len(aszHint)
+			self.iTipHintLines = len(aszHint)
+			self.aiTipIndent = aiIndent
+			iWidth = self.getTipTextWidth(aszLines, iChar, iMaxWidth, iPad, aiIndent)
+			iHeight = len(aszLines) * iLine + 2 * iPad
+			(iX, iY) = self.getTipPlacement(iWidth, iHeight, iCursorX, iCursorY, xRes, yRes)
+			self.tTipPlacedAt = (iCursorX, iCursorY)
+			self.tTipLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
+			self.aszTipParas = aszParas
+			self.drawCursorTip(screen, False)
+			self.bCursorTipShown = True
+			self.szCursorTipText = szHelp
+			self.tCursorTipAt = (iCursorX, iCursorY)
+		except:
+			self.bCursorTipShown = False
+
+	# A color of the game text can go over several lines ("[COLOR_CYAN]...[NEWLINE]...[COLOR_REVERT]"), but every line is drawn on its own: a line
+	# that begins inside of a color gets the color again.
+	def carryColors( self, aszParas ):
+		aNew = []
+		aOpen = []
+		for szPara in aszParas:
+			if len(aOpen) > 0:
+				aNew.append(aOpen[-1] + szPara)
+			else:
+				aNew.append(szPara)
+			for tTag in re.finditer(u"<color=[^>]*>|</color>", szPara):
+				if tTag.group(0) == u"</color>":
+					if len(aOpen) > 0:
+						aOpen.pop()
+				else:
+					aOpen.append(tTag.group(0))
+		return aNew
+
+	# a text without color tags and icons, words separated by one space
+	def normTipText( self, szText ):
+		szText = re.sub(u"<[^>]*>", u"", szText)
+		szText = u"".join([c for c in szText if ord(c) < 0x2000])
+		return u" ".join(szText.split())
+
+	def getTipPrefix( self, szKey, aArgs ):
+		return self.normTipText(localText.getText(szKey, aArgs)).split(u":")[0].strip()
+
+	# the first line of a unit: its name in a color (the color depends on the owner), then the strength and the moves with their icons
+	def isUnitHeader( self, szText ):
+		if szText.find(u"<color=") != 0:
+			return False
+		return re.search(u", [0-9][0-9./]*\\s*[\u2000-\uffff]", re.sub(u"<[^>]*>", u"", szText)) is not None
+
+	# a line of a list: it starts with the bullet (an icon of the game font)
+	def isBulletLine( self, szText ):
+		szPlain = re.sub(u"<[^>]*>", u"", szText).lstrip()
+		return len(szPlain) > 0 and ord(szPlain[0]) >= 0x2000
+
+	# the row of the promotion pictures of a unit (only pictures)
+	def isPromotionRow( self, szText ):
+		if szText.lower().find(u"<img=") < 0 and re.search(u"[\u2000-\uffff]", re.sub(u"<[^>]*>", u"", szText)) is None:
+			return False
+		return len(self.normTipText(szText)) == 0
+
+	# Folds the lines of the help text that are not needed at first sight (the lines are the paragraphs of the text); their tooltip lists them.
+	# - a unit with promotions (or a military unit: it has a line "Barracks Space Needed"): the XP goes into the row of the promotion pictures,
+	#   the plain "Fortify bonus" line follows that row, and everything after the line "Social Status" up to the next unit is folded into the
+	#   line "Promotion sum."
+	# - the share of the cultures on a plot (82% Dutch ...) is folded into the line "Culture %" above the line "Movement Cost"
+	def foldUnitDetails( self, aszParas ):
+		self.dTipDetails = {}
+		try:
+			szBarracks = self.getTipPrefix("TXT_KEY_UNIT_BARRACKS_SPACE_NEEDED", (0, u""))
+			szSocial = self.getTipPrefix("TXT_KEY_CITIZEN_STATUS_FREE", ())
+			szFortify = self.getTipPrefix("TXT_KEY_UNIT_HELP_FORTIFY_BONUS", (0,))
+			szEthn = self.getTipPrefix("TXT_KEY_ETHNICITY_EUROPEAN", ())
+			szCargoLine = self.getTipPrefix("TXT_KEY_UNIT_HELP_CARGO_SPACE", (0, 0))
+			szMove = self.getTipPrefix("TXT_KEY_FEATURE_MOVEMENT_COST", (0,))
+			szYellow = u"<color=255,255,0,255>"
+			# a header with the promotion pictures at its end (ships, units of others): the pictures become a row of their own
+			aSplit = []
+			for szPara in aszParas:
+				if (szPara.find(szYellow) == 0 or self.isUnitHeader(szPara)) and szPara.lower().find(u"<img=") > 0:
+					iImg = szPara.lower().find(u"<img=")
+					if self.isPromotionRow(szPara[iImg:]):
+						aSplit.append(szPara[:iImg])
+						aSplit.append(szPara[iImg:])
+						continue
+				aSplit.append(szPara)
+			# a unit with an attached leader: the line "commanded by" stands between its header and the row of its promotions; the row comes first
+			szCommanded = self.normTipText(localText.getText("TXT_KEY_UNIT_HELP_COMMANDED_BY", ()))
+			if len(szCommanded) > 3:
+				for k in range(len(aSplit) - 2):
+					if (aSplit[k].find(szYellow) == 0 or self.isUnitHeader(aSplit[k])) and self.normTipText(aSplit[k + 1]).find(szCommanded) == 0 and self.isPromotionRow(aSplit[k + 2]):
+						szSwap = aSplit[k + 1]
+						aSplit[k + 1] = aSplit[k + 2]
+						aSplit[k + 2] = szSwap
+			aszParas = aSplit
+			aOut = [] # [text, folded lines or None]
+			n = len(aszParas)
+			i = 0
+			while i < n:
+				aOut.append([aszParas[i], None])
+				i += 1
+				if aszParas[i - 1].find(szYellow) != 0 and not self.isUnitHeader(aszParas[i - 1]) and not (i < n and self.isPromotionRow(aszParas[i])):
+					continue
+				# a unit: its lines end at the next unit or at the share of the cultures
+				iStart = i
+				bPromo = (i < n and self.isPromotionRow(aszParas[i]))
+				if bPromo:
+					iStart = i + 1
+				iEnd = iStart
+				while iEnd < n and aszParas[iEnd].find(szYellow) != 0 and not self.isUnitHeader(aszParas[iEnd]) and re.match(u"^[0-9]+% ", self.normTipText(aszParas[iEnd])) is None:
+					iEnd += 1
+				aLines = aszParas[iStart:iEnd]
+				iBarracks = -1
+				iSocial = -1
+				iFortify = -1
+				iEthn = -1
+				iCargo = -1
+				for k in range(len(aLines)):
+					szNorm = self.normTipText(aLines[k])
+					if iBarracks < 0 and len(szBarracks) > 3 and szNorm.find(szBarracks) >= 0:
+						iBarracks = k
+					elif iSocial < 0 and len(szSocial) > 3 and szNorm.find(szSocial) >= 0:
+						iSocial = k
+					elif iEthn < 0 and len(szEthn) > 3 and szNorm.find(szEthn) == 0:
+						iEthn = k
+					elif iCargo < 0 and len(szCargoLine) > 3 and szNorm.find(szCargoLine) == 0:
+						iCargo = k
+					elif iFortify < 0 and len(szFortify) > 3 and szNorm.find(szFortify) == 0 and aLines[k].find(u"<color") < 0:
+						iFortify = k
+				iFold = -1
+				bCargoFold = False
+				if iSocial >= 0:
+					# (units with promotions in the header have no separate row: the bullet lines after the social status are folded in any case)
+					iFold = iSocial + 1
+				elif iBarracks >= 0:
+					# (also without a separate row of promotions: natives have their promotions at the end of the header)
+					iFold = iBarracks
+				elif iCargo >= 0:
+					# (a ship or a land transport: the bullet lines after the line "Cargo space" are folded, the slots of goods are not)
+					iFold = iCargo + 1
+					bCargoFold = True
+				elif bPromo:
+					# (units of others have no line "Social Status": everything is folded)
+					iFold = 0
+				bSum = True
+				if iFold < 0 and iEthn >= 0 and iSocial > iEthn:
+					# (no promotions to fold: only the lines of the ethnicity and the social status are put together)
+					iFold = iSocial + 1
+					bSum = False
+				if bPromo:
+					# the XP of the unit moves to the row of the promotions
+					szHeader = aOut[-1][0]
+					tXP = re.search(u",\\s*((?:<[^>]*>)*[^,<:()]{1,10}:\\s*\\(\\s*[0-9]+\\s*/\\s*[0-9]+\\s*\\)(?:<[^>]*>)*)\\s*$", szHeader)
+					szRow = aszParas[i]
+					if tXP is not None:
+						aOut[-1][0] = szHeader[:tXP.start()]
+						szRow = szRow + u" " + tXP.group(1)
+					aOut.append([szRow, None])
+				if iFold < 0:
+					i = iStart
+					continue
+				if iFortify >= 0 and (bSum or iFortify < iFold) and not bCargoFold:
+					aOut.append([aLines[iFortify], None])
+				bMerge = (iEthn >= 0 and iSocial > iEthn and iSocial < iFold)
+				for k in range(iFold):
+					if k == iFortify and not bCargoFold:
+						continue
+					if bMerge and k == iEthn:
+						# ethnicity and social status in one line (the ethnicity), both when hovering
+						aOut.append([aLines[iEthn], aLines[iEthn] + u"\n" + aLines[iSocial]])
+					elif bMerge and k == iSocial:
+						pass
+					else:
+						aOut.append([aLines[k], None])
+				# only the list of the unit is folded (lines with a bullet): the lines after it (the commands "(< CTRL > to select ...)", the
+				# lines of the plot) stay where they are
+				aFolded = []
+				iSegEnd = iFold
+				while bSum and iSegEnd < len(aLines) and (iSegEnd == iFortify or self.isBulletLine(aLines[iSegEnd])):
+					if iSegEnd != iFortify:
+						aFolded.append(aLines[iSegEnd])
+					iSegEnd += 1
+				if bCargoFold and iFortify >= iFold and iFortify < iSegEnd:
+					# (the fortify bonus stays a line of its own, below the cargo space)
+					aOut.append([aLines[iFortify], None])
+				if len(aFolded) > 0:
+					aOut.append([localText.getText("TXT_KEY_WTP_TIP_PROMO_SUM", ()), u"\n".join(aFolded)])
+				i = iStart + iSegEnd
+			# the shares of the cultures: one line above the movement cost
+			aFinal = []
+			aCulture = []
+			for aEntry in aOut:
+				if aEntry[1] is None and re.match(u"^[0-9]+% ", self.normTipText(aEntry[0])) is not None:
+					aCulture.append(aEntry[0])
+				else:
+					aFinal.append(aEntry)
+			if len(aCulture) > 0:
+				# the line of the culture with the highest share (with its colors), "more..." if there are others
+				iBest = 0
+				iBestShare = -1
+				for k in range(len(aCulture)):
+					iShare = int(re.match(u"^([0-9]+)% ", self.normTipText(aCulture[k])).group(1))
+					if iShare > iBestShare:
+						iBestShare = iShare
+						iBest = k
+				szCulture = aCulture[iBest]
+				szDetails = None
+				if len(aCulture) > 1:
+					szCulture = szCulture + u" " + localText.getText("TXT_KEY_WTP_TIP_MORE", ())
+					szDetails = u"\n".join(aCulture)
+				iAt = len(aFinal)
+				for k in range(len(aFinal)):
+					if len(szMove) > 3 and self.normTipText(aFinal[k][0]).find(szMove) == 0:
+						iAt = k
+						break
+				aFinal.insert(iAt, [szCulture, szDetails])
+			# the line "Cargo space" of a ship: what it can carry (child tooltip)
+			szCargo = self.getTipPrefix("TXT_KEY_UNIT_HELP_CARGO_SPACE", (0, 0))
+			szLastHeader = None
+			for aEntry in aFinal:
+				if aEntry[1] is None:
+					if self.isUnitHeader(aEntry[0]):
+						szLastHeader = aEntry[0]
+					elif szLastHeader is not None and len(szCargo) > 3 and self.normTipText(aEntry[0]).find(szCargo) == 0:
+						aEntry[1] = self.getCargoRulesText(szLastHeader)
+			# the lines of the commands of a stack of units in one line
+			aCommands = []
+			iCmdAt = -1
+			aRest = []
+			for aEntry in aFinal:
+				if aEntry[1] is None and aEntry[0].find(u"(") >= 0 and self.isCommandText(aEntry[0]):
+					if iCmdAt < 0:
+						iCmdAt = len(aRest)
+					aCommands.append(aEntry[0])
+				else:
+					aRest.append(aEntry)
+			if len(aCommands) > 0:
+				aRest.insert(iCmdAt, [localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()), u"\n".join(aCommands)])
+				aFinal = aRest
+			aFinal = self.foldUnitGroups(aFinal)
+			aNew = []
+			for aEntry in aFinal:
+				if aEntry[1] is not None:
+					self.dTipDetails[len(aNew)] = aEntry[1]
+				aNew.append(aEntry[0])
+			return aNew
+		except:
+			self.dTipDetails = {}
+		return aszParas
+
+	# a line of the units that the game lists in groups (a plot with more than 10 units: "Free Colonist (3) 2, Master Potter (1) 2, ...")
+	def isUnitGroupLine( self, szText ):
+		if szText.find(u"<color=") != 0 or self.isUnitHeader(szText):
+			return False
+		return re.match(u"^[^(),]+ \\([0-9]+\\)", re.sub(u"<[^>]*>", u"", szText)) is not None
+
+	# the lines of the groups of units become one line "more...units"; its child window lists the units one by one (a right click selects one)
+	def foldUnitGroups( self, aFinal ):
+		try:
+			aRun = []
+			for k in range(len(aFinal)):
+				if aFinal[k][1] is None and self.isUnitGroupLine(aFinal[k][0]):
+					aRun.append(k)
+			if len(aRun) == 0:
+				return aFinal
+			szPlain = u"\n".join([re.sub(u"<[^>]*>", u"", aFinal[k][0]) for k in aRun])
+			iTotal = 0
+			for szCount in re.findall(u"\\(([0-9]+)\\)", szPlain):
+				iTotal += int(szCount)
+			if iTotal < 2:
+				return aFinal
+			pPlot = CyInterface().getMouseOverPlot()
+			if pPlot is None or pPlot.isNone():
+				pPlot = self.getStackPlot()
+			aUnits = None
+			if pPlot is not None and not pPlot.isNone():
+				aUnits = self.getGroupedUnits(pPlot, szPlain)
+			if aUnits is None or len(aUnits) < 2:
+				return aFinal
+			self.iUnitGroupCounter += 1
+			if len(self.dUnitGroups) > 100:
+				self.dUnitGroups = {}
+			szMarker = u"@WTPUNITS%d" % self.iUnitGroupCounter
+			self.dUnitGroups[szMarker] = aUnits
+			aKeep = []
+			for k in range(len(aFinal)):
+				if k == aRun[0]:
+					aKeep.append([localText.getText("TXT_KEY_WTP_TIP_MORE_UNITS", ()), szMarker])
+				elif k not in aRun:
+					aKeep.append(aFinal[k])
+			return aKeep
+		except:
+			pass
+		return aFinal
+
+	def getUnitTypeName( self, pUnit ):
+		return re.sub(u"<[^>]*>", u"", gc.getUnitInfo(pUnit.getUnitType()).getDescription())
+
+	# the units of a plot in the order of the tooltip of the game: the own ones first, a transport followed by its cargo
+	def getPlotUnitOrder( self, pPlot ):
+		aAll = []
+		eActive = gc.getGame().getActivePlayer()
+		eTeam = gc.getGame().getActiveTeam()
+		for iPass in range(2):
+			for k in range(pPlot.getNumUnits()):
+				pUnit = pPlot.getUnit(k)
+				if pUnit.isInvisible(eTeam, True) or pUnit.isCargo():
+					continue
+				if (pUnit.getOwner() == eActive) == (iPass == 0):
+					aAll.append(pUnit)
+					if pUnit.hasCargo():
+						for j in range(pPlot.getNumUnits()):
+							pCargo = pPlot.getUnit(j)
+							if pCargo.isInvisible(eTeam, True) or not pCargo.isCargo():
+								continue
+							pTransport = pCargo.getTransportUnit()
+							if pTransport is not None and not pTransport.isNone() and pTransport.getID() == pUnit.getID() and pTransport.getOwner() == pUnit.getOwner():
+								aAll.append(pCargo)
+		return aAll
+
+	# the units of the groups of the text (the game lists the first 10 units of a plot one by one, the unit of the tooltip is no part of the
+	# groups): [(owner, id)], None if the groups of the text and the units of the plot do not fit together
+	def getGroupedUnits( self, pPlot, szPlain ):
+		try:
+			aAll = self.getPlotUnitOrder(pPlot)
+			if len(aAll) <= 10:
+				return None
+			aGroup = aAll[10:]
+			dWant = {}
+			for tEntry in re.findall(u"(?:^|, )([^,()\n]+?) \\(([0-9]+)\\)", szPlain, re.M):
+				szName = tEntry[0].strip()
+				dWant[szName] = dWant.get(szName, 0) + int(tEntry[1])
+			dHave = {}
+			for pUnit in aGroup:
+				szName = self.getUnitTypeName(pUnit)
+				dHave[szName] = dHave.get(szName, 0) + 1
+			for szName in dHave.keys():
+				while dHave[szName] > dWant.get(szName, 0):
+					# (the unit of the tooltip itself: the selected one, else the last of its type)
+					iRemove = -1
+					for k in range(len(aGroup)):
+						if self.getUnitTypeName(aGroup[k]) == szName:
+							iRemove = k
+							if aGroup[k].IsSelected():
+								break
+					if iRemove < 0:
+						break
+					del aGroup[iRemove]
+					dHave[szName] -= 1
+			iWant = 0
+			for szName in dWant.keys():
+				iWant += dWant[szName]
+				if dHave.get(szName, 0) != dWant[szName]:
+					return None
+			if len(aGroup) != iWant:
+				return None
+			return [(pUnit.getOwner(), pUnit.getID()) for pUnit in aGroup]
+		except:
+			pass
+		return None
+
+	# the line of a unit in the list of the child window: like the first line of a unit in a tooltip
+	def getUnitListLine( self, tKey ):
+		try:
+			pUnit = gc.getPlayer(tKey[0]).getUnit(tKey[1])
+			if pUnit is None or pUnit.isNone():
+				return None
+			szLine = u"<color=255,255,0,255>" + pUnit.getNameAndProfession() + u"</color>"
+			if pUnit.canFight():
+				szLine += u", %d%c" % (pUnit.baseCombatStr(), CyGame().getSymbolID(FontSymbols.STRENGTH_CHAR))
+			if pUnit.maxMoves() > 0:
+				szLine += u", %d%c" % (pUnit.baseMoves(), CyGame().getSymbolID(FontSymbols.MOVES_CHAR))
+			eActive = gc.getGame().getActivePlayer()
+			if pUnit.getOwner() == eActive:
+				if pUnit.getExperience() > 0:
+					szLine += localText.getText("TXT_KEY_UNIT_HELP_LEVEL", (pUnit.getExperience(), pUnit.experienceNeeded()))
+			else:
+				try:
+					if not gc.getUnitInfo(pUnit.getUnitType()).isHiddenNationality():
+						pOwner = gc.getPlayer(pUnit.getOwner())
+						szLine += u", <color=%d,%d,%d,%d>%s</color>" % (pOwner.getPlayerTextColorR(), pOwner.getPlayerTextColorG(), pOwner.getPlayerTextColorB(), pOwner.getPlayerTextColorA(), pOwner.getName())
+				except:
+					pass
+			return szLine
+		except:
+			pass
+		return None
+
+	# the text of a child window with units: as many units as fit into iBudget lines (the height of the parent window), the rest is behind
+	# a last line "more...units"; (text, [the unit of every line (None: no unit), the units of that last line, the number of that line])
+	def getUnitListText( self, aUnits, iCharsPerLine, iBudget ):
+		aLines = []
+		aKeys = []
+		iUsed = 0
+		iDone = 0
+		for k in range(len(aUnits)):
+			szLine = self.getUnitListLine(aUnits[k])
+			if szLine is None:
+				iDone = k + 1
+				continue
+			iNeed = len(self.wrapMessage(szLine, iCharsPerLine))
+			iReserve = 0
+			if k < len(aUnits) - 1:
+				iReserve = 1
+			if len(aLines) > 0 and iUsed + iNeed + iReserve > iBudget:
+				break
+			aLines.append(szLine)
+			aKeys.append(aUnits[k])
+			iUsed += iNeed
+			iDone = k + 1
+		aMore = aUnits[iDone:]
+		if len(aMore) == 1:
+			# (the last unit takes no more room than the line "more...units")
+			szLine = self.getUnitListLine(aMore[0])
+			if szLine is None:
+				aMore = []
+			elif iUsed + len(self.wrapMessage(szLine, iCharsPerLine)) <= iBudget:
+				aLines.append(szLine)
+				aKeys.append(aMore[0])
+				aMore = []
+		iMorePara = -1
+		if len(aMore) > 0:
+			iMorePara = len(aLines)
+			aLines.append(localText.getText("TXT_KEY_WTP_TIP_MORE_UNITS", ()))
+			aKeys.append(None)
+		return (u"\n".join(aLines), [aKeys, aMore, iMorePara])
+
+	# (state, goods missing, goods needing imports, goods with an import rule): state 2 = a production of the city lacks raw materials (the red
+	# numbers of the city screen), 1 = a raw material is consumed more than produced and has no import rule, 3 = the same, all with an import rule, 0 = ok
+	def getCityProductionState( self, pCity ):
+		try:
+			aMissing = []
+			aNeed = []
+			aSet = []
+			for iYield in range(YieldTypes.NUM_YIELD_TYPES):
+				if pCity.calculateActualYieldProduced(iYield) < pCity.getBaseRawYieldProduced(iYield):
+					aMissing.append(iYield)
+				if iYield != YieldTypes.YIELD_FOOD and pCity.getRawYieldConsumed(iYield) > pCity.getBaseRawYieldProduced(iYield):
+					# the goods made of this raw material
+					bSet = pCity.isImport(iYield)
+					for iProfession in range(gc.getNumProfessionInfos()):
+						if gc.getProfessionInfo(iProfession).getYieldsConsumed(0) == iYield:
+							iOut = gc.getProfessionInfo(iProfession).getYieldsProduced(0)
+							if iOut < 0:
+								continue
+							if bSet:
+								if iOut not in aSet:
+									aSet.append(iOut)
+							elif iOut not in aNeed:
+								aNeed.append(iOut)
+			for iOut in aNeed:
+				if iOut in aSet:
+					aSet.remove(iOut)
+			if len(aMissing) > 0:
+				return (2, aMissing, aNeed, aSet)
+			if len(aNeed) > 0:
+				return (1, aMissing, aNeed, aSet)
+			if len(aSet) > 0:
+				return (3, aMissing, aNeed, aSet)
+		except:
+			pass
+		return (0, [], [], [])
+
+	# what a ship can carry (the type is the name in the brackets of the header line), None if the ship is not found
+	def getCargoRulesText( self, szHeader ):
+		try:
+			szFirst = re.sub(u"<[^>]*>", u"", szHeader).split(u",")[0].strip()
+			tName = re.search(u"\\(([^()]*)\\)\\s*$", szFirst)
+			if tName is None:
+				return None
+			szType = tName.group(1).strip()
+			for eType in range(gc.getNumUnitInfos()):
+				pInfo = gc.getUnitInfo(eType)
+				if pInfo.getCargoSpace() > 0 and (pInfo.getDomainType() == DomainTypes.DOMAIN_SEA or pInfo.getDomainType() == DomainTypes.DOMAIN_LAND) and pInfo.getDescription() == szType:
+					if pInfo.getSpecialCargo() >= 0:
+						szRules = localText.getText("TXT_KEY_WTP_TIP_CARGO_GOODS", ())
+					elif hasattr(pInfo, "isSlaveShip") and pInfo.isSlaveShip():
+						szRules = localText.getText("TXT_KEY_WTP_TIP_CARGO_SLAVE", ())
+					elif hasattr(pInfo, "isTreasureShip") and pInfo.isTreasureShip():
+						szRules = localText.getText("TXT_KEY_WTP_TIP_CARGO_TREASURE", ())
+					elif hasattr(pInfo, "isTroopShip") and pInfo.isTroopShip():
+						szRules = localText.getText("TXT_KEY_WTP_TIP_CARGO_TROOP", ())
+					else:
+						szRules = localText.getText("TXT_KEY_WTP_TIP_CARGO_ALL", ())
+					# the ports over the sea that the ship can sail to (first line)
+					if pInfo.getDomainType() == DomainTypes.DOMAIN_SEA and hasattr(pInfo, "canSailToEurope") and hasattr(pInfo, "canSailToAfrica"):
+						aPorts = []
+						if pInfo.canSailToEurope():
+							aPorts.append(localText.getText("TXT_KEY_WTP_TIP_PORT_EUROPE", ()))
+						if pInfo.canSailToAfrica():
+							aPorts.append(localText.getText("TXT_KEY_WTP_TIP_PORT_AFRICA", ()))
+						bSlave = hasattr(pInfo, "isSlaveShip") and pInfo.isSlaveShip()
+						if pInfo.isHiddenNationality() or bSlave:
+							aPorts.append(localText.getText("TXT_KEY_WTP_TIP_PORT_ROYAL", ()))
+						if len(aPorts) > 0:
+							szRules = localText.getText("TXT_KEY_WTP_TIP_PORTS", (u", ".join(aPorts),)) + u"\n" + szRules
+						else:
+							szRules = localText.getText("TXT_KEY_WTP_TIP_NO_OCEAN", ()) + u"\n" + szRules
+					return szRules
+		except:
+			pass
+		return None
+
+	# the tooltip of a city (banner): a line with the used storage above "Stored", the buildings in one line ("Buildings", the list when hovering)
+	# returns the new paragraphs (self.dTipDetails set) or None if the text is not the tooltip of a city
+	def foldCityDetails( self, aszParas ):
+		try:
+			n = len(aszParas)
+			if n < 4:
+				return None
+			if self.getPlainCommandText(aszParas[n - 2]) != self.getPlainCommandText(localText.getText("TXT_KEY_CITY_BAR_SELECT_CTRL", ())):
+				return None
+			if self.getPlainCommandText(aszParas[n - 1]) != self.getPlainCommandText(localText.getText("TXT_KEY_CITY_BAR_SELECT_ALT", ())):
+				return None
+			szName = self.getPlainCommandText(aszParas[0])
+			pCity = None
+			for ePlayer in range(gc.getMAX_PLAYERS()):
+				pPlayer = gc.getPlayer(ePlayer)
+				if not pPlayer.isAlive():
+					continue
+				(loopCity, iter) = pPlayer.firstCity(False)
+				while loopCity:
+					if loopCity.getName() == szName:
+						pCity = loopCity
+						break
+					(loopCity, iter) = pPlayer.nextCity(iter, False)
+				if pCity is not None:
+					break
+			self.dTipDetails = {}
+			if pCity is None:
+				return None
+			szStored = self.getTipPrefix("TXT_KEY_CITY_BAR_STORED", (u"",))
+			szProducing = self.getTipPrefix("TXT_KEY_CITY_BAR_PRODUCING", (u"",))
+			szList = None
+			aBuildings = []
+			for eBuilding in range(gc.getNumBuildingInfos()):
+				if pCity.isHasRealBuilding(eBuilding):
+					aBuildings.append(gc.getBuildingInfo(eBuilding).getDescription())
+			if len(aBuildings) > 0:
+				szList = self.normTipText(u", ".join(aBuildings))
+			aOut = []
+			bBuildings = False
+			for iParaAt in range(len(aszParas)):
+				szPara = aszParas[iParaAt]
+				szNorm = self.normTipText(szPara)
+				if iParaAt >= n - 3:
+					# the three lines of the commands
+					if iParaAt == n - 3:
+						aOut.append([localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()), u"\n".join(aszParas[n - 3:])])
+					continue
+				if len(szStored) > 3 and szNorm.find(szStored) == 0:
+					iTotal = pCity.getTotalYieldStored()
+					iMax = pCity.getMaxYieldCapacity()
+					if iTotal > iMax:
+						aOut.append([localText.getText("TXT_KEY_WTP_TIP_STORAGE_FULL", (iTotal, iMax)), None])
+					else:
+						szStorage = localText.getText("TXT_KEY_WTP_TIP_STORAGE", (iTotal, iMax))
+						# orange: only about 10 % free, or the maximum is reached within 5 turns with the current net yields
+						iNet = 0
+						for iYield in range(YieldTypes.NUM_YIELD_TYPES):
+							if not gc.getYieldInfo(iYield).isIgnoredForStorageCapacity() and gc.getYieldInfo(iYield).isCargo():
+								iNet += pCity.calculateNetYield(iYield)
+						if iTotal * 10 >= iMax * 9 or iTotal + 5 * iNet >= iMax:
+							szStorage = u"<color=255,140,0,255>" + szStorage + u"</color>"
+						aOut.append([szStorage, None])
+					# the line of the stock in one line; red: no food or no lumber in the city
+					szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOLD", ())
+					bNoFood = pCity.getYieldStored(YieldTypes.YIELD_FOOD) <= 0
+					bNoWood = pCity.getYieldStored(YieldTypes.YIELD_LUMBER) <= 0
+					if bNoFood or bNoWood:
+						if bNoFood and bNoWood:
+							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_BOTH", ())
+						elif bNoWood:
+							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_WOOD", ())
+						else:
+							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOOD", ())
+						szLabel = u"<color=255,0,0,255>" + szLabel + u"</color>"
+					aOut.append([szLabel, szPara])
+					continue
+				if len(szProducing) > 3 and szNorm.find(szProducing) == 0:
+					# the line of the production in one line; red: the production lacks goods to work at its capacity,
+					# orange: the stock suffices, but the city produces less of a raw material than its production consumes (imports needed)
+					szLabel = localText.getText("TXT_KEY_WTP_TIP_PRODUCED_FOLD", ())
+					(iState, aMissing, aNeed, aSet) = self.getCityProductionState(pCity)
+					if iState == 2:
+						szLabel = u"<color=255,0,0,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_MISSING", ()) + u"</color>"
+					elif iState == 1:
+						szLabel = u"<color=255,140,0,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", ()) + u"</color>"
+					elif iState == 3:
+						szLabel = u"<color=255,200,110,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", ()) + u"</color>"
+					if iState > 0:
+						# the affected goods in the list: red (missing) before orange (imports); the same goods: red
+						aSeg = szPara.split(u", ")
+						for k in range(len(aSeg)):
+							szColor = None
+							for iYield in aSet:
+								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
+									szColor = u"255,200,110,255"
+							for iYield in aNeed:
+								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
+									szColor = u"255,140,0,255"
+							for iYield in aMissing:
+								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
+									szColor = u"255,0,0,255"
+							if szColor is not None:
+								aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
+						szPara = u", ".join(aSeg)
+					aOut.append([szLabel, szPara])
+					continue
+				if not bBuildings and szList is not None and szNorm == szList:
+					aOut.append([localText.getText("TXT_KEY_WTP_TIP_BUILDINGS", ()), szPara])
+					bBuildings = True
+					continue
+				aOut.append([szPara, None])
+			aNew = []
+			for aEntry in aOut:
+				if aEntry[1] is not None:
+					self.dTipDetails[len(aNew)] = aEntry[1]
+				aNew.append(aEntry[0])
+			return aNew
+		except:
+			self.dTipDetails = {}
+		return None
+
+	# where a window of this size goes: mode 0 beside the cursor (right of it, left if there is no room; beside the own windows when the cursor is
+	# on one) with its top at the lower end of the cursor; mode 1 at the place of the game tooltip (left, above the HUD, growing upwards)
+	def getTipPlacement( self, iWidth, iHeight, iCursorX, iCursorY, xRes, yRes ):
+		if self.iTipMode == 1:
+			return (HELTTEXT_AREA_X_MARGIN, max(4, yRes - SADDLE_HEIGHT - iHeight))
+		iGap = max(48, int(yRes * 0.04))
+		tRect = self.getTipAvoidRect(iCursorX, iCursorY)
+		if tRect is not None:
+			iX = tRect[0] + tRect[2] + 12
+			if iX + iWidth > xRes - 4:
+				iX = tRect[0] - 12 - iWidth
+		else:
+			iX = iCursorX + iGap
+			if iX + iWidth > xRes - 4:
+				iX = iCursorX - int(iGap * 0.6) - iWidth
+		iX = max(4, iX)
+		iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
+		if len(self.aFrozen) > 0 and tRect is None:
+			# it does not cover a frozen window: the other side of the cursor, then below and above the cursor
+			iRight = iCursorX + iGap
+			iLeft = iCursorX - int(iGap * 0.6) - iWidth
+			iBelow = iCursorY + self.getCursorBottom(yRes)
+			(iX, iY) = self.pickFreeSpot([(iX, iY), (iRight, iY), (iLeft, iY), (iX, iBelow + 2 * iGap), (iX, iCursorY - iHeight - iGap)], iWidth, iHeight, xRes, yRes)
+		return (iX, iY)
+
+	# the window follows the cursor: the game asks for the same text again only now and then, and a window that stays where it was made
+	# would be too far away from the cursor
+	def followCursorTip( self, screen ):
+		iCursorX = gc.getGame().getCursorClientX()
+		iCursorY = gc.getGame().getCursorClientY()
+		if abs(iCursorX - self.tTipPlacedAt[0]) < 6 and abs(iCursorY - self.tTipPlacedAt[1]) < 6:
+			return
+		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = self.tTipLayout
+		(iNX, iNY) = self.getTipPlacement(iWidth, iHeight, iCursorX, iCursorY, screen.getXResolution(), screen.getYResolution())
+		self.tTipPlacedAt = (iCursorX, iCursorY)
+		if iNX == iX and iNY == iY:
+			return
+		for szName in self.getCursorTipNames():
+			screen.hide(szName)
+			screen.deleteWidget(szName)
+		self.tTipLayout = (iNX, iNY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
+		self.drawCursorTip(screen, False)
+
+	# width of a window for the lines (icons of the game font are wider than letters: getMessageWidth, as the lines were wrapped)
+	# pixel width of a text of the tooltip font by character classes (fitted to measured lines of the game: a line of 50 characters is between 250
+	# and 350 pixels wide, so a character count is not good enough). The values are for a line distance of 22 pixels, the others are scaled.
+	# Width of the letters in thousandths of the font size (a serif font like Times: measured on the screenshots of the tooltips, the
+	# factor to pixels is 15.9 for a line of 22 pixels, the icons of the game font are 19.7 pixels wide)
+	TIP_CHAR_WIDTHS = {}
+	for szWtpChars, aiWtpWidths in (
+			(u"abcdefghijklmnopqrstuvwxyz", [444,500,444,500,444,333,500,500,278,278,500,278,778,500,500,500,500,333,389,278,500,500,722,500,500,444]),
+			(u"ABCDEFGHIJKLMNOPQRSTUVWXYZ", [722,667,667,722,611,556,722,722,333,389,722,611,889,722,722,556,722,667,556,611,722,722,944,722,722,611]),
+			(u"0123456789", [500,500,500,500,500,500,500,500,500,500]),
+			(u" ,.:;-()%/+'!|\"", [250,250,250,278,278,333,333,333,833,278,564,180,333,200,408])):
+		for iWtpChar in range(len(szWtpChars)):
+			TIP_CHAR_WIDTHS[szWtpChars[iWtpChar]] = aiWtpWidths[iWtpChar]
+
+	def getTextPixels( self, szPlain, iLine ):
+		fSum = 0.0
+		szPlain = szPlain.replace(u"&lt;", u"<").replace(u"&gt;", u">").replace(u"&amp;", u"&")
+		for c in szPlain:
+			if c == u"\u2022":
+				fSum += 8.0 # the bullet of a list
+			elif ord(c) >= 0x2000:
+				fSum += 19.7 # icon of the game font
+			elif self.TIP_CHAR_WIDTHS.has_key(c):
+				fSum += self.TIP_CHAR_WIDTHS[c] * 0.0159
+			elif c.isupper():
+				fSum += 10.3
+			else:
+				fSum += 7.1 # other letters (accents)
+		return fSum * iLine / 22.0
+
+	def getTipTextWidth( self, aszLines, iChar, iMaxWidth, iPad, aiIndent = None ):
+		iLine = iChar / 0.32
+		fPixel = 0
+		for i in range(len(aszLines)):
+			fThis = self.getTextPixels(re.sub(u"<[^>]*>", u"", aszLines[i]), iLine) + len(re.findall(u"<img=", aszLines[i].lower())) * 18.0 * iLine / 22.0
+			if aiIndent is not None and i < len(aiIndent):
+				fThis += aiIndent[i]
+			fPixel = max(fPixel, fThis)
+		# a little reserve (4.5 % + 4 pixels) and the border; the lines were wrapped by a character count, so wide letters can make a line wider than the maximum
+		return max(120, min(int(iMaxWidth * 1.15), int(fPixel * 1.045) + 2 * iPad + 4))
+
+	def drawCursorTip( self, screen, bClickable ):
+		self.iCursorTipLines = len(self.tTipLayout[4])
+		self.drawTipWindow(screen, "HudTip", self.tTipLayout, bClickable, 0, self.aiTipIndent)
+
+	def getTipWindowNames( self, szPrefix, iLines ):
+		aszNames = [szPrefix + "Back1", szPrefix + "Back2"]
+		for i in range(iLines):
+			aszNames.append(szPrefix + "Line%d" % i)
+		return aszNames
+
+	def deleteTipWindow( self, screen, szPrefix, iLines ):
+		for szName in self.getTipWindowNames(szPrefix, iLines):
+			screen.hide(szName)
+			screen.deleteWidget(szName)
+
+	# a tooltip window; the lines of a frozen one can be clicked (right click: Colopedia), their data is the level of the window and the paragraph
+	def drawTipWindow( self, screen, szPrefix, tLayout, bClickable, iLevel, aiIndent ):
+		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
+		screen.addPanel(szPrefix + "Back1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+		screen.addPanel(szPrefix + "Back2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+		for i in range(len(aszLines)):
+			eWidget = WidgetTypes.WIDGET_GENERAL
+			iData1 = -1
+			iData2 = -1
+			if bClickable and aiPara[i] >= 0 and aszLines[i].lower().find(u"<img=") < 0:
+				iData1 = self.BUTTON_TIP_LINE
+				iData2 = iLevel * 1000 + aiPara[i]
+			iIndent = 0
+			if i < len(aiIndent):
+				iIndent = aiIndent[i]
+			screen.setText(szPrefix + "Line%d" % i, "Background", self.setFontSize(aszLines[i], -1), CvUtil.FONT_LEFT_JUSTIFY, iX + iPad + iIndent, iY + iPad + i * iLine, -0.3, FontTypes.SMALL_FONT, eWidget, iData1, iData2)
+		for szName in self.getTipWindowNames(szPrefix, len(aszLines)):
+			screen.show(szName)
+			screen.moveToFront(szName)
+
+	# the hint line at the end of a frozen window (wrapped to the width of the window: the window does not get wider because of it)
+	def addFrozenHint( self, screen, tLayout, aiIndent ):
+		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
+		szHint = localText.getText("TXT_KEY_WTP_TIP_FROZEN_HINT", ())
+		iChar = iLine * 0.32
+		aszHint = self.wrapMessage(szHint, max(20, int((iWidth - 2 * iPad) / iChar)))
+		aszLines = list(aszLines) + aszHint
+		aiPara = list(aiPara) + [-1] * len(aszHint)
+		aiIndent = list(aiIndent) + [0] * len(aszHint)
+		iHeight += iLine * len(aszHint)
+		iWidth = max(iWidth, self.getTipTextWidth(aszHint, iChar, int(iWidth * 1.3), iPad))
+		iY = max(4, min(screen.getYResolution() - iHeight - 4, iY))
+		iX = max(4, min(screen.getXResolution() - iWidth - 4, iX))
+		return ((iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine), aiIndent)
+
+	# NESTED TOOLTIPS. The key X (short press) freezes the tooltip that is shown: it stays where it is, the cursor can be moved onto it and a
+	# right click on a line opens the Colopedia page of the first thing named in it (Ctrl: the second). The window beside it (the tooltip of
+	# the line under the cursor) can be frozen with X as well, and so on. Esc unfreezes the last frozen window, X held (0.6 s) all of them.
+	def keyXDown( self ):
+		# False: the key is not ours (no tooltip), the game gets it
+		try:
+			if self.isPediaActive():
+				return False
+			if not (self.bTipFrozen or self.bCursorTipShown or self.szPendingHelp is not None):
+				return False
+			if not self.bXHeld:
+				self.bXHeld = True
+				self.bXHoldDone = False
+				self.fXStart = self.getTipNow()
+			return True
+		except:
+			return False
+
+	def keyXUp( self ):
+		if not self.bXHeld:
+			return False
+		self.bXHeld = False
+		if self.bXHoldDone:
+			return True
+		try:
+			self.pressX()
+		except:
+			pass
+		return True
+
+	# short press of X: the window beside a frozen one is frozen; otherwise the tooltip that is shown at the cursor (several can be frozen, to
+	# compare them)
+	def pressX( self ):
+		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+		if self.bSecondTipShown:
+			self.freezePreview(screen)
+		elif self.szPendingHelp is not None:
+			# the tooltip still waits for its delay: X shows it at once
+			szHelp = self.szPendingHelp
+			bWidget = self.bPendingWidget
+			self.szPendingHelp = None
+			self.showCursorTooltip(screen, szHelp, bWidget, True)
+		elif self.bCursorTipShown:
+			self.freezeCursorTooltip()
+
+	# a frozen window: its widgets get names of their own, its lines can be clicked
+	def addFrozenWindow( self, screen, tLayout, aszParas, aiIndent, dDetails, tAnchor = None, iParent = -1 ):
+		iLevel = len(self.aFrozen)
+		self.iFzCounter += 1
+		szPrefix = "HudFz%d" % self.iFzCounter
+		self.drawTipWindow(screen, szPrefix, tLayout, True, iLevel, aiIndent)
+		tRel = None
+		if iParent >= 0:
+			# a child window keeps its place to its parent window
+			tRel = (tLayout[0] - self.aFrozen[iParent][1][0], tLayout[1] - self.aFrozen[iParent][1][1])
+		self.aFrozen.append([szPrefix, tLayout, aszParas, aiIndent, dDetails, tAnchor, iParent, tRel])
+		self.bTipFrozen = True
+
+	# after the game window was activated again (alt-tab) the widgets of the frozen windows are gone: they are drawn again a few frames later
+	def windowActivated( self ):
+		if len(self.aFrozen) > 0:
+			self.iRedrawFrozen = 6
+
+	def redrawFrozenTips( self, screen ):
+		try:
+			for i in range(len(self.aFrozen)):
+				szPrefix = self.aFrozen[i][0]
+				tLayout = self.aFrozen[i][1]
+				self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
+				self.drawTipWindow(screen, szPrefix, tLayout, True, i, self.aFrozen[i][3])
+		except:
+			pass
+
+	# the place of a map plot on the screen
+	def getPlotScreen( self, iPlotX, iPlotY ):
+		pt = CyEngine().worldPointToScreenPoint(CyMap().plot(iPlotX, iPlotY).getPoint())
+		return (int(pt.x), int(pt.y))
+
+	# A window frozen at the map stays at that place of the map (it moves with the map when that is scrolled or zoomed): the anchor is the
+	# plot under the cursor and the distance of the window to the place of that plot on the screen. None: the window stays on the screen.
+	def makeAnchor( self, tLayout, tPlot = None ):
+		try:
+			if tPlot is None:
+				if self.bHudHover:
+					return None
+				pPlot = CyInterface().getMouseOverPlot()
+				if pPlot is None or pPlot.isNone():
+					return None
+				tPlot = (pPlot.getX(), pPlot.getY())
+			(iSX, iSY) = self.getPlotScreen(tPlot[0], tPlot[1])
+			return (tPlot[0], tPlot[1], tLayout[0] - iSX, tLayout[1] - iSY)
+		except:
+			return None
+
+	# a frozen window moves to a place (its widgets are drawn again)
+	def moveFrozenWindow( self, screen, i, iNX, iNY ):
+		tLayout = self.aFrozen[i][1]
+		# a window is pushed along by the edges of the screen (all four), the place of the map it belongs to is kept (see updateFrozenAnchors)
+		iNX = max(4, min(screen.getXResolution() - tLayout[2] - 4, iNX))
+		iNY = max(4, min(screen.getYResolution() - tLayout[3] - 4, iNY))
+		if iNX == tLayout[0] and iNY == tLayout[1]:
+			return
+		szPrefix = self.aFrozen[i][0]
+		self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
+		tNew = (iNX, iNY, tLayout[2], tLayout[3], tLayout[4], tLayout[5], tLayout[6], tLayout[7])
+		self.aFrozen[i][1] = tNew
+		self.drawTipWindow(screen, szPrefix, tNew, True, i, self.aFrozen[i][3])
+
+	# every frame: the frozen windows of the map follow the map, the child windows follow their parent window
+	def updateFrozenAnchors( self, screen ):
+		for i in range(len(self.aFrozen)):
+			iParent = self.aFrozen[i][6]
+			tAnchor = self.aFrozen[i][5]
+			try:
+				if iParent >= 0:
+					self.moveFrozenWindow(screen, i, self.aFrozen[iParent][1][0] + self.aFrozen[i][7][0], self.aFrozen[iParent][1][1] + self.aFrozen[i][7][1])
+				elif tAnchor is not None:
+					(iSX, iSY) = self.getPlotScreen(tAnchor[0], tAnchor[1])
+					self.moveFrozenWindow(screen, i, iSX + tAnchor[2], iSY + tAnchor[3])
+			except:
+				pass
+
+	# Shift + X: the frozen parent windows are brought to the cursor and stacked diagonally there, each one below the one before and beside it
+	# (to the left, to the right if there is no room), so that the child windows beside them do not get in the way of each other. The oldest
+	# window is at the cursor.
+	def stackFrozenTips( self ):
+		try:
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			aiParents = []
+			for i in range(len(self.aFrozen)):
+				if self.aFrozen[i][6] < 0:
+					aiParents.append(i)
+			if len(aiParents) < 1:
+				return len(self.aFrozen) > 0
+			# the first window goes to the cursor, the others are stacked from there
+			self.moveFrozenWindow(screen, aiParents[0], gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY() + self.getCursorBottom(screen.getYResolution()))
+			tFirst = self.aFrozen[aiParents[0]][1]
+			iNeeded = 0
+			for i in aiParents[1:]:
+				iNeeded += self.aFrozen[i][1][2] + 8
+			bLeft = (tFirst[0] - iNeeded >= 4)
+			iPrevX = tFirst[0]
+			iPrevY = tFirst[1]
+			iPrevW = tFirst[2]
+			iPrevH = tFirst[3]
+			for i in aiParents[1:]:
+				tLayout = self.aFrozen[i][1]
+				iY = iPrevY + iPrevH + 8
+				if bLeft:
+					iX = iPrevX - tLayout[2] - 8
+				else:
+					iX = iPrevX + iPrevW + 8
+				self.moveFrozenWindow(screen, i, iX, iY)
+				tNow = self.aFrozen[i][1]
+				iPrevX = tNow[0]
+				iPrevY = tNow[1]
+				iPrevW = tNow[2]
+				iPrevH = tNow[3]
+			for i in aiParents:
+				tAnchor = self.aFrozen[i][5]
+				if tAnchor is not None:
+					# (the window stays at its new place of the map)
+					self.aFrozen[i][5] = self.makeAnchor(self.aFrozen[i][1], (tAnchor[0], tAnchor[1]))
+			self.updateFrozenAnchors(screen)
+			self.placeChildTips(screen)
+			return True
+		except:
+			pass
+		return False
+
+	# After the parent windows were moved every child window looks again for its own place: beside its parent (right, then left) at the height
+	# that it had been given, then the other places (see showSecondTip); a place that was taken away from it earlier may be free again.
+	def placeChildTips( self, screen ):
+		try:
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			for i in range(len(self.aFrozen)):
+				iParent = self.aFrozen[i][6]
+				if iParent < 0:
+					continue
+				(iPX, iPY, iPW, iPH) = self.aFrozen[iParent][1][:4]
+				(iX, iY, iW, iH) = self.aFrozen[i][1][:4]
+				iDY = self.dFrozenPrefDY.get(self.aFrozen[i][0], iY - iPY)
+				iRight = iPX + iPW + 12
+				iLeft = iPX - 12 - iW
+				(iNX, iNY) = self.pickFreeSpot([(iRight, iPY + iDY), (iLeft, iPY + iDY), (iRight, iPY), (iLeft, iPY), (iRight, iPY + iPH - iH), (iLeft, iPY + iPH - iH), (iPX, iPY + iPH + 12), (iPX, iPY - 12 - iH)], iW, iH, xRes, yRes, i)
+				self.moveFrozenWindow(screen, i, iNX, iNY)
+				tNow = self.aFrozen[i][1]
+				self.aFrozen[i][7] = (tNow[0] - iPX, tNow[1] - iPY)
+		except:
+			pass
+
+	def freezeCursorTooltip( self ):
+		try:
+			if self.isPediaActive():
+				return False
+			if not self.bHoverTip or not self.bCursorTipShown or self.tTipLayout is None:
+				return False
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			for szName in self.getCursorTipNames():
+				screen.hide(szName)
+				screen.deleteWidget(szName)
+			self.szSuppressHelp = self.szCursorTipText
+			(tFLayout, aiFIndent) = self.removeFreezeHint(self.tTipLayout, self.aiTipIndent, self.iTipHintLines)
+			(tLayout, aiIndent) = self.addFrozenHint(screen, tFLayout, aiFIndent)
+			self.addFrozenWindow(screen, tLayout, self.aszTipParas, aiIndent, dict(self.dTipDetails), self.makeAnchor(tLayout))
+			# the tooltip window of the cursor is free again for the next tooltip
+			self.bCursorTipShown = False
+			self.szCursorTipText = u""
+			self.szPendingHelp = None
+			return True
+		except:
+			pass
+		return False
+
+	# the layout without the last lines (the hint that the tooltip can be frozen)
+	def removeFreezeHint( self, tLayout, aiIndent, iLines ):
+		if iLines <= 0:
+			return (tLayout, list(aiIndent))
+		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
+		return ((iX, iY, iWidth, iHeight - iLines * iLine, list(aszLines[:-iLines]), list(aiPara[:-iLines]), iPad, iLine), list(aiIndent[:-iLines]))
+
+	def freezePreview( self, screen ):
+		try:
+			self.deleteTipWindow(screen, self.szPreviewPrefix, self.iSecondTipLines)
+			(tFLayout, aiFIndent) = self.removeFreezeHint(self.tPreviewLayout, [0] * len(self.tPreviewLayout[4]), self.iPreviewHintLines)
+			(tLayout, aiIndent) = self.addFrozenHint(screen, tFLayout, aiFIndent)
+			iParent = self.iPreviewParent
+			if iParent >= len(self.aFrozen):
+				iParent = -1
+			self.addFrozenWindow(screen, tLayout, self.aszPreviewParas, aiIndent, {}, None, iParent)
+			if iParent >= 0:
+				self.dFrozenPrefDY[self.aFrozen[-1][0]] = self.iPreviewPrefDY
+			self.bSecondTipShown = False
+			self.iSecondTipLines = 0
+			self.tSecondTipKey = None
+			self.iTipSelPara = -1
+			self.iTipSelIdx = 0
+			if self.bTipWheel:
+				self.bTipWheel = False
+				gc.getGame().setWheelCapture(False)
+		except:
+			pass
+
+	def getSecondTipNames( self ):
+		return self.getTipWindowNames(self.szPreviewPrefix, self.iSecondTipLines)
+
+	def hideSecondTip( self, screen ):
+		try:
+			if self.bSecondTipShown:
+				for szName in self.getSecondTipNames():
+					screen.hide(szName)
+					screen.deleteWidget(szName)
+		except:
+			pass
+		self.bSecondTipShown = False
+		self.iSecondTipLines = 0
+
+	def getFrozenAt( self, iCX, iCY ):
+		i = len(self.aFrozen) - 1
+		while i >= 0:
+			(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.aFrozen[i][1]
+			if iCX >= iX and iCX < iX + iW and iCY >= iY and iCY < iY + iH:
+				return i
+			i -= 1
+		return -1
+
+	# the first of the places (x, y) where a window of this size covers no frozen window (kept on the screen); the one that covers the least if
+	# there is none
+	def pickFreeSpot( self, aCands, iWidth, iHeight, xRes, yRes, iExclude = -1 ):
+		tBest = None
+		iBest = -1
+		for (iX, iY) in aCands:
+			iX = max(4, min(xRes - iWidth - 4, iX))
+			iY = max(4, min(yRes - iHeight - 4, iY))
+			iOver = 0
+			for iFz in range(len(self.aFrozen)):
+				if iFz == iExclude:
+					continue
+				(iFX, iFY, iFW, iFH) = self.aFrozen[iFz][1][:4]
+				iDX = min(iX + iWidth, iFX + iFW) - max(iX, iFX)
+				iDY = min(iY + iHeight, iFY + iFH) - max(iY, iFY)
+				if iDX > 0 and iDY > 0:
+					iOver += iDX * iDY
+			if iOver == 0:
+				return (iX, iY)
+			if tBest is None or iOver < iBest:
+				tBest = (iX, iY)
+				iBest = iOver
+		return tBest
+
+	def showSecondTip( self, screen, szText, iCursorY, tAnchor, iParent = -1, aUnits = None ):
+		try:
+			(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iPad, iLine) = tAnchor
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			iChar = iLine * 0.32
+			iMaxWidth = max(300, int(xRes * 0.2))
+			iCharsPerLine = max(20, int((iMaxWidth - 2 * iPad) / iChar))
+			aszLines = []
+			aiPara = []
+			tUnitWin = None
+			if aUnits is not None:
+				# (a list of units: not higher than the parent window)
+				iHintLines = len(self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT", ()), iCharsPerLine))
+				(szText, tUnitWin) = self.getUnitListText(aUnits, iCharsPerLine, max(3, len(aszFLines) - iHintLines))
+			aszParas = self.carryColors(szText.split(u"\n"))
+			if tUnitWin is not None:
+				if len(self.dUnitWin) > 200:
+					self.dUnitWin = {}
+				self.dUnitWin[tuple(aszParas)] = tUnitWin
+			for iPart in range(len(aszParas)):
+				aszWrapped = self.wrapMessage(aszParas[iPart], iCharsPerLine)
+				aszLines += aszWrapped
+				aiPara += [iPart] * len(aszWrapped)
+			aszHint = self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT", ()), iCharsPerLine)
+			aszLines += aszHint
+			aiPara += [-1] * len(aszHint)
+			self.iPreviewHintLines = len(aszHint)
+			iWidth = self.getTipTextWidth(aszLines, iChar, iMaxWidth, iPad)
+			iHeight = len(aszLines) * iLine + 2 * iPad
+			iX = iFX + iFW + 12
+			if iX + iWidth > xRes - 4:
+				iX = iFX - 12 - iWidth
+			iX = max(4, iX)
+			iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
+			# it does not cover another frozen window: beside the window (right, left), then above and below it
+			iRight = iFX + iFW + 12
+			iLeft = iFX - 12 - iWidth
+			# (the place that the window would like to have: its distance below the top of its parent window)
+			self.iPreviewPrefDY = iY - iFY
+			(iX, iY) = self.pickFreeSpot([(iX, iY), (iRight, iY), (iLeft, iY), (iRight, iFY), (iLeft, iFY), (iRight, iFY + iFH - iHeight), (iLeft, iFY + iFH - iHeight), (iFX, iFY + iFH + 12), (iFX, iFY - 12 - iHeight)], iWidth, iHeight, xRes, yRes)
+			self.tPreviewLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
+			self.iPreviewParent = iParent
+			self.aszPreviewParas = aszParas
+			self.iSecondTipLines = len(aszLines)
+			self.drawTipWindow(screen, self.szPreviewPrefix, self.tPreviewLayout, False, 0, [])
+			self.bSecondTipShown = True
+		except:
+			self.bSecondTipShown = False
+
+	# every frame while frozen: the line of the frozen window under the cursor decides about the second window. Shift + mouse wheel on a line
+	# chooses among all the things named in it (the window lists them, the chosen one in yellow; a right click opens its page)
+	def updateFrozenTip( self ):
+		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+		if self.iRedrawFrozen > 0:
+			self.iRedrawFrozen -= 1
+			if self.iRedrawFrozen == 0:
+				self.redrawFrozenTips(screen)
+		iCX = gc.getGame().getCursorClientX()
+		iCY = gc.getGame().getCursorClientY()
+		self.updateFrozenAnchors(screen)
+		iFz = self.getFrozenAt(iCX, iCY)
+		iPara = -1
+		iLineIdx = -1
+		bPromoLine = False
+		aszLines = []
+		aszTopParas = []
+		dDetails = {}
+		tTop = None
+		if iFz >= 0:
+			tTop = self.aFrozen[iFz][1]
+			aszTopParas = self.aFrozen[iFz][2]
+			dDetails = self.aFrozen[iFz][4]
+			(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = tTop
+		if iFz >= 0 and iCY >= iY + iPad and iCY < iY + iPad + len(aszLines) * iLine:
+			iLineIdx = int((iCY - iY - iPad) / iLine)
+			iPara = aiPara[iLineIdx]
+			# the line with the promotion pictures of a unit: its tooltip lists the promotions and what they do (nothing for the Colopedia)
+			bPromoLine = (aszLines[iLineIdx].lower().find(u"<img=") >= 0)
+		# the mouse wheel is only taken (the map does not zoom) while shift is down and the cursor is on a line with named things
+		bWheel = False
+		bShift = False
+		try:
+			bShift = gc.getGame().isShiftKeyPressed()
+		except:
+			pass
+		try:
+			if iPara >= 0 and not bPromoLine and bShift and len(self.getTextPediaAllTargets(aszTopParas[iPara])) > 0:
+				bWheel = True
+		except:
+			pass
+		if bWheel != self.bTipWheel:
+			self.bTipWheel = bWheel
+			gc.getGame().setWheelCapture(bWheel)
+		if bWheel:
+			iNotches = gc.getGame().takeWheelNotches()
+			if iNotches != 0:
+				aTargets = self.getTextPediaAllTargets(aszTopParas[iPara])
+				if iPara != self.iTipSelPara or iFz != self.iTipSelLevel:
+					self.iTipSelPara = iPara
+					self.iTipSelLevel = iFz
+					self.iTipSelIdx = 0
+				# the wheel towards the user: the next one, away from the user: the one before
+				self.iTipSelIdx = (self.iTipSelIdx - iNotches) % len(aTargets)
+		iSel = -1
+		if iPara >= 0 and iPara == self.iTipSelPara and iFz == self.iTipSelLevel and not bPromoLine:
+			iSel = self.iTipSelIdx
+		tKey = (iFz, iPara, iSel, iLineIdx, bPromoLine)
+		if tKey == self.tSecondTipKey:
+			return
+		self.tSecondTipKey = tKey
+		self.hideSecondTip(screen)
+		tUnitWin = None
+		if iFz >= 0 and iPara >= 0:
+			tUnitWin = self.dUnitWin.get(tuple(aszTopParas))
+		if bPromoLine:
+			szText = self.getPromotionTipText(aszLines[iLineIdx])
+			if len(szText) > 0:
+				self.showSecondTip(screen, szText, iCY, tTop, iFz)
+		elif tUnitWin is not None and iPara == tUnitWin[2]:
+			# the last line of a list of units: the units that did not fit into its window
+			self.showSecondTip(screen, u"", iCY, tTop, iFz, tUnitWin[1])
+		elif iPara >= 0 and dDetails.has_key(iPara):
+			if self.dUnitGroups.has_key(dDetails[iPara]):
+				# the line "more...units": the units that the game lists in groups
+				self.showSecondTip(screen, u"", iCY, tTop, iFz, self.dUnitGroups[dDetails[iPara]])
+			else:
+				# the line "Details" of a military unit: the lines folded into it
+				self.showSecondTip(screen, dDetails[iPara], iCY, tTop, iFz)
+		elif iPara >= 0 and self.isCommandLine(iFz, aszTopParas, iPara):
+			# the command lines of a city tooltip: no Colopedia, a right click runs the command
+			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_RUN_COMMAND", ()), iCY, tTop, iFz)
+		elif iPara >= 0:
+			if iSel >= 0:
+				szText = self.getTipSecondText(iPara, iSel, aszTopParas, iFz)
+			else:
+				szText = self.getTipSecondText(iPara, -1, aszTopParas, iFz)
+			if len(szText) > 0:
+				self.showSecondTip(screen, szText, iCY, tTop, iFz)
+
+	# the promotions named by the pictures of a line (<img=button path size=16>): their names and what they do
+	def getPromotionTipText( self, szLine ):
+		try:
+			if len(self.dPromotionButtons) == 0:
+				for i in range(gc.getNumPromotionInfos()):
+					self.dPromotionButtons[gc.getPromotionInfo(i).getButton().replace("\\", "/").lower()] = i
+			aszTexts = []
+			aiDone = []
+			for szPath in re.findall(u"<img=([^ >]+)", szLine):
+				iPromotion = self.dPromotionButtons.get(str(szPath).replace("\\", "/").lower(), -1)
+				if iPromotion < 0 or iPromotion in aiDone:
+					continue
+				aiDone.append(iPromotion)
+				# the help text of the game starts with the name of the promotion itself
+				szText = CyGameTextMgr().getPromotionHelp(iPromotion, False).strip()
+				if len(szText) == 0:
+					szText = u"<color=255,255,0,255>" + gc.getPromotionInfo(iPromotion).getDescription() + u"</color>"
+				aszTexts.append(szText)
+			return u"\n".join(aszTexts)
+		except:
+			return u""
+
+	dPromotionButtons = {}
+
+	# the text of the second window: what a right click opens, and all the hits of the line (the chosen one in yellow)
+	# the player (not the own one) whose unit is named in the first line of a tooltip (the leader is the last part of the line): -1 if none or
+	# if he cannot be talked to
+	def getTalkPlayer( self, aszParas, iPara ):
+		try:
+			if iPara != 0 or len(aszParas) == 0:
+				return -1
+			if aszParas[0].find(u"<color=255,255,0,255>") != 0 and not self.isUnitHeader(aszParas[0]):
+				return -1
+			szHead = re.sub(u"<[^>]*>", u"", aszParas[0])
+			szHead = u"".join([c for c in szHead if ord(c) < 0x2000])
+			aParts = [x.strip() for x in szHead.split(u",") if len(x.strip()) > 0]
+			if len(aParts) < 2:
+				return -1
+			szLeader = aParts[-1]
+			eActive = gc.getGame().getActivePlayer()
+			pActive = gc.getPlayer(eActive)
+			for ePlayer in range(gc.getMAX_PLAYERS()):
+				pPlayer = gc.getPlayer(ePlayer)
+				if ePlayer != eActive and pPlayer.isAlive() and pPlayer.getName() == szLeader:
+					if pActive.canContact(ePlayer):
+						return ePlayer
+					return -1
+		except:
+			pass
+		return -1
+
+	# the child tooltip of a line: for the first line of a unit the draft of a ship and the ability to ignore borders, then the Colopedia
+	def getTipSecondText( self, iPara, iSel = -1, aszParas = None, iLevel = -1 ):
+		szBase = self.getTipSecondTextBase(iPara, iSel, aszParas, iLevel)
+		try:
+			if aszParas is not None and iSel < 0 and iPara >= 0 and iPara < len(aszParas) and self.isUnitHeader(aszParas[iPara]):
+				szInfo = self.getUnitMoveInfoText(aszParas[iPara])
+				if len(szInfo) > 0:
+					if len(szBase) > 0:
+						return szInfo + u"\n" + szBase
+					return szInfo
+		except:
+			pass
+		return szBase
+
+	# the type of a unit of the first line of its tooltip: its name in the brackets
+	def getUnitTypeOfHeader( self, szHeader ):
+		try:
+			szFirst = re.sub(u"<[^>]*>", u"", szHeader).split(u",")[0].strip()
+			tName = re.search(u"\\(([^()]*)\\)\\s*$", szFirst)
+			if tName is None:
+				return -1
+			if len(self.dUnitTypeByName) == 0:
+				for eType in range(gc.getNumUnitInfos()):
+					szName = gc.getUnitInfo(eType).getDescription()
+					if not self.dUnitTypeByName.has_key(szName):
+						self.dUnitTypeByName[szName] = eType
+			return self.dUnitTypeByName.get(tName.group(1).strip(), -1)
+		except:
+			return -1
+
+	# the draft of a ship (the waters that it cannot enter) and the ability to ignore borders; "" if there is nothing to tell
+	def getUnitMoveInfoText( self, szHeader ):
+		aLines = []
+		eType = self.getUnitTypeOfHeader(szHeader)
+		if eType < 0:
+			return u""
+		pInfo = gc.getUnitInfo(eType)
+		try:
+			if pInfo.getDomainType() == DomainTypes.DOMAIN_SEA:
+				aWaters = []
+				for eTerrain in range(gc.getNumTerrainInfos()):
+					if pInfo.getTerrainImpassable(eTerrain) and gc.getTerrainInfo(eTerrain).isWater():
+						aWaters.append(gc.getTerrainInfo(eTerrain).getDescription())
+				aFeatures = []
+				for eFeature in range(gc.getNumFeatureInfos()):
+					if pInfo.getFeatureImpassable(eFeature):
+						aFeatures.append(gc.getFeatureInfo(eFeature).getDescription())
+				aAll = aWaters + aFeatures
+				if len(aWaters) > 0:
+					aLines.append(localText.getText("TXT_KEY_WTP_TIP_DRAFT_DEEP", (u", ".join(aAll),)))
+				elif len(aFeatures) > 0:
+					aLines.append(localText.getText("TXT_KEY_WTP_TIP_DRAFT_SHALLOW_LIM", (u", ".join(aAll),)))
+				else:
+					aLines.append(localText.getText("TXT_KEY_WTP_TIP_DRAFT_SHALLOW", ()))
+			if hasattr(pInfo, "isRivalTerritory") and pInfo.isRivalTerritory():
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_IGNORE_BORDERS", ()))
+		except:
+			pass
+		return u"\n".join(aLines)
+
+	# the own unit that a line of the first window names (the lines of the units of a plot: one line per unit, a right click selects the unit):
+	# the plot is the one that the window was frozen at
+	def getHeaderUnit( self, iLevel, aszParas, iPara ):
+		try:
+			if iLevel < 0 or iLevel >= len(self.aFrozen) or iPara < 0 or iPara >= len(aszParas):
+				return None
+			tUnitWin = self.dUnitWin.get(tuple(aszParas))
+			if tUnitWin is not None:
+				# a list of units ("more...units"): the unit of the line
+				if iPara < len(tUnitWin[0]) and tUnitWin[0][iPara] is not None:
+					pListed = gc.getPlayer(tUnitWin[0][iPara][0]).getUnit(tUnitWin[0][iPara][1])
+					if pListed is not None and not pListed.isNone() and pListed.getOwner() == gc.getGame().getActivePlayer():
+						return pListed
+				return None
+			if self.aFrozen[iLevel][6] >= 0 or not self.isUnitHeader(aszParas[iPara]):
+				return None
+			szFirst = re.sub(u"<[^>]*>", u"", aszParas[iPara]).split(u",")[0].strip()
+			iNth = 0
+			for k in range(iPara):
+				if self.isUnitHeader(aszParas[k]) and re.sub(u"<[^>]*>", u"", aszParas[k]).split(u",")[0].strip() == szFirst:
+					iNth += 1
+			tAnchor = self.aFrozen[iLevel][5]
+			if tAnchor is not None:
+				pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+			else:
+				pPlot = self.getStackPlot()
+			if pPlot is None or pPlot.isNone():
+				return None
+			# the tooltip lists the selected units first, then the others in the order of the plot
+			aSelected = []
+			aOthers = []
+			for k in range(pPlot.getNumUnits()):
+				pUnit = pPlot.getUnit(k)
+				if pUnit.IsSelected():
+					aSelected.append(pUnit)
+				else:
+					aOthers.append(pUnit)
+			aCands = []
+			for pUnit in aSelected + aOthers:
+				if self.unitMatchesHeader(pUnit, szFirst):
+					aCands.append(pUnit)
+			if iNth < len(aCands) and aCands[iNth].getOwner() == gc.getGame().getActivePlayer():
+				return aCands[iNth]
+		except:
+			pass
+		return None
+
+	# the first part of the header line of a unit: its profession and the name of its type in brackets ("Colonial Militia (Veteran Infantry Soldier)"),
+	# the name of the type alone for a unit without a profession ("Treasure")
+	def unitMatchesHeader( self, pUnit, szFirst ):
+		try:
+			szName = re.sub(u"<[^>]*>", u"", pUnit.getName())
+			if szFirst == szName or szFirst.find(szName + u" (") == 0:
+				return True
+			eProfession = pUnit.getProfession()
+			if eProfession >= 0:
+				szProfession = re.sub(u"<[^>]*>", u"", gc.getProfessionInfo(eProfession).getDescription())
+				if szFirst == szProfession + u" (" + szName + u")" or szFirst == szProfession:
+					return True
+			szType = re.sub(u"<[^>]*>", u"", gc.getUnitInfo(pUnit.getUnitType()).getDescription())
+			# (the type in the brackets only for a unit without an own name: units with names ("Tholen (War Galleon)") match by the name)
+			if szName == szType and (szFirst == szType or szFirst.find(u"(" + szType + u")") >= 0):
+				return True
+		except:
+			pass
+		return False
+
+	def getTipSecondTextBase( self, iPara, iSel = -1, aszParas = None, iLevel = -1 ):
+		try:
+			if aszParas is None:
+				aszParas = []
+			szLine = aszParas[iPara]
+			aTargets = self.getTextPediaTargets(szLine)
+			aAll = self.getTextPediaAllTargets(szLine)
+			eTalk = -1
+			if iSel < 0:
+				eTalk = self.getTalkPlayer(aszParas, iPara)
+			pSelect = None
+			if iSel < 0 and eTalk < 0:
+				pSelect = self.getHeaderUnit(iLevel, aszParas, iPara)
+			if eTalk >= 0 or pSelect is not None:
+				# a unit of another nation: a right click talks to the nation; an own unit of a plot: it selects the unit; the Colopedia is Ctrl + right click
+				if eTalk >= 0:
+					szText = localText.getText("TXT_KEY_WTP_TIP_TALK", (gc.getPlayer(eTalk).getCivilizationShortDescription(0),))
+				else:
+					szText = localText.getText("TXT_KEY_WTP_TIP_SELECT_UNIT", (pSelect.getName(),))
+				if len(aTargets) > 0:
+					szText += u"\n" + localText.getText("TXT_KEY_WTP_TIP_PEDIA_HELP2", (aTargets[0][0],))
+				if len(aAll) > 1:
+					szText += u"\n" + localText.getText("TXT_KEY_WTP_TIP_PEDIA_LIST", ())
+					for i in range(len(aAll)):
+						szText += u"\n  " + aAll[i][0]
+				return szText
+			if len(aAll) == 0:
+				return u""
+			if iSel >= 0:
+				iIdx = iSel
+			else:
+				iIdx = 0
+				if len(aTargets) > 0:
+					# (the first one of the default list)
+					for i in range(len(aAll)):
+						if aAll[i] == aTargets[0]:
+							iIdx = i
+			if iSel >= 0:
+				szText = localText.getText("TXT_KEY_WTP_TIP_PEDIA_HELP", (aAll[iIdx][0],))
+			else:
+				if len(aTargets) == 0:
+					return u""
+				szText = localText.getText("TXT_KEY_WTP_TIP_PEDIA_HELP", (aTargets[0][0],))
+				if len(aTargets) > 1:
+					szText += u"\n" + localText.getText("TXT_KEY_WTP_TIP_PEDIA_HELP2", (aTargets[1][0],))
+			if len(aAll) > 1:
+				szText += u"\n" + localText.getText("TXT_KEY_WTP_TIP_PEDIA_LIST", ())
+				for i in range(len(aAll)):
+					if i == iIdx:
+						szText += u"\n  <color=255,255,0,255>" + aAll[i][0] + u"</color>"
+					else:
+						szText += u"\n  " + aAll[i][0]
+			return szText
+		except:
+			return u""
+
+	def unfreezeAllTips( self ):
+		while len(self.aFrozen) > 0:
+			if not self.unfreezeCursorTooltip():
+				break
+
+	# Esc: the last frozen window is unfrozen (the window is gone, the ones before it stay frozen)
+	def unfreezeCursorTooltip( self ):
+		if len(self.aFrozen) == 0:
+			self.bTipFrozen = False
+			return False
+		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+		self.hideSecondTip(screen)
+		self.tSecondTipKey = None
+		self.iTipSelPara = -1
+		self.iTipSelIdx = 0
+		if self.bTipWheel:
+			self.bTipWheel = False
+			try:
+				gc.getGame().setWheelCapture(False)
+			except:
+				pass
+		(szPrefix, tLayout, aszParas, aiIndent, dDetails, tAnchor, iParent, tRel) = self.aFrozen.pop()
+		try:
+			self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
+		except:
+			pass
+		self.bTipFrozen = (len(self.aFrozen) > 0)
+		if not self.bTipFrozen:
+			self.szSuppressHelp = u""
+		return True
+
+	def isPediaActive( self ):
+		try:
+			return CvScreensInterface.pediaMainScreen.getScreen().isActive()
+		except:
+			return False
+
+	def isTipFrozen( self ):
+		# (while the Colopedia is up, its keys are not ours: Esc closes the Colopedia and leaves the frozen window as it is)
+		return self.bTipFrozen and not self.isPediaActive()
+
+	# the paragraphs of a frozen window: level 0 is the first window, the others are the nested ones
+	def getLevelParas( self, iLevel ):
+		return self.aFrozen[iLevel][2]
+
+	# the paragraphs for a command of a line of a frozen window: the commands of a city tooltip are folded into a child window, the name of the
+	# city is the first line of its parent window
+	def getCommandParas( self, iLevel, aszParas, iPara ):
+		try:
+			iParent = self.aFrozen[iLevel][6]
+			if iParent >= 0:
+				return ([self.aFrozen[iParent][2][0]] + list(aszParas), iPara + 1)
+		except:
+			pass
+		return (aszParas, iPara)
+
+	def isCommandLine( self, iLevel, aszParas, iPara ):
+		(aszCmd, iCmd) = self.getCommandParas(iLevel, aszParas, iPara)
+		return self.getCityCommand(aszCmd, iCmd) is not None or self.getUnitCommand(aszParas, iPara) is not None
+
+	# the lines of the commands (select the city / all of the continent / all; select all units of the type / all units) in one line
+	def isCommandText( self, szText ):
+		try:
+			szPlain = self.getPlainCommandText(szText)
+			if szPlain == self.getPlainCommandText(localText.getText("TXT_KEY_MISC_ALT_SELECT", ())):
+				return True
+			szPre = self.getPlainCommandText(localText.getText("TXT_KEY_MISC_CTRL_SELECT", (u"QQQQ",))).split(u"QQQQ")[0].strip()
+			return len(szPre) > 3 and szPlain.find(szPre) == 0
+		except:
+			return False
+
+	# the command lines at the end of a city tooltip (select the city / all of the continent / all): (city, mode) or None
+	# a text without color tags and without the signs < > (written as &lt; &gt; in one text and as < > in the other), words separated by one space
+	def getPlainCommandText( self, szText ):
+		szText = re.sub(u"</?(color|font|img)[^>]*>", u"", szText)
+		szText = szText.replace(u"&lt;", u" ").replace(u"&gt;", u" ").replace(u"<", u" ").replace(u">", u" ")
+		return u" ".join(szText.split())
+
+	def getCityCommand( self, aszParas, iPara ):
+		try:
+			if iPara <= 0:
+				return None
+			szPara = self.getPlainCommandText(aszParas[iPara])
+			if len(szPara) == 0:
+				return None
+			szCtrl = self.getPlainCommandText(localText.getText("TXT_KEY_CITY_BAR_SELECT_CTRL", ()))
+			szAlt = self.getPlainCommandText(localText.getText("TXT_KEY_CITY_BAR_SELECT_ALT", ()))
+			if szPara != szCtrl and szPara != szAlt and szPara.find(u"%") >= 0:
+				return None
+			szName = self.getPlainCommandText(aszParas[0])
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			pCity = None
+			(loopCity, iter) = pPlayer.firstCity(False)
+			while loopCity:
+				if loopCity.getName() == szName:
+					pCity = loopCity
+					break
+				(loopCity, iter) = pPlayer.nextCity(iter, False)
+			if pCity is None:
+				return None
+			if szPara == szCtrl:
+				return (pCity, 1)
+			if szPara == szAlt:
+				return (pCity, 2)
+			szSelect = self.getPlainCommandText(localText.getText("TXT_KEY_CITY_BAR_SELECT", (pCity.getName(),)))
+			if szPara == szSelect:
+				return (pCity, 0)
+		except:
+			pass
+		return None
+
+	# the command lines of the tooltip of a unit of the stack ("(< CTRL > to select all Treasure units)", "(< ALT > to select all units)"):
+	# the plot of the stack of units (the one of the plot list)
+	def getStackPlot( self ):
+		pPlot = CyInterface().getSelectionPlot()
+		if pPlot is None or pPlot.isNone():
+			pHead = CyInterface().getHeadSelectedUnit()
+			if pHead is not None and not pHead.isNone():
+				pPlot = pHead.plot()
+		if pPlot is None or pPlot.isNone():
+			return None
+		return pPlot
+
+	# (mode, unit type) with mode 1: all units of that type on the plot, 2: all units of the domain (land / sea) of the unit of the tooltip;
+	# the type is the one of the line "(< CTRL > to select all ... units)" of the same tooltip (the unit of the tooltip); None: no command
+	def getUnitCommand( self, aszParas, iPara ):
+		try:
+			if iPara < 0 or iPara >= len(aszParas) or aszParas[iPara].find(u"(") < 0:
+				return None
+			pPlot = self.getStackPlot()
+			if pPlot is None:
+				return None
+			szPara = self.getPlainCommandText(aszParas[iPara])
+			szAlt = self.getPlainCommandText(localText.getText("TXT_KEY_MISC_ALT_SELECT", ()))
+			eFound = -1
+			for k in range(pPlot.getNumUnits()):
+				eType = pPlot.getUnit(k).getUnitType()
+				szCtrl = self.getPlainCommandText(localText.getText("TXT_KEY_MISC_CTRL_SELECT", (gc.getUnitInfo(eType).getTextKey(),)))
+				if szPara == szCtrl:
+					return (1, eType)
+				if eFound < 0:
+					for szOther in aszParas:
+						if szOther.find(u"(") >= 0 and self.getPlainCommandText(szOther) == szCtrl:
+							eFound = eType
+							break
+			if szPara == szAlt:
+				if eFound < 0:
+					pHead = CyInterface().getHeadSelectedUnit()
+					if pHead is not None and not pHead.isNone():
+						eFound = pHead.getUnitType()
+				return (2, eFound)
+		except:
+			pass
+		return None
+
+	def runUnitCommand( self, aszParas, iPara ):
+		try:
+			tCommand = self.getUnitCommand(aszParas, iPara)
+			if tCommand is None:
+				return False
+			(iMode, eType) = tCommand
+			ePlayer = gc.getGame().getActivePlayer()
+			pPlot = self.getStackPlot()
+			eDomain = -1
+			if iMode == 2 and eType >= 0:
+				eDomain = gc.getUnitInfo(eType).getDomainType()
+			aUnits = []
+			for k in range(pPlot.getNumUnits()):
+				pUnit = pPlot.getUnit(k)
+				# (only units with moves left; Alt: the units of the same domain, land or sea)
+				if pUnit.getOwner() == ePlayer and pUnit.movesLeft() > 0 and ((iMode == 2 and (eDomain < 0 or pUnit.getDomainType() == eDomain)) or (iMode == 1 and pUnit.getUnitType() == eType)):
+					aUnits.append(pUnit)
+			if len(aUnits) == 0:
+				return False
+			CyInterface().clearSelectionList()
+			for pUnit in aUnits:
+				CyInterface().selectUnit(pUnit, False, False, False)
+			self.unfreezeAllTips()
+			return True
+		except:
+			pass
+		return False
+
+	# right click on such a line: the same as a click on the city banner (Ctrl: all cities of the continent, Alt: all cities): the cities are
+	# selected (to give them production orders), the city screen is not opened
+	def runCityCommand( self, aszParas, iPara ):
+		try:
+			tCommand = self.getCityCommand(aszParas, iPara)
+			if tCommand is None:
+				return False
+			(pCity, iMode) = tCommand
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			iArea = pCity.plot().getArea()
+			CyInterface().clearSelectedCities()
+			(loopCity, iter) = pPlayer.firstCity(False)
+			while loopCity:
+				if loopCity.getID() == pCity.getID() or iMode == 2 or (iMode == 1 and loopCity.plot().getArea() == iArea):
+					CyInterface().addSelectedCity(loopCity)
+				(loopCity, iter) = pPlayer.nextCity(iter, False)
+			self.unfreezeAllTips()
+			return True
+		except:
+			pass
+		return False
+
+	def openTipPedia( self, iData, bSecond ):
+		try:
+			iLevel = iData / 1000
+			iPara = iData % 1000
+			aszParas = self.getLevelParas(iLevel)
+			if iPara >= 0 and iPara < len(aszParas):
+				(aszCmd, iCmd) = self.getCommandParas(iLevel, aszParas, iPara)
+				if self.runCityCommand(aszCmd, iCmd) or self.runUnitCommand(aszParas, iPara):
+					return
+				aTargets = self.getTextPediaTargets(aszParas[iPara])
+				eTalk = -1
+				pSelect = None
+				if not (iPara == self.iTipSelPara and iLevel == self.iTipSelLevel):
+					eTalk = self.getTalkPlayer(aszParas, iPara)
+					if eTalk < 0:
+						pSelect = self.getHeaderUnit(iLevel, aszParas, iPara)
+				if pSelect is not None:
+					if bSecond:
+						self.openPediaTargetIndex(aTargets, 0)
+					else:
+						CyInterface().selectUnit(pSelect, True, False, False)
+						self.unfreezeAllTips()
+						return
+				elif eTalk >= 0:
+					if bSecond:
+						self.openPediaTargetIndex(aTargets, 0)
+					else:
+						self.unfreezeAllTips()
+						gc.getPlayer(gc.getGame().getActivePlayer()).contact(eTalk)
+						return
+				elif iPara == self.iTipSelPara and iLevel == self.iTipSelLevel:
+					aTargets = self.getTextPediaAllTargets(aszParas[iPara])
+					# the target chosen with shift + mouse wheel
+					self.openPediaTargetIndex(aTargets, self.iTipSelIdx)
+				else:
+					self.openPediaTargets(aTargets, bSecond)
+		except:
+			pass
+		# the window stays frozen (to look up more lines after the Colopedia is closed); the wheel is given back, the second window goes
+		try:
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			self.hideSecondTip(screen)
+			self.tSecondTipKey = None
+			if self.bTipWheel:
+				self.bTipWheel = False
+				gc.getGame().setWheelCapture(False)
+		except:
+			pass
+
+	# distance from the cursor position (hot spot) to the lower end of the cursor picture: the tooltip windows start there
+	def getCursorBottom( self, yRes ):
+		return max(20, int(yRes * 0.025))
+
+	def getTipAvoidRect( self, iCursorX, iCursorY ):
+		# the own windows whose elements have a tooltip: the tooltip appears beside the window, not over it
+		aRects = []
+		# (windows of other parts of the mod, if there are any: the import / export window, the amount dialog, the message panel)
+		try:
+			t = getattr(CvScreensInterface, "tradeRouteScreen", None)
+			if t is not None and t.isOpen():
+				aRects.append((t.OX, t.OY, t.W, t.H))
+		except:
+			pass
+		try:
+			t = getattr(CvScreensInterface, "yieldAmountScreen", None)
+			if t is not None and t.isOpen():
+				aRects.append((t.iGX, t.iGY, t.W, t.H))
+		except:
+			pass
+		aRects.append(self.tMsgRect)
+		for (x, y, w, h) in aRects:
+			if w > 0 and iCursorX >= x and iCursorX < x + w and iCursorY >= y and iCursorY < y + h:
+				return (x, y, w, h)
+		return None
+
+	def getCursorTipNames( self ):
+		aszNames = ["HudTipBack1", "HudTipBack2"]
+		for i in range(self.iCursorTipLines):
+			aszNames.append("HudTipLine%d" % i)
+		return aszNames
+
+	# the help area of the game tooltip: while the own tooltip is on it is put far outside of the screen (the game still shows its tooltip of a
+	# HUD element for a moment before our window takes over)
+	def setGameHelpArea( self, screen, iY ):
+		iX = HELTTEXT_AREA_X_MARGIN
+		if self.bHoverTip:
+			iX = -5000
+		screen.setHelpTextArea( HELPTEXT_AREA_MAX_WIDTH, FontTypes.SMALL_FONT, iX, iY, -0.1, False, "", True, False, CvUtil.FONT_LEFT_JUSTIFY, HELPTEXT_AREA_MIN_WIDTH )
+
+	def toggleHoverTip( self ):
+		# 0: hover tooltip at the cursor, 1: own tooltip window at the place of the game tooltip, 2: off (game tooltip)
+		self.setHoverTipMode((self.iTipMode + 1) % 3, True)
+
+	# also called by the options screen (Game tab); bMessage: the message of the hotkey
+	def setHoverTipMode( self, iMode, bMessage ):
+		self.iTipMode = iMode
+		self.bHoverTip = (self.iTipMode != 2)
+		self.saveTipSettings()
+		self.unfreezeAllTips()
+		self.bTipFrozen = False
+		try:
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			self.bHudHover = False
+			self.hideCursorTooltip(screen)
+			self.setGameHelpArea(screen, screen.getYResolution() - SADDLE_HEIGHT)
+			if self.iTipMode == 0:
+				szKey = "TXT_KEY_WTP_HOVER_TIP_ON"
+			elif self.iTipMode == 1:
+				szKey = "TXT_KEY_WTP_HOVER_TIP_ORIGINAL"
+			else:
+				szKey = "TXT_KEY_WTP_HOVER_TIP_OFF"
+				screen.setHelpTextString("")
+			if bMessage:
+				CyInterface().addImmediateMessage(localText.getText(szKey, ()), "")
+		except:
+			pass
+
+	def isHudHover( self ):
+		if not self.bHudHover:
+			return False
+		try:
+			# the game asks for the help text again with every cursor move over the element (log). A cursor that has moved away from the place
+			# of the last question and is not asked about any more has left the element; far away it has surely left it
+			iDist = max(abs(gc.getGame().getCursorClientX() - self.tHudHoverAt[0]), abs(gc.getGame().getCursorClientY() - self.tHudHoverAt[1]))
+			if iDist > 150 or (iDist > 35 and self.iTick - self.iWidgetHelpTick >= 3):
+				self.bHudHover = False
+				self.szHudHelp = u""
+		except:
+			pass
+		return self.bHudHover
+
+	# called by the game when it asks for the help text of a widget under the cursor (CvScreensInterface.getWidgetHelp)
+	def widgetHelpSeen( self, szText, eWidgetType ):
+		if not self.bHoverTip:
+			return
+		try:
+			if self.bTipFrozen and self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
+				return
+			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_CONTACT_CIV) and not self.isCursorInScoreTable():
+				# (log: after a click on a unit the game reports the contact help of the score table although the cursor is on the map)
+				return
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			if szText and len(szText) > 0:
+				self.iWidgetHelpTick = self.iTick
+				self.bHudHover = True
+				self.tHudHoverAt = (gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
+				self.szHudHelp = szText
+				self.showCursorTooltip(screen, szText, True)
+				# the game tooltip is not shown while the own one is on
+				screen.setHelpTextString(u"")
+			elif int(eWidgetType) == int(WidgetTypes.WIDGET_GENERAL) and self.bHudHover:
+				# the game asks for the help of "nothing in particular". Directly after the text of a widget (same place) it does that
+				# too (log), so only a cursor that has moved away from the last widget text means that the HUD element was left
+				if abs(gc.getGame().getCursorClientX() - self.tHudHoverAt[0]) > 4 or abs(gc.getGame().getCursorClientY() - self.tHudHoverAt[1]) > 4:
+					self.bHudHover = False
+					self.szHudHelp = u""
+			# empty texts are ignored: the game reports them all the time on the map (log: type 24), they must not block the plot help
+		except:
+			pass
+
+	# the help texts the game itself makes for its HUD elements (the DLL stores the last one, CyGame.getWidgetHelp...)
+	def pollWidgetHelp( self ):
+		try:
+			game = gc.getGame()
+			iCount = game.getWidgetHelpCount()
+			if iCount == self.iWidgetHelpCount:
+				return
+			self.iWidgetHelpCount = iCount
+			self.widgetHelpSeen(game.getWidgetHelpText(), game.getWidgetHelpType())
+		except:
+			pass
+
+	# time in milliseconds for the tooltip delay. time.time() of the game does not advance (log), time.clock() should; if that one does not
+	# advance either, the frames are counted (60 per second assumed)
+	def getTipNow( self ):
+		try:
+			fNow = time.clock() * 1000.0
+			if fNow == self.fLastClock:
+				self.iClockSame += 1
+				if self.iClockSame > 120 and not self.bClockDead:
+					self.bClockDead = True
+			else:
+				self.iClockSame = 0
+				self.fLastClock = fNow
+			if not self.bClockDead:
+				return fNow
+		except:
+			self.bClockDead = True
+		return self.iTick * 16.7
+
+	def updatePendingTip( self ):
+		iCursorX = gc.getGame().getCursorClientX()
+		iCursorY = gc.getGame().getCursorClientY()
+		fNow = self.getTipNow()
+		if abs(iCursorX - self.tPendingPos[0]) > 3 or abs(iCursorY - self.tPendingPos[1]) > 3:
+			# the cursor moves: the time starts again
+			self.tPendingPos = (iCursorX, iCursorY)
+			self.fPendingStart = fNow
+		elif self.iTipDelay > 0 and fNow - self.fPendingStart >= self.iTipDelay:
+			szHelp = self.szPendingHelp
+			bWidget = self.bPendingWidget
+			self.szPendingHelp = None
+			self.showCursorTooltip(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE), szHelp, bWidget, True)
+
+	def setTipDelay( self, iIndex ):
+		self.iTipDelayIndex = max(0, min(len(TIP_DELAYS) - 1, iIndex))
+		self.iTipDelay = TIP_DELAYS[self.iTipDelayIndex]
+		self.szPendingHelp = None
+		self.saveTipSettings()
+
+	def setTipQuick( self, bQuick ):
+		self.bTipQuick = bool(bQuick)
+		self.saveTipSettings()
+
+	def saveTipSettings( self ):
+		try:
+			f = open(TIP_SETTINGS_FILE, "w")
+			f.write("mode=%d\n" % self.iTipMode)
+			f.write("delay=%d\n" % self.iTipDelayIndex)
+			if self.bTipQuick:
+				f.write("quick=1\n")
+			else:
+				f.write("quick=0\n")
+			f.close()
+		except:
+			pass
+
+	iTipDelayIndex = aiTipSettings[1]
+	bTipQuick = (aiTipSettings[2] == 1) # options screen: the next tooltip appears without delay while a tooltip is shown
+
+	def isCursorInScoreTable( self ):
+		if self.tScoreRect is None:
+			return True
+		(iX, iY, iW, iH) = self.tScoreRect
+		iCX = gc.getGame().getCursorClientX()
+		iCY = gc.getGame().getCursorClientY()
+		return iCX >= iX - 10 and iCX < iX + iW + 10 and iCY >= iY - 10 and iCY < iY + iH + 10
+
+	def hideCursorTooltip( self, screen ):
+		self.szPendingHelp = None
+		try:
+			if self.bCursorTipShown:
+				for szName in self.getCursorTipNames():
+					screen.hide(szName)
+					screen.deleteWidget(szName)
+		except:
+			pass
+		self.bCursorTipShown = False
+		self.szCursorTipText = u""
+
+	def updateCursorTooltip( self ):
+		# called every frame: the window goes away when the cursor has left its place (the game does not always say that a tooltip is gone)
+		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
+			# X held: all frozen windows are closed
+			self.bXHoldDone = True
+			self.unfreezeAllTips()
+		if self.bTipFrozen:
+			# a frozen window stays until Esc / X, but not into the city screen
+			if CyInterface().isCityScreenUp() or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL:
+				self.unfreezeAllTips()
+			else:
+				try:
+					self.updateFrozenTip()
+				except:
+					pass
+			try:
+				if self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
+					# the cursor is on a frozen window: no tooltip of the cursor
+					if self.bCursorTipShown or self.szPendingHelp is not None:
+						self.hideCursorTooltip(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
+					return
+			except:
+				pass
+		if self.bHoverTip and self.bHudHover and not self.isHudHover():
+			# the cursor has left the HUD element: the help of what is under it now (map plot) takes the place of the element help at once
+			try:
+				screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+				szPlotHelp = CyInterface().getHelpString()
+				if len(szPlotHelp) > 0:
+					self.showCursorTooltip(screen, szPlotHelp)
+				else:
+					self.hideCursorTooltip(screen)
+			except:
+				pass
+		if self.szPendingHelp is not None:
+			try:
+				self.updatePendingTip()
+			except:
+				self.szPendingHelp = None
+		if not self.bCursorTipShown:
+			return
+		try:
+			iDX = abs(gc.getGame().getCursorClientX() - self.tCursorTipAt[0])
+			iDY = abs(gc.getGame().getCursorClientY() - self.tCursorTipAt[1])
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			if iDX > 100 or iDY > 100 or CyInterface().isCityScreenUp():
+				self.hideCursorTooltip(screen)
+			elif self.iTipMode == 0:
+				self.followCursorTip(screen)
+		except:
+			self.bCursorTipShown = False
+
+			self.hideCursorTooltip(screen)
+			szHelp = CyInterface().getHelpString()
+			self.showCursorTooltip(screen, szHelp)
+			# while the cursor is on a HUD element the plot help behind it must not replace the help of the element
+			if not self.bHoverTip:
+				screen.setHelpTextString( szHelp )
+			else:
+				# the own tooltip is on: the game tooltip stays away
+				screen.setHelpTextString( u"" )
 	# Will update the help Strings
 	def updateHelpStrings( self ):
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
@@ -3711,17 +5802,186 @@ class CvMainInterface:
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TERRITORIAL_INFLUENCE):
 				self.toggleTerritorialInfluence()
 
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TIP_LINE):
+				if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
+					# a line of the frozen hover tooltip: right click: Colopedia page of the first named thing of the line (Ctrl: the second)
+					self.openTipPedia(inputClass.getData2(), inputClass.isCtrlKeyDown())
 		return 0
 
+	def getMessageWidth(self, szText):
+		# width in characters: the symbols of the game font (icons) are wider than letters
+		iWidth = 0
+		# the help texts contain &lt; &gt; &amp; for the signs that are shown (&lt;F1&gt; is 4 characters wide)
+		szText = szText.replace(u"&lt;", u"<").replace(u"&gt;", u">").replace(u"&amp;", u"&")
+		for szChar in szText:
+			if ord(szChar) >= 0x2000:
+				iWidth += 3.4
+			else:
+				iWidth += 1
+		return iWidth
+
+
+	def wrapMessage(self, szMessage, iCharsPerLine, bIconIndent = False):
+		# splits a message with color markup into lines of about iCharsPerLine visible characters; the colors that are open at the end of
+		# a line are closed there and opened again at the start of the next line.
+		# bIconIndent (hover tooltip): a row of icons (promotions) that does not fit is continued in the next line, under the first icon;
+		# the indent of every line (in characters) is in self.aiWrapIndent afterwards
+		aszLines = []
+		aiIndent = []
+		aszOpen = []
+		szLine = u""
+		iVisible = 0
+		iLineIndent = 0
+		bImgRun = False
+		iImgIndent = 0
+		aszTokens = re.split(u"(<[^>]*>)", szMessage)
+		for iToken in range(len(aszTokens)):
+			szToken = aszTokens[iToken]
+			if not szToken:
+				continue
+			if szToken[0] == u"<" and szToken[-1] == u">":
+				szLower = szToken.lower()
+				if szLower.startswith(u"<img="):
+					# a picture (the promotions of a unit): about as wide as an icon of the game font. A row of them that does not fit into the
+					# rest of the line goes into the next line as a whole (a row longer than a line is broken there)
+					if not bImgRun:
+						bImgRun = True
+						iImgIndent = 0
+						if bIconIndent:
+							fRun = 0
+							for szNext in aszTokens[iToken:]:
+								if szNext.lower().startswith(u"<img="):
+									fRun += self.fImgWidth
+								elif szNext and szNext.lower() != u"</img>" and szNext.strip():
+									break
+							# the promotions of a unit always go into a line of their own (not behind a number: that is a counted group)
+							szBefore = re.sub(u"<[^>]*>", u"", szLine).rstrip()
+							bOwnLine = (len(szBefore) > 0 and not szBefore[-1:].isdigit())
+							if iVisible > iLineIndent and (bOwnLine or iVisible + fRun > iCharsPerLine):
+								aszLines.append(szLine + u"</color>" * len(aszOpen))
+								aiIndent.append(iLineIndent)
+								szLine = u"".join(aszOpen)
+								iVisible = 0
+								iLineIndent = 0
+					if iVisible > iLineIndent and iVisible + self.fImgWidth > iCharsPerLine:
+						aszLines.append(szLine + u"</color>" * len(aszOpen))
+						aiIndent.append(iLineIndent)
+						szLine = u"".join(aszOpen)
+						iVisible = iImgIndent
+						iLineIndent = iImgIndent
+					szLine += szToken
+					iVisible += self.fImgWidth
+					continue
+				if szLower.startswith(u"<color"):
+					aszOpen.append(szToken)
+				elif szLower == u"</color>":
+					if aszOpen:
+						aszOpen.pop()
+				szLine += szToken
+				continue
+			if szToken.strip():
+				bImgRun = False
+			szLead = szToken[:len(szToken) - len(szToken.lstrip())]
+			szLine += szLead
+			iVisible += len(szLead)
+			aszWords = []
+			for szWord in re.findall(u"\\S+\\s*", szToken, re.UNICODE):
+				if bIconIndent:
+					# a row of icons at the end of a word (\"(26/37)\" + promotions) is a word of its own
+					aszWords += self.splitIconRow(szWord)
+				else:
+					aszWords.append(szWord)
+			for szWord in aszWords:
+				szCore = szWord.rstrip()
+				iWord = self.getMessageWidth(szCore)
+				if bIconIndent and len(szCore) > 1 and self.isIconRow(szCore):
+					# the row of icons starts where it is and goes on under its first icon
+					iIndent = iVisible
+					if iIndent + 4 * 3.4 > iCharsPerLine:
+						iIndent = 0
+					bHas = iVisible > 0
+					for szChar in szCore:
+						iChar = self.getMessageWidth(szChar)
+						if bHas and iVisible + iChar > iCharsPerLine:
+							aszLines.append(szLine + u"</color>" * len(aszOpen))
+							aiIndent.append(iLineIndent)
+							szLine = u"".join(aszOpen)
+							iVisible = iIndent
+							iLineIndent = iIndent
+							bHas = False
+						szLine += szChar
+						iVisible += iChar
+						bHas = True
+					szLine += szWord[len(szCore):]
+					iVisible += len(szWord) - len(szCore)
+					continue
+				if iVisible > 0 and iVisible + iWord > iCharsPerLine:
+					aszLines.append(szLine + u"</color>" * len(aszOpen))
+					aiIndent.append(iLineIndent)
+					szLine = u"".join(aszOpen)
+					iVisible = 0
+					iLineIndent = 0
+				if iWord > iCharsPerLine:
+					# a word without blanks that is longer than a line (e.g. a row of icons): broken between the characters
+					for szChar in szWord:
+						iChar = self.getMessageWidth(szChar)
+						if iVisible > 0 and iVisible + iChar > iCharsPerLine:
+							aszLines.append(szLine + u"</color>" * len(aszOpen))
+							aiIndent.append(iLineIndent)
+							szLine = u"".join(aszOpen)
+							iVisible = 0
+							iLineIndent = 0
+						szLine += szChar
+						iVisible += iChar
+					continue
+				szLine += szWord
+				iVisible += self.getMessageWidth(szWord)
+		aszLines.append(szLine)
+		aiIndent.append(iLineIndent)
+		self.aiWrapIndent = aiIndent
+		return aszLines
+
+	def splitIconRow(self, szWord):
+		szCore = szWord.rstrip()
+		iStart = len(szCore)
+		while iStart > 0 and ord(szCore[iStart - 1]) >= 0x2000:
+			iStart -= 1
+		if iStart > 0 and len(szCore) - iStart >= 2:
+			return [szWord[:iStart], szWord[iStart:]]
+		return [szWord]
+
+	fImgWidth = 3.6 # width of a picture (<img=...>) in characters
+
+	# visible width of a line in characters (pictures and icons of the game font count more than a letter)
+	def getLineWidth(self, szLine):
+		return self.getMessageWidth(re.sub(u"<[^>]*>", u"", szLine)) + self.fImgWidth * len(re.findall(u"<img=", szLine.lower()))
+
+	def isIconRow(self, szText):
+		for szChar in szText:
+			if ord(szChar) < 0x2000:
+				return False
+		return True
+
 	def getMessagePediaTargets(self, iMessage):
-		# the things named (colored) in a message that have a Colopedia page: [(name, screen, id)] in the order of the text
+		try:
+			return self.getTextPediaTargets(self.aszMessageTexts[iMessage])
+		except:
+			return []
+
+	def getTextPediaAllTargets(self, szMessage):
+		# all things named in a text, in the order of priority (colored names and symbols, game concepts, other names; gold last)
+		aResult = self.getTextPediaTargets(szMessage)
+		return self.dMessagePediaAll.get(szMessage, aResult)
+
+	def getTextPediaTargets(self, szMessage):
+		# the things named (colored) in a text that have a Colopedia page: [(name, screen, id)] in the order of the text
 		aResult = []
 		try:
-			szMessage = self.aszMessageTexts[iMessage]
 			if szMessage in self.dMessagePediaCache:
 				return self.dMessagePediaCache[szMessage]
 			if len(self.dMessagePediaCache) > 300:
 				self.dMessagePediaCache = {}
+				self.dMessagePediaAll = {}
 			if self.dMessagePediaNames is None:
 				dNames = {}
 				# later entries must not overwrite earlier ones: units first, then professions, buildings, goods, bonuses, promotions
@@ -3730,14 +5990,31 @@ class CvMainInterface:
 					(CvScreenEnums.PEDIA_BUILDING, gc.getNumBuildingInfos, gc.getBuildingInfo),
 					(CvScreenEnums.PEDIA_YIELDS, gc.getNumYieldInfos, gc.getYieldInfo),
 					(CvScreenEnums.PEDIA_BONUS, gc.getNumBonusInfos, gc.getBonusInfo),
-					(CvScreenEnums.PEDIA_PROMOTION, gc.getNumPromotionInfos, gc.getPromotionInfo))
+					(CvScreenEnums.PEDIA_PROMOTION, gc.getNumPromotionInfos, gc.getPromotionInfo),
+					(CvScreenEnums.PEDIA_TERRAIN, gc.getNumTerrainInfos, gc.getTerrainInfo),
+					(CvScreenEnums.PEDIA_FEATURE, gc.getNumFeatureInfos, gc.getFeatureInfo),
+					(CvScreenEnums.PEDIA_IMPROVEMENT, gc.getNumImprovementInfos, gc.getImprovementInfo))
 				for (eScreen, fNum, fInfo) in aKinds:
 					for i in range(fNum()):
-						szName = fInfo(i).getDescription()
+						# (the names of some infos have color tags: [COLOR_CAT_ROAD]Paved Country Road[COLOR_REVERT])
+						szName = re.sub(u"<[^>]*>", u"", fInfo(i).getDescription() or u"")
 						if szName and len(szName) >= 3:
 							szKey = szName.lower()
 							if not szKey in dNames:
 								dNames[szKey] = (szName, eScreen, i)
+				# the roads have no page of their own: the concept "Pioneers and improvements" tells about them
+				try:
+					iImprovements = -1
+					for i in range(gc.getNumConceptInfos()):
+						if gc.getConceptInfo(i).getType() == "CONCEPT_IMPROVEMENTS":
+							iImprovements = i
+					if iImprovements >= 0:
+						for i in range(gc.getNumRouteInfos()):
+							szName = re.sub(u"<[^>]*>", u"", gc.getRouteInfo(i).getDescription() or u"")
+							if szName and len(szName) >= 3 and not szName.lower() in dNames:
+								dNames[szName.lower()] = (szName, "CONCEPT", iImprovements)
+				except:
+					pass
 				# the symbols (font characters) of goods and bonus resources
 				dChars = {}
 				for (eScreen, fNum, fInfo) in ((CvScreenEnums.PEDIA_YIELDS, gc.getNumYieldInfos, gc.getYieldInfo), (CvScreenEnums.PEDIA_BONUS, gc.getNumBonusInfos, gc.getBonusInfo)):
@@ -3745,7 +6022,7 @@ class CvMainInterface:
 						try:
 							iChar = fInfo(i).getChar()
 							if iChar > 0:
-								dChars[unichr(iChar)] = (fInfo(i).getDescription(), eScreen, i)
+								dChars[unichr(iChar)] = (re.sub(u"<[^>]*>", u"", fInfo(i).getDescription()), eScreen, i)
 						except:
 							pass
 				# concepts (Colopedia: game concepts): by their name and by the key words of the text MESSAGE_CONCEPT_WORDS ("stem=CONCEPT_TYPE;...")
@@ -3753,7 +6030,7 @@ class CvMainInterface:
 				aConceptNames = []
 				for i in range(gc.getNumConceptInfos()):
 					try:
-						szName = gc.getConceptInfo(i).getDescription()
+						szName = re.sub(u"<[^>]*>", u"", gc.getConceptInfo(i).getDescription() or u"")
 						dConcepts[gc.getConceptInfo(i).getType()] = (szName, "CONCEPT", i)
 						if szName and len(szName) >= 4:
 							aConceptNames.append((szName, i))
@@ -3908,21 +6185,30 @@ class CvMainInterface:
 				if not tFound in aResult:
 					aResult.append(tFound)
 			# gold is mentioned in many messages: with more than two hits it is left out
+			# (the list for the mouse wheel of the frozen tooltip keeps gold, at the end)
+			aAll = list(aResult)
 			if len(aResult) > 2:
-				szGold = gc.getYieldInfo(gc.getInfoTypeForString("YIELD_GOLD")).getDescription().lower()
+				szGold = gc.getYieldInfo(YieldTypes.YIELD_GOLD).getDescription().lower()
 				aResult = [t for t in aResult if t[0].lower() != szGold]
+				aAll = aResult + [t for t in aAll if t[0].lower() == szGold]
+			self.dMessagePediaAll[szMessage] = aAll
 			self.dMessagePediaCache[szMessage] = aResult
 		except:
 			pass
 		return aResult
 
 	def openMessagePedia(self, iMessage, bSecond):
+		self.openPediaTargets(self.getMessagePediaTargets(iMessage), bSecond)
+
+	def openPediaTargets(self, aTargets, bSecond):
+		iIndex = 0
+		if bSecond:
+			iIndex = 1
+		self.openPediaTargetIndex(aTargets, iIndex)
+
+	def openPediaTargetIndex(self, aTargets, iIndex):
 		try:
-			aTargets = self.getMessagePediaTargets(iMessage)
-			iIndex = 0
-			if bSecond:
-				iIndex = 1
-			if iIndex < len(aTargets):
+			if iIndex >= 0 and iIndex < len(aTargets):
 				szName, eScreen, iEntry = aTargets[iIndex]
 				if eScreen == "CONCEPT":
 					iEntryId = CvScreensInterface.pediaMainScreen.pediaHistorical.getIdFromEntryInfo(CivilopediaPageTypes.CIVILOPEDIA_PAGE_CONCEPT, iEntry)
@@ -3933,8 +6219,16 @@ class CvMainInterface:
 			pass
 
 	def getMessagePediaHelp(self, iMessage):
+		return self.getPediaHelpForTargets(self.getMessagePediaTargets(iMessage))
+
+	def getTipPediaHelp(self, iData):
 		try:
-			aTargets = self.getMessagePediaTargets(iMessage)
+			return self.getPediaHelpForTargets(self.getTextPediaTargets(self.getLevelParas(iData / 1000)[iData % 1000]))
+		except:
+			return u""
+
+	def getPediaHelpForTargets(self, aTargets):
+		try:
 			if len(aTargets) == 0:
 				return u""
 			szText = localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP", (aTargets[0][0],))
@@ -4034,7 +6328,10 @@ class CvMainInterface:
 
 	# Updates the Screen
 	def update( self, fDelta ):
+		self.iTick += 1
 		self.updateTerritorialInfluenceEditor()
+		self.updateCursorTooltip()
+		self.pollWidgetHelp()
 		return
 
 	# Adds Mouse Over Help to General Widgets
@@ -4052,6 +6349,8 @@ class CvMainInterface:
 				return localText.getText("TXT_KEY_INTERFACE_ACHIEVE_ADVISOR", ("F10", ""));
 			elif iData1 == self.BUTTON_TERRITORIAL_INFLUENCE:
 				return localText.getText("TXT_KEY_INTERFACE_TERRITORIAL_INFLUENCE", ("Ctrl+I", ""));
+			elif iData1 == self.BUTTON_TIP_LINE:
+				return self.getTipPediaHelp(iData2)
 			elif iData1 == VET_NEW_CAPACITY:
 				return localText.getText("TXT_KEY_NEW_STORAGE_CITY_SCREEN", ());
 			elif iData1 == NEW_HARBOUR_SYSTEM:

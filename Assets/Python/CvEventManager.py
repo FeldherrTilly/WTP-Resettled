@@ -222,8 +222,37 @@ class CvEventManager:
 			if ( CvDebugTools.g_CvDebugTools.notifyInput(argsList) ):
 				return 0
 
+		# WTP: nested tooltips. Esc unfreezes the last frozen tooltip, X (short press) freezes the tooltip that is shown,
+		# X held closes all frozen ones
+		if (eventType == self.EventKeyDown):
+			try:
+				if int(key) == int(InputTypes.KB_ESCAPE) and CvScreensInterface.mainInterface.isTipFrozen():
+					CvScreensInterface.mainInterface.unfreezeCursorTooltip()
+					return 1
+				if int(key) == int(InputTypes.KB_X) and not self.bCtrl and not self.bShift and not self.bAlt:
+					if CvScreensInterface.mainInterface.keyXDown():
+						return 1
+				if int(key) == int(InputTypes.KB_X) and self.bShift and not self.bCtrl and not self.bAlt and CvScreensInterface.mainInterface.isTipFrozen():
+					# Shift + X stacks the frozen tooltips
+					if CvScreensInterface.mainInterface.stackFrozenTips():
+						return 1
+			except:
+				pass
+		elif (eventType == self.EventKeyUp):
+			try:
+				if int(key) == int(InputTypes.KB_X):
+					if CvScreensInterface.mainInterface.keyXUp():
+						return 1
+			except:
+				pass
+
 		if ( eventType == self.EventKeyDown ):
 			theKey=int(key)
+
+			# WTP: Ctrl+Shift+T switches the hover tooltip (own tooltip window at the cursor) on and off
+			if (theKey == int(InputTypes.KB_T) and self.bCtrl and self.bShift and not self.bAlt):
+				CvScreensInterface.mainInterface.toggleHoverTip()
+				return 1
 
 			if (theKey == int(InputTypes.KB_I) and self.bCtrl and not self.bShift and not self.bAlt):
 				CvScreensInterface.mainInterface.toggleTerritorialInfluence()
@@ -392,6 +421,12 @@ class CvEventManager:
 	def onWindowActivation(self, argsList):
 		'Called when the game window activates or deactivates'
 		bActive = argsList[0]
+		# the frozen tooltips are drawn again (their widgets are gone after alt-tab)
+		try:
+			if bActive:
+				CvScreensInterface.mainInterface.windowActivated()
+		except:
+			pass
 
 	def onCityScreenOpen(self, argsList):
 		'Called when the game window activates or deactivates'
