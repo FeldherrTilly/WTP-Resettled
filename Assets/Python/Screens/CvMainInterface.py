@@ -4334,10 +4334,12 @@ class CvMainInterface:
 		fPixel = 0
 		fTabPixel = 0
 		for i in range(len(aszLines)):
-			fThis = self.getTextPixels(re.sub(u"<[^>]*>", u"", aszLines[i]), iLine) + len(re.findall(u"<img=", aszLines[i].lower())) * 18.0 * iLine / 22.0
+			# (the [TAB] of the game text arrives as the tag <tab>: it is a tab stop, not a tag without width)
+			szLineTabs = re.sub(u"(?i)<tab>", u"\t", aszLines[i])
+			fThis = self.getTextPixels(re.sub(u"<[^>]*>", u"", szLineTabs), iLine) + len(re.findall(u"<img=", aszLines[i].lower())) * 18.0 * iLine / 22.0
 			if aiIndent is not None and i < len(aiIndent):
 				fThis += aiIndent[i]
-			if self.hasControlChar(aszLines[i]):
+			if self.hasControlChar(szLineTabs):
 				fTabPixel = max(fTabPixel, fThis)
 			else:
 				fPixel = max(fPixel, fThis)
