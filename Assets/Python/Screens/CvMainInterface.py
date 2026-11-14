@@ -1329,8 +1329,11 @@ class CvMainInterface:
 	# Will redraw the interface
 	def redraw( self ):
 
-		# WTP: while the import / export window is drawn on this screen the interface must not be redrawn
+		# WTP: while the amount dialog is drawn on this screen the interface must not be redrawn: the redraw then treats the city
+		# screen like the map (minimap, date, money text, dark goods bar appear); the dirty bits stay set and are handled afterwards
 		try:
+			if CvScreensInterface.yieldAmountScreen.isHostMain():
+				return 0
 			if CvScreensInterface.tradeRouteScreen.isHostMain():
 				return 0
 		except:
@@ -4081,6 +4084,12 @@ class CvMainInterface:
 	def isMessagePanelShown(self):
 		return self.tMessagePanelKey is not None
 
+	# Ctrl + Shift + Q: back to the default place
+	def resetMessagePanel(self):
+		self.iMsgMoveX = 0
+		self.iMsgMoveY = 0
+		self.updateMessagePanel()
+
 	def pressMessageArrow(self, iDir):
 		if iDir in self.aMsgHeld:
 			return
@@ -4828,6 +4837,10 @@ class CvMainInterface:
 		self.updateTerritorialInfluenceEditor()
 		self.updateAutomatedFollow()
 		self.updateMessageMove()
+		try:
+			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
+		except:
+			pass
 		return
 
 	# WTP: the game selects the next unit when a transport gets automated: the transport stays selected (the game does its
