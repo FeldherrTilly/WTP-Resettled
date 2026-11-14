@@ -3491,8 +3491,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_RESET</Tag>
-		<English>Reset the good</English>
-		<German>Ware zurücksetzen</German>
+		<English>Reset</English>
+		<German>Zurücksetzen</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE</Tag>
@@ -3518,5 +3518,15 @@
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_2</Tag>
 		<English>can only be switched on or off in the view "All goods".</English>
 		<German>kann nur in der Ansicht „Alle Waren" ein- und ausgeschaltet werden.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1</Tag>
+		<English>%s1_preset: %s2_count goods set by the preset are switched off</English>
+		<German>%s1_preset: %s2_count Waren, die das Preset gesetzt hat, sind ausgeschaltet</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2</Tag>
+		<English>%s1_goods - Reset puts them back. Ignore: they no longer belong to the preset (when none is left, the preset switches itself off).</English>
+		<German>%s1_goods - Zurücksetzen stellt sie wieder her. Ignorieren: sie gehören dann nicht mehr zum Preset (bleibt keine übrig, schaltet sich das Preset selbst aus).</German>
 	</TEXT>
 </Civ4GameText>

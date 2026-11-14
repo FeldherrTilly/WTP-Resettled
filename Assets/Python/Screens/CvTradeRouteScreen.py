@@ -338,7 +338,8 @@ class CvTradeRouteScreen:
 		self.dNames = {}
 		self.dKeys = {}
 		self.sHover = ""
-		self.tWarn = None # the notice in the middle of the window: (line 1, line 2, the good to reset or -1)
+		self.tWarn = None # the notice in the middle of the window: (line 1, line 2, the good of market automatic to reset or -1, the goods of a preset that were switched off)
+		self.aWarnQueue = [] # notices that wait for the one on the screen
 		self.aWarnDrawn = []
 
 	def isOpen(self):
@@ -666,8 +667,12 @@ class CvTradeRouteScreen:
 		d = self.dData[iYield]
 		return (not d["imp"]) or (not d["feeder"]) or d["exp"] or d["maintain"] < iMaintain or d["impLimit"] < iLimit
 
+	# a manual change: reported when it breaks market automatic or switches off a good a preset has set
 	def checkMarketChange(self, iYield):
-		if self.isMarketLocked(iYield) and self.isMarketDeviating(iYield):
+		if not self.isMarketLocked(iYield):
+			self.checkPresetLost([iYield])
+			return
+		if self.isMarketDeviating(iYield):
 			szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1", (self.dNames[iYield],))
 			szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_2", ())
 			self.showWarn(szLine1, szLine2, iYield)
@@ -702,17 +707,87 @@ class CvTradeRouteScreen:
 		szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_2", (szNames,))
 		self.showWarn(szLine1, szLine2, -1)
 
-	def showWarn(self, szLine1, szLine2, iYield):
-		self.tWarn = (szLine1, szLine2, iYield)
+	# --- the building material preset (and presets to come): the goods it has set are reported when they are switched off again ---
+	# the goods of the preset (the ones it turned on) that are off / zero now, among the given goods
+	def getPresetLost(self, aGoods):
+		aLost = []
+		dBuild = loadBuild()
+		if not dBuild.has_key(self.iCity):
+			return aLost
+		for aType in dBuild[self.iCity]:
+			iYield = self.getYieldByType(aType[0])
+			if iYield < 0 or not iYield in aGoods or self.isMarketLocked(iYield):
+				continue
+			d = self.dData[iYield]
+			if (not d["imp"] and not d["feeder"]) or (d["maintain"] == 0 and d["impLimit"] == 0):
+				aLost.append(iYield)
+		return aLost
+
+	def checkPresetLost(self, aGoods, bQueue = False):
+		aLost = self.getPresetLost(aGoods)
+		if len(aLost) == 0:
+			return
+		aNames = [self.dNames[i] for i in aLost[:4]]
+		szNames = ", ".join(aNames)
+		if len(aLost) > 4:
+			szNames += ", ..."
+		szPreset = localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", ())
+		szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1", (szPreset, str(len(aLost))))
+		szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2", (szNames,))
+		self.showWarn(szLine1, szLine2, -1, aLost, bQueue)
+
+	# reset: the goods get the values of the preset again
+	def resetPresetGoods(self, aGoods):
+		for iYield in aGoods:
+			d = self.dData[iYield]
+			d["imp"] = True
+			d["feeder"] = True
+			d["maintain"] = 100
+			d["impLimit"] = 150
+		self.apply()
+		self.iReload = 60
+
+	# ignore: the goods are not part of the preset any more; when none is left the preset is off (its button shows it)
+	def ignorePresetGoods(self, aGoods):
+		dBuild = loadBuild()
+		if not dBuild.has_key(self.iCity):
+			return
+		aTypes = [gc.getYieldInfo(i).getType() for i in aGoods]
+		aRest = []
+		for aType in dBuild[self.iCity]:
+			if not aType[0] in aTypes:
+				aRest.append(aType)
+		if len(aRest) == 0:
+			del dBuild[self.iCity]
+		else:
+			dBuild[self.iCity] = aRest
+		saveBuild(dBuild)
+		self.drawBuildButton()
+		if self.iView == VIEW_MARKED:
+			self.buildView()
+			self.drawPage()
+
+	def showWarn(self, szLine1, szLine2, iYield, aGoods = None, bQueue = False):
+		if aGoods == None:
+			aGoods = []
+		if bQueue and self.tWarn != None:
+			self.aWarnQueue.append((szLine1, szLine2, iYield, aGoods))
+			return
+		self.tWarn = (szLine1, szLine2, iYield, aGoods)
 		self.drawWarn()
 
 	def hideWarn(self):
 		self.tWarn = None
+		if len(self.aWarnQueue) > 0:
+			# the next notice
+			self.tWarn = self.aWarnQueue.pop(0)
 		for szName in self.aWarnDrawn:
 			self.drop(szName)
 		for szName in ("TRSWarnReset", "TRSWarnOk"):
 			self.removeButton(szName)
 		self.aWarnDrawn = []
+		if self.tWarn != None:
+			self.drawWarn()
 
 	# the notice in the middle of the window: a dark panel, two lines and the buttons (Reset only for a changed good)
 	def drawWarn(self):
@@ -736,7 +811,7 @@ class CvTradeRouteScreen:
 		screen.setText("TRSWarnText2", "", u"<font=3b><color=255,255,255>" + self.tWarn[1] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 50, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		self.aWarnDrawn.append("TRSWarnText1")
 		self.aWarnDrawn.append("TRSWarnText2")
-		if self.tWarn[2] >= 0:
+		if self.tWarn[2] >= 0 or len(self.tWarn[3]) > 0:
 			self.addButton("TRSWarnReset", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_RESET", ()), False, iX + iW / 2 - 165, iY + iH - 42, 160, 28, BTN_WARN_RESET)
 			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE", ()), False, iX + iW / 2 + 5, iY + iH - 42, 160, 28, BTN_WARN_OK)
 		else:
@@ -808,6 +883,7 @@ class CvTradeRouteScreen:
 		self.dBtn = {}
 		self.sHover = ""
 		self.tWarn = None
+		self.aWarnQueue = []
 		for iYield in range(YieldTypes.NUM_YIELD_TYPES):
 			if not gc.getYieldInfo(iYield).isCargo():
 				continue
@@ -1224,6 +1300,8 @@ class CvTradeRouteScreen:
 			self.drawPage()
 		self.drawRows()
 		self.warnSkipped(aSkipped)
+		if iPreset == 0:
+			self.checkPresetLost(self.aYields, True)
 		self.iReload = 60
 
 	def runPreset(self, iPreset):
@@ -1234,7 +1312,7 @@ class CvTradeRouteScreen:
 			self.toggleMarket()
 			return
 		try:
-			if iPreset <= 2 and (len(self.aYields) != len(self.aAllYields) or self.isMarketOn()):
+			if iPreset <= 2 and (len(self.aYields) != len(self.aAllYields) or self.isMarketOn() or self.isBuildOn()):
 				# only the goods of the current view (all pages); with market automatic on also here: the goods it manages stay as they are
 				self.runFilteredPreset(iPreset)
 				return
@@ -1433,8 +1511,16 @@ class CvTradeRouteScreen:
 		elif iData == BTN_WARN_RESET:
 			if self.tWarn != None and self.tWarn[2] >= 0:
 				self.resetMarketGood(self.tWarn[2])
+			elif self.tWarn != None and len(self.tWarn[3]) > 0:
+				aGoods = self.tWarn[3]
+				self.resetPresetGoods(aGoods)
+				self.hideWarn()
+				self.drawRows()
 		elif iData == BTN_WARN_OK:
+			if self.tWarn != None and len(self.tWarn[3]) > 0:
+				self.ignorePresetGoods(self.tWarn[3])
 			self.hideWarn()
+			self.drawRows()
 		elif iData == BTN_CLEAR_SEARCH:
 			self.szQuery = u""
 			self.aConfirmed = []
