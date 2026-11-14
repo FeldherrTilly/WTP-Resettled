@@ -3685,7 +3685,267 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_CONCEPT_WORDS</Tag>
-		<English>happi=CONCEPT_HAPPINESS_UNHAPPINESS;unhappi=CONCEPT_HAPPINESS_UNHAPPINESS;educat=CONCEPT_TRAINING;grow=CONCEPT_FOOD;well-fed=CONCEPT_FOOD;fed=CONCEPT_FOOD;famine=CONCEPT_FOOD;starv=CONCEPT_FOOD;healthy=CONCEPT_HEALTH;sick=CONCEPT_HEALTH;disease=CONCEPT_HEALTH;rebel=CONCEPT_REBEL_SENTIMENT;independence=CONCEPT_INDEPENDENCE_WAR;tax=CONCEPT_TAX_RATE;storm=CONCEPT_WINDS_AND_STORMS;hurricane=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;smuggl=CONCEPT_SMUGGLING;domestic=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;emigrat=CONCEPT_IMMIGRATION;immigrat=CONCEPT_IMMIGRATION;upkeep=CONCEPT_MILITARY_UPKEEP;monaster=CONCEPT_MONASTERIES;livestock=CONCEPT_CATTLE_OR_SHEEP_BREEDING;whal=CONCEPT_WHALING;storage=CONCEPT_NEW_STORAGE;specialist=CONCEPT_SPECIALISTS;founding father=CONCEPT_FATHERS;raid=CONCEPT_NATIVES;forced labo=CONCEPT_SLAVES;slave=CONCEPT_SLAVES;servant=CONCEPT_SLAVES</English>
-		<German>zufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;unzufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;glück=CONCEPT_HAPPINESS_UNHAPPINESS;bildung=CONCEPT_TRAINING;ausbildung=CONCEPT_TRAINING;wachs=CONCEPT_FOOD;wächst=CONCEPT_FOOD;ernährt=CONCEPT_FOOD;hungersnot=CONCEPT_FOOD;verhungert=CONCEPT_FOOD;gesund=CONCEPT_HEALTH;krank=CONCEPT_HEALTH;seuche=CONCEPT_HEALTH;rebell=CONCEPT_REBEL_SENTIMENT;unabhängigkeit=CONCEPT_INDEPENDENCE_WAR;steuer=CONCEPT_TAX_RATE;sturm=CONCEPT_WINDS_AND_STORMS;orkan=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;schmuggel=CONCEPT_SMUGGLING;binnen=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;auswander=CONCEPT_IMMIGRATION;unterhalt=CONCEPT_MILITARY_UPKEEP;kloster=CONCEPT_MONASTERIES;vieh=CONCEPT_CATTLE_OR_SHEEP_BREEDING;walfang=CONCEPT_WHALING;lager=CONCEPT_NEW_STORAGE;spezialist=CONCEPT_SPECIALISTS;gründervater=CONCEPT_FATHERS;überfall=CONCEPT_NATIVES;stoßtrupp=CONCEPT_NATIVES;eindringling=CONCEPT_NATIVES;zwangsarbeit=CONCEPT_SLAVES;sklav=CONCEPT_SLAVES;leibeigen=CONCEPT_SLAVES</German>
+		<English>happi=CONCEPT_HAPPINESS_UNHAPPINESS;unhappi=CONCEPT_HAPPINESS_UNHAPPINESS;educat=CONCEPT_TRAINING;grow=CONCEPT_FOOD;well-fed=CONCEPT_FOOD;fed=CONCEPT_FOOD;famine=CONCEPT_FOOD;starv=CONCEPT_FOOD;healthy=CONCEPT_HEALTH;sick=CONCEPT_HEALTH;disease=CONCEPT_HEALTH;rebel=CONCEPT_REBEL_SENTIMENT;independence=CONCEPT_INDEPENDENCE_WAR;tax=CONCEPT_TAX_RATE;storm=CONCEPT_WINDS_AND_STORMS;hurricane=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;smuggl=CONCEPT_SMUGGLING;domestic=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;emigrat=CONCEPT_IMMIGRATION;immigrat=CONCEPT_IMMIGRATION;upkeep=CONCEPT_MILITARY_UPKEEP;monaster=CONCEPT_MONASTERIES;livestock=CONCEPT_CATTLE_OR_SHEEP_BREEDING;whal=CONCEPT_WHALING;storage=CONCEPT_NEW_STORAGE;specialist=CONCEPT_SPECIALISTS;founding father=CONCEPT_FATHERS;raid=CONCEPT_NATIVES;forced labo=CONCEPT_SLAVES;slave=CONCEPT_SLAVES;servant=CONCEPT_SLAVES;unhealth=CONCEPT_HEALTH;fresh water=CONCEPT_HEALTH;defense bonus=CONCEPT_COMBAT;defence bonus=CONCEPT_COMBAT;barracks=CONCEPT_NEW_BARRACKS_SYSTEM;withdrawal=CONCEPT_COMBAT;withdraw=CONCEPT_COMBAT;fortify bonus=CONCEPT_COMBAT;social status=CONCEPT_TRAINING;harbour space=CONCEPT_NEW_HARBOUR_SYSTEM;harbor space=CONCEPT_NEW_HARBOUR_SYSTEM</English>
+		<German>zufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;unzufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;glück=CONCEPT_HAPPINESS_UNHAPPINESS;bildung=CONCEPT_TRAINING;ausbildung=CONCEPT_TRAINING;wachs=CONCEPT_FOOD;wächst=CONCEPT_FOOD;ernährt=CONCEPT_FOOD;hungersnot=CONCEPT_FOOD;verhungert=CONCEPT_FOOD;gesund=CONCEPT_HEALTH;krank=CONCEPT_HEALTH;seuche=CONCEPT_HEALTH;rebell=CONCEPT_REBEL_SENTIMENT;unabhängigkeit=CONCEPT_INDEPENDENCE_WAR;steuer=CONCEPT_TAX_RATE;sturm=CONCEPT_WINDS_AND_STORMS;orkan=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;schmuggel=CONCEPT_SMUGGLING;binnen=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;auswander=CONCEPT_IMMIGRATION;unterhalt=CONCEPT_MILITARY_UPKEEP;kloster=CONCEPT_MONASTERIES;vieh=CONCEPT_CATTLE_OR_SHEEP_BREEDING;walfang=CONCEPT_WHALING;lager=CONCEPT_NEW_STORAGE;spezialist=CONCEPT_SPECIALISTS;gründervater=CONCEPT_FATHERS;überfall=CONCEPT_NATIVES;stoßtrupp=CONCEPT_NATIVES;eindringling=CONCEPT_NATIVES;zwangsarbeit=CONCEPT_SLAVES;sklav=CONCEPT_SLAVES;leibeigen=CONCEPT_SLAVES;ungesund=CONCEPT_HEALTH;süßwasser=CONCEPT_HEALTH;defensivbonus=CONCEPT_COMBAT;verteidigungsbonus=CONCEPT_COMBAT;kasernenplatz=CONCEPT_NEW_BARRACKS_SYSTEM;kasernenplätze=CONCEPT_NEW_BARRACKS_SYSTEM;rückzug=CONCEPT_COMBAT;verschanzungsbonus=CONCEPT_COMBAT;sozialer status=CONCEPT_TRAINING;ankerplätze=CONCEPT_NEW_HARBOUR_SYSTEM;ankerplatz=CONCEPT_NEW_HARBOUR_SYSTEM</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_ON</Tag>
+		<English>Nested tooltips: on</English>
+		<German>Nested Tooltips: an</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_ORIGINAL</Tag>
+		<English>Nested tooltips: window at the original position</English>
+		<German>Nested Tooltips: Fenster an der ursprünglichen Position</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE</Tag>
+		<English>Tooltips:</English>
+		<German>Tooltips:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_0</Tag>
+		<English>Nested tooltips (at the cursor) (recommended)</English>
+		<German>Nested Tooltips (am Mauszeiger) (empfohlen)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_1</Tag>
+		<English>Own window at the original position</English>
+		<German>Eigenes Fenster an der ursprünglichen Position</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_2</Tag>
+		<English>Game tooltip</English>
+		<German>Spiel-Tooltip</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP</Tag>
+		<English>How tooltips are shown. Nested tooltips: a window right at the mouse cursor. Key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] freezes it (and again the tooltip beside it, and so on), right click opens the Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] unfreezes the last one, holding [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] all of them. Hotkey to switch between the three modes: [COLOR_HIGHLIGHT_TEXT]Ctrl + Shift + T[COLOR_REVERT].</English>
+		<German>Wie Tooltips angezeigt werden. Nested Tooltips: ein Fenster direkt am Mauszeiger. Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] friert es ein (und erneut den Tooltip daneben, und so weiter), Rechtsklick öffnet die Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] hebt das letzte Einfrieren auf, X gehalten alle. Tastenkombination zum Umschalten zwischen den drei Modi: [COLOR_HIGHLIGHT_TEXT]Strg + Umschalt + T[COLOR_REVERT].</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY</Tag>
+		<English>Tooltip delay:</English>
+		<German>Tooltip-Verzögerung:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_0</Tag>
+		<English>None</English>
+		<German>Keine</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_1</Tag>
+		<English>Short (0.25 s)</English>
+		<German>Kurz (0,25 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_2</Tag>
+		<English>Medium (0.5 s)</English>
+		<German>Mittel (0,5 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_3</Tag>
+		<English>Long (0.8 s)</English>
+		<German>Lang (0,8 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_4</Tag>
+		<English>Very long (1.2 s)</English>
+		<German>Sehr lang (1,2 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP</Tag>
+		<English>How long the cursor has to rest on something before the nested tooltip appears. While a tooltip is shown, the next one appears at once. Moving the cursor starts the time again. "Only on key X": the tooltip appears only when you press X.</English>
+		<German>Wie lange der Mauszeiger auf etwas ruhen muss, bevor der Nested Tooltip erscheint. Solange ein Tooltip angezeigt wird, erscheint der nächste sofort. Bewegt man den Mauszeiger, beginnt die Zeit neu. "Nur mit Taste X": Der Tooltip erscheint nur, wenn Sie X drücken.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK</Tag>
+		<English>Next tooltip without delay (while a tooltip is shown)</English>
+		<German>Nächster Tooltip ohne Verzögerung (solange ein Tooltip angezeigt wird)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK_HELP</Tag>
+		<English>Off: moving the cursor on to the next thing removes the tooltip and the delay starts again. On: while a tooltip is shown, the tooltip of the next thing appears at once. The key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] shows a tooltip that still waits for its delay at once.</English>
+		<German>Aus: Beim Weiterfahren zum nächsten Ziel verschwindet der Tooltip und die Verzögerung beginnt neu. An: Solange ein Tooltip angezeigt wird, erscheint der Tooltip des nächsten Ziels sofort. Die Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] zeigt einen Tooltip, der noch auf seine Verzögerung wartet, sofort an.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_5</Tag>
+		<English>Extra long (2 s)</English>
+		<German>Extra lang (2 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_6</Tag>
+		<English>Only on key X</English>
+		<German>Nur mit Taste X</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TOTAL_PRICE_HELP</Tag>
+		<English>[NEWLINE]	Total[TAB][TAB]</English>
+		<German>[NEWLINE]	Gesamt[TAB][TAB]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_OFF</Tag>
+		<English>Nested tooltips: off</English>
+		<German>Nested Tooltips: aus</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FROZEN_HINT</Tag>
+		<English>[COLOR:140:255:40:255]Frozen - Esc or hold X: close[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Eingefroren - Esc oder X halten: schließen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_RUN_COMMAND</Tag>
+		<English>Right click: run this command</English>
+		<German>Rechtsklick: diesen Befehl ausführen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PROMO_SUM</Tag>
+		<English>[COLOR_CAT_MILITARY]Promotion sum.[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_MILITARY]Bef.-Details[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORAGE</Tag>
+		<English>Storage : %d1 / %d2</English>
+		<German>Lager : %d1 / %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORAGE_FULL</Tag>
+		<English>[COLOR_NEGATIVE_TEXT]Storage : %d1 / %d2[COLOR_REVERT]</English>
+		<German>[COLOR_NEGATIVE_TEXT]Lager : %d1 / %d2[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_BUILDINGS</Tag>
+		<English>[COLOR_SELECTED_TEXT]Buildings...[COLOR_REVERT]</English>
+		<German>[COLOR_SELECTED_TEXT]Gebäude...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_FOLD</Tag>
+		<English>Stored...</English>
+		<German>Gelagert...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_FOLD</Tag>
+		<English>Produced...</English>
+		<German>Produziert...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_MISSING</Tag>
+		<English>Produced...missing</English>
+		<German>Produziert...missing</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT</Tag>
+		<English>Produced...need imp.</English>
+		<German>Produziert...bent. Imp.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_WOOD</Tag>
+		<English>Stored...wood</English>
+		<German>Gelagert...Holz</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_FOOD</Tag>
+		<English>Stored...food</English>
+		<German>Gelagert...Nahrung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_BOTH</Tag>
+		<English>Stored...wood&amp;food</English>
+		<German>Gelagert...Holz&amp;Nahrung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET</Tag>
+		<English>Produced...imp. set</English>
+		<German>Produziert...Imp. ges.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT</Tag>
+		<English>[COLOR:140:255:40:255]X: freeze this tooltip[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]X: Tooltip einfrieren[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_COMMANDS</Tag>
+		<English>[COLOR:140:255:40:255]Commands...[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Kommandos...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_GOODS</Tag>
+		<English>Carries goods only</English>
+		<German>Lädt nur Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_SLAVE</Tag>
+		<English>Carries slaves and goods only</English>
+		<German>Lädt nur Sklaven und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_TREASURE</Tag>
+		<English>Carries treasures and goods only</English>
+		<German>Lädt nur Schätze und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_TROOP</Tag>
+		<English>Carries military units and goods only</English>
+		<German>Lädt nur Militäreinheiten und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_ALL</Tag>
+		<English>Carries units and goods</English>
+		<German>Lädt Einheiten und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORTS</Tag>
+		<English>Ports: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Häfen: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_NO_OCEAN</Tag>
+		<English>[COLOR_WARNING_TEXT]Not ocean-going[COLOR_REVERT]</English>
+		<German>[COLOR_WARNING_TEXT]Nicht überseetauglich[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_EUROPE</Tag>
+		<English>Europe</English>
+		<German>Europa</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_AFRICA</Tag>
+		<English>Africa</English>
+		<German>Afrika</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_ROYAL</Tag>
+		<English>Port Royal</English>
+		<German>Port Royal</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_MORE</Tag>
+		<English>more...</English>
+		<German>mehr...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_DETAILS</Tag>
+		<English>[COLOR_CAT_MILITARY]Details[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_MILITARY]Details[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TALK</Tag>
+		<English>Right click: Talk to [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Rechtsklick: Mit [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] sprechen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP</Tag>
+		<English>Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP2</Tag>
+		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_LIST</Tag>
+		<English>[COLOR:140:255:40:255]All hits (Shift + mouse wheel: choose):[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Alle Treffer (Shift + Mausrad: auswählen):[COLOR_REVERT]</German>
 	</TEXT>
 </Civ4GameText>

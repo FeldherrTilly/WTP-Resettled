@@ -737,6 +737,15 @@ def handleForward(screens):
 	return 0
 
 def getWidgetHelp(argsList):
+	szText = getWidgetHelpText(argsList)
+	# WTP: the own tooltip window at the cursor shows the same text
+	try:
+		mainInterface.widgetHelpSeen(szText, argsList[1])
+	except:
+		pass
+	return szText
+
+def getWidgetHelpText(argsList):
 	iScreen = argsList[0]
 	# WTP: the tooltips of the import / export window of the city screen
 	if (tradeRouteScreen.isOpen() and argsList[1] == WidgetTypes.WIDGET_GENERAL and argsList[2] >= 41001 and argsList[2] < 43000):
@@ -991,3 +1000,13 @@ def selectOneEvent(argsList):
 	pPlayer.trigger(eventTriggerNumber)
 
 #TAC: EventTriggerMenu END
+
+# WTP debug log: every show... function (a screen or a menu that is opened) is logged with its arguments
+def wtpLoggedShow(szName, fxn):
+	def logged(*args):
+		return fxn(*args)
+	return logged
+
+for szWtpName in globals().keys():
+	if szWtpName.startswith("show") and callable(globals()[szWtpName]):
+		globals()[szWtpName] = wtpLoggedShow(szWtpName, globals()[szWtpName])
