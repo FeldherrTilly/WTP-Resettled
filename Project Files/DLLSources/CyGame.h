@@ -166,6 +166,16 @@ public:
 	int getReplayMessagePlayer(int i) const;
 	ColorTypes getReplayMessageColor(int i) const;
 	std::wstring getReplayMessageText(int i) const;
+	void setWheelCapture(bool bOn) const; // WTP: the mouse wheel is collected for the amount dialog (python) instead of zooming the map
+	int takeWheelNotches() const; // WTP: the notches of the wheel since the last call (positive: away from the user)
+	bool isCtrlKeyPressed() const;
+	bool isShiftKeyPressed() const; // WTP: is the shift key down (frozen tooltip: shift + mouse wheel)
+	std::wstring getWidgetHelpText() const; // WTP: the last help text the game asked for (widget under the cursor)
+	int getWidgetHelpCount() const; // WTP: counts the help requests (a change means a new request)
+	int getWidgetHelpType() const; // WTP: widget type of the last help request
+	std::wstring getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const; // WTP: the help text of a widget (as parseHelp makes it)
+	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
+	int getCursorClientY() const;
 	uint getNumReplayMessages() const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
