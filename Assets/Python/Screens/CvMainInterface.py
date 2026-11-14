@@ -4325,13 +4325,19 @@ class CvMainInterface:
 	def getTipTextWidth( self, aszLines, iChar, iMaxWidth, iPad, aiIndent = None ):
 		iLine = iChar / 0.32
 		fPixel = 0
+		fTabPixel = 0
 		for i in range(len(aszLines)):
 			fThis = self.getTextPixels(re.sub(u"<[^>]*>", u"", aszLines[i]), iLine) + len(re.findall(u"<img=", aszLines[i].lower())) * 18.0 * iLine / 22.0
 			if aiIndent is not None and i < len(aiIndent):
 				fThis += aiIndent[i]
-			fPixel = max(fPixel, fThis)
-		# a little reserve (4.5 % + 4 pixels) and the border; the lines were wrapped by a character count, so wide letters (and the tab stops of the sell price lines) can make a line wider than the maximum
-		return max(120, min(int(iMaxWidth * 1.5), int(fPixel * 1.045) + 2 * iPad + 4))
+			if aszLines[i].find(u"\t") >= 0:
+				fTabPixel = max(fTabPixel, fThis)
+			else:
+				fPixel = max(fPixel, fThis)
+		# a little reserve (4.5 % + 4 pixels) and the border; the lines were wrapped by a character count, so wide letters can make a line wider than
+		# the maximum. The lines with tab stops (the sell prices of cargo) cannot be wrapped: they may make the window up to 1.5 times as wide.
+		iWidth = max(120, min(int(iMaxWidth * 1.15), int(fPixel * 1.045) + 2 * iPad + 4))
+		return max(iWidth, min(int(iMaxWidth * 1.5), int(fTabPixel * 1.045) + 2 * iPad + 4))
 
 	def drawCursorTip( self, screen, bClickable ):
 		self.iCursorTipLines = len(self.tTipLayout[4])
