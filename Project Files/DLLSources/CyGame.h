@@ -173,6 +173,17 @@ public:
 	bool isShiftKeyPressed() const; // WTP: is the shift key down
 	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
 	int getCursorClientY() const;
+	// WTP: the messages of the turn for the message panel of the main interface
+	int getNumHudMessages() const;
+	std::wstring getHudMessageText(int i) const;
+	int getHudMessageX(int i) const;
+	int getHudMessageY(int i) const;
+	int getNumHudMessagesPrevious() const;
+	int getNumHudPriority() const;
+	int getNumHudPriorityPrevious() const;
+	std::wstring getHudMessagePreviousText(int i) const;
+	int getHudMessagePreviousX(int i) const;
+	int getHudMessagePreviousY(int i) const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);
