@@ -14059,10 +14059,13 @@ void CvCity::handleAutoTraderouteSetup(bool bReset, bool bImportAll, bool bAutoE
 				int iMaintainLevel   = getMaintainLevel(eYield);
 				int iImportLimitLevel= getImportsLimit(eYield);
 
-				int iBuffer = iMaintainLevel & 0xFFFF; // lowest 16 bits
-				iBuffer |= (iImportLimitLevel & 0xFFFF) << 16; // next 16 bits
+				// UNTESTED: the layout is the one of NetworkDataTradeRouteInts (import limit in the lower, maintain level in the upper 16 bits)
+				// as read by TASK_YIELD_TRADEROUTE. It was the other way round here, which swapped both values for every good.
+				NetworkDataTradeRouteInts buffer;
+				buffer.iImportLimitLevel = (unsigned short)iImportLimitLevel;
+				buffer.iMaintainLevel    = (unsigned short)iMaintainLevel;
 
-				doTask(TASK_YIELD_TRADEROUTE, getTradeRouteTaskData(eYield), iBuffer, bImport, bExport, bMaintainImport, bAutoExport);
+				doTask(TASK_YIELD_TRADEROUTE, getTradeRouteTaskData(eYield), buffer.iNetwork, bImport, bExport, bMaintainImport, bAutoExport);
 			}
 		}
 	}
