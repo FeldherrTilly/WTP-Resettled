@@ -1201,21 +1201,22 @@ class CvTradeRouteScreen:
 		self.drawSearchText()
 		self.iViewX = self.W - 20 - 160
 		screen.addDropDownBoxGFC("TRSView", self.OX + self.iViewX, self.OY + self.H - 44, 160, WidgetTypes.WIDGET_GENERAL, BTN_VIEW, -1, FontTypes.GAME_FONT)
-		# the views in alphabetical order (of the text of the language; the number of the view is the data of the entry)
+		# the views: all goods, market automatic, favorites, filter, marked only, needed goods, produced goods; then the presets in alphabetical
+		# order (of the text of the language; the number of the view is the data of the entry)
+		aFixed = [(0, "TXT_KEY_WTP_TRADEROUTE_VIEW_ALL"), (4, "TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT"), (1, "TXT_KEY_WTP_TRADEROUTE_VIEW_FAV"),
+			(7, "TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER"), (2, "TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED"), (6, "TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED"),
+			(5, "TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED")]
+		aPresetViews = []
+		for p in PRESETS:
+			aPresetViews.append((localText.getText(p["text"], ()).lower(), p["text"], p["view"]))
+		aPresetViews.sort()
 		aViews = []
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_ALL", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_ALL", ()), 0))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FAV", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FAV", ()), 1))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED", ()), 2))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", ()), 3))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT", ()), 4))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED", ()), 5))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED", ()), 6))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ()), 7))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", ()), 8))
-		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", ()), 9))
-		aViews.sort()
+		for aView in aFixed:
+			aViews.append((aView[0], localText.getText(aView[1], ())))
+		for aView in aPresetViews:
+			aViews.append((aView[2], localText.getText(aView[1], ())))
 		for iPos in range(len(aViews)):
-			screen.addPullDownString("TRSView", aViews[iPos][1], iPos, aViews[iPos][2], self.iView == aViews[iPos][2])
+			screen.addPullDownString("TRSView", aViews[iPos][1], iPos, aViews[iPos][0], self.iView == aViews[iPos][0])
 		self.aDrawn.append("TRSView")
 		self.drawRows()
 		self.drawPage()
