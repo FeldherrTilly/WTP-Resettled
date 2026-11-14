@@ -3384,6 +3384,11 @@
 		<German>Zum Ende der Runde noch einmal fragen</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_BUILDING_UPGRADE_HEADER</Tag>
+		<English>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]Upgrade %s1_building to:</English>
+		<German>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]%s1_building ausbauen zu:</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON</Tag>
 		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
