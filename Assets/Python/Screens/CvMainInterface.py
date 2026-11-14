@@ -584,22 +584,27 @@ class CvMainInterface:
 		self.bTerritorialInfluenceRightMouseDown = False
 		self.bTerritorialInfluenceOldNoUnitCycling = False
 		# WTP: message panel (the messages of the turn, click to expand)
-		self.bMessagePanelExpanded = False
-		self.bMessageAutoExpand = None # opens expanded at the start of a turn (saved with the game; None: not read yet)
-		self.iMessageTurn = -1
-		self.bMessageTurnPending = True
-		self.iMsgMoveX = 0 # the message panel moved by the player (Shift + arrow keys)
-		self.iMsgMoveY = 0
-		self.iMsgX = 0
-		self.iMsgY = 0
-		self.aMsgHeld = [] # the arrow keys that are down
-		self.iMsgHoldWait = 0
-		self.iMsgCamKeep = 0 # frames the camera is kept where it was (the game turns it a little with Shift + arrow keys itself)
-		self.fMsgCamTurn = 0.0
-		self.fMsgCamPitch = 0.0
+		# (the interface is built again when the player comes back to the game with Alt+Tab: the state of the panel stays then,
+		# it starts from scratch only in another turn, i.e. after loading another game)
+		if getattr(self, "iMessageTurn", -1) != CyGame().getGameTurn() or not hasattr(self, "iMsgMoveX"):
+			self.bMessagePanelExpanded = False
+			self.bMessageAutoExpand = None # opens expanded at the start of a turn (saved with the game; None: not read yet)
+			self.iMessageTurn = -1
+			self.bMessageTurnPending = True
+			self.iMsgMoveX = 0 # the message panel moved by the player (Shift + arrow keys)
+			self.iMsgMoveY = 0
+			self.iMsgX = 0
+			self.iMsgY = 0
+			self.aMsgHeld = [] # the arrow keys that are down
+			self.iMsgHoldWait = 0
+			self.iMsgCamKeep = 0 # frames the camera is kept where it was (the game turns it a little with Shift + arrow keys itself)
+			self.fMsgCamTurn = 0.0
+			self.fMsgCamPitch = 0.0
+			self.bMessagePosRead = False # the position is read from the script data of the player
+			self.bMessagePanelPrevious = False # shows the messages of the turn before
+			self.iMessagePage = 0 # page of the expanded panel (0 = the newest messages)
+		self.aMsgHeld = []
 		self.tMessagePanelKey = None
-		self.bMessagePanelPrevious = False # shows the messages of the turn before
-		self.iMessagePage = 0 # page of the expanded panel (0 = the newest messages)
 		self.aszMessageLines = []
 		self.atMessageTargets = []
 		self.dMessageCapitals = {}
@@ -3925,6 +3930,46 @@ class CvMainInterface:
 		except:
 			pass
 
+	# the option "New message panel" of the game options (PLAYEROPTION_MODDER_1, default off, kept in the profile of the player)
+	def isMessagePanelOption(self):
+		try:
+			return gc.getActivePlayer().isOption(PlayerOptionTypes.PLAYEROPTION_MODDER_1)
+		except:
+			return False
+
+	# the position of the panel, kept in the script data of the player: [[WTPMSGPOS:x:y]] (offset from the default place)
+	def readMessagePosition(self):
+		if self.bMessagePosRead:
+			return
+		self.bMessagePosRead = True
+		try:
+			szData = gc.getActivePlayer().getScriptData()
+			if szData is not None:
+				iStart = szData.find("[[WTPMSGPOS:")
+				if iStart != -1:
+					iEnd = szData.find("]]", iStart)
+					aszPos = szData[iStart + 12:iEnd].split(":")
+					self.iMsgMoveX = int(aszPos[0])
+					self.iMsgMoveY = int(aszPos[1])
+		except:
+			pass
+
+	def saveMessagePosition(self):
+		try:
+			pPlayer = gc.getActivePlayer()
+			szData = pPlayer.getScriptData()
+			if szData is None:
+				szData = ""
+			iStart = szData.find("[[WTPMSGPOS:")
+			if iStart != -1:
+				iEnd = szData.find("]]", iStart)
+				szData = szData[:iStart] + szData[iEnd + 2:]
+			if self.iMsgMoveX != 0 or self.iMsgMoveY != 0:
+				szData = szData + "[[WTPMSGPOS:" + str(self.iMsgMoveX) + ":" + str(self.iMsgMoveY) + "]]"
+			pPlayer.setScriptData(szData)
+		except:
+			pass
+
 	# the message panel is moved with Ctrl + Shift + W A S D (two keys at once: diagonal)
 	def isMessagePanelShown(self):
 		return self.tMessagePanelKey is not None
@@ -3933,6 +3978,7 @@ class CvMainInterface:
 	def resetMessagePanel(self):
 		self.iMsgMoveX = 0
 		self.iMsgMoveY = 0
+		self.saveMessagePosition()
 		self.updateMessagePanel()
 
 	def pressMessageArrow(self, iDir):
@@ -3953,6 +3999,8 @@ class CvMainInterface:
 		if iDir in self.aMsgHeld:
 			self.aMsgHeld.remove(iDir)
 			self.iMsgCamKeep = 40
+			if len(self.aMsgHeld) == 0:
+				self.saveMessagePosition()
 
 	def moveMessagePanel(self, aDirs):
 		for iDir in aDirs:
@@ -3978,6 +4026,7 @@ class CvMainInterface:
 			bShift = True
 		if not bShift:
 			self.aMsgHeld = []
+			self.saveMessagePosition()
 			return
 		self.iMsgHoldWait -= 1
 		if self.iMsgHoldWait <= 0:
@@ -4018,7 +4067,7 @@ class CvMainInterface:
 			else:
 				iNum = iNumCurrent
 			# (MESSAGE_PANEL_ENABLED = 0: the DLL collects no messages, so there is nothing to show)
-			bShow = (iNumCurrent > 0
+			bShow = (iNumCurrent > 0 and self.isMessagePanelOption()
 				and CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW and not CyInterface().isCityScreenUp())
 			if iNumCurrent == 0:
 				self.bMessageTurnPending = True
@@ -4038,6 +4087,7 @@ class CvMainInterface:
 				iNumPriority = game.getNumHudPriorityPrevious()
 			else:
 				iNumPriority = game.getNumHudPriority()
+			self.readMessagePosition()
 			tKey = (iNumCurrent, iNumPrevious, iNumPriority, bPrevious, self.iMessagePage, self.bMessagePanelExpanded, self.getMessageAutoExpand(), self.iMsgMoveX, self.iMsgMoveY, xRes, yRes)
 			if tKey == self.tMessagePanelKey:
 				return
