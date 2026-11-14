@@ -1190,6 +1190,9 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 						const bool bExport          = (pPopupReturn->getCheckboxBitfield(eExportYield) & 0x01);
 						const bool bMaintainImport  = (pPopupReturn->getCheckboxBitfield(eYield)       & 0x02);
 						const bool bAutoExport      = (pPopupReturn->getCheckboxBitfield(eExportYield) & 0x02);
+						// WTP: land only / sea only (bit 1 = land, bit 2 = sea)
+						const int iImportDomains    = (pPopupReturn->getCheckboxBitfield(eYield + 2 * NUM_YIELD_TYPES) & 0x03);
+						const int iExportDomains    = (pPopupReturn->getCheckboxBitfield(eExportYield + 2 * NUM_YIELD_TYPES) & 0x03);
 						const int iImportLimitLevel =  pPopupReturn->getSpinnerWidgetValue(eYield);
 						const int iMaintainLevel    =  pPopupReturn->getSpinnerWidgetValue(eExportYield);
 
@@ -1198,6 +1201,8 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 							|| bExport != pCity->isExport(eYield)
 							|| bMaintainImport != pCity->getImportsMaintain(eYield)
 							|| bAutoExport != pCity->isAutoExport(eYield) // auto traderoute - Nightinggale
+							|| iImportDomains != pCity->getImportDomains(eYield)
+							|| iExportDomains != pCity->getExportDomains(eYield)
 							|| iMaintainLevel != pCity->getMaintainLevel(eYield)
 							|| iImportLimitLevel != pCity->getImportsLimit(eYield) // R&R mod, vetiarvind, max yield import limit
 							)
@@ -1210,7 +1215,7 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 							buffer.iImportLimitLevel = iImportLimitLevel;
 							buffer.iMaintainLevel    = iMaintainLevel;
 
-							gDLL->sendDoTask(info.getData1(), TASK_YIELD_TRADEROUTE, eYield, buffer.iNetwork, bImport, bExport, bMaintainImport, bAutoExport);
+							gDLL->sendDoTask(info.getData1(), TASK_YIELD_TRADEROUTE, (int)eYield | (iImportDomains << 8) | (iExportDomains << 10), buffer.iNetwork, bImport, bExport, bMaintainImport, bAutoExport);
 						}
 						// R&R mod, vetiarvind, max yield import limit - end
 						// transport feeder - end - Nightinggale
@@ -3625,6 +3630,21 @@ bool CvDLLButtonPopup::launchYieldImportExportPopup(CvPopup* pPopup, CvPopupInfo
 	{
 		return false;
 	}
+
+	// WTP: the settings are made in an own window (python: wider, with the land / sea checkboxes and the mouse wheel); if it cannot
+	// be opened the popup of the game is used as before
+	{
+		CyArgsList argsList;
+		argsList.add(pCity->getID());
+		argsList.add(info.getOption1() ? 1 : 0);
+		long lOpened = 0;
+		gDLL->getPythonIFace()->callFunction(PYScreensModule, "askTradeRouteSetup", argsList.makeFunctionArgs(), &lOpened);
+		if (lOpened != 0)
+		{
+			return false;
+		}
+	}
+
 	gDLL->getInterfaceIFace()->popupSetBodyString(pPopup, gDLL->getText("TXT_KEY_POPUP_IMPORT_TITLE", pCity->getNameKey()));
 
 	// auto traderoute - start - Nightinggale
@@ -3662,6 +3682,16 @@ bool CvDLLButtonPopup::launchYieldImportExportPopup(CvPopup* pPopup, CvPopupInfo
 			gDLL->getInterfaceIFace()->popupSetCheckBoxText(pPopup, 1, L"<font=1>" + gDLL->getText("TXT_KEY_POPUP_IMPORT_FEEDER") + L"</font>", eYield, gDLL->getText("TXT_KEY_POPUP_IMPORT_FEEDER_HELP").getWithoutFormatting());
 			gDLL->getInterfaceIFace()->popupEndLayout(pPopup);
 
+			// WTP: only for land / only for sea transports (own line, the window is not wide enough for a 4th checkbox)
+			const int iImportDomainGroup = eYield + 2 * NUM_YIELD_TYPES;
+			gDLL->getInterfaceIFace()->popupStartHLayout(pPopup, 0);
+			gDLL->getInterfaceIFace()->popupCreateCheckBoxes(pPopup, 2, iImportDomainGroup, WIDGET_GENERAL, POPUP_LAYOUT_TOP);
+			gDLL->getInterfaceIFace()->popupSetCheckBoxText(pPopup, 0, L"<font=1>" + gDLL->getText("TXT_KEY_POPUP_IMPORT_LAND") + L"</font>", iImportDomainGroup, gDLL->getText("TXT_KEY_POPUP_IMPORT_LAND_HELP").getWithoutFormatting());
+			gDLL->getInterfaceIFace()->popupSetCheckBoxState(pPopup, 0, (pCity->getImportDomains(eYield) & 1) != 0, iImportDomainGroup);
+			gDLL->getInterfaceIFace()->popupSetCheckBoxText(pPopup, 1, L"<font=1>" + gDLL->getText("TXT_KEY_POPUP_IMPORT_SEA") + L"</font>", iImportDomainGroup, gDLL->getText("TXT_KEY_POPUP_IMPORT_SEA_HELP").getWithoutFormatting());
+			gDLL->getInterfaceIFace()->popupSetCheckBoxState(pPopup, 1, (pCity->getImportDomains(eYield) & 2) != 0, iImportDomainGroup);
+			gDLL->getInterfaceIFace()->popupEndLayout(pPopup);
+
 			// export
 			YieldTypes eExportYield = eYield + NUM_YIELD_TYPES;
 
@@ -3674,6 +3704,16 @@ bool CvDLLButtonPopup::launchYieldImportExportPopup(CvPopup* pPopup, CvPopupInfo
 			gDLL->getInterfaceIFace()->popupSetCheckBoxState(pPopup, 0, pCity->isExport(eYield), eExportYield);
 			gDLL->getInterfaceIFace()->popupSetCheckBoxState(pPopup, 1, pCity->isAutoExport(eYield), eExportYield);
 			gDLL->getInterfaceIFace()->popupSetCheckBoxText(pPopup, 1, L"<font=1>" + gDLL->getText("TXT_KEY_POPUP_IMPORT_AUTO_EXPORT") + L"</font>", eExportYield, gDLL->getText("TXT_KEY_POPUP_IMPORT_AUTO_EXPORT_HELP").getWithoutFormatting());
+			gDLL->getInterfaceIFace()->popupEndLayout(pPopup);
+
+			// WTP: only for land / only for sea transports (own line)
+			const int iExportDomainGroup = eExportYield + 2 * NUM_YIELD_TYPES;
+			gDLL->getInterfaceIFace()->popupStartHLayout(pPopup, 0);
+			gDLL->getInterfaceIFace()->popupCreateCheckBoxes(pPopup, 2, iExportDomainGroup, WIDGET_GENERAL, POPUP_LAYOUT_TOP);
+			gDLL->getInterfaceIFace()->popupSetCheckBoxText(pPopup, 0, L"<font=1>" + gDLL->getText("TXT_KEY_POPUP_EXPORT_LAND") + L"</font>", iExportDomainGroup, gDLL->getText("TXT_KEY_POPUP_EXPORT_LAND_HELP").getWithoutFormatting());
+			gDLL->getInterfaceIFace()->popupSetCheckBoxState(pPopup, 0, (pCity->getExportDomains(eYield) & 1) != 0, iExportDomainGroup);
+			gDLL->getInterfaceIFace()->popupSetCheckBoxText(pPopup, 1, L"<font=1>" + gDLL->getText("TXT_KEY_POPUP_EXPORT_SEA") + L"</font>", iExportDomainGroup, gDLL->getText("TXT_KEY_POPUP_EXPORT_SEA_HELP").getWithoutFormatting());
+			gDLL->getInterfaceIFace()->popupSetCheckBoxState(pPopup, 1, (pCity->getExportDomains(eYield) & 2) != 0, iExportDomainGroup);
 			gDLL->getInterfaceIFace()->popupEndLayout(pPopup);
 			// R&R mod, vetiarvind, max yield import limit - end
 		}

@@ -11,6 +11,7 @@ import CvAchieveAdvisor
 # TAC - Trade Route Advisor - koma13 - START
 import CvTradeRoutesAdvisor
 # TAC - Trade Route Advisor - koma13 - END
+import CvTradeRouteScreen
 
 import CvRevolutionAdvisor
 import CvMilitaryAdvisor
@@ -577,9 +578,24 @@ def mouseOverPlot (argsList):
 	if (WORLDBUILDER_SCREEN == argsList[0]):
 		worldBuilderScreen.mouseOverPlot(argsList)
 
+# WTP: the DLL asks for the import / export settings of a city (instead of its popup); returns 1 if the window is open
+tradeRouteScreen = CvTradeRouteScreen.CvTradeRouteScreen()
+def askTradeRouteSetup(argsList):
+	try:
+		return tradeRouteScreen.open(argsList[0], argsList[1] != 0)
+	except:
+		import traceback
+		CvTradeRouteScreen.logTrade(traceback.format_exc())
+		return 0
+
 def handleInput (argsList):
 	' handle input is called when a screen is up '
 	inputClass = PyScreenInput.ScreenInput(argsList)
+
+	# WTP: the buttons of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen()):
+		if (tradeRouteScreen.handleEmbeddedInput(inputClass)):
+			return 0
 
 	# allows overides for mods
 	ret = CvScreenUtilsInterface.getScreenUtils().handleInput( (inputClass.getPythonFile(),inputClass) )
@@ -600,6 +616,10 @@ def update (argsList):
 	if (HandleInputMap.has_key(argsList[0])):
 		screen = HandleInputMap.get(argsList[0])
 		screen.update(argsList[1])
+
+	# WTP: the mouse wheel of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen()):
+		tradeRouteScreen.update(argsList[1])
 
 def onClose (argsList):
 	# allows overides for mods
@@ -668,6 +688,9 @@ def handleForward(screens):
 
 def getWidgetHelp(argsList):
 	iScreen = argsList[0]
+	# WTP: the tooltips of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen() and argsList[1] == WidgetTypes.WIDGET_GENERAL and argsList[2] >= 41001 and argsList[2] < 43000):
+		return tradeRouteScreen.getHelp(argsList[2])
 	if (HandleMouseoverMap.has_key(iScreen)):
 		screen = HandleMouseoverMap.get(iScreen)
 		return screen.getWidgetHelp(argsList)

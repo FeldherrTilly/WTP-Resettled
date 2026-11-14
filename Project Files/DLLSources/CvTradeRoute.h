@@ -44,6 +44,8 @@ public:
 	int getDistanceBetweenCities() const;
 	int getImportAmount() const;
 
+	// WTP: the land only / sea only settings of the import and export of the colonies: can a transport of this domain serve the route?
+	bool isAllowedForDomain(DomainTypes eDomain) const;
 protected:
 	int m_iId;
 	IDInfo m_kSourceCity;

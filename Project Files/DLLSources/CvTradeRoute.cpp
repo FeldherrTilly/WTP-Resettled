@@ -24,6 +24,26 @@ void CvTradeRoute::init(const IDInfo& kSourceCity, const IDInfo& kDestinationCit
 	m_eYield = eYield;
 }
 
+bool CvTradeRoute::isAllowedForDomain(DomainTypes eDomain) const
+{
+	// a private route leaves the settings of the colonies alone
+	if (m_bPrivate)
+	{
+		return true;
+	}
+	const CvCity* const pSource = ::getCity(m_kSourceCity);
+	if (pSource != NULL && !pSource->isExportAllowedForDomain(m_eYield, eDomain))
+	{
+		return false;
+	}
+	const CvCity* const pDestination = ::getCity(m_kDestinationCity);
+	if (pDestination != NULL && !pDestination->isImportAllowedForDomain(m_eYield, eDomain))
+	{
+		return false;
+	}
+	return true;
+}
+
 int CvTradeRoute::getID() const
 {
 	return m_iId;
