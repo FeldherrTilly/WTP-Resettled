@@ -4307,7 +4307,8 @@ class CvMainInterface:
 		fSum = 0.0
 		szPlain = szPlain.replace(u"&lt;", u"<").replace(u"&gt;", u">").replace(u"&amp;", u"&")
 		for c in szPlain:
-			if c == u"\t":
+			if c == u"\t" or ord(c) < 32:
+				# (the [TAB] of the game text may arrive as another control character than a tab)
 				# a tab goes to the next tab stop (31 pixels for a line of 22 pixels: measured on the sell price lines of a cargo ship)
 				fSum = (int(fSum / 31.0) + 1) * 31.0
 			elif c == u"\u2022":
@@ -4330,7 +4331,7 @@ class CvMainInterface:
 			fThis = self.getTextPixels(re.sub(u"<[^>]*>", u"", aszLines[i]), iLine) + len(re.findall(u"<img=", aszLines[i].lower())) * 18.0 * iLine / 22.0
 			if aiIndent is not None and i < len(aiIndent):
 				fThis += aiIndent[i]
-			if aszLines[i].find(u"\t") >= 0:
+			if re.search(u"[\x00-\x1f]", aszLines[i]) is not None:
 				fTabPixel = max(fTabPixel, fThis)
 			else:
 				fPixel = max(fPixel, fThis)
