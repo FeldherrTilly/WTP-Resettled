@@ -607,7 +607,6 @@ class CvMainInterface:
 		self.tMessagePanelKey = None
 		self.aszMessageLines = []
 		self.atMessageTargets = []
-		self.dMessageCapitals = {}
 
 		self.TableYields = []
 		for iYield in range(YieldTypes.NUM_YIELD_TYPES):
@@ -3774,22 +3773,14 @@ class CvMainInterface:
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_LINE):
 				if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
 					# right click: Colopedia page of the first named thing of the message, Ctrl + right click: of the second one
-					self.openMessagePedia(inputClass.getData2(), inputClass.isCtrlKeyDown())
+					iContact = self.getMessageContact(inputClass.getData2())
+					if iContact >= 0 and not inputClass.isCtrlKeyDown():
+						# a message that names a native tribe: right click talks to the nation (Ctrl: the first Colopedia page)
+						self.contactMessageNation(iContact)
+					else:
+						self.openMessagePedia(inputClass.getData2(), inputClass.isCtrlKeyDown() and iContact < 0)
 				else:
 					self.clickMessageLine(inputClass.getData2())
-			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_CONTACT_CIV and inputClass.getData1() in self.dMessageCapitals):
-				# a message of the panel that names a native tribe: its main settlement is centered (the game opens the diplomacy)
-				try:
-					if inputClass.getFunctionName().startswith("HudMsgLine"):
-						if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
-							# right click: the Colopedia (Ctrl: the second page), as with the other lines
-							if inputClass.getFunctionName() in self.dMessageLineIndex:
-								self.openMessagePedia(self.dMessageLineIndex[inputClass.getFunctionName()], inputClass.isCtrlKeyDown())
-						else:
-							iPX, iPY = self.dMessageCapitals[inputClass.getData1()]
-							CyCamera().JustLookAtPlot(gc.getMap().plot(iPX, iPY))
-				except:
-					pass
 		return 0
 
 	# WTP: the message panel. The game's own message area (top center) shows the messages of a turn only for a few seconds and ignores the
@@ -4241,16 +4232,9 @@ class CvMainInterface:
 						iLineX = iX + iPad + iIndent
 					szName = "HudMsgLine%d" % iLabel
 					iLabel += 1
-					if eContact >= 0:
-						# a native tribe: contact (diplomacy), the click also centers its main settlement (handleInput)
-						eWidget = WidgetTypes.WIDGET_CONTACT_CIV
-						iData1 = eContact
-						iData2 = -1
-						self.dMessageCapitals[eContact] = (iTargetX, iTargetY)
-					else:
-						eWidget = WidgetTypes.WIDGET_GENERAL
-						iData1 = self.BUTTON_MESSAGE_LINE
-						iData2 = i
+					eWidget = WidgetTypes.WIDGET_GENERAL
+					iData1 = self.BUTTON_MESSAGE_LINE
+					iData2 = i
 					screen.setText(szName, "Background", self.setFontSize(szLine, -1), CvUtil.FONT_LEFT_JUSTIFY, iLineX, iTextY + int(fRow * iLine), -0.3, FontTypes.SMALL_FONT, eWidget, iData1, iData2)
 					self.dMessageLineIndex[szName] = i
 					screen.show(szName)
@@ -4679,8 +4663,35 @@ class CvMainInterface:
 		except:
 			pass
 
+	# the native player a message names (-1: none); right click on such a message talks to the nation
+	def getMessageContact(self, iMessage):
+		try:
+			iX, iY, eContact = self.atMessageTargets[iMessage]
+			if eContact >= 0 and gc.getActivePlayer().canContact(eContact):
+				return eContact
+		except:
+			pass
+		return -1
+
+	def contactMessageNation(self, eContact):
+		try:
+			gc.getActivePlayer().contact(eContact)
+		except:
+			pass
+
 	def getMessagePediaHelp(self, iMessage):
 		try:
+			iContact = self.getMessageContact(iMessage)
+			if iContact >= 0:
+				pNative = gc.getPlayer(iContact)
+				szNation = pNative.getCivilizationShortDescription(0)
+				if not szNation:
+					szNation = pNative.getName()
+				szText = localText.getText("TXT_KEY_WTP_MESSAGE_CONTACT_HELP", (szNation,))
+				aContactTargets = self.getMessagePediaTargets(iMessage)
+				if len(aContactTargets) > 0:
+					szText += u"\n" + localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP2", (aContactTargets[0][0],))
+				return szText
 			aTargets = self.getMessagePediaTargets(iMessage)
 			if len(aTargets) == 0:
 				return u""

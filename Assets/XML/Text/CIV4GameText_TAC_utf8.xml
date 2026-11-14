@@ -3399,6 +3399,11 @@
 		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_CONTACT_HELP</Tag>
+		<English>Left click: show the place on the map[NEWLINE]Right click: talk to [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: mit [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] sprechen</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP2</Tag>
 		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
