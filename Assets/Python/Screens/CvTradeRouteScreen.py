@@ -1307,17 +1307,17 @@ class CvTradeRouteScreen:
 		elif iField == F_IMP_FEEDER:
 			d["feeder"] = not d["feeder"]
 		elif iField == F_IMP_LAND:
-			d["impDom"] = d["impDom"] ^ 1
+			d["impDom"] = (d["impDom"] ^ 1) & 1
 		elif iField == F_IMP_SEA:
-			d["impDom"] = d["impDom"] ^ 2
+			d["impDom"] = (d["impDom"] ^ 2) & 2
 		elif iField == F_EXP_CHECK:
 			d["exp"] = not d["exp"]
 		elif iField == F_EXP_AUTO:
 			d["auto"] = not d["auto"]
 		elif iField == F_EXP_LAND:
-			d["expDom"] = d["expDom"] ^ 1
+			d["expDom"] = (d["expDom"] ^ 1) & 1
 		elif iField == F_EXP_SEA:
-			d["expDom"] = d["expDom"] ^ 2
+			d["expDom"] = (d["expDom"] ^ 2) & 2
 		self.drawRows()
 		self.checkMarketChange(self.aYields[iIndex], dOld)
 
