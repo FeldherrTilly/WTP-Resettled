@@ -18,6 +18,7 @@ BTN_DOWN = 41004
 BTN_PRESET = 41010 # + 0..4
 BTN_FAV_IMP = 41020 # (the favorite checkbox of a row: 41020 + slot)
 BTN_FAV_EXP = 41100 # + slot
+BTN_FILTER = 41400 # + slot (the filter checkbox of a row)
 BTN_VIEW = 41200 # the drop down: default view / favorites
 BTN_SEARCH = 41300 # the search field
 BTN_CLEAR_SEARCH = 41301
@@ -33,6 +34,7 @@ VIEW_BUILD = 3 # the goods of the building material preset
 VIEW_MARKET = 4 # the goods of the market automatic preset
 VIEW_PRODUCED = 5 # the goods the city produces
 VIEW_NEEDED = 6 # the goods the current production needs
+VIEW_FILTER = 7 # the goods of the searches (kept, goods can be taken out again)
 
 # fields of a row
 F_IMP_MINUS = 0
@@ -82,6 +84,46 @@ def logTrade(szText):
 # [[WTPFAV:TYPE_1,TYPE_2]] in the text (the random events keep their own markers in the same text, they are left alone)
 FAV_PREFIX = "[[WTPFAV:"
 FAV_SUFFIX = "]]"
+# the filter (the goods of the searches) is kept like the favorites, in the script data of the player
+FLT_PREFIX = "[[WTPFLT:"
+FLT_SUFFIX = "]]"
+
+def loadFilter():
+	aFlt = []
+	try:
+		szData = getActivePlayer().getScriptData()
+		if szData == None:
+			szData = ""
+		iStart = szData.find(FLT_PREFIX)
+		if iStart != -1:
+			iStart += len(FLT_PREFIX)
+			iEnd = szData.find(FLT_SUFFIX, iStart)
+			if iEnd != -1:
+				for szType in szData[iStart:iEnd].split(","):
+					szType = szType.strip()
+					if len(szType) > 0:
+						aFlt.append(szType)
+	except:
+		pass
+	return aFlt
+
+def saveFilter(aFlt):
+	try:
+		pPlayer = getActivePlayer()
+		szData = pPlayer.getScriptData()
+		if szData == None:
+			szData = ""
+		iStart = szData.find(FLT_PREFIX)
+		if iStart != -1:
+			iEnd = szData.find(FLT_SUFFIX, iStart)
+			if iEnd != -1:
+				szData = szData[:iStart] + szData[iEnd + len(FLT_SUFFIX):]
+		if len(aFlt) > 0:
+			szData = szData + FLT_PREFIX + ",".join(aFlt) + FLT_SUFFIX
+		pPlayer.setScriptData(szData)
+	except:
+		import traceback
+		logTrade(traceback.format_exc())
 
 def getActivePlayer():
 	return gc.getPlayer(gc.getGame().getActivePlayer())
@@ -374,7 +416,7 @@ class CvTradeRouteScreen:
 				self.szQuery = self.szSuggestion
 				bChanged = True
 		if bChanged:
-			self.searchChanged()
+			self.searchChanged(True)
 
 	# the number of rows and whether there are pages: when it changes the window is built again (its height follows)
 	def getMaxVisible(self):
@@ -396,11 +438,49 @@ class CvTradeRouteScreen:
 			self.drawRows()
 			self.drawPage()
 
-	def searchChanged(self):
+	def searchChanged(self, bSwitch = False):
 		self.findSuggestion()
 		self.drawSearchText()
+		self.syncFilter()
+		if bSwitch and self.iView != VIEW_FILTER:
+			# searching: the drop down changes to the filter view (the window is built again with the new selection)
+			self.iView = VIEW_FILTER
+			self.tLayout = (-1, False)
 		self.buildView()
 		self.refreshList()
+
+	# the confirmed goods are saved (as yield types) with the game
+	def syncFilter(self):
+		aTypes = []
+		for szName in self.aConfirmed:
+			for iYield in self.dNames.keys():
+				if self.dNames[iYield].lower() == szName:
+					aTypes.append(gc.getYieldInfo(iYield).getType())
+		if aTypes != loadFilter():
+			saveFilter(aTypes)
+
+	def isInFilter(self, iYield):
+		return self.dNames[iYield].lower() in self.aConfirmed
+
+	def toggleFilter(self, iYield):
+		szName = self.dNames[iYield].lower()
+		if szName in self.aConfirmed:
+			self.aConfirmed.remove(szName)
+		else:
+			self.aConfirmed.append(szName)
+		self.syncFilter()
+		self.findSuggestion()
+		self.drawSearchText()
+		if self.iView == VIEW_FILTER:
+			self.buildView()
+			self.refreshList()
+		else:
+			self.drawRows()
+
+	def filterClicked(self, iSlot):
+		iIndex = self.iFirst + iSlot
+		if iIndex < len(self.aYields):
+			self.toggleFilter(self.aYields[iIndex])
 
 	def isFav(self, iYield):
 		return gc.getYieldInfo(iYield).getType() in self.aFav
@@ -446,8 +526,8 @@ class CvTradeRouteScreen:
 		else:
 			self.aYields = list(self.aAllYields)
 		szTerm = self.szQuery.strip().lower()
-		if len(szTerm) > 0 or len(self.aConfirmed) > 0:
-			# the confirmed goods exactly, plus everything that contains the text just being typed
+		if self.iView == VIEW_FILTER:
+			# the confirmed goods exactly (kept), plus everything that contains the text just being typed
 			aKept = []
 			for iYield in self.aYields:
 				szName = self.dNames[iYield].lower()
@@ -465,6 +545,11 @@ class CvTradeRouteScreen:
 		if iView == self.iView:
 			return
 		self.iView = iView
+		if iView != VIEW_FILTER and len(self.szQuery) > 0:
+			# the text just being typed belongs to the filter view only
+			self.szQuery = u""
+			self.findSuggestion()
+			self.drawSearchText()
 		self.buildView()
 		self.refreshList()
 
@@ -626,6 +711,11 @@ class CvTradeRouteScreen:
 		self.dNames = {}
 		for iYield in self.dData.keys():
 			self.dNames[iYield] = gc.getYieldInfo(iYield).getDescription()
+		# the filter of the searches before (names in the order they were confirmed)
+		for szType in loadFilter():
+			for iYield in self.dNames.keys():
+				if gc.getYieldInfo(iYield).getType() == szType:
+					self.aConfirmed.append(self.dNames[iYield].lower())
 		self.dKeys = {}
 		for szKey in SEARCH_KEY_NAMES.keys():
 			iKey = getattr(InputTypes, szKey, None)
@@ -731,6 +821,7 @@ class CvTradeRouteScreen:
 		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT", ()), 4, 4, self.iView == 4)
 		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED", ()), 5, 5, self.iView == 5)
 		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED", ()), 6, 6, self.iView == 6)
+		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ()), 7, 7, self.iView == 7)
 		self.aDrawn.append("TRSView")
 		self.drawRows()
 		self.drawPage()
@@ -817,6 +908,7 @@ class CvTradeRouteScreen:
 		szExport = localText.getText("TXT_KEY_POPUP_IMPORT_EXPORT", ())
 		szAuto = localText.getText("TXT_KEY_POPUP_IMPORT_AUTO_EXPORT", ())
 		szFav = localText.getText("TXT_KEY_WTP_TRADEROUTE_FAVORITE", ())
+		szFilter = localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ())
 		for iSlot in range(self.iVisible):
 			iIndex = self.iFirst + iSlot
 			if iIndex >= len(self.aYields):
@@ -847,7 +939,9 @@ class CvTradeRouteScreen:
 			self.drawCheck("TRSc" + str(iSlot) + "_11", szSea, (d["expDom"] & 2) != 0, iCX + self.CHECK_W + 4, iY + 2 + self.CHECK_H + 2, iBase + F_EXP_SEA)
 			# the favorite checkbox at the right end of the row (one setting per good, for import and export)
 			bFav = self.isFav(iYield)
-			self.drawCheck("TRSc" + str(iSlot) + "_fe", szFav, bFav, self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + (self.ROW_H - self.CHECK_H) / 2, BTN_FAV_EXP + iSlot)
+			self.drawCheck("TRSc" + str(iSlot) + "_fe", szFav, bFav, self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + 2, BTN_FAV_EXP + iSlot)
+			# below it: the good is part of the filter (the goods of the searches, view "Filter")
+			self.drawCheck("TRSc" + str(iSlot) + "_ff", szFilter, self.isInFilter(iYield), self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + 2 + self.CHECK_H + 2, BTN_FILTER + iSlot)
 
 	def drawSpin(self, iSlot, iBlock, iValue, iX, iY, iMinusCode, iPlusCode):
 		screen = self.pHost
@@ -869,7 +963,7 @@ class CvTradeRouteScreen:
 			self.removeButton("TRSm" + str(iSlot) + "_" + str(iBlock))
 			self.removeButton("TRSp" + str(iSlot) + "_" + str(iBlock))
 			self.drop("TRSv" + str(iSlot) + "_" + str(iBlock))
-		for szTag in ("2", "3", "4", "5", "8", "9", "10", "11", "fe"):
+		for szTag in ("2", "3", "4", "5", "8", "9", "10", "11", "fe", "ff"):
 			self.removeButton("TRSc" + str(iSlot) + "_" + szTag)
 
 	def clearRows(self):
@@ -963,6 +1057,8 @@ class CvTradeRouteScreen:
 			return localText.getText("TXT_KEY_WTP_TRADEROUTE_FAVORITE_HELP", ())
 		if iCode >= BTN_FAV_EXP and iCode < BTN_FAV_EXP + 80:
 			return localText.getText("TXT_KEY_WTP_TRADEROUTE_FAVORITE_HELP", ())
+		if iCode >= BTN_FILTER and iCode < BTN_FILTER + 80:
+			return localText.getText("TXT_KEY_WTP_TRADEROUTE_FILTER_HELP", ())
 		if iCode == BTN_UP:
 			return localText.getText("TXT_KEY_WTP_TRADEROUTE_PAGE_PREV_HELP", ())
 		if iCode == BTN_DOWN:
@@ -1211,6 +1307,8 @@ class CvTradeRouteScreen:
 			self.szQuery = u""
 			self.aConfirmed = []
 			self.searchChanged()
+		elif iData >= BTN_FILTER and iData < BTN_FILTER + 80:
+			self.filterClicked(iData - BTN_FILTER)
 		elif iData == BTN_SEARCH:
 			self.drawSearchText()
 		elif iData == BTN_UP:
