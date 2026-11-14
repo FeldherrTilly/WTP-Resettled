@@ -3358,4 +3358,9 @@
 		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Moves the window; hold the button to keep moving. The arrow keys do the same. Shift: double steps, Ctrl: half steps, both: a third.[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Verschiebt das Fenster; Knopf gedrückt halten, um weiterzuschieben. Die Pfeiltasten machen dasselbe. Umschalt: doppelte Schritte, Strg: halbe Schritte, beide: ein Drittel.[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_SELL_ALL_SHIFT_HELP</Tag>
+		<English>Shift + click: sells the goods of all ships in the port.</English>
+		<German>Umschalt + Klick: verkauft die Waren aller Schiffe im Hafen.</German>
+	</TEXT>
 </Civ4GameText>
