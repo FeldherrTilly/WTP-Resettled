@@ -220,8 +220,11 @@ def loadBuild(szPrefix = BLD_PREFIX):
 					aTypes = []
 					for szType in szTypes.split(","):
 						aPart = szType.strip().split("@")
-						if len(aPart) == 3:
-							aTypes.append([aPart[0], int(aPart[1]), int(aPart[2])]) # [type, the maintain level and the import limit before]
+						if len(aPart) == 3 or len(aPart) == 4:
+							iImp = 0
+							if len(aPart) == 4:
+								iImp = int(aPart[3])
+							aTypes.append([aPart[0], int(aPart[1]), int(aPart[2]), iImp]) # [type, the maintain level and the import limit before, import before (0 / 1)]
 					dBuild[int(szCity)] = aTypes
 	except:
 		pass
@@ -242,7 +245,10 @@ def saveBuild(dBuild, szPrefix = BLD_PREFIX):
 		for iCity in dBuild.keys():
 			aTypeEntries = []
 			for aType in dBuild[iCity]:
-				aTypeEntries.append("%s@%d@%d" % (aType[0], aType[1], aType[2]))
+				iImp = 0
+				if len(aType) > 3:
+					iImp = aType[3]
+				aTypeEntries.append("%s@%d@%d@%d" % (aType[0], aType[1], aType[2], iImp))
 			aEntries.append(str(iCity) + ":" + ",".join(aTypeEntries))
 		if len(aEntries) > 0:
 			szData = szData + szPrefix + ";".join(aEntries) + BLD_SUFFIX
@@ -686,13 +692,25 @@ class CvTradeRouteScreen:
 			if self.isMarketLocked(iYield):
 				aSkipped.append(iYield)
 				continue
-			bOther = False
+			aOther = []
 			for q in self.getPresetsOfGood(iYield):
 				if q["id"] != p["id"]:
-					bOther = True
-			if bOther:
+					aOther.append(q)
+			if len(aOther) > 0:
+				# another preset that is on still asks for the good: it keeps it and takes over what it was before (so that the good
+				# is taken away again when that preset goes off)
+				q = aOther[0]
+				dOther = loadBuild(q["prefix"])
+				if dOther.has_key(self.iCity):
+					bHas = False
+					for aOld in dOther[self.iCity]:
+						if aOld[0] == aType[0]:
+							bHas = True
+					if not bHas:
+						dOther[self.iCity].append(list(aType))
+						saveBuild(dOther, q["prefix"])
 				continue
-			self.dData[iYield]["imp"] = False
+			self.dData[iYield]["imp"] = len(aType) > 3 and aType[3] != 0 # (an import with the amount 0 before stays)
 			self.dData[iYield]["feeder"] = False
 			self.dData[iYield]["maintain"] = aType[1]
 			self.dData[iYield]["impLimit"] = aType[2]
@@ -713,12 +731,12 @@ class CvTradeRouteScreen:
 				if iYield < 0:
 					continue
 				d = self.dData[iYield]
-				if d["imp"] or d["feeder"]:
+				if self.isGoodActive(iYield):
 					continue # set by hand before: stays as it is
 				if self.isMarketLocked(iYield):
 					aSkipped.append(iYield) # (market automatic manages the good)
 					continue
-				aAdded.append([szType, d["maintain"], d["impLimit"]])
+				aAdded.append([szType, d["maintain"], d["impLimit"], int(d["imp"])])
 				d["imp"] = True
 				d["feeder"] = True
 				self.setPresetLevels(d, p)
@@ -1477,10 +1495,10 @@ class CvTradeRouteScreen:
 		if self.iView == VIEW_MARKED:
 			self.buildView()
 			self.drawPage()
-		self.drawRows()
 		self.warnSkipped(aSkipped)
 		if iPreset == 0:
 			self.checkPresetLost(self.aYields, True, dOldAll)
+		self.drawRows() # (after the notices: with one open a preset stays on until it is answered)
 		self.iReload = 60
 
 	def runPreset(self, iPreset):
