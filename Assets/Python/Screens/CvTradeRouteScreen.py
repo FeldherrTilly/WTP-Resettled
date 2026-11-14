@@ -616,11 +616,11 @@ class CvTradeRouteScreen:
 		self.drawBuildButton()
 		self.drawRows()
 
-	# a good does something for the trade routes: it imports or the feeder is on
-	# (the game switches the import on by itself when the feeder is on, so the feeder alone is enough)
+	# a good does something for the trade routes: the feeder is on (the game switches the import on with it), or it imports with an
+	# import amount above 0 (import on with the amount 0 does nothing without the feeder)
 	def isGoodActive(self, iYield):
 		d = self.dData[iYield]
-		return d["imp"] or d["feeder"]
+		return d["feeder"] or (d["imp"] and d["impLimit"] > 0)
 
 	# a preset none of whose goods is active any more is off (its button shows it)
 	def updatePresetState(self):
@@ -1335,8 +1335,8 @@ class CvTradeRouteScreen:
 		if iBlock == 1:
 			szKey = "maintain"
 		d[szKey] = max(0, min(MAX_VALUE, d[szKey] + iDelta))
+		self.checkMarketChange(self.aYields[iIndex], dOld) # (before the redraw: a notice keeps the preset on until it is answered)
 		self.drawRows()
-		self.checkMarketChange(self.aYields[iIndex], dOld)
 
 	def toggleField(self, iSlot, iField):
 		iIndex = self.iFirst + iSlot
@@ -1364,8 +1364,8 @@ class CvTradeRouteScreen:
 			d["expDom"] = (d["expDom"] ^ 1) & 1
 		elif iField == F_EXP_SEA:
 			d["expDom"] = (d["expDom"] ^ 2) & 2
+		self.checkMarketChange(self.aYields[iIndex], dOld) # (before the redraw: a notice keeps the preset on until it is answered)
 		self.drawRows()
-		self.checkMarketChange(self.aYields[iIndex], dOld)
 
 	def apply(self):
 		pCity = self.getCity()
