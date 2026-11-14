@@ -3929,6 +3929,12 @@ class CvMainInterface:
 	def isMessagePanelShown(self):
 		return self.tMessagePanelKey is not None
 
+	# Ctrl + Shift + Q: back to the default place
+	def resetMessagePanel(self):
+		self.iMsgMoveX = 0
+		self.iMsgMoveY = 0
+		self.updateMessagePanel()
+
 	def pressMessageArrow(self, iDir):
 		if iDir in self.aMsgHeld:
 			return
