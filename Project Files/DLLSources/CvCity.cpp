@@ -518,6 +518,7 @@ void CvCity::doTurn()
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvCity::doTurn (native)" : "CvCity::doTurn");
 #endif
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_CITY_DOTURN);
 	OOS_LOG("CvCity::doTurn start", getID());
 
 	PROFILE_FUNC();

@@ -101,6 +101,7 @@ void CvCityAI::AI_doTurn()
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvCityAI::AI_doTurn (native)" : "CvCityAI::AI_doTurn");
 #endif
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_CITYAI_DOTURN);
 	PROFILE_FUNC();
 
 	UnitTypes eUnit = GC.getCivilizationInfo(getCivilizationType()).getCivilizationUnits(GLOBAL_DEFINE_DEFAULT_POPULATION_UNIT);

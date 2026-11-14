@@ -228,6 +228,7 @@ void CvPlayerAI::AI_doTurnPre()
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPre (native)" : "CvPlayerAI::AI_doTurnPre");
 #endif
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPRE);
 	PROFILE_FUNC();
 
 	FAssertMsg(getPersonalityType() != NO_LEADER, "getPersonalityType() is not expected to be equal with NO_LEADER");
@@ -236,9 +237,15 @@ void CvPlayerAI::AI_doTurnPre()
 
 	AI_invalidateCloseBordersAttitudeCache();
 
-	AI_doCounter();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOCOUNTER);
+		AI_doCounter();
+	}
 
-	AI_doEnemyUnitData();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOENEMYUNITDATA);
+		AI_doEnemyUnitData();
+	}
 
 	if (isHuman())
 	{
@@ -252,15 +259,29 @@ void CvPlayerAI::AI_doTurnPre()
 		pUnit->AI_setMovePriority(0);
 	}
 
-	AI_doEmotions();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOEMOTIONS);
+		AI_doEmotions();
+	}
 
-	AI_doUnitAIWeights();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOUNITAIWEIGHTS);
+		AI_doUnitAIWeights();
+	}
 
-	AI_doMilitary();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOMILITARY);
+		AI_doMilitary();
+	}
 
-	AI_doStrategy();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOSTRATEGY);
+		AI_doStrategy();
+	}
 
-	AI_updateYieldValues();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_UPDATEYIELDVALUES);
+		AI_updateYieldValues();
 
 	AI_doCitizenRelocation();
 
@@ -413,6 +434,7 @@ void CvPlayerAI::AI_doTurnPost()
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPost (native)" : "CvPlayerAI::AI_doTurnPost");
 #endif
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPOST);
 	PROFILE_FUNC();
 
 	if (isHuman())
@@ -630,6 +652,7 @@ void CvPlayerAI::AI_doTurnUnitsPre()
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnUnitsPre (native)" : "CvPlayerAI::AI_doTurnUnitsPre");
 #endif
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPRE);
 	PROFILE_FUNC();
 	AI_updateBestYieldPlots();
 	// WTP: rating every plot of the map is expensive; every 3 turns is enough (spread over the players).
@@ -1300,6 +1323,7 @@ void CvPlayerAI::AI_doTurnUnitsPost()
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnUnitsPost (native)" : "CvPlayerAI::AI_doTurnUnitsPost");
 #endif
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPOST);
 	PROFILE_FUNC();
 
 	CvUnit* pLoopUnit;
@@ -1892,6 +1916,7 @@ void CvPlayerAI::AI_unitUpdate()
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_unitUpdate (native)" : "CvPlayerAI::AI_unitUpdate");
 #endif
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_UNITUPDATE);
 	PROFILE_FUNC();
 
 	CLLNode<int>* pCurrUnitNode;
@@ -2300,6 +2325,7 @@ struct ApplyAssignWorkingPlots
 
 void CvPlayerAI::AI_assignWorkingPlots()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_ASSIGN_WORKING_PLOTS);
 	AI_manageEconomy();
 
 	// Collect cities
