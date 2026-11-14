@@ -717,6 +717,25 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 			}
 			break;
 		}
+		if (info.getData2() == WTP_NATIVE_WAYPOINT_POPUP)
+		{
+			// WTP: waypoint of a native settlement: button = id of the city, WTP_NATIVE_WAYPOINT_REMOVE = remove, -1 = cancel
+			const int iButton = pPopupReturn->getButtonClicked();
+			CvPlayer& kWpPlayer = GET_PLAYER(GC.getGameINLINE().getActivePlayer());
+			if (iButton == WTP_NATIVE_WAYPOINT_REMOVE)
+			{
+				kWpPlayer.setNativeWaypoint(info.getData1(), -1);
+			}
+			else if (iButton >= 0 && kWpPlayer.getCity(iButton) != NULL)
+			{
+				kWpPlayer.setNativeWaypoint(info.getData1(), iButton);
+			}
+			// back to the advisor (native tab)
+			CvPopupInfo* pAdvisor = new CvPopupInfo(BUTTONPOPUP_PYTHON_SCREEN);
+			pAdvisor->setText(L"showDomesticAdvisor");
+			gDLL->getInterfaceIFace()->addPopup(pAdvisor, GC.getGameINLINE().getActivePlayer(), true);
+			break;
+		}
 		iExamineCityID = 0;
 		iExamineCityID = std::max(iExamineCityID, GC.getNumUnitInfos());
 		iExamineCityID = std::max(iExamineCityID, GC.getNumBuildingInfos());
@@ -1563,6 +1582,10 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 		{
 			break; // WTP: the buy panel is wanted while the city is producing
 		}
+		if (info.getData2() == WTP_NATIVE_WAYPOINT_POPUP)
+		{
+			break; // WTP: the waypoint popup is wanted while the city is producing
+		}
 		{
 			PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
 			CvCity* pCity = GET_PLAYER(ePlayer).getCity(info.getData1());
@@ -1993,6 +2016,37 @@ static bool launchBuyMaterialsPopup(CvPopup* pPopup, CvPopupInfo& info)
 	return true;
 }
 
+static bool launchNativeWaypointPopup(CvPopup* pPopup, CvPopupInfo& info)
+{
+	CvPlot* pPlot = GC.getMap().plotByIndexINLINE(info.getData1());
+	CvPlayer& kPlayer = GET_PLAYER(GC.getGameINLINE().getActivePlayer());
+	if (pPlot == NULL || !pPlot->isCity())
+	{
+		return false;
+	}
+	CvCity* pNative = pPlot->getPlotCity();
+	gDLL->getInterfaceIFace()->popupSetHeaderString(pPopup, gDLL->getText("TXT_KEY_WTP_WAYPOINT_HEADER", pNative->getNameKey()), DLL_FONT_LEFT_JUSTIFY);
+
+	int iLoop;
+	const int iCurrent = kPlayer.getNativeWaypoint(info.getData1());
+	for (CvCity* pCity = kPlayer.firstCity(&iLoop); pCity != NULL; pCity = kPlayer.nextCity(&iLoop))
+	{
+		CvWString szText = pCity->getName();
+		if (pCity->getID() == iCurrent)
+		{
+			szText += L" *";
+		}
+		gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, szText.c_str(), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CITYSELECTION")->getPath(), pCity->getID(), WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+	}
+	if (iCurrent >= 0)
+	{
+		gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_WTP_WAYPOINT_REMOVE").c_str(), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CANCEL")->getPath(), WTP_NATIVE_WAYPOINT_REMOVE, WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+	}
+	gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_NEVER_MIND"), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CANCEL")->getPath(), -1, WIDGET_GENERAL, -1, -1, true, POPUP_LAYOUT_STRETCH, DLL_FONT_LEFT_JUSTIFY);
+	gDLL->getInterfaceIFace()->popupLaunch(pPopup, false, POPUPSTATE_IMMEDIATE);
+	return true;
+}
+
 bool CvDLLButtonPopup::launchProductionPopup(CvPopup* pPopup, CvPopupInfo &info)
 {
 	// WTP: upgrade of a building (right click on a building of the city screen)
@@ -2005,6 +2059,11 @@ bool CvDLLButtonPopup::launchProductionPopup(CvPopup* pPopup, CvPopupInfo &info)
 	if (info.getData2() == WTP_BUY_MATERIALS_POPUP)
 	{
 		return launchBuyMaterialsPopup(pPopup, info);
+	}
+
+	if (info.getData2() == WTP_NATIVE_WAYPOINT_POPUP)
+	{
+		return launchNativeWaypointPopup(pPopup, info);
 	}
 
 	CvWString szBuffer;

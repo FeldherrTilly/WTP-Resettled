@@ -102,6 +102,33 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 			return citylist[iRow]
 		return None
 
+	def hasOwnPresence(self, pNativeCity, player):
+		if pNativeCity.getTradePostPlayer() == player.getID():
+			return True
+		if pNativeCity.getMissionaryPlayer() == player.getID() and pNativeCity.getMissionaryRate() > 0:
+			return True
+		return False
+
+	def openWaypointPopup(self, iRow, iPlotIndex = -1):
+		try:
+			pNative = self.getCityOfRow(iRow)
+			if pNative is None:
+				return False
+			player = gc.getPlayer(gc.getGame().getActivePlayer())
+			if not self.hasOwnPresence(pNative, player):
+				return False
+			self.parent.getScreen().hideScreen()
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_CHOOSEPRODUCTION)
+			popupInfo.setData1(pNative.plot().getIndex())
+			popupInfo.setData2(1002)
+			popupInfo.addPopup(player.getID())
+			return True
+		except:
+			import traceback
+			logWaypoint(traceback.format_exc())
+			return False
+
 	def lookAtSettlement(self, iPlotID):
 		plot = gc.getMap().plotByIndex(iPlotID)
 		if plot is None or plot.isNone():
@@ -172,6 +199,19 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 					self.tableManager.addText(gc.getUnitInfo(pLoopCity.getTeachUnit()).getDescription(), pLoopCity.getTeachUnit(), -1, WidgetTypes.WIDGET_PEDIA_JUMP_TO_UNIT)
 				else:
 					self.tableManager.skipCell()
+
+				# WTP: waypoint for units created here by a mission / trading post of the player (click to set / remove)
+				if self.hasOwnPresence(pLoopCity, player):
+					iWaypoint = player.getNativeWaypoint(pLoopCity.plot().getIndex())
+					pWaypointCity = None
+					if iWaypoint >= 0:
+						pWaypointCity = player.getCity(iWaypoint)
+					if pWaypointCity is not None and not pWaypointCity.isNone():
+						self.tableManager.addText(u"%c " % CyGame().getSymbolID(FontSymbols.MOVES_CHAR) + pWaypointCity.getName(), pLoopCity.plot().getIndex())
+					else:
+						self.tableManager.addText(u"%c " % CyGame().getSymbolID(FontSymbols.OPEN_BORDERS_CHAR) + localText.getText("TXT_KEY_WTP_WAYPOINT_COLUMN", ()), pLoopCity.plot().getIndex())
+				else:
+					self.tableManager.skipCell()
 	
 	def getWidgetHelp(self, argsList):
 		iScreen, eWidgetType, iData1, iData2, bOption = argsList
@@ -193,6 +233,10 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 			# WTP: a click on the civ column opens the diplomacy screen of this nation
 			if (inputClass.getMouseX() == 2):
 				if self.contactNation(inputClass.getMouseY(), inputClass.getData1()):
+					return 0
+			# WTP: waypoint column
+			if (inputClass.getMouseX() == 8):
+				if self.openWaypointPopup(inputClass.getMouseY(), inputClass.getData1()):
 					return 0
 			return -1
 
@@ -225,3 +269,4 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 		
 		self.tableManager.addHeaderChar(gc.getYieldInfo(YieldTypes.YIELD_CROSSES).getChar(), iCrossWidth)
 		self.tableManager.addHeaderTxt("TXT_KEY_PEDIA_SPECIAL_ABILITIES", 200)
+		self.tableManager.addHeaderTxt("TXT_KEY_WTP_WAYPOINT_COLUMN", 160)
