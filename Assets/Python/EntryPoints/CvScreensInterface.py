@@ -582,6 +582,8 @@ def mouseOverPlot (argsList):
 tradeRouteScreen = CvTradeRouteScreen.CvTradeRouteScreen()
 def askTradeRouteSetup(argsList):
 	try:
+		if not CvTradeRouteScreen.isNewWindowEnabled():
+			return 0 # (game option off: the DLL shows its own popup)
 		return tradeRouteScreen.open(argsList[0], argsList[1] != 0)
 	except:
 		import traceback
