@@ -4301,7 +4301,10 @@ class CvMainInterface:
 		fSum = 0.0
 		szPlain = szPlain.replace(u"&lt;", u"<").replace(u"&gt;", u">").replace(u"&amp;", u"&")
 		for c in szPlain:
-			if c == u"\u2022":
+			if c == u"\t":
+				# a tab goes to the next tab stop (31 pixels for a line of 22 pixels: measured on the sell price lines of a cargo ship)
+				fSum = (int(fSum / 31.0) + 1) * 31.0
+			elif c == u"\u2022":
 				fSum += 8.0 # the bullet of a list
 			elif ord(c) >= 0x2000:
 				fSum += 19.7 # icon of the game font
@@ -4329,7 +4332,7 @@ class CvMainInterface:
 		self.drawTipWindow(screen, "HudTip", self.tTipLayout, bClickable, 0, self.aiTipIndent)
 
 	def getTipWindowNames( self, szPrefix, iLines ):
-		aszNames = [szPrefix + "Back1", szPrefix + "Back2"]
+		aszNames = [szPrefix + "Back1", szPrefix + "Back2", szPrefix + "Back3"]
 		for i in range(iLines):
 			aszNames.append(szPrefix + "Line%d" % i)
 		return aszNames
@@ -4344,6 +4347,10 @@ class CvMainInterface:
 		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
 		screen.addPanel(szPrefix + "Back1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		screen.addPanel(szPrefix + "Back2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+		# over an element of the HUD (the panel style is semi-transparent) one more layer, as the expanded message panel has
+		bOverHud = self.isTipOverHud(screen, iX, iY, iWidth, iHeight)
+		if bOverHud:
+			screen.addPanel(szPrefix + "Back3", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		for i in range(len(aszLines)):
 			eWidget = WidgetTypes.WIDGET_GENERAL
 			iData1 = -1
@@ -4356,8 +4363,27 @@ class CvMainInterface:
 				iIndent = aiIndent[i]
 			screen.setText(szPrefix + "Line%d" % i, "Background", self.setFontSize(aszLines[i], -1), CvUtil.FONT_LEFT_JUSTIFY, iX + iPad + iIndent, iY + iPad + i * iLine, -0.3, FontTypes.SMALL_FONT, eWidget, iData1, iData2)
 		for szName in self.getTipWindowNames(szPrefix, len(aszLines)):
+			if szName == szPrefix + "Back3" and not bOverHud:
+				continue
 			screen.show(szName)
 			screen.moveToFront(szName)
+
+	# does the window cover an element of the HUD (the bars at the bottom, the unit panel, the minimap, the score table)?
+	def isTipOverHud( self, screen, iX, iY, iWidth, iHeight ):
+		try:
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			if iY + iHeight > yRes - max(UPPER_SADDLE_HEIGHT, BOTTOM_CENTER_HUD_HEIGHT):
+				return True
+			if iX + iWidth > xRes - LOWER_RIGHT_CORNER_BACKGROUND_WIDTH and iY + iHeight > yRes - LOWER_RIGHT_CORNER_BACKGROUND_HEIGHT:
+				return True
+			if self.tScoreRect is not None:
+				(iSX, iSY, iSW, iSH) = self.tScoreRect
+				if iX < iSX + iSW and iX + iWidth > iSX and iY < iSY + iSH and iY + iHeight > iSY:
+					return True
+		except:
+			pass
+		return False
 
 	# the hint line at the end of a frozen window (wrapped to the width of the window: the window does not get wider because of it)
 	def addFrozenHint( self, screen, tLayout, aiIndent ):
