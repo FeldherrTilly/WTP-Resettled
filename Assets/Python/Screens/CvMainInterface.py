@@ -4677,7 +4677,9 @@ class CvMainInterface:
 		iScreen, eWidgetType, iData1, iData2, bOption = argsList
 
 		if eWidgetType == WidgetTypes.WIDGET_GENERAL:
-			if iData1 == BUILDING_MANAGMENT_TOGGLE:
+			if iData1 == self.BUTTON_MESSAGE_AUTO:
+				return localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP", ())
+			elif iData1 == BUILDING_MANAGMENT_TOGGLE:
 				return localText.getText("TXT_KEY_INTERFACE_BUILD_TOGGLE", ());
 			elif iData1 == MAP_MANAGMENT_TOGGLE:
 				return localText.getText("TXT_KEY_INTERFACE_MAP_TOGGLE", ());
