@@ -4368,12 +4368,15 @@ class CvMainInterface:
 			screen.show(szName)
 			screen.moveToFront(szName)
 
-	# does the window cover an element of the HUD (the bars at the bottom, the unit panel, the minimap, the score table)?
+	# does the window cover an element of the HUD (the bars at the top and bottom, the unit panel, the minimap, the score table)?
 	def isTipOverHud( self, screen, iX, iY, iWidth, iHeight ):
 		try:
 			xRes = screen.getXResolution()
 			yRes = screen.getYResolution()
 			if iY + iHeight > yRes - max(UPPER_SADDLE_HEIGHT, BOTTOM_CENTER_HUD_HEIGHT):
+				return True
+			# the top of the screen (the advisor buttons, gold, date)
+			if iY < max(TOP_CORNER_HUD_HEIGHT, TOP_CENTER_HUD_HEIGHT):
 				return True
 			if iX + iWidth > xRes - LOWER_RIGHT_CORNER_BACKGROUND_WIDTH and iY + iHeight > yRes - LOWER_RIGHT_CORNER_BACKGROUND_HEIGHT:
 				return True
