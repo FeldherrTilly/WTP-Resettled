@@ -231,6 +231,44 @@ class CvEventManager:
 					pass
 			return 1
 
+		# WTP: the amount dialog of the transfers (shift + transfer) takes all keys while it is open
+		if (CvScreensInterface.yieldAmountScreen.isOpen()):
+			if (eventType == self.EventKeyDown):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
+				except:
+					pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKeyUp(int(key))
+				except:
+					pass
+			return 1
+
+		# WTP: nested tooltips. Esc unfreezes the last frozen tooltip, X (short press) freezes the tooltip that is shown,
+		# X held closes all frozen ones
+		if (eventType == self.EventKeyDown):
+			try:
+				if int(key) == int(InputTypes.KB_ESCAPE) and CvScreensInterface.mainInterface.isTipFrozen():
+					CvScreensInterface.mainInterface.unfreezeCursorTooltip()
+					return 1
+				if int(key) == int(InputTypes.KB_X) and not self.bCtrl and not self.bShift and not self.bAlt:
+					if CvScreensInterface.mainInterface.keyXDown():
+						return 1
+				if int(key) == int(InputTypes.KB_X) and self.bShift and not self.bCtrl and not self.bAlt and CvScreensInterface.mainInterface.isTipFrozen():
+					# Shift + X stacks the frozen tooltips
+					if CvScreensInterface.mainInterface.stackFrozenTips():
+						return 1
+			except:
+				pass
+		elif (eventType == self.EventKeyUp):
+			try:
+				if int(key) == int(InputTypes.KB_X):
+					if CvScreensInterface.mainInterface.keyXUp():
+						return 1
+			except:
+				pass
+
 		# WTP: Ctrl + Shift + W A S D move the message panel (two keys at once: diagonal)
 		aMoveKeys = [int(InputTypes.KB_A), int(InputTypes.KB_D), int(InputTypes.KB_W), int(InputTypes.KB_S)] # left, right, up, down
 		if (eventType == self.EventKeyUp):
@@ -248,19 +286,6 @@ class CvEventManager:
 					return 1
 			except:
 				pass
-		# WTP: the amount dialog of the transfers (shift + transfer) takes all keys while it is open
-		if (CvScreensInterface.yieldAmountScreen.isOpen()):
-			if (eventType == self.EventKeyDown):
-				try:
-					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
-				except:
-					pass
-			elif (eventType == self.EventKeyUp):
-				try:
-					CvScreensInterface.yieldAmountScreen.handleKeyUp(int(key))
-				except:
-					pass
-			return 1
 
 		if (self.bAllowCheats):
 			# notify debug tools of input to allow it to override the control
@@ -283,6 +308,11 @@ class CvEventManager:
 					return 1
 				except:
 					pass
+
+			# WTP: Ctrl+Shift+T switches the hover tooltip (own tooltip window at the cursor) on and off
+			if (theKey == int(InputTypes.KB_T) and self.bCtrl and self.bShift and not self.bAlt):
+				CvScreensInterface.mainInterface.toggleHoverTip()
+				return 1
 
 			if (theKey == int(InputTypes.KB_I) and self.bCtrl and not self.bShift and not self.bAlt):
 				CvScreensInterface.mainInterface.toggleTerritorialInfluence()

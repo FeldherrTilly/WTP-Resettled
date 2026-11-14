@@ -6,6 +6,7 @@
 #include "CyGame.h"
 #include "CvPopupInfo.h"
 #include "CvDLLInterfaceIFaceBase.h"
+#include "CvDLLWidgetData.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
 #include "CyPlayer.h"
@@ -741,6 +742,11 @@ bool CyGame::isCtrlKeyPressed() const
 	return (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
 }
 
+bool CyGame::isShiftKeyPressed() const
+{
+	return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+}
+
 // WTP: the amount of goods of a diplomacy deal (the same as CvDLLButtonPopup::handleSelectYieldAmountPopup does)
 void CyGame::sendDiploYieldAmount(int iYield, int iAmount, int iFromPlayer) const
 {
@@ -782,6 +788,36 @@ static bool wtpGetCursor(POINT& pt)
 	HWND hWnd = GetForegroundWindow();
 	if (hWnd == NULL || !ScreenToClient(hWnd, &pt)) return false;
 	return true;
+}
+
+// WTP: the last help text of a widget of the interface (see CvDLLWidgetData::parseHelp)
+extern CvWString wtpGetWidgetHelpText();
+extern int wtpGetWidgetHelpCount();
+extern int wtpGetWidgetHelpType();
+std::wstring CyGame::getWidgetHelpText() const
+{
+	return std::wstring(wtpGetWidgetHelpText().GetCString());
+}
+int CyGame::getWidgetHelpCount() const
+{
+	return wtpGetWidgetHelpCount();
+}
+int CyGame::getWidgetHelpType() const
+{
+	return wtpGetWidgetHelpType();
+}
+std::wstring CyGame::getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const
+{
+	// the same text the game gets from CvDLLWidgetData::parseHelp for this widget; asked for inside the Python help callback, so that the
+	// own tooltip window is made before the game shows its own tooltip (changing the screen afterwards makes the game tooltip disappear)
+	CvWidgetDataStruct widgetData;
+	widgetData.m_iData1 = iData1;
+	widgetData.m_iData2 = iData2;
+	widgetData.m_bOption = bOption;
+	widgetData.m_eWidgetType = (WidgetTypes)eWidgetType;
+	CvWStringBuffer szBuffer;
+	CvDLLWidgetData::getInstance().parseHelp(szBuffer, widgetData);
+	return std::wstring(szBuffer.getCString());
 }
 
 int CyGame::getCursorClientX() const
