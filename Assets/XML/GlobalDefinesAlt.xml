@@ -1826,7 +1826,7 @@
 		<iDefineIntVal>120</iDefineIntVal>
 	</Define>
 	<Define>
-		<!-- number of free land units (only Town Guards, Colonial Militia, Rangers, Dragoons, Conquistadors can be free) -->
+		<!-- number of free land units (only Town Guards, Colonial Militia, Rangers, Dragoons, Conquistadors, Native Mercenaries, Slave Masters, Slave Hunters, Buccaneers can be free) -->
 		<DefineName>MILITARY_UPKEEP_FREE_UNITS</DefineName>
 		<iDefineIntVal>5</iDefineIntVal>
 	</Define>
