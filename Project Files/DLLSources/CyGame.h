@@ -173,6 +173,7 @@ public:
 	bool isShiftKeyPressed() const; // WTP: is the shift key down
 	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
 	int getCursorClientY() const;
+	void openDomesticMarket(int iCityID) const; // WTP: opens the domestic market popup of a city
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);

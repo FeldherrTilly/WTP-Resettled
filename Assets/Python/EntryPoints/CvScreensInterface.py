@@ -601,7 +601,25 @@ def update (argsList):
 		screen = HandleInputMap.get(argsList[0])
 		screen.update(argsList[1])
 
+# WTP: diplomacy opened from the native info tab of the domestic advisor
+bReturnToDomesticAfterDiplomacy = False
+
+# WTP: screen id of a trade screen opened from the exported goods tab of the domestic advisor (-1: none)
+iReturnToDomesticScreen = -1
+
 def onClose (argsList):
+	global iReturnToDomesticScreen
+	# WTP: back to the domestic advisor (exported goods tab) when the trade screen opened from there is closed
+	if (iReturnToDomesticScreen != -1 and argsList[0] == iReturnToDomesticScreen):
+		iReturnToDomesticScreen = -1
+		try:
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+			popupInfo.setText(u"showDomesticAdvisor")
+			popupInfo.addPopup(CyGame().getActivePlayer())
+		except:
+			pass
+
 	# allows overides for mods
 	if (CvScreenUtilsInterface.getScreenUtils().onClose(argsList)):
 		return
