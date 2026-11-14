@@ -191,7 +191,7 @@ PRESETS = [
 	{"id": "MIL", "prefix": MIL_PREFIX, "goods": MIL_GOODS, "maintain": -1, "limit": 100, "code": 6, "view": VIEW_MILITARY, "slot": 2, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON"},
 ]
 
-def loadBuild(szPrefix = szPrefix):
+def loadBuild(szPrefix = BLD_PREFIX):
 	dBuild = {}
 	try:
 		szData = getActivePlayer().getScriptData()
@@ -216,7 +216,7 @@ def loadBuild(szPrefix = szPrefix):
 		pass
 	return dBuild
 
-def saveBuild(dBuild, szPrefix = szPrefix):
+def saveBuild(dBuild, szPrefix = BLD_PREFIX):
 	try:
 		pPlayer = getActivePlayer()
 		szData = pPlayer.getScriptData()
