@@ -315,7 +315,7 @@ class CvTradeRouteScreen:
 		self.OY = 0
 		self.ROW_H = 60
 		self.CHECK_H = 28
-		self.LIST_Y = 172
+		self.LIST_Y = 206
 		self.BLOCK_IMP_X = 90
 		self.BLOCK_EXP_X = 520
 		self.CHECK_W = 124
@@ -614,15 +614,15 @@ class CvTradeRouteScreen:
 				return True
 		return False
 
-	# the buttons of the presets (building material, livestock, military goods) and of market automatic in one row, a quarter of the window each
+	# the buttons of the presets (building material, livestock, military goods) in one row below clear all / import all / auto-export all, a third of the window each
 	def drawBuildButton(self):
-		iThird = (self.W - 40 - 30) / 4
+		iThird = (self.W - 40 - 20) / 3
 		for p in PRESETS:
 			szKey = p["text"]
 			bOn = self.isPresetOn(p)
 			if bOn:
 				szKey = p["on"]
-			self.addButton("TRSPreset" + str(p["code"]), localText.getText(szKey, ()), bOn, self.OX + 20 + p["slot"] * (iThird + 10), self.OY + 96, iThird, 28, BTN_PRESET + p["code"])
+			self.addButton("TRSPreset" + str(p["code"]), localText.getText(szKey, ()), bOn, self.OX + 20 + p["slot"] * (iThird + 10), self.OY + 130, iThird, 28, BTN_PRESET + p["code"])
 
 	def getYieldByType(self, szType):
 		for iYield in self.dData.keys():
@@ -758,15 +758,27 @@ class CvTradeRouteScreen:
 				aLost.append(iYield)
 		return aLost
 
+	# the names of the presets (switched on) that ask for the good
+	def getPresetNames(self, iYield):
+		aNames = []
+		szType = gc.getYieldInfo(iYield).getType()
+		for p in PRESETS:
+			if szType in p["goods"] and self.isPresetOn(p):
+				aNames.append(localText.getText(p["text"], ()))
+		return aNames
+
 	def checkPresetLost(self, aGoods, bQueue = False):
 		for p in PRESETS:
 			aLost = self.getPresetLost(aGoods, p)
 			if len(aLost) == 0:
 				continue
-			aNames = [self.dNames[i] for i in aLost[:4]]
-			szNames = ", ".join(aNames)
+			# every good with the presets that ask for it (a good can be part of several)
+			aNames = []
+			for i in aLost[:4]:
+				aNames.append(self.dNames[i] + " (" + ", ".join(self.getPresetNames(i)) + ")")
+			szNames = "; ".join(aNames)
 			if len(aLost) > 4:
-				szNames += ", ..."
+				szNames += "; ..."
 			szPreset = localText.getText(p["text"], ())
 			szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1", (szPreset, str(len(aLost))))
 			szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2", (szNames,))
@@ -825,6 +837,21 @@ class CvTradeRouteScreen:
 		if self.tWarn != None:
 			self.drawWarn()
 
+	# the text broken into lines of at most iMax characters
+	def wrapText(self, szText, iMax):
+		aLines = []
+		szLine = u""
+		for szWord in szText.split(u" "):
+			if len(szLine) > 0 and len(szLine) + 1 + len(szWord) > iMax:
+				aLines.append(szLine)
+				szLine = szWord
+			elif len(szLine) > 0:
+				szLine = szLine + u" " + szWord
+			else:
+				szLine = szWord
+		aLines.append(szLine)
+		return aLines
+
 	# the notice in the middle of the window: a dark panel, two lines and the buttons (Reset only for a changed good)
 	def drawWarn(self):
 		if self.tWarn == None:
@@ -835,8 +862,9 @@ class CvTradeRouteScreen:
 		for szName in ("TRSWarnReset", "TRSWarnOk"):
 			self.removeButton(szName)
 		self.aWarnDrawn = []
-		iW = 640
-		iH = 130
+		iW = min(self.W - 40, 900)
+		aLines = self.wrapText(self.tWarn[1], 100)
+		iH = 110 + 24 * len(aLines)
 		iX = self.OX + (self.W - iW) / 2
 		iY = self.OY + (self.H - iH) / 2
 		for iLayer in range(3):
@@ -844,9 +872,11 @@ class CvTradeRouteScreen:
 			screen.addPanel(szBack, u"", u"", True, False, iX, iY, iW, iH, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 			self.aWarnDrawn.append(szBack)
 		screen.setText("TRSWarnText1", "", u"<font=3b><color=255,220,100>" + self.tWarn[0] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 20, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
-		screen.setText("TRSWarnText2", "", u"<font=3b><color=255,255,255>" + self.tWarn[1] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 50, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		self.aWarnDrawn.append("TRSWarnText1")
-		self.aWarnDrawn.append("TRSWarnText2")
+		for iLine in range(len(aLines)):
+			szLine = "TRSWarnText2_" + str(iLine)
+			screen.setText(szLine, "", u"<font=3b><color=255,255,255>" + aLines[iLine] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 50 + iLine * 24, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			self.aWarnDrawn.append(szLine)
 		if self.tWarn[2] >= 0 or len(self.tWarn[3]) > 0:
 			self.addButton("TRSWarnReset", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_RESET", ()), False, iX + iW / 2 - 165, iY + iH - 42, 160, 28, BTN_WARN_RESET)
 			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE", ()), False, iX + iW / 2 + 5, iY + iH - 42, 160, 28, BTN_WARN_OK)
@@ -900,8 +930,8 @@ class CvTradeRouteScreen:
 		szMarket = "TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT"
 		if pCity.isAutoMarketImport():
 			szMarket = "TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT_ON"
-		iThird = (self.W - 40 - 30) / 4
-		self.addButton("TRSPreset4", localText.getText(szMarket, ()), pCity.isAutoMarketImport(), self.OX + 20 + 3 * (iThird + 10), self.OY + 96, iThird, 28, BTN_PRESET + 4)
+		# on top of the three buttons clear all / import all / auto-export all, as wide as these together
+		self.addButton("TRSPreset4", localText.getText(szMarket, ()), pCity.isAutoMarketImport(), self.OX + 20, self.OY + 62, self.W - 40, 28, BTN_PRESET + 4)
 
 	# opens the window (1: it is open, 0: the DLL shows its own popup instead)
 	def open(self, iCity, bCondensed):
@@ -1012,7 +1042,7 @@ class CvTradeRouteScreen:
 		iBW = (self.W - 40 - 20) / 3
 		aszPreset = [localText.getText("TXT_KEY_POPUP_IMPORT_CLEAR_ALL", ()), localText.getText("TXT_KEY_POPUP_IMPORT_ALL", ()), localText.getText("TXT_KEY_POPUP_IMPORT_EXPORT_ALL", ())]
 		for i in range(3):
-			self.addButton("TRSPreset" + str(i), aszPreset[i], False, self.OX + 20 + i * (iBW + 10), self.OY + 62, iBW, 28, BTN_PRESET + i)
+			self.addButton("TRSPreset" + str(i), aszPreset[i], False, self.OX + 20 + i * (iBW + 10), self.OY + 96, iBW, 28, BTN_PRESET + i)
 		iHalf = (self.W - 40 - 10) / 2
 		self.drawBuildButton()
 		self.drawMarketButton(pCity)
