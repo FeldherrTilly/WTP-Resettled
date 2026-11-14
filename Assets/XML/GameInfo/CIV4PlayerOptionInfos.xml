@@ -118,7 +118,7 @@
 			<Type>PLAYEROPTION_MODDER_1</Type>
 			<Description>TXT_KEY_PLAYEROPTION_MODDER_1</Description>
 			<Help>TXT_KEY_PLAYEROPTION_MODDER_1_HELP</Help>
-			<bDefault>1</bDefault>
+			<bDefault>0</bDefault>
 		</PlayerOptionInfo>
 		<PlayerOptionInfo>
 			<Type>PLAYEROPTION_MODDER_2</Type>
