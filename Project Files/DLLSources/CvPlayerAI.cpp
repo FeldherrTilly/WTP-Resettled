@@ -282,22 +282,47 @@ void CvPlayerAI::AI_doTurnPre()
 	{
 		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_UPDATEYIELDVALUES);
 		AI_updateYieldValues();
+	}
 
-	AI_doCitizenRelocation();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOCITIZENRELOCATION);
+		AI_doCitizenRelocation();
+	}
 
-	AI_doPeaceWarships();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOPEACEWARSHIPS);
+		AI_doPeaceWarships();
+	}
 
-	AI_updateFullStorage();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_UPDATEFULLSTORAGE);
+		AI_updateFullStorage();
+	}
 
-	AI_doWorkforcePlan();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOWORKFORCEPLAN);
+		AI_doWorkforcePlan();
+	}
 
-	AI_doReclaimTerritory();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DORECLAIMTERRITORY);
+		AI_doReclaimTerritory();
+	}
 
-	AI_doSurplusPioneers();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOSURPLUSPIONEERS);
+		AI_doSurplusPioneers();
+	}
 
-	AI_doNativeMercDefense();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DONATIVEMERCDEFENSE);
+		AI_doNativeMercDefense();
+	}
 
-	AI_logStatusSummary();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_LOGSTATUSSUMMARY);
+		AI_logStatusSummary();
+	}
 }
 
 // WTP: per turn summary of a colonial AI, to find bad decisions (no expansion, no growth, ...) in BBAI.log

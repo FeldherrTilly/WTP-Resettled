@@ -2758,6 +2758,15 @@ class CvMainInterface:
 			if (gc.getPlayer(ePlayer).isAlive()):
 				szText = CyGameTextMgr().getGoldStr(ePlayer)
 				screen.setLabel("GoldText", "Background", self.setFontSize(szText, 1), CvUtil.FONT_LEFT_JUSTIFY, 17, 17, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, TIMETEXT_ID, -1 )
+				# WTP: the gold pile icon follows the amount: 5 digits or less keep its place, every digit more moves it to the right
+				try:
+					iDigits = len([c for c in unicode(szText) if c.isdigit()])
+					iPileX = 60
+					if iDigits > 5:
+						iPileX = 86 + (iDigits - 6) * 10
+					screen.moveItem("GoldPile", iPileX, 8, -0.3)
+				except:
+					pass
 				# WTP: below the gold the military upkeep, below that the domestic market income of the last turn
 				pPlayer = gc.getPlayer(ePlayer)
 				iUpkeep = pPlayer.getMilitaryUpkeep()
@@ -2768,15 +2777,6 @@ class CvMainInterface:
 					screen.hide("MilitaryUpkeepText")
 				szText = localText.getText("TXT_KEY_DOMESTIC_MARKET_INCOME_STR", (pPlayer.getDomesticMarketIncome(),))
 				screen.setLabel("DomesticIncomeText", "Background", self.setFontSize(szText, 0), CvUtil.FONT_LEFT_JUSTIFY, 17, 62, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
-				# WTP: the gold pile icon follows the amount: 5 digits or less keep its place, every digit more moves it to the right
-				try:
-					iDigits = len([c for c in unicode(szText) if c.isdigit()])
-					iPileX = 60
-					if iDigits > 5:
-						iPileX = 86 + (iDigits - 6) * 10
-					screen.moveItem("GoldPile", iPileX, 8, -0.3)
-				except:
-					pass
 
 		return 0
 
