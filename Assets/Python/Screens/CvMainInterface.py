@@ -5543,8 +5543,14 @@ class CvMainInterface:
 				self.followCursorTip(screen)
 		except:
 			self.bCursorTipShown = False
+	# Will update the help Strings
+	def updateHelpStrings( self ):
+		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
 
+		if ( CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL ):
+			screen.setHelpTextString("")
 			self.hideCursorTooltip(screen)
+		else:
 			szHelp = CyInterface().getHelpString()
 			self.showCursorTooltip(screen, szHelp)
 			# while the cursor is on a HUD element the plot help behind it must not replace the help of the element
@@ -5553,14 +5559,6 @@ class CvMainInterface:
 			else:
 				# the own tooltip is on: the game tooltip stays away
 				screen.setHelpTextString( u"" )
-	# Will update the help Strings
-	def updateHelpStrings( self ):
-		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
-
-		if ( CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL ):
-			screen.setHelpTextString("")
-		else:
-			screen.setHelpTextString( CyInterface().getHelpString() )
 
 		return 0
 
