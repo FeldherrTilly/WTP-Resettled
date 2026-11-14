@@ -667,6 +667,15 @@ def handleForward(screens):
 	return 0
 
 def getWidgetHelp(argsList):
+	szText = getWidgetHelpText(argsList)
+	# WTP: the own tooltip window at the cursor shows the same text
+	try:
+		mainInterface.widgetHelpSeen(szText, argsList[1])
+	except:
+		pass
+	return szText
+
+def getWidgetHelpText(argsList):
 	iScreen = argsList[0]
 	if (HandleMouseoverMap.has_key(iScreen)):
 		screen = HandleMouseoverMap.get(iScreen)
