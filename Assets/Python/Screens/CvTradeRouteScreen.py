@@ -128,8 +128,8 @@ def saveFavorites(aFav):
 # not touched at all
 BLD_PREFIX = "[[WTPBLD:"
 BLD_SUFFIX = "]]"
-BLD_MATERIAL = ["YIELD_CLAY", "YIELD_STONE", "YIELD_TOOLS"] # feeder 100 / 150
-BLD_OTHER = ["YIELD_HORSES", "YIELD_SAILCLOTH", "YIELD_HARDWOOD", "YIELD_ROPE"] # feeder, levels unchanged
+BLD_MATERIAL = ["YIELD_CLAY", "YIELD_STONE", "YIELD_TOOLS", "YIELD_HORSES", "YIELD_SAILCLOTH", "YIELD_HARDWOOD", "YIELD_ROPE"] # import and feeder, levels 100 / 150
+BLD_OTHER = []
 
 def loadBuild():
 	dBuild = {}
@@ -982,6 +982,30 @@ class CvTradeRouteScreen:
 		return u""
 
 	# a preset: the changes of the window are sent first, the window stays open and shows the result a moment later
+	# clear all / import all goods / auto-export all goods for the goods of the current filter only (all pages of the view / search)
+	def runFilteredPreset(self, iPreset):
+		for iYield in self.aYields:
+			d = self.dData[iYield]
+			if iPreset == 0:
+				d["imp"] = False
+				d["feeder"] = False
+				d["exp"] = False
+				d["auto"] = False
+				d["impDom"] = 0
+				d["expDom"] = 0
+				d["maintain"] = 0
+				d["impLimit"] = 0
+			elif iPreset == 1:
+				d["imp"] = True
+			else:
+				d["auto"] = True
+		self.apply()
+		if self.iView == VIEW_MARKED:
+			self.buildView()
+			self.drawPage()
+		self.drawRows()
+		self.iReload = 60
+
 	def runPreset(self, iPreset):
 		if iPreset == 3:
 			self.toggleBuild()
@@ -990,6 +1014,10 @@ class CvTradeRouteScreen:
 			self.toggleMarket()
 			return
 		try:
+			if iPreset <= 2 and len(self.aYields) != len(self.aAllYields):
+				# a filter is active (view / search): only the goods of the filter, over all pages
+				self.runFilteredPreset(iPreset)
+				return
 			self.apply()
 			if iPreset <= 2:
 				# 0: clear all, 1: import all, 2: auto export all
