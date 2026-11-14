@@ -2256,14 +2256,14 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_DOMESTIC_MARKET_INCOME_STR</Tag>
-		<English>Domestic market: + %d1 last turn</English>
-		<Portuguese>Mercado interno: + %d1 no último turno</Portuguese>
-		<French>Marché intérieur : + %d1 au dernier tour</French>
-		<German>Binnenmarkt: + %d1 letzte Runde</German>
-		<Italian>Mercato interno: + %d1 nell'ultimo turno</Italian>
-		<Spanish>Mercado interior: + %d1 el último turno</Spanish>
-		<Russian>Внутренний рынок: + %d1 за прошлый ход</Russian>
-		<Hungarian>Belső piac: + %d1 az előző körben</Hungarian>
+		<English>Domestic market: +%d1 last turn</English>
+		<Portuguese>Mercado interno:      +%d1 no último turno</Portuguese>
+		<French>Marché intérieur :   +%d1 au dernier tour</French>
+		<German>Binnenmarkt:     +%d1 letzte Runde</German>
+		<Italian>Mercato interno:            +%d1 nell'ultimo turno</Italian>
+		<Spanish>Mercado interior:          +%d1 el último turno</Spanish>
+		<Russian>Внутренний рынок: +%d1 за прошлый ход</Russian>
+		<Hungarian>Belső piac:              +%d1 az előző körben</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TURN_GOLD_CRIME_CULTURE</Tag>
