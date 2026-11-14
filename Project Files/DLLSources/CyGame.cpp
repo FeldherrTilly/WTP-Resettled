@@ -4,6 +4,7 @@
 
 #include "CvGameCoreDLL.h"
 #include "CyGame.h"
+#include "CvDLLInterfaceIFaceBase.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
 #include "CyPlayer.h"
@@ -660,6 +661,48 @@ ColorTypes CyGame::getReplayMessageColor(int i) const
 std::wstring CyGame::getReplayMessageText(int i) const
 {
 	return (NULL != m_pGame ? m_pGame->getReplayMessageText(i) : L"");
+}
+int CyGame::getNumHudMessages() const
+{
+	return WtpHudMessages::getNum();
+}
+std::wstring CyGame::getHudMessageText(int i) const
+{
+	return std::wstring(WtpHudMessages::getText(i).GetCString());
+}
+int CyGame::getHudMessageX(int i) const
+{
+	return WtpHudMessages::getX(i);
+}
+int CyGame::getHudMessageY(int i) const
+{
+	return WtpHudMessages::getY(i);
+}
+int CyGame::getNumHudPriority() const
+{
+	return WtpHudMessages::getNumPriority();
+}
+
+int CyGame::getNumHudPriorityPrevious() const
+{
+	return WtpHudMessages::getNumPriorityPrevious();
+}
+
+int CyGame::getNumHudMessagesPrevious() const
+{
+	return WtpHudMessages::getNumPrevious();
+}
+std::wstring CyGame::getHudMessagePreviousText(int i) const
+{
+	return std::wstring(WtpHudMessages::getPreviousText(i).GetCString());
+}
+int CyGame::getHudMessagePreviousX(int i) const
+{
+	return WtpHudMessages::getPreviousX(i);
+}
+int CyGame::getHudMessagePreviousY(int i) const
+{
+	return WtpHudMessages::getPreviousY(i);
 }
 uint CyGame::getNumReplayMessages() const
 {

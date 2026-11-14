@@ -16,6 +16,8 @@ import CvScreensInterface
 # Achievements END
 import CvEventInterface
 import time
+import re
+import sys
 import math
 
 # GLOBAL SYSTEM SHORTCUTS
@@ -202,6 +204,8 @@ BUILDING_AREA_HEIGHT = -1
 # PANEL TOGGLE CONTROLS
 BUILDING_MANAGMENT_TOGGLE = 1000
 AUTOMATION_MANAGMENT_TOGGLE = 1001
+# WTP: message panel: 1 = one label per message (the mouse over highlight covers all lines of a message, needs line breaks inside a label), 0 = one label per line
+MESSAGE_PANEL_ONE_LABEL_PER_MESSAGE = 0
 MAP_MANAGMENT_TOGGLE = 1002
 GO_TO_CITY = 1003
 
@@ -284,6 +288,20 @@ class CvMainInterface:
 	"Main Interface Screen"
 
 	BUTTON_TERRITORIAL_INFLUENCE = 750
+	BUTTON_MESSAGE_PANEL = 756 # WTP: the message panel of the turn (click: expand / collapse)
+	BUTTON_MESSAGE_MORE = 758 # WTP: message panel footer: the next older page of messages
+	BUTTON_MESSAGE_PREVIOUS = 759 # WTP: message panel footer: the messages of the turn before / back
+	BUTTON_MESSAGE_AUTO = 761 # WTP: message panel: auto expand at the start of a turn on / off
+	BUTTON_MESSAGE_LINE = 757 # WTP: a line of a message of the message panel (click: center the map on its place)
+	dMessagePediaChars = {}
+	aMessageConceptPatterns = []
+	aMessageNameList = []
+	aMessageSpecial = []
+	dMessageConcepts = {}
+	dMessagePediaCache = {}
+	dMessageLineIndex = {}
+	dMessagePediaNames = None # WTP: lower case name -> (name, Colopedia screen, id), built at the first use
+	aszMessageTexts = []
 
 	def numPlotListButtons( self ):
 		return NUM_PLOT_LIST_BUTTONS
@@ -558,6 +576,23 @@ class CvMainInterface:
 		self.bTerritorialInfluenceLeftMouseDown = False
 		self.bTerritorialInfluenceRightMouseDown = False
 		self.bTerritorialInfluenceOldNoUnitCycling = False
+		# WTP: message panel (the messages of the turn, click to expand)
+		self.bMessagePanelExpanded = False
+		self.bMessageAutoExpand = None # opens expanded at the start of a turn (saved with the game; None: not read yet)
+		self.iMessageTurn = -1
+		self.bMessageTurnPending = True
+		self.iMsgMoveX = 0 # the message panel moved by the player (Shift + arrow keys)
+		self.iMsgMoveY = 0
+		self.iMsgX = 0
+		self.iMsgY = 0
+		self.aMsgHeld = [] # the arrow keys that are down
+		self.iMsgHoldWait = 0
+		self.tMessagePanelKey = None
+		self.bMessagePanelPrevious = False # shows the messages of the turn before
+		self.iMessagePage = 0 # page of the expanded panel (0 = the newest messages)
+		self.aszMessageLines = []
+		self.atMessageTargets = []
+		self.dMessageCapitals = {}
 
 		self.TableYields = []
 		for iYield in range(YieldTypes.NUM_YIELD_TYPES):
@@ -1256,6 +1291,7 @@ class CvMainInterface:
 			screen.hideEndTurn("EndTurnText")
 
 		self.updateEndTurnButton()
+		self.updateMessagePanel()
 
 		if (CyInterface().getShowInterface() != InterfaceVisibility.INTERFACE_HIDE_ALL and CyInterface().getShowInterface() != InterfaceVisibility.INTERFACE_ADVANCED_START):
 			if (CyInterface().isCityScreenUp()):
@@ -2471,6 +2507,15 @@ class CvMainInterface:
 			if (gc.getPlayer(ePlayer).isAlive()):
 				szText = CyGameTextMgr().getGoldStr(ePlayer)
 				screen.setLabel("GoldText", "Background", self.setFontSize(szText, 1), CvUtil.FONT_LEFT_JUSTIFY, 17, 17, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, TIMETEXT_ID, -1 )
+				# WTP: the gold pile icon follows the amount: 5 digits or less keep its place, every digit more moves it to the right
+				try:
+					iDigits = len([c for c in unicode(szText) if c.isdigit()])
+					iPileX = 60
+					if iDigits > 5:
+						iPileX = 86 + (iDigits - 6) * 10
+					screen.moveItem("GoldPile", iPileX, 8, -0.3)
+				except:
+					pass
 
 		return 0
 
@@ -3338,11 +3383,10 @@ class CvMainInterface:
 				iWidth = int((25 * xResolution) / 100)
 				yCoord = yResolution - SADDLE_HEIGHT * 14/16 - self.SCORE_TEXT_BOTTOM_MARGIN_SMALL
 
-				# Scrollable Scoreboard
-				if (not pHeadSelectedCity):
-					screen.addTableControlGFC("ScoreBackground", 1, xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, yCoord - (iBtnHeight * (iCount - 1)), iWidth, (iBtnHeight * (iCount - 1)), False, False, 0, 0, TableStyles.TABLE_STYLE_STANDARD)
-					screen.enableSelect("ScoreBackground", False)
-					screen.setTableColumnHeader("ScoreBackground", 0, "", iWidth - 10)
+				# Scrollable Scoreboard: the rows are collected first, the table is as wide as the longest entry (created after the loop)
+				aScoreRows = []
+				iTableY = yCoord # the yCoord is changed below
+				iMaxTextWidth = 0
 
 				i = 0
 				while (i < gc.getMAX_CIV_TEAMS()):
@@ -3425,8 +3469,9 @@ class CvMainInterface:
 
 									szBuffer = szBuffer + "</font>"
 
-									if ( CyInterface().determineWidth( szBuffer ) > iWidth ):
-										iWidth = CyInterface().determineWidth( szBuffer )
+									iTextWidth = CyInterface().determineWidth( szBuffer )
+									if ( iTextWidth > iMaxTextWidth ):
+										iMaxTextWidth = iTextWidth
 
 									szName = "ScoreText" + str(ePlayer)
 									if ( CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW or CyInterface().isInAdvancedStart() or pHeadSelectedCity != None):
@@ -3434,9 +3479,7 @@ class CvMainInterface:
 									else:
 										yCoord = yResolution - SADDLE_HEIGHT - self.SCORE_TEXT_BOTTOM_MARGIN_SMALL
 
-									if not pHeadSelectedCity:
-										iRow = screen.appendTableRow("ScoreBackground")
-										screen.setTableText("ScoreBackground", 0, iRow, szBuffer, "", WidgetTypes.WIDGET_CONTACT_CIV, ePlayer, -1, CvUtil.FONT_RIGHT_JUSTIFY)
+									aScoreRows.append((szBuffer, ePlayer))
 
 									CyInterface().checkFlashReset(ePlayer)
 
@@ -3452,6 +3495,14 @@ class CvMainInterface:
 					yCoord = yResolution - SADDLE_HEIGHT - self.SCORE_BACKGROUND_BOTTOM_MARGIN_SMALL
 
 				if not pHeadSelectedCity:
+					# width of the longest entry plus room for the table border and the scroll bar (never wider than before)
+					iWidth = min(iWidth, iMaxTextWidth + 20)
+					screen.addTableControlGFC("ScoreBackground", 1, xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, iTableY + int(yResolution * 0.066) - (iBtnHeight * 7), iWidth, (iBtnHeight * 7), False, False, 0, 0, TableStyles.TABLE_STYLE_STANDARD)
+					screen.enableSelect("ScoreBackground", False)
+					screen.setTableColumnHeader("ScoreBackground", 0, "", iWidth - 10)
+					for (szRowText, ePlayerRow) in aScoreRows:
+						iRow = screen.appendTableRow("ScoreBackground")
+						screen.setTableText("ScoreBackground", 0, iRow, szRowText, "", WidgetTypes.WIDGET_CONTACT_CIV, ePlayerRow, -1, CvUtil.FONT_RIGHT_JUSTIFY)
 					screen.show("ScoreBackground")
 
 	# Will update the help Strings
@@ -3703,7 +3754,731 @@ class CvMainInterface:
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TERRITORIAL_INFLUENCE):
 				self.toggleTerritorialInfluence()
 
+
+			# WTP: message panel of the turn: a click expands or collapses it
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_PANEL):
+				self.bMessagePanelExpanded = not self.bMessagePanelExpanded
+				self.bMessagePanelPrevious = False
+				self.iMessagePage = 0
+				self.updateMessagePanel()
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_AUTO):
+				self.setMessageAutoExpand(not self.getMessageAutoExpand())
+				self.updateMessagePanel()
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_MORE):
+				self.iMessagePage += 1 # (the panel starts again with the newest messages after the last page)
+				self.updateMessagePanel()
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_PREVIOUS):
+				self.bMessagePanelPrevious = not self.bMessagePanelPrevious
+				self.iMessagePage = 0
+				self.updateMessagePanel()
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_LINE):
+				if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
+					# right click: Colopedia page of the first named thing of the message, Ctrl + right click: of the second one
+					self.openMessagePedia(inputClass.getData2(), inputClass.isCtrlKeyDown())
+				else:
+					self.clickMessageLine(inputClass.getData2())
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_CONTACT_CIV and inputClass.getData1() in self.dMessageCapitals):
+				# a message of the panel that names a native tribe: its main settlement is centered (the game opens the diplomacy)
+				try:
+					if inputClass.getFunctionName().startswith("HudMsgLine"):
+						if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
+							# right click: the Colopedia (Ctrl: the second page), as with the other lines
+							if inputClass.getFunctionName() in self.dMessageLineIndex:
+								self.openMessagePedia(self.dMessageLineIndex[inputClass.getFunctionName()], inputClass.isCtrlKeyDown())
+						else:
+							iPX, iPY = self.dMessageCapitals[inputClass.getData1()]
+							CyCamera().JustLookAtPlot(gc.getMap().plot(iPX, iPY))
+				except:
+					pass
 		return 0
+
+	# WTP: the message panel. The game's own message area (top center) shows the messages of a turn only for a few seconds and ignores the
+	# mouse. The DLL keeps the messages of the turn (CyGame.getNumHudMessages, MESSAGE_PANEL_ENABLED in GlobalDefinesAlt.xml) and this panel
+	# shows them as long as the turn lasts: the newest ones when collapsed, all of them after a click on the header (it grows downwards).
+	# Every line of a message is a clickable label (the game does not pass clicks on a multiline text): a click centers the map on the place
+	# of the message (colony, battle, unit ...) or on the named colony / native settlement. A message that names a native tribe or its chief
+	# and has no place of its own also opens the diplomacy with the tribe (and centers its main settlement).
+	def getMessageWidth(self, szText):
+		# width in characters: the symbols of the game font (icons) are wider than letters
+		iWidth = 0
+		for szChar in szText:
+			if ord(szChar) >= 0x2000:
+				iWidth += 3.4
+			else:
+				iWidth += 1
+		return iWidth
+
+	def wrapMessage(self, szMessage, iCharsPerLine):
+		# splits a message with color markup into lines of about iCharsPerLine visible characters; the colors that are open at the end of
+		# a line are closed there and opened again at the start of the next line
+		aszLines = []
+		aszOpen = []
+		szLine = u""
+		iVisible = 0
+		for szToken in re.split(u"(<[^>]*>)", szMessage):
+			if not szToken:
+				continue
+			if szToken[0] == u"<" and szToken[-1] == u">":
+				szLower = szToken.lower()
+				if szLower.startswith(u"<color"):
+					aszOpen.append(szToken)
+				elif szLower == u"</color>":
+					if aszOpen:
+						aszOpen.pop()
+				szLine += szToken
+				continue
+			szLead = szToken[:len(szToken) - len(szToken.lstrip())]
+			szLine += szLead
+			iVisible += len(szLead)
+			for szWord in re.findall(u"\\S+\\s*", szToken, re.UNICODE):
+				iWord = self.getMessageWidth(szWord.rstrip())
+				if iVisible > 0 and iVisible + iWord > iCharsPerLine:
+					aszLines.append(szLine + u"</color>" * len(aszOpen))
+					szLine = u"".join(aszOpen)
+					iVisible = 0
+				if iWord > iCharsPerLine:
+					# a word without blanks that is longer than a line (e.g. a row of icons): broken between the characters
+					for szChar in szWord:
+						iChar = self.getMessageWidth(szChar)
+						if iVisible > 0 and iVisible + iChar > iCharsPerLine:
+							aszLines.append(szLine + u"</color>" * len(aszOpen))
+							szLine = u"".join(aszOpen)
+							iVisible = 0
+						szLine += szChar
+						iVisible += iChar
+					continue
+				szLine += szWord
+				iVisible += self.getMessageWidth(szWord)
+		aszLines.append(szLine)
+		return aszLines
+
+	def getMessageTargets(self, aszMessages, aiX, aiY):
+		# for every message: (x, y, ePlayer) - the plot to center (x < 0: none) and the native player to contact (-1: none)
+		atTargets = []
+		pMap = gc.getMap()
+		iTeam = gc.getGame().getActiveTeam()
+		aNatives = [] # (name, ePlayer, x, y)
+		aCities = [] # (name, x, y)
+		for ePlayer in range(gc.getMAX_PLAYERS()):
+			pPlayer = gc.getPlayer(ePlayer)
+			if not pPlayer.isAlive():
+				continue
+			pCapital = None
+			for iCity in range(pPlayer.getNumCities()):
+				pCity = pPlayer.getCity(iCity)
+				if pCity is None or pCity.isNone() or not pCity.isRevealed(iTeam, False):
+					continue
+				if pCapital is None:
+					pCapital = pCity
+				aCities.append((pCity.getName(), pCity.getX(), pCity.getY()))
+			if pPlayer.isNative() and pCapital is not None:
+				try:
+					pBest = pPlayer.getCapitalCity()
+					if pBest is not None and not pBest.isNone() and pBest.isRevealed(iTeam, False):
+						pCapital = pBest
+				except:
+					pass
+				for szName in (pPlayer.getName(), pPlayer.getCivilizationShortDescription(0)):
+					if szName and len(szName) >= 3:
+						aNatives.append((szName, ePlayer, pCapital.getX(), pCapital.getY()))
+		aCities.sort(key = lambda t: -len(t[0]))
+
+		for i in range(len(aszMessages)):
+			szPlain = re.sub(u"<[^>]*>", u"", aszMessages[i])
+			iX = aiX[i]
+			iY = aiY[i]
+			if iX >= 0 and iY >= 0 and iX < pMap.getGridWidth() and iY < pMap.getGridHeight() and not pMap.plot(iX, iY).isNone():
+				atTargets.append((iX, iY, -1))
+				continue
+			tTarget = None
+			for (szName, ePlayer, iPX, iPY) in aNatives:
+				if szName in szPlain:
+					tTarget = (iPX, iPY, ePlayer)
+					break
+			if tTarget is None:
+				for (szName, iPX, iPY) in aCities:
+					if szName and szName in szPlain:
+						tTarget = (iPX, iPY, -1)
+						break
+			if tTarget is None:
+				tTarget = (-1, -1, -1)
+			atTargets.append(tTarget)
+		return atTargets
+
+	# the auto expand option of the message panel, kept in the script data of the player: [[WTPMSG:0]] / [[WTPMSG:1]] (on when nothing is saved)
+	def getMessageAutoExpand(self):
+		if self.bMessageAutoExpand is None:
+			self.bMessageAutoExpand = True
+			try:
+				szData = gc.getActivePlayer().getScriptData()
+				if szData is not None and szData.find("[[WTPMSG:0]]") != -1:
+					self.bMessageAutoExpand = False
+			except:
+				pass
+		return self.bMessageAutoExpand
+
+	def setMessageAutoExpand(self, bAuto):
+		self.bMessageAutoExpand = bAuto
+		try:
+			pPlayer = gc.getActivePlayer()
+			szData = pPlayer.getScriptData()
+			if szData is None:
+				szData = ""
+			szData = szData.replace("[[WTPMSG:0]]", "").replace("[[WTPMSG:1]]", "")
+			szData = szData + "[[WTPMSG:" + str(int(bAuto)) + "]]"
+			pPlayer.setScriptData(szData)
+		except:
+			pass
+
+	# the message panel is moved with Ctrl + Shift + W A S D (two keys at once: diagonal)
+	def isMessagePanelShown(self):
+		return self.tMessagePanelKey is not None
+
+	def pressMessageArrow(self, iDir):
+		if iDir in self.aMsgHeld:
+			return
+		self.aMsgHeld.append(iDir)
+		self.iMsgHoldWait = 18
+		self.moveMessagePanel([iDir])
+
+	def releaseMessageArrow(self, iDir):
+		if iDir in self.aMsgHeld:
+			self.aMsgHeld.remove(iDir)
+
+	def moveMessagePanel(self, aDirs):
+		for iDir in aDirs:
+			self.iMsgMoveX += [-40, 40, 0, 0][iDir]
+			self.iMsgMoveY += [0, 0, -40, 40][iDir]
+		self.updateMessagePanel()
+
+	def updateMessageMove(self):
+		if len(self.aMsgHeld) == 0:
+			return
+		try:
+			bShift = CyInterface().shiftKey() and CyInterface().ctrlKey()
+		except:
+			bShift = True
+		if not bShift:
+			self.aMsgHeld = []
+			return
+		self.iMsgHoldWait -= 1
+		if self.iMsgHoldWait <= 0:
+			self.iMsgHoldWait = 3
+			self.moveMessagePanel(list(self.aMsgHeld))
+
+	def hideMessagePanel(self, screen):
+		for szName in self.aszMessageLines:
+			screen.hide(szName)
+		self.aszMessageLines = []
+		screen.deleteWidget("HudMsgPanel")
+		screen.deleteWidget("HudMsgPanelBack1")
+		screen.deleteWidget("HudMsgPanelBack2")
+		screen.hide("HudMsgHeader")
+		screen.hide("HudMsgAuto")
+		screen.hide("HudMsgFooterMore")
+		screen.hide("HudMsgFooterPrevious")
+
+	def updateMessagePanel(self):
+
+		try:
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
+			game = gc.getGame()
+			iNumCurrent = game.getNumHudMessages()
+			iNumPrevious = game.getNumHudMessagesPrevious()
+			# a new turn: the panel opens expanded with its first messages (when the option is on)
+			if game.getGameTurn() != self.iMessageTurn:
+				self.iMessageTurn = game.getGameTurn()
+				self.bMessageTurnPending = True
+			if self.bMessageTurnPending and iNumCurrent > 0:
+				self.bMessageTurnPending = False
+				self.bMessagePanelExpanded = self.getMessageAutoExpand()
+				self.bMessagePanelPrevious = False
+				self.iMessagePage = 0
+			bPrevious = self.bMessagePanelPrevious and self.bMessagePanelExpanded
+			if bPrevious:
+				iNum = iNumPrevious
+			else:
+				iNum = iNumCurrent
+			# (MESSAGE_PANEL_ENABLED = 0: the DLL collects no messages, so there is nothing to show)
+			bShow = (iNumCurrent > 0
+				and CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW and not CyInterface().isCityScreenUp())
+			if iNumCurrent == 0:
+				self.bMessageTurnPending = True
+				self.bMessagePanelExpanded = False
+				self.bMessagePanelPrevious = False
+				self.iMessagePage = 0
+
+			if not bShow:
+				if self.tMessagePanelKey is not None:
+					self.tMessagePanelKey = None
+					self.hideMessagePanel(screen)
+				return
+
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			if bPrevious:
+				iNumPriority = game.getNumHudPriorityPrevious()
+			else:
+				iNumPriority = game.getNumHudPriority()
+			tKey = (iNumCurrent, iNumPrevious, iNumPriority, bPrevious, self.iMessagePage, self.bMessagePanelExpanded, self.getMessageAutoExpand(), self.iMsgMoveX, self.iMsgMoveY, xRes, yRes)
+			if tKey == self.tMessagePanelKey:
+				return
+			self.tMessagePanelKey = tKey
+
+			# geometry: centered below the top HUD, about as wide as the game's own message area
+			iLine = max(16, int(yRes * 0.0153)) # distance of the text lines (measured: 22 pixels at 1440)
+			iPad = max(6, iLine / 2)
+			iWidth = max(380, int(xRes * 0.23))
+			iX = (xRes - iWidth) / 2
+			iY = int(yRes * 0.058) # just below the round buttons of the top HUD
+			# moved by the player (stays on the screen)
+			iBaseX = iX
+			iBaseY = iY
+			iX = max(0, min(xRes - iWidth, iX + self.iMsgMoveX))
+			iY = max(0, min(yRes - 120, iY + self.iMsgMoveY))
+			self.iMsgMoveX = iX - iBaseX
+			self.iMsgMoveY = iY - iBaseY
+			self.iMsgX = iX
+			self.iMsgY = iY
+			iHeaderHeight = int(max(14, int(yRes * 0.0135)) * 0.85)
+			iGap = int(iLine * 0.8) # a blank line between the header and the messages
+			iIndent = int(iLine * 0.95) # the lines after the first one of a message
+			# characters per line (measured: about 6.6 pixels per character at 22 pixels line distance)
+			iCharsPerLine = max(20, int((iWidth - 2 * iPad - iIndent) / (iLine * 0.32)))
+
+			aszMessages = []
+			aiX = []
+			aiY = []
+			for i in range(iNum):
+				if bPrevious:
+					aszMessages.append(game.getHudMessagePreviousText(i))
+					aiX.append(game.getHudMessagePreviousX(i))
+					aiY.append(game.getHudMessagePreviousY(i))
+				else:
+					aszMessages.append(game.getHudMessageText(i))
+					aiX.append(game.getHudMessageX(i))
+					aiY.append(game.getHudMessageY(i))
+			aatLines = [self.wrapMessage(szMessage, iCharsPerLine) for szMessage in aszMessages]
+			atTargets = self.getMessageTargets(aszMessages, aiX, aiY)
+			self.aszMessageTexts = aszMessages
+			self.atMessageTargets = atTargets
+
+			# which messages: collapsed the newest ones that fit; expanded pages of the full height of the panel, the newest page
+			# first, a click on the footer shows the next older page (and after the last one the newest again)
+			# the expanded panel ends at 80 percent of the screen height in its default place, moved down it may reach the bottom edge
+			iBottomLimit = int(yRes * 0.80)
+			if self.iMsgMoveY != 0:
+				iBottomLimit = yRes - 10
+			bFooterPrevious = self.bMessagePanelExpanded and (iNumPrevious > 0 or bPrevious)
+			if self.bMessagePanelExpanded:
+				iFooterLines = 1 # the footer of the previous turn
+				iMaxLines = max(6, (iBottomLimit - iY - iHeaderHeight - iGap - 2 * iPad) / iLine - 2 * iFooterLines)
+			else:
+				iFooterLines = 0
+				iMaxLines = 7 # collapsed: three priority messages of two lines each (3 * 2.2 lines)
+			# the priority messages (the first iNumPriority ones) are always at the top of the newest page; on the other pages the others
+			iNumPriority = min(iNumPriority, iNum)
+			fMessageGap = 0.2 # extra space after every message (in lines), better to read
+			aiPriority = []
+			iPriorityLines = 0
+			for i in range(iNumPriority):
+				if len(aiPriority) > 0 and iPriorityLines + len(aatLines[i]) + fMessageGap > max(2, iMaxLines - 2 * int(self.bMessagePanelExpanded)):
+					break
+				aiPriority.append(i)
+				iPriorityLines += len(aatLines[i]) + fMessageGap
+			aPages = []
+			iEnd = iNum
+			while iEnd > iNumPriority:
+				if len(aPages) == 0:
+					iLimit = max(1, iMaxLines - iPriorityLines)
+				else:
+					iLimit = iMaxLines
+				iFirst = iEnd
+				iSum = 0
+				while iFirst > iNumPriority and (iSum + len(aatLines[iFirst - 1]) + fMessageGap <= iLimit or (iFirst == iEnd and (self.bMessagePanelExpanded or iPriorityLines == 0))):
+					iFirst -= 1
+					iSum += len(aatLines[iFirst]) + fMessageGap
+				aPages.append((iFirst, iEnd, iSum))
+				iEnd = iFirst
+				if not self.bMessagePanelExpanded:
+					break
+			if len(aPages) == 0:
+				aPages.append((iNumPriority, iNumPriority, 0))
+			bMore = (len(aPages) > 1)
+			if self.iMessagePage >= len(aPages):
+				self.iMessagePage = 0
+			iFirst, iLast, iSum = aPages[self.iMessagePage]
+			if self.iMessagePage == 0:
+				aiShow = aiPriority + range(iFirst, iLast)
+				iTextLines = iSum + iPriorityLines
+			else:
+				aiShow = range(iFirst, iLast)
+				iTextLines = iSum
+			iFooterHeight = 0
+			if bMore:
+				iFooterHeight += iLine
+			if bFooterPrevious:
+				iFooterHeight += iLine
+			if iFooterHeight > 0:
+				iFooterHeight += iGap / 2
+			iTextHeight = int(iTextLines * iLine) + iPad / 2
+			iHeight = iHeaderHeight + iGap + iTextHeight + iFooterHeight + iPad
+
+			if self.bMessagePanelExpanded:
+				if bPrevious:
+					szHeader = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS_HEADER", (iNum,))
+				else:
+					szHeader = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_COLLAPSE", (iNum,))
+			else:
+				szHeader = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_EXPAND", (iNum,))
+
+			# the old labels are hidden, the ones that are needed again are shown by setText
+			for szName in self.aszMessageLines:
+				screen.hide(szName)
+			self.aszMessageLines = []
+			self.dMessageCapitals = {}
+			self.dMessageLineIndex = {}
+
+			# a denser background: the panel style is semi-transparent, several of them on top of each other are better to read
+			# (two when collapsed, three when expanded)
+			screen.deleteWidget("HudMsgPanel")
+			screen.deleteWidget("HudMsgPanelBack1")
+			screen.deleteWidget("HudMsgPanelBack2")
+			screen.addPanel("HudMsgPanelBack1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			screen.show("HudMsgPanelBack1")
+			screen.moveToFront("HudMsgPanelBack1")
+			if self.bMessagePanelExpanded:
+				screen.addPanel("HudMsgPanelBack2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+				screen.show("HudMsgPanelBack2")
+				screen.moveToFront("HudMsgPanelBack2")
+			screen.addPanel("HudMsgPanel", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_PANEL, -1)
+			screen.show("HudMsgPanel")
+			screen.moveToFront("HudMsgPanel")
+
+			szBullet = u"%c " % game.getSymbolID(FontSymbols.BULLET_CHAR)
+			iLabel = 0
+			iTextY = iY + iHeaderHeight + iGap
+			fRow = 0.0
+			for i in aiShow:
+				iTargetX, iTargetY, eContact = atTargets[i]
+				if eContact >= 0:
+					# a native tribe: contact (diplomacy), the click also centers its main settlement (handleInput)
+					eWidget = WidgetTypes.WIDGET_CONTACT_CIV
+					iData1 = eContact
+					iData2 = -1
+					self.dMessageCapitals[eContact] = (iTargetX, iTargetY)
+				else:
+					eWidget = WidgetTypes.WIDGET_GENERAL
+					iData1 = self.BUTTON_MESSAGE_LINE
+					iData2 = i
+				if MESSAGE_PANEL_ONE_LABEL_PER_MESSAGE:
+					# one label for all lines of a message: the mouse over highlight covers the whole message
+					szText = szBullet + aatLines[i][0]
+					for iPart in range(1, len(aatLines[i])):
+						szText += u"\n" + u"    " + aatLines[i][iPart]
+					szName = "HudMsgLine%d" % iLabel
+					iLabel += 1
+					screen.setText(szName, "Background", self.setFontSize(szText, -1), CvUtil.FONT_LEFT_JUSTIFY, iX + iPad, iTextY + int(fRow * iLine), -0.3, FontTypes.SMALL_FONT, eWidget, iData1, iData2)
+					self.dMessageLineIndex[szName] = i
+					screen.show(szName)
+					screen.moveToFront(szName)
+					self.aszMessageLines.append(szName)
+					fRow += len(aatLines[i])
+				else:
+					for iPart in range(len(aatLines[i])):
+						szLine = aatLines[i][iPart]
+						if iPart == 0:
+							szLine = szBullet + szLine
+							iLineX = iX + iPad
+						else:
+							iLineX = iX + iPad + iIndent
+						szName = "HudMsgLine%d" % iLabel
+						iLabel += 1
+						screen.setText(szName, "Background", self.setFontSize(szLine, -1), CvUtil.FONT_LEFT_JUSTIFY, iLineX, iTextY + int(fRow * iLine), -0.3, FontTypes.SMALL_FONT, eWidget, iData1, iData2)
+						self.dMessageLineIndex[szName] = i
+						screen.show(szName)
+						screen.moveToFront(szName)
+						self.aszMessageLines.append(szName)
+						fRow += 1.0
+				fRow += fMessageGap
+
+			# footer: further (older) messages, the messages of the turn before
+			iFooterY = iTextY + int(iTextLines * iLine) + iPad / 2 + iGap / 2
+			screen.hide("HudMsgFooterMore")
+			screen.hide("HudMsgFooterPrevious")
+			if bMore:
+				iOlder = aPages[self.iMessagePage][0] - iNumPriority
+				szMore = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_MORE", (iOlder, self.iMessagePage + 1, len(aPages)))
+				screen.setText("HudMsgFooterMore", "Background", self.setFontSize(szMore, -1), CvUtil.FONT_CENTER_JUSTIFY, iX + iWidth / 2, iFooterY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_MORE, -1)
+				screen.show("HudMsgFooterMore")
+				screen.moveToFront("HudMsgFooterMore")
+				iFooterY += iLine
+			if bFooterPrevious:
+				if bPrevious:
+					szPrevious = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_CURRENT", ())
+				else:
+					szPrevious = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS", ())
+				screen.setText("HudMsgFooterPrevious", "Background", self.setFontSize(szPrevious, -1), CvUtil.FONT_CENTER_JUSTIFY, iX + iWidth / 2, iFooterY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_PREVIOUS, -1)
+				screen.show("HudMsgFooterPrevious")
+				screen.moveToFront("HudMsgFooterPrevious")
+
+			screen.setText("HudMsgHeader", "Background", self.setFontSize(szHeader, -1), CvUtil.FONT_CENTER_JUSTIFY, iX + iWidth / 2, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_PANEL, -1)
+			screen.show("HudMsgHeader")
+			screen.moveToFront("HudMsgHeader")
+			# the option at the top right corner
+			if self.getMessageAutoExpand():
+				szAuto = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON", ())
+			else:
+				szAuto = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_OFF", ())
+			screen.setText("HudMsgAuto", "Background", self.setFontSize(szAuto, -1), CvUtil.FONT_RIGHT_JUSTIFY, iX + iWidth - iPad, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_AUTO, -1)
+			screen.show("HudMsgAuto")
+			screen.moveToFront("HudMsgAuto")
+		except:
+			# the panel must never break the main interface
+			self.tMessagePanelKey = None
+			if not getattr(self, "bMessagePanelErrorShown", False):
+				self.bMessagePanelErrorShown = True
+				CvUtil.pyPrint("Message panel failed: " + str(sys.exc_info()[1]))
+
+	def getMessagePediaTargets(self, iMessage):
+		# the things named (colored) in a message that have a Colopedia page: [(name, screen, id)] in the order of the text
+		aResult = []
+		try:
+			szMessage = self.aszMessageTexts[iMessage]
+			if szMessage in self.dMessagePediaCache:
+				return self.dMessagePediaCache[szMessage]
+			if len(self.dMessagePediaCache) > 300:
+				self.dMessagePediaCache = {}
+			if self.dMessagePediaNames is None:
+				dNames = {}
+				# later entries must not overwrite earlier ones: units first, then professions, buildings, goods, bonuses, promotions
+				aKinds = ((CvScreenEnums.PEDIA_UNIT, gc.getNumUnitInfos, gc.getUnitInfo),
+					(CvScreenEnums.PEDIA_PROFESSION, gc.getNumProfessionInfos, gc.getProfessionInfo),
+					(CvScreenEnums.PEDIA_BUILDING, gc.getNumBuildingInfos, gc.getBuildingInfo),
+					(CvScreenEnums.PEDIA_YIELDS, gc.getNumYieldInfos, gc.getYieldInfo),
+					(CvScreenEnums.PEDIA_BONUS, gc.getNumBonusInfos, gc.getBonusInfo),
+					(CvScreenEnums.PEDIA_PROMOTION, gc.getNumPromotionInfos, gc.getPromotionInfo))
+				for (eScreen, fNum, fInfo) in aKinds:
+					for i in range(fNum()):
+						szName = fInfo(i).getDescription()
+						if szName and len(szName) >= 3:
+							szKey = szName.lower()
+							if not szKey in dNames:
+								dNames[szKey] = (szName, eScreen, i)
+				# the symbols (font characters) of goods and bonus resources
+				dChars = {}
+				for (eScreen, fNum, fInfo) in ((CvScreenEnums.PEDIA_YIELDS, gc.getNumYieldInfos, gc.getYieldInfo), (CvScreenEnums.PEDIA_BONUS, gc.getNumBonusInfos, gc.getBonusInfo)):
+					for i in range(fNum()):
+						try:
+							iChar = fInfo(i).getChar()
+							if iChar > 0:
+								dChars[unichr(iChar)] = (fInfo(i).getDescription(), eScreen, i)
+						except:
+							pass
+				# concepts (Colopedia: game concepts): by their name and by the key words of the text MESSAGE_CONCEPT_WORDS ("stem=CONCEPT_TYPE;...")
+				dConcepts = {}
+				aConceptNames = []
+				for i in range(gc.getNumConceptInfos()):
+					try:
+						szName = gc.getConceptInfo(i).getDescription()
+						dConcepts[gc.getConceptInfo(i).getType()] = (szName, "CONCEPT", i)
+						if szName and len(szName) >= 4:
+							aConceptNames.append((szName, i))
+					except:
+						pass
+				aAliases = []
+				for szEntry in localText.getText("TXT_KEY_WTP_MESSAGE_CONCEPT_WORDS", ()).split(u";"):
+					aParts = szEntry.strip().split(u"=")
+					if len(aParts) == 2 and aParts[1].strip() in dConcepts:
+						aAliases.append((re.compile(u"(?<!\\w)" + re.escape(aParts[0].strip()) + u"\\w*", re.UNICODE | re.IGNORECASE), dConcepts[aParts[1].strip()]))
+				for (szName, i) in aConceptNames:
+					aAliases.append((re.compile(u"(?<!\\w)" + re.escape(szName) + u"(?!\\w)", re.UNICODE | re.IGNORECASE), dConcepts[gc.getConceptInfo(i).getType()]))
+				self.aMessageConceptPatterns = aAliases
+				self.dMessageConcepts = dConcepts
+				# the summarized storage messages (surplus sold / lost): fixed Colopedia entries instead of the many goods symbols
+				aSpecial = []
+				for (szKey, aTypes) in (("TXT_KEY_WTP_SURPLUS_SOLD", ("CONCEPT_DOMESTIC_MARKETS", "CONCEPT_NEW_STORAGE")), ("TXT_KEY_WTP_SURPLUS_LOST", ("CONCEPT_NEW_STORAGE",))):
+					try:
+						szText = localText.getText(szKey, (u"\x01", u"\x02", 0))
+						szText = szText[szText.index(u"\x01") + 1:szText.index(u"\x02")]
+						szText = re.sub(u"<[^>]*>", u"", szText).strip()
+						if len(szText) > 10:
+							aSpecial.append((szText, [dConcepts[t] for t in aTypes if t in dConcepts], None))
+					except:
+						pass
+				# the messages about a new great person (great general / admiral, brave lieutenant, able captain): the unit page and the concept
+				try:
+					tConcept = dConcepts.get("CONCEPT_GREAT_GENERALS")
+					dUnits = {}
+					for szUnit in ("UNIT_GREAT_GENERAL", "UNIT_GREAT_ADMIRAL", "UNIT_BRAVE_LIEUTENANT", "UNIT_CAPABLE_CAPTAIN"):
+						eUnit = gc.getInfoTypeForString(szUnit)
+						if eUnit >= 0:
+							dUnits[szUnit] = (gc.getUnitInfo(eUnit).getDescription(), CvScreenEnums.PEDIA_UNIT, eUnit)
+					aGroups = []
+					for szKey in ("TXT_KEY_MISC_GP_BORN", "TXT_KEY_MISC_GP_BORN_SOMEWHERE", "TXT_KEY_MISC_GP_BORN_FIELD"):
+						aGroups.append((szKey, "UNIT_GREAT_GENERAL"))
+					for szKey in ("TXT_KEY_MISC_BL_BORN", "TXT_KEY_MISC_BL_BORN_SOMEWHERE", "TXT_KEY_MISC_BL_BORN_FIELD"):
+						aGroups.append((szKey, "UNIT_BRAVE_LIEUTENANT"))
+					for szKey in ("TXT_KEY_MISC_CC_BORN", "TXT_KEY_MISC_CC_BORN_SOMEWHERE", "TXT_KEY_MISC_CC_BORN_FIELD"):
+						aGroups.append((szKey, "UNIT_CAPABLE_CAPTAIN"))
+					for (szKey, szUnit) in aGroups:
+						if not szUnit in dUnits:
+							continue
+						aPieces = re.split(u"[\x01\x02]", localText.getText(szKey, (u"\x01", u"\x02")))
+						aPieces = [re.sub(u"<[^>]*>", u"", t).strip() for t in aPieces]
+						aPieces.sort(key = lambda t: -len(t))
+						if len(aPieces[0]) > 10:
+							aTargets = [dUnits[szUnit]]
+							if tConcept is not None:
+								aTargets.append(tConcept)
+							# great generals: the admiral instead of the general if the text names him
+							aSpecial.append((aPieces[0], aTargets, szUnit == "UNIT_GREAT_GENERAL" and "UNIT_GREAT_ADMIRAL" in dUnits and dUnits["UNIT_GREAT_ADMIRAL"]))
+				except:
+					pass
+				self.aMessageSpecial = aSpecial
+				self.dMessagePediaChars = dChars
+				aNameList = [(k, v) for (k, v) in dNames.items() if len(k) >= 3]
+				aNameList.sort(key = lambda t: -len(t[0]))
+				self.aMessageNameList = aNameList
+				self.dMessagePediaNames = dNames
+			szPlainAll = re.sub(u"<[^>]*>", u"", szMessage)
+			for (szFragment, aSpecialTargets, bGreat) in self.aMessageSpecial:
+				if szFragment in szPlainAll:
+					aResult = list(aSpecialTargets)
+					if bGreat and bGreat[0].lower() in szPlainAll.lower() and len(aResult) > 0:
+						aResult[0] = bGreat
+					self.dMessagePediaCache[szMessage] = aResult
+					return aResult
+			# the names of settlements are cut out of the text (Fort Nassau is a city, not a fort)
+			# exception: a settlement named like a Colopedia concept (Port Royal) keeps its link
+			aConceptNames = [t[0].lower() for t in self.dMessageConcepts.values()]
+			aCityNames = []
+			for ePlayer in range(gc.getMAX_PLAYERS()):
+				pPlayer = gc.getPlayer(ePlayer)
+				if not pPlayer.isAlive():
+					continue
+				for iCity in range(pPlayer.getNumCities()):
+					pCity = pPlayer.getCity(iCity)
+					if pCity is not None and not pCity.isNone():
+						szCity = pCity.getName().lower()
+						if len(szCity) >= 3 and not szCity in aCityNames and not szCity in aConceptNames:
+							aCityNames.append(szCity)
+			aCityNames.sort(key = lambda t: -len(t))
+			def maskCities(szText):
+				szLower = szText.lower()
+				for szCity in aCityNames:
+					iPos = szLower.find(szCity)
+					while iPos >= 0:
+						szText = szText[:iPos] + u" " * len(szCity) + szText[iPos + len(szCity):]
+						szLower = szLower[:iPos] + u" " * len(szCity) + szLower[iPos + len(szCity):]
+						iPos = szLower.find(szCity, iPos + len(szCity))
+				return szText
+			dNames = self.dMessagePediaNames
+			dChars = self.dMessagePediaChars
+			aFound = [] # (position in the text, target)
+			for oMatch in re.finditer(u"<color=[^>]*>(.*?)</color>", szMessage):
+				szSegment = re.sub(u"<[^>]*>", u"", oMatch.group(1))
+				szSegment = re.compile(u"^[^\\w]+|[^\\w]+$", re.UNICODE).sub(u"", szSegment).lower()
+				if len(szSegment) < 3 or szSegment in aCityNames:
+					continue
+				tFound = dNames.get(szSegment)
+				if tFound is None:
+					# plural forms
+					if szSegment.endswith(u"ies"):
+						tFound = dNames.get(szSegment[:-3] + u"y")
+					if tFound is None and szSegment.endswith(u"es"):
+						tFound = dNames.get(szSegment[:-2])
+					if tFound is None and szSegment.endswith(u"s"):
+						tFound = dNames.get(szSegment[:-1])
+				if tFound is not None:
+					aFound.append((oMatch.start(), tFound))
+			# symbols
+			for iPos in range(len(szMessage)):
+				tFound = dChars.get(szMessage[iPos])
+				if tFound is not None:
+					aFound.append((iPos, tFound))
+			aFound.sort(key = lambda t: t[0])
+			for (iPos, tFound) in aFound:
+				if not tFound in aResult:
+					aResult.append(tFound)
+			# names in the whole text (marked or not): whole words only (at least 3 letters), the longest names first, a found name is cut out of the text
+			szRest = maskCities(re.sub(u"<[^>]*>", u"", szMessage)).lower()
+			aRest = []
+			oWord = re.compile(u"\\w", re.UNICODE)
+			for (szKey, tFound) in self.aMessageNameList:
+				iStart = 0
+				while True:
+					iPos = szRest.find(szKey, iStart)
+					if iPos < 0:
+						break
+					iEnd = iPos + len(szKey)
+					bOk = (iPos == 0 or oWord.match(szRest[iPos - 1]) is None) and (iEnd >= len(szRest) or oWord.match(szRest[iEnd]) is None)
+					if bOk:
+						aRest.append((iPos, tFound))
+						szRest = szRest[:iPos] + u" " * len(szKey) + szRest[iEnd:]
+						break
+					iStart = iPos + 1
+			aRest.sort(key = lambda t: t[0])
+			# game concepts in the plain text (after the marked names and symbols, before the other names)
+			szPlain = maskCities(re.sub(u"<[^>]*>", u"", szMessage))
+			aConcepts = []
+			for (oPattern, tConcept) in self.aMessageConceptPatterns:
+				oMatch = oPattern.search(szPlain)
+				if oMatch is not None:
+					aConcepts.append((oMatch.start(), tConcept))
+			aConcepts.sort(key = lambda t: t[0])
+			for (iPos, tFound) in aConcepts:
+				if not tFound in aResult:
+					aResult.append(tFound)
+			# the names found in the whole text come last (the game concepts have priority)
+			for (iPos, tFound) in aRest:
+				if not tFound in aResult:
+					aResult.append(tFound)
+			# gold is mentioned in many messages: with more than two hits it is left out
+			if len(aResult) > 2:
+				szGold = gc.getYieldInfo(YieldTypes.YIELD_GOLD).getDescription().lower()
+				aResult = [t for t in aResult if t[0].lower() != szGold]
+			self.dMessagePediaCache[szMessage] = aResult
+		except:
+			pass
+		return aResult
+
+	def openMessagePedia(self, iMessage, bSecond):
+		try:
+			aTargets = self.getMessagePediaTargets(iMessage)
+			iIndex = 0
+			if bSecond:
+				iIndex = 1
+			if iIndex < len(aTargets):
+				szName, eScreen, iEntry = aTargets[iIndex]
+				if eScreen == "CONCEPT":
+					iEntryId = CvScreensInterface.pediaMainScreen.pediaHistorical.getIdFromEntryInfo(CivilopediaPageTypes.CIVILOPEDIA_PAGE_CONCEPT, iEntry)
+					CvScreensInterface.pediaMainScreen.pediaJump(CvScreenEnums.PEDIA_HISTORY, iEntryId, True)
+				else:
+					CvScreensInterface.pediaMainScreen.pediaJump(eScreen, iEntry, True)
+		except:
+			pass
+
+	def getMessagePediaHelp(self, iMessage):
+		try:
+			aTargets = self.getMessagePediaTargets(iMessage)
+			if len(aTargets) == 0:
+				return u""
+			szText = localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP", (aTargets[0][0],))
+			if len(aTargets) > 1:
+				szText += u"\n" + localText.getText("TXT_KEY_WTP_MESSAGE_PEDIA_HELP2", (aTargets[1][0],))
+			return szText
+		except:
+			return u""
+
+	def clickMessageLine(self, iMessage):
+		# centers the map on the place of the message
+		try:
+			iX, iY, eContact = self.atMessageTargets[iMessage]
+			if iX >= 0:
+				CyCamera().JustLookAtPlot(gc.getMap().plot(iX, iY))
+		except:
+			pass
 
 	def updateTerritorialInfluenceEditor(self):
 
@@ -3796,6 +4571,7 @@ class CvMainInterface:
 	# Updates the Screen
 	def update( self, fDelta ):
 		self.updateTerritorialInfluenceEditor()
+		self.updateMessageMove()
 		return
 
 	# Adds Mouse Over Help to General Widgets
@@ -3813,6 +4589,10 @@ class CvMainInterface:
 				return localText.getText("TXT_KEY_INTERFACE_ACHIEVE_ADVISOR", ("F10", ""));
 			elif iData1 == self.BUTTON_TERRITORIAL_INFLUENCE:
 				return localText.getText("TXT_KEY_INTERFACE_TERRITORIAL_INFLUENCE", ("Ctrl+I", ""));
+			elif iData1 == self.BUTTON_MESSAGE_AUTO:
+				return localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP", (self.iMsgX, self.iMsgY))
+			elif iData1 == self.BUTTON_MESSAGE_LINE:
+				return self.getMessagePediaHelp(iData2)
 			elif iData1 == VET_NEW_CAPACITY:
 				return localText.getText("TXT_KEY_NEW_STORAGE_CITY_SCREEN", ());
 			elif iData1 == NEW_HARBOUR_SYSTEM:
