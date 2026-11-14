@@ -3564,26 +3564,4 @@
 		<English>Military goods: import and feeder for muskets, blades, cannons, black powder, bakery goods (provisions) and horses, at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
 		<German>Militärgüter: Import und Feeder für Musketen, Säbel, Kanonen, Schießpulver, Proviant (Backwaren) und Pferde, höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
 	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_GAMEOPTION_WTP_TRADE_WINDOW</Tag>
-		<English>New Import / Export Window</English>
-		<German>Neues Import-/Export-Fenster</German>
-		<French>Nouvelle fenêtre d'import / export</French>
-		<Spanish>Nueva ventana de importación / exportación</Spanish>
-		<Italian>Nuova finestra di importazione / esportazione</Italian>
-		<Portuguese>Nova janela de importação / exportação</Portuguese>
-		<Russian>Новое окно импорта / экспорта</Russian>
-		<Hungarian>Új import / export ablak</Hungarian>
-	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_GAMEOPTION_WTP_TRADE_WINDOW_HELP</Tag>
-		<English>The city screen uses the new import / export window (filters, presets, preset protection, market automatic). Switched off, the original import / export popup is used.</English>
-		<German>Der Stadtbildschirm nutzt das neue Import-/Export-Fenster (Filter, Presets, Preset-Schutz, Marktautomatik). Ausgeschaltet wird das ursprüngliche Import-/Export-Popup verwendet.</German>
-		<French>L'écran de la colonie utilise la nouvelle fenêtre d'import / export (filtres, préréglages, protection des préréglages, automatisme du marché). Désactivée, la fenêtre d'origine est utilisée.</French>
-		<Spanish>La pantalla de la colonia usa la nueva ventana de importación / exportación (filtros, ajustes preestablecidos, protección, automatismo del mercado). Desactivada, se usa la ventana original.</Spanish>
-		<Italian>La schermata dell'insediamento usa la nuova finestra di importazione / esportazione (filtri, preset, protezione dei preset, automatismo del mercato). Se disattivata, si usa la finestra originale.</Italian>
-		<Portuguese>O ecrã da colónia usa a nova janela de importação / exportação (filtros, predefinições, proteção das predefinições, automatismo do mercado). Desativada, é usada a janela original.</Portuguese>
-		<Russian>Экран поселения использует новое окно импорта / экспорта (фильтры, пресеты, защита пресетов, автоматика рынка). Если выключено, используется прежнее окно.</Russian>
-		<Hungarian>A település képernyő az új import / export ablakot használja (szűrők, előbeállítások, védelem, piaci automatika). Kikapcsolva az eredeti ablak jelenik meg.</Hungarian>
-	</TEXT>
 </Civ4GameText>

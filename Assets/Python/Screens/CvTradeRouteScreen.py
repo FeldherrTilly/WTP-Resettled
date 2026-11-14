@@ -76,11 +76,11 @@ STEP = 50
 STEP_CTRL = 10
 MAX_VALUE = 0xFFFF
 
-# the game option "new import / export window" (GAMEOPTION_WTP_TRADE_WINDOW): off = the original popup of the DLL with its original tooltips
-# (a DLL without the option: the window stays on)
+# the player option "new import / export window" (options screen, tab Game; it uses the player option slot PLAYEROPTION_MODDER_1):
+# off = the original popup of the DLL with its original tooltips (the option cannot be read: the window stays on)
 def isNewWindowEnabled():
 	try:
-		return gc.getGame().isOption(GameOptionTypes.GAMEOPTION_WTP_TRADE_WINDOW)
+		return CyUserProfile().getPlayerOption(PlayerOptionTypes.PLAYEROPTION_MODDER_1)
 	except:
 		return True
 
