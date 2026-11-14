@@ -646,7 +646,7 @@ class CvTradeRouteScreen:
 		self.drawRows()
 		self.iReload = 60
 
-	# --- market automatic: the goods it manages are protected: the presets of the window leave them alone, a manual change is reported ---
+	# --- PRESET PROTECTION (part 1): market automatic: the goods it manages are protected: the presets of the window leave them alone, a manual change is reported ---
 	def isMarketOn(self):
 		pCity = self.getCity()
 		return pCity != None and not pCity.isNone() and pCity.isAutoMarketImport()
@@ -707,7 +707,7 @@ class CvTradeRouteScreen:
 		szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_2", (szNames,))
 		self.showWarn(szLine1, szLine2, -1)
 
-	# --- the building material preset (and presets to come): the goods it has set are reported when they are switched off again ---
+	# --- PRESET PROTECTION (part 2): the building material preset (and presets to come): the goods it has set are reported when they are switched off again ---
 	# the goods of the preset (the ones it turned on) that are off / zero now, among the given goods
 	def getPresetLost(self, aGoods):
 		aLost = []
@@ -1267,6 +1267,8 @@ class CvTradeRouteScreen:
 				if pCity != None and not pCity.isNone() and pCity.isAutoMarketImport():
 					return localText.getText("TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO_OFF", ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
 				return localText.getText(aszKey[iCode - BTN_PRESET], ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
+			if iCode - BTN_PRESET == 3:
+				return localText.getText(aszKey[3], ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT", ())
 			return localText.getText(aszKey[iCode - BTN_PRESET], ())
 		return u""
 

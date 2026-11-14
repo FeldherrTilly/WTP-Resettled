@@ -3476,13 +3476,13 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT</Tag>
-		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Works in the view "All goods" only.[COLOR_REVERT] While it is on, the goods it manages cannot be changed by the buttons Clear All, Import all goods, Auto-export all goods or Building material, only by hand (you get a notice then, with a button to set the good back).</English>
-		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Funktioniert nur in der Ansicht „Alle Waren".[COLOR_REVERT] Solange er an ist, können die Waren, die er verwaltet, nicht durch die Knöpfe Alles löschen, Alle Waren importieren, Alle Waren automatisch exportieren oder Baumaterial verändert werden, nur von Hand (dann erscheint ein Hinweis mit einem Knopf, der die Ware zurücksetzt).</German>
+		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] works in the view "All goods" only. While it is on, the goods it manages cannot be changed by the buttons Clear All, Import all goods, Auto-export all goods or Building material, only by hand (you get a notice then, with a button to set the good back).</English>
+		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] funktioniert nur in der Ansicht „Alle Waren". Solange er an ist, können die Waren, die er verwaltet, nicht durch die Knöpfe Alles löschen, Alle Waren importieren, Alle Waren automatisch exportieren oder Baumaterial verändert werden, nur von Hand (dann erscheint ein Hinweis mit einem Knopf, der die Ware zurücksetzt).</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1</Tag>
-		<English>%s1_good: managed by Market automatic</English>
-		<German>%s1_good: von „Markt-Automatik" verwaltet</German>
+		<English>Preset protection: %s1_good is managed by Market automatic</English>
+		<German>Preset-Schutz: %s1_good wird von der Markt-Automatik verwaltet</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_2</Tag>
@@ -3501,8 +3501,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_1</Tag>
-		<English>%s1_count goods not changed: managed by Market automatic</English>
-		<German>%s1_count Waren nicht geändert: von „Markt-Automatik" verwaltet</German>
+		<English>Preset protection: %s1_count goods not changed (managed by Market automatic)</English>
+		<German>Preset-Schutz: %s1_count Waren nicht geändert (von der Markt-Automatik verwaltet)</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_2</Tag>
@@ -3511,8 +3511,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_1</Tag>
-		<English>Market automatic</English>
-		<German>Markt-Automatik</German>
+		<English>Preset protection: Market automatic</English>
+		<German>Preset-Schutz: Markt-Automatik</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_2</Tag>
@@ -3521,12 +3521,17 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1</Tag>
-		<English>%s1_preset: %s2_count goods set by the preset are switched off</English>
-		<German>%s1_preset: %s2_count Waren, die das Preset gesetzt hat, sind ausgeschaltet</German>
+		<English>Preset protection (%s1_preset): %s2_count goods set by the preset are switched off</English>
+		<German>Preset-Schutz (%s1_preset): %s2_count Waren, die das Preset gesetzt hat, sind ausgeschaltet</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2</Tag>
 		<English>%s1_goods - Reset puts them back. Ignore: they no longer belong to the preset (when none is left, the preset switches itself off).</English>
 		<German>%s1_goods - Zurücksetzen stellt sie wieder her. Ignorieren: sie gehören dann nicht mehr zum Preset (bleibt keine übrig, schaltet sich das Preset selbst aus).</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT</Tag>
+		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] while the preset is on, you get a notice when its goods are switched off again (by hand or by Clear All), with a button to put them back. If you ignore it and none of its goods is left, the preset switches itself off.</English>
+		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] solange das Preset an ist, erscheint ein Hinweis, wenn seine Waren wieder ausgeschaltet werden (von Hand oder durch Alles löschen), mit einem Knopf, der sie zurücksetzt. Ignorierst du ihn und ist keine seiner Waren mehr übrig, schaltet sich das Preset selbst aus.</German>
 	</TEXT>
 </Civ4GameText>
