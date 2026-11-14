@@ -6136,13 +6136,14 @@ void CvUnit::unloadAllTransportsOnPlot()
 		return;
 	}
 
+	// (only the transports of the domain of this one: land transports with land transports, ships with ships)
 	// (the transports are collected first: unloading changes the list of the units on the plot)
 	std::vector<IDInfo> aTransports;
 	CLLNode<IDInfo>* pUnitNode = pPlot->headUnitNode();
 	while (pUnitNode != NULL)
 	{
 		CvUnit* pLoopUnit = pPlot->getUnitNodeLoop(pUnitNode);
-		if (pLoopUnit != NULL && pLoopUnit->getOwnerINLINE() == getOwnerINLINE() && pLoopUnit->getCargo() > 0)
+		if (pLoopUnit != NULL && pLoopUnit->getOwnerINLINE() == getOwnerINLINE() && pLoopUnit->getDomainType() == getDomainType() && pLoopUnit->getCargo() > 0)
 		{
 			aTransports.push_back(pLoopUnit->getIDInfo());
 		}
