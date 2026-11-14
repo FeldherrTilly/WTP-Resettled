@@ -4337,7 +4337,10 @@ class CvMainInterface:
 		# a little reserve (4.5 % + 4 pixels) and the border; the lines were wrapped by a character count, so wide letters can make a line wider than
 		# the maximum. The lines with tab stops (the sell prices of cargo) cannot be wrapped: they may make the window up to 1.5 times as wide.
 		iWidth = max(120, min(int(iMaxWidth * 1.15), int(fPixel * 1.045) + 2 * iPad + 4))
-		return max(iWidth, min(int(iMaxWidth * 1.5), int(fTabPixel * 1.045) + 2 * iPad + 4))
+		if fTabPixel > 0:
+			# (the tab stops are only estimated: one more border width on the right side)
+			iWidth = max(iWidth, min(int(iMaxWidth * 1.5), int(fTabPixel * 1.06) + 3 * iPad + 4))
+		return iWidth
 
 	def drawCursorTip( self, screen, bClickable ):
 		self.iCursorTipLines = len(self.tTipLayout[4])
