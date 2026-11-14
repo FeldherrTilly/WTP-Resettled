@@ -11697,10 +11697,12 @@ int CvPlayer::getMilitaryUpkeepCost(const CvUnit& kUnit, int& iFreePool) const
 	}
 	if (eClass == eSlaveHunter || eClass == eSlaveMaster)
 	{
+		iFreePool = 1;
 		return 40;
 	}
 	if (eClass == UNITCLASS_NATIVE_MERC || eClass == eBuccanneer)
 	{
+		iFreePool = 1;
 		return 60;
 	}
 	if (eClass == UNITCLASS_CONTINENTAL_GUARD)
