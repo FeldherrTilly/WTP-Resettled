@@ -5461,6 +5461,8 @@ void CvGame::addShipName(const CvWString& szName)
 
 void CvGame::doTurn()
 {
+	WtpTiming::flush(getGameTurn());
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_DOTURN);
 	PROFILE_FUNC();
 
 	int iLoopPlayer;
@@ -6034,6 +6036,7 @@ void CvGame::updateWar()
 
 void CvGame::updateMoves()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_UPDATEMOVES);
 	MOD_PROFILE("CvGame::updateMoves");
 
 	CvSelectionGroup* pLoopSelectionGroup;
@@ -7539,7 +7542,7 @@ void CvGame::changeYieldBoughtTotal(TradeLocationTypes eLocation, PlayerTypes eM
 			}
 
 			//affect non-mercantile amounts
-			kEuropePlayer.changeYieldTradedTaxCounter(eLocation, eYield, iChange * iMercantilePercent / 100);
+			kEuropePlayer.changeYieldTradedTaxCounter(eLocation, eYield, iChange * iMercantilePercent / 100, false);
 		}
 	}
 }
