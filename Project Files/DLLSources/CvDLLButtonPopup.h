@@ -15,6 +15,13 @@
 #include "CvPopupReturn.h"
 
 class CvPopup;
+// WTP: the panel to buy the missing materials of a project that is finished next turn: asked for when the turn is about to end (once per city and turn)
+namespace WtpBuyMaterialsPanel
+{
+	// opens the panels; true if one was opened (the turn must not end yet)
+	bool relaunch();
+}
+
 class CvDLLButtonPopup
 {
 
