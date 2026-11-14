@@ -965,6 +965,12 @@ class CvDomesticAdvisor:
 		screen.setStyle( szTableName, "Table_StandardCiv_Style" )
 		screen.hide( szTableName )
 
+		# WTP: button for the overview of the trade route assignments of all transports (symbol of the automate trade routes command), in the lower row after the tab buttons
+		iOverviewSize = self.iButtonSize * 4 / 3 # the symbol has more empty border than the round tab buttons
+		iOverviewX = self.nScreenWidth * 843 / 1000
+		screen.setImageButton("TransportOverviewButton", "Art/Interface/Game Hud/Actions/automate_city_high_res.dds", iOverviewX, self.Y_LOWER_ROW + self.iButtonSize / 2 - iOverviewSize / 2, iOverviewSize, iOverviewSize, WidgetTypes.WIDGET_GENERAL, 10002, -1)
+		screen.show("TransportOverviewButton")
+
 		screen.setTableColumnHeader( szTableName, 0, localText.getText("TXT_KEY_SOURCE", ()), (150 * self.nTableWidth) / self.nNormalizedTableWidth)
 		screen.setTableColumnHeader( szTableName, 1, localText.getText("TXT_KEY_DESTINATION", ()), (150 * self.nTableWidth) / self.nNormalizedTableWidth)
 		screen.setTableColumnHeader( szTableName, 2, localText.getText("TXT_KEY_YIELD", ()), (65 * self.nTableWidth) / self.nNormalizedTableWidth)
@@ -1028,6 +1034,8 @@ class CvDomesticAdvisor:
 						if self.StateWindow[self.CurrentState] != None:
 							self.StateWindow[self.CurrentState].hide()
 						screen.hide(self.StatePages[self.CurrentState][self.CurrentPage] + "ListBackground")
+						if self.CurrentState == self.TRADEROUTE_STATE:
+							screen.hide("TransportOverviewButton")
 						if self.CurrentState not in self.YieldPages or iData not in self.YieldPages:
 							self.CurrentPage = 0
 						self.CurrentState = iData
@@ -1051,6 +1059,10 @@ class CvDomesticAdvisor:
 							self.CurrentPage = new_page
 							self.drawContents()
 				# auto-generated list creation - end - Nightinggale
+				elif (iData == 10002):
+					# WTP: overview of the trade route assignments of all transports
+					self.openTransportOverview()
+					return 0
 				elif (iData == 10001):
 					# WTP: a click on a transport selects it on the map (shift + click: select it here to assign trade routes)
 					if (not inputClass.isShiftKeyDown() and self.selectTransportOnMap(inputClass.getData2())):
@@ -1107,6 +1119,22 @@ class CvDomesticAdvisor:
 		popupInfo.setText(u"showDomesticAdvisor")
 		popupInfo.addPopup(pCity.getOwner())
 
+	def openTransportOverview(self):
+		try:
+			if len(self.Transports) == 0:
+				return False
+			import CvTransportRoutesOverview
+			CvTransportRoutesOverview.g_FromHotkey = False
+			screen = CyGInterfaceScreen( "DomesticAdvisor", CvScreenEnums.DOMESTIC_ADVISOR )
+			screen.hideScreen()
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+			popupInfo.setText(u"showTransportRoutesOverview")
+			popupInfo.addPopup(gc.getGame().getActivePlayer())
+			return True
+		except:
+			return False
+
 	def selectTransportOnMap(self, iUnitID):
 		try:
 			pUnit = gc.getPlayer(gc.getGame().getActivePlayer()).getUnit(iUnitID)
@@ -1162,6 +1190,8 @@ class CvDomesticAdvisor:
 		iScreen, eWidgetType, iData1, iData2, bOption = argsList
 
 		if eWidgetType == WidgetTypes.WIDGET_GENERAL:
+			if iData1 == 10002:
+				return localText.getText("TXT_KEY_WTP_TRANSPORT_OVERVIEW_BUTTON", ())
 			if iData1 == self.GENERAL_STATE:
 				return localText.getText("TXT_KEY_DOMESTIC_ADVISOR_STATE_GENERAL", ())
 			elif iData1 == self.DOMESTIC_DEMAND_STATE:
