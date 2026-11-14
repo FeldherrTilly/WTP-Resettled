@@ -1588,7 +1588,10 @@ class CvTradeRouteScreen:
 		self.pHost = None
 
 	# a key down event (CvEventManager.onKbdEvent gives them to the window while it is open)
-	def handleKey(self, iKey, bCtrl, bShift = False):
+	def handleKey(self, iKey, bCtrl, bShift = False, bAlt = False):
+		if bAlt and iKey != self.iKeyEsc:
+			# Alt+Tab (switching out of the game) must not count as Tab (accept the suggestion) or as typing
+			return
 		if iKey == self.iKeyEsc:
 			self.finish(False, -1)
 		elif bCtrl and bShift and iKey == self.getKeyId("KB_Q"):
@@ -1597,6 +1600,16 @@ class CvTradeRouteScreen:
 			self.pressArrow(self.aKeyArrows.index(iKey), bCtrl, bShift)
 		else:
 			self.handleSearchKey(iKey, bShift)
+
+	# after an error in a key: the search state is made consistent again and the window is built again
+	def recoverFromError(self):
+		self.syncFilter()
+		self.findSuggestion()
+		if self.iView == VIEW_FILTER:
+			self.buildView()
+		self.tLayout = (-1, False)
+		self.refreshList()
+		self.drawSearchText()
 
 	# the clicks on the buttons of the window; returns 1 if the event was for it
 	def handleEmbeddedInput(self, inputClass):

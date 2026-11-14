@@ -220,9 +220,15 @@ class CvEventManager:
 		if (CvScreensInterface.tradeRouteScreen.isOpen()):
 			if (eventType == self.EventKeyDown):
 				try:
-					CvScreensInterface.tradeRouteScreen.handleKey(int(key), self.bCtrl, self.bShift)
+					CvScreensInterface.tradeRouteScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
 				except:
-					pass
+					# (a failed key must not stay unseen: the error goes to the log, the window is drawn again from its data)
+					try:
+						import traceback
+						CvUtil.pyPrint("TradeRouteScreen key: " + traceback.format_exc())
+						CvScreensInterface.tradeRouteScreen.recoverFromError()
+					except:
+						pass
 			elif (eventType == self.EventKeyUp):
 				try:
 					CvScreensInterface.tradeRouteScreen.handleKeyUp(int(key))
