@@ -1794,9 +1794,9 @@
 		<DefineName>TRADE_DECAY_PRICE_CHANGE</DefineName>
 		<iDefineIntVal>128</iDefineIntVal>
 	</Define>
-	<!-- WTP: factor for the map scroll speed (edge scrolling) while the shift key is held. 1.0 = no change, 2.0 = twice as fast -->
+	<!-- WTP: factor for the map scroll speed (edge scrolling) while the shift key is held. 1.0 = no change, 2.5 = two and a half times as fast -->
 	<Define>
 		<DefineName>SHIFT_SCROLL_SPEED_MULTIPLIER</DefineName>
-		<fDefineFloatVal>2.0</fDefineFloatVal>
+		<fDefineFloatVal>2.5</fDefineFloatVal>
 	</Define>
 </Civ4Defines>
