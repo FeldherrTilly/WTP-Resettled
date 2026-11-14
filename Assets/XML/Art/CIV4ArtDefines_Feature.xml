@@ -129,7 +129,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>256</iModelCopies>
+				<iModelCopies>448</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,5,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -167,7 +167,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>192</iModelCopies>
+				<iModelCopies>336</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,3,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -185,7 +185,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>192</iModelCopies>
+				<iModelCopies>336</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,7,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -203,7 +203,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>192</iModelCopies>
+				<iModelCopies>336</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,8,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -223,7 +223,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>128</iModelCopies>
+				<iModelCopies>224</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,1,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -297,7 +297,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>28</iModelCopies>
+				<iModelCopies>49</iModelCopies>
 				<VarietyButton>Art/Interface/Buttons/shrub.dds</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -434,7 +434,7 @@
 						<Connections>NW NE SE SW</Connections>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>16</iModelCopies>
+				<iModelCopies>28</iModelCopies>
 				<VarietyButton>Art/Interface/Buttons/button_tropical_grove.dds</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -583,7 +583,7 @@
 						<Connections>NW NE SE SW</Connections>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>24</iModelCopies>
+				<iModelCopies>42</iModelCopies>
 				<VarietyButton>Art/Interface/Buttons/button_dense_forest.dds</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -732,7 +732,7 @@
 						<Connections>NW NE SE SW</Connections>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>24</iModelCopies>
+				<iModelCopies>42</iModelCopies>
 				<VarietyButton>Art/Interface/Buttons/Ancient_Forest_Button.dds</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>

@@ -95,7 +95,7 @@
 	</Define>
 	<Define>
 		<DefineName>CAMERA_NEAR_FAR_PLANE_RATIO</DefineName>
-		<fDefineFloatVal>100</fDefineFloatVal>
+		<fDefineFloatVal>200</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>CAMERA_CITY_ZOOM_IN_DISTANCE</DefineName>
@@ -131,11 +131,11 @@
 	</Define>
 	<Define>
 		<DefineName>IMPROVEMENT_SCALE</DefineName>
-		<fDefineFloatVal>0.7</fDefineFloatVal>
+		<fDefineFloatVal>0.5</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>BONUS_SCALE</DefineName>
-		<fDefineFloatVal>0.7</fDefineFloatVal>
+		<fDefineFloatVal>0.5</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>HEALTH_BAR_WIDTH</DefineName>
