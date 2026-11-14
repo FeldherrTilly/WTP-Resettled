@@ -198,6 +198,7 @@ public:
 	void setWheelCapture(bool bOn) const; // the mouse wheel is collected for the amount dialog (python) instead of zooming the map
 	int takeWheelNotches() const; // the notches of the wheel since the last call (positive: away from the user)
 	bool isCtrlKeyPressed() const;
+	bool isArrowKeyPressed(int iDir) const; // 0: left, 1: right, 2: up, 3: down
 	void sendYieldTransfer(int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) const; // the amount dialog sends the transfer of goods
 	void sendDiploYieldAmount(int iYield, int iAmount, int iFromPlayer) const; // the amount dialog sets the amount of goods of a diplomacy deal
 	int getCursorClientX() const; // mouse position in the game window (-1 if unknown)
