@@ -1232,6 +1232,8 @@ class CvTradeRouteScreen:
 		screen = self.pHost
 		if szFont == "":
 			szFont = TEXT_FONT
+		if self.dBtn.has_key(szName) and self.dBtn[szName][:9] == [iX, iY, iW, iH, iCode, szText, bMark, szFont, iDy]:
+			return # (nothing changed: not drawn again, so the tooltip of the button under the mouse does not flicker)
 		self.removeButton(szName)
 		screen.setButtonGFC(szName, u"", "", iX, iY, iW, iH, WidgetTypes.WIDGET_GENERAL, iCode, -1, ButtonStyles.BUTTON_STYLE_STANDARD)
 		aLights = []
@@ -1295,8 +1297,7 @@ class CvTradeRouteScreen:
 
 	def drawRows(self):
 		screen = self.pHost
-		self.clearHover()
-		self.updatePresetState()
+		self.updatePresetState() # (the highlight of the button under the mouse stays: removeButton takes it away when a button is drawn again)
 		szImport = localText.getText("TXT_KEY_POPUP_IMPORT_IMPORT", ())
 		szFeeder = localText.getText("TXT_KEY_POPUP_IMPORT_FEEDER", ())
 		szLand = localText.getText("TXT_KEY_POPUP_IMPORT_LAND", ())
