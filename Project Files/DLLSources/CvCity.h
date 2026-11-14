@@ -786,6 +786,7 @@ public:
 	int getMaintainLevel(YieldTypes eYield) const;
 	// R&R mod, vetiarvind, max yield import limit - Start
 	void setImportsLimit(YieldTypes eYield, int iValue);
+	bool getAutoMarketImportLevels(YieldTypes eYield, int& iMaintainLevel, int& iImportLimit) const; // WTP: the levels the automatic market import sets for the good (false: the market does not ask for it)
 	int getImportsLimit(YieldTypes eYield) const;
 	// R&R mod, vetiarvind, max yield import limit - End
 	// R&R, ray, finishing Custom House Screen START

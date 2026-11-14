@@ -1705,6 +1705,20 @@ bool CyCity::isMarketDemandYield(int /*YieldTypes*/ eYield) const
 	return false;
 }
 
+int CyCity::getMarketImportMaintain(int /*YieldTypes*/ eYield) const
+{
+	int iMaintain = 0;
+	int iLimit = 0;
+	return (m_pCity != NULL && m_pCity->getAutoMarketImportLevels((YieldTypes) eYield, iMaintain, iLimit)) ? iMaintain : -1;
+}
+
+int CyCity::getMarketImportLimit(int /*YieldTypes*/ eYield) const
+{
+	int iMaintain = 0;
+	int iLimit = 0;
+	return (m_pCity != NULL && m_pCity->getAutoMarketImportLevels((YieldTypes) eYield, iMaintain, iLimit)) ? iLimit : -1;
+}
+
 // same condition as CvDLLButtonPopup::isYieldSupportedInExportPanelForCity
 bool CyCity::isYieldInTradeRouteCondensedList(int /*YieldTypes*/ eYield) const
 {

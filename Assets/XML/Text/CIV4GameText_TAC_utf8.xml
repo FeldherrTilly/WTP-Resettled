@@ -3380,18 +3380,18 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Clear All[COLOR_REVERT][NEWLINE]Removes all import and export settings of this city.</English>
-		<German>[COLOR_HIGHLIGHT_TEXT]Alles löschen[COLOR_REVERT][NEWLINE]Entfernt alle Import- und Export-Einstellungen dieser Stadt.</German>
+		<English>[COLOR_HIGHLIGHT_TEXT]Clear All[COLOR_REVERT][NEWLINE]Removes all import and export settings of this city.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic are not changed.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alles löschen[COLOR_REVERT][NEWLINE]Entfernt alle Import- und Export-Einstellungen dieser Stadt.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Import all goods[COLOR_REVERT][NEWLINE]Turns import on for all goods.</English>
-		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren importieren[COLOR_REVERT][NEWLINE]Schaltet den Import für alle Waren ein.</German>
+		<English>[COLOR_HIGHLIGHT_TEXT]Import all goods[COLOR_REVERT][NEWLINE]Turns import on for all goods.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren importieren[COLOR_REVERT][NEWLINE]Schaltet den Import für alle Waren ein.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Auto-export all goods[COLOR_REVERT][NEWLINE]Turns automatic export on for all goods.</English>
-		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren automatisch exportieren[COLOR_REVERT][NEWLINE]Schaltet den automatischen Export für alle Waren ein.</German>
+		<English>[COLOR_HIGHLIGHT_TEXT]Auto-export all goods[COLOR_REVERT][NEWLINE]Turns automatic export on for all goods.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic are not changed.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren automatisch exportieren[COLOR_REVERT][NEWLINE]Schaltet den automatischen Export für alle Waren ein.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT</Tag>
@@ -3473,5 +3473,50 @@
 		<Tag>TXT_KEY_WTP_TRADEROUTE_FILTER_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Filter[COLOR_REVERT][NEWLINE]Adds this good to the filter or takes it out again. The filter view (drop down at the bottom right) lists the goods of your searches: confirmed goods (Enter) stay in it, also for the next time and for all cities, and are saved with the game.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Filter[COLOR_REVERT][NEWLINE]Nimmt diese Ware in den Filter auf oder wieder heraus. Die Filteransicht (Auswahlmenü unten rechts) zeigt die Waren deiner Suchen: bestätigte Waren (Enter) bleiben darin, auch für das nächste Mal und für alle Städte, und werden mit dem Spielstand gespeichert.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT</Tag>
+		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Works in the view "All goods" only.[COLOR_REVERT] While it is on, the goods it manages cannot be changed by the buttons Clear All, Import all goods, Auto-export all goods or Building material, only by hand (you get a notice then, with a button to set the good back).</English>
+		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Funktioniert nur in der Ansicht „Alle Waren".[COLOR_REVERT] Solange er an ist, können die Waren, die er verwaltet, nicht durch die Knöpfe Alles löschen, Alle Waren importieren, Alle Waren automatisch exportieren oder Baumaterial verändert werden, nur von Hand (dann erscheint ein Hinweis mit einem Knopf, der die Ware zurücksetzt).</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1</Tag>
+		<English>%s1_good: managed by Market automatic</English>
+		<German>%s1_good: von „Markt-Automatik" verwaltet</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_2</Tag>
+		<English>Your change differs from the setting Market automatic makes for this good.</English>
+		<German>Deine Änderung weicht von der Einstellung ab, die „Markt-Automatik" für diese Ware setzt.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_RESET</Tag>
+		<English>Reset the good</English>
+		<German>Ware zurücksetzen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE</Tag>
+		<English>Ignore</English>
+		<German>Ignorieren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_1</Tag>
+		<English>%s1_count goods not changed: managed by Market automatic</English>
+		<German>%s1_count Waren nicht geändert: von „Markt-Automatik" verwaltet</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_2</Tag>
+		<English>%s1_goods - only manual changes are possible for them while it is on.</English>
+		<German>%s1_goods - solange er an ist, sind für sie nur manuelle Änderungen möglich.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_1</Tag>
+		<English>Market automatic</English>
+		<German>Markt-Automatik</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_2</Tag>
+		<English>can only be switched on or off in the view "All goods".</English>
+		<German>kann nur in der Ansicht „Alle Waren" ein- und ausgeschaltet werden.</German>
 	</TEXT>
 </Civ4GameText>

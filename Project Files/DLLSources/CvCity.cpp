@@ -15719,4 +15719,32 @@ int CvCity::getExportAvailable(YieldTypes eYield) const
 	return std::max(0, getYieldStored(eYield)
 		- getAutoMaintainThreshold(eYield));
 }
+// WTP: the levels that the automatic market import sets for a good (the same numbers as updateAutoMarketImport starts with, before a
+// higher level set by hand is taken over); false if the market does not ask for the good
+bool CvCity::getAutoMarketImportLevels(YieldTypes eYield, int& iMaintainLevel, int& iImportLimit) const
+{
+	if (eYield < FIRST_YIELD || eYield >= NUM_YIELD_TYPES || !GC.getYieldInfo(eYield).isCargo())
+	{
+		return false;
+	}
+	YieldCargoArray<int> aiDemand;
+	getYieldDemands(aiDemand);
+	const InfoArray<YieldTypes>& kYieldArray = GC.getDomesticDemandYieldTypes();
+	for (int i = 0; i < kYieldArray.getLength(); ++i)
+	{
+		if (kYieldArray.get(i) == eYield)
+		{
+			const int iDemand = aiDemand.get(eYield);
+			if (iDemand <= 0)
+			{
+				return false;
+			}
+			iMaintainLevel = std::max(iDemand * GLOBAL_DEFINE_AUTO_MARKET_IMPORT_MAINTAIN_TURNS, GLOBAL_DEFINE_AUTO_MARKET_IMPORT_MIN_LEVEL);
+			iImportLimit = std::max(std::max(iDemand * GLOBAL_DEFINE_AUTO_MARKET_IMPORT_LIMIT_TURNS, GLOBAL_DEFINE_AUTO_MARKET_IMPORT_MIN_LEVEL), iMaintainLevel);
+			return true;
+		}
+	}
+	return false;
+}
+
 	doTask(TASK_YIELD_TRADEROUTE, getTradeRouteTaskData(eYield), buffer.iNetwork, true, isExport(eYield), true, isAutoExport(eYield));

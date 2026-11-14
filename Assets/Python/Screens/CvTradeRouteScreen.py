@@ -23,6 +23,8 @@ BTN_VIEW = 41200 # the drop down: default view / favorites
 BTN_SEARCH = 41300 # the search field
 BTN_CLEAR_SEARCH = 41301
 BTN_MOVE = 41310 # +0 left, +1 right, +2 up, +3 down
+BTN_WARN_RESET = 41330 # the notice in the middle of the window: reset the good to the setting of market automatic
+BTN_WARN_OK = 41331 # the notice: ignore / OK
 MOVE_STEP = 60
 MOVE_DELAY = 18 # frames until the key repeats
 MOVE_REPEAT = 3 # frames between the steps
@@ -336,6 +338,8 @@ class CvTradeRouteScreen:
 		self.dNames = {}
 		self.dKeys = {}
 		self.sHover = ""
+		self.tWarn = None # the notice in the middle of the window: (line 1, line 2, the good to reset or -1)
+		self.aWarnDrawn = []
 
 	def isOpen(self):
 		return not self.bFinished
@@ -599,11 +603,14 @@ class CvTradeRouteScreen:
 	# the building material preset as a switch (see BLD_PREFIX)
 	def toggleBuild(self):
 		dBuild = loadBuild()
+		aSkipped = []
 		if dBuild.has_key(self.iCity):
 			# off: only the goods the preset turned on are taken away again
 			for aType in dBuild[self.iCity]:
 				iYield = self.getYieldByType(aType[0])
-				if iYield >= 0:
+				if iYield >= 0 and self.isMarketLocked(iYield):
+					aSkipped.append(iYield) # (market automatic manages the good)
+				elif iYield >= 0:
 					self.dData[iYield]["imp"] = False
 					self.dData[iYield]["feeder"] = False
 					self.dData[iYield]["maintain"] = aType[1]
@@ -618,6 +625,9 @@ class CvTradeRouteScreen:
 				d = self.dData[iYield]
 				if d["imp"] or d["feeder"]:
 					continue # set by hand before: stays as it is
+				if self.isMarketLocked(iYield):
+					aSkipped.append(iYield) # (market automatic manages the good)
+					continue
 				aAdded.append([szType, d["maintain"], d["impLimit"]])
 				d["imp"] = True
 				d["feeder"] = True
@@ -627,6 +637,7 @@ class CvTradeRouteScreen:
 			dBuild[self.iCity] = aAdded
 		saveBuild(dBuild)
 		self.apply()
+		self.warnSkipped(aSkipped)
 		self.drawBuildButton()
 		if self.iView == VIEW_MARKED:
 			self.buildView()
@@ -634,10 +645,111 @@ class CvTradeRouteScreen:
 		self.drawRows()
 		self.iReload = 60
 
+	# --- market automatic: the goods it manages are protected: the presets of the window leave them alone, a manual change is reported ---
+	def isMarketOn(self):
+		pCity = self.getCity()
+		return pCity != None and not pCity.isNone() and pCity.isAutoMarketImport()
+
+	# market automatic is on and the market asks for the good
+	def isMarketLocked(self, iYield):
+		if not self.isMarketOn():
+			return False
+		return self.getCity().getMarketImportMaintain(iYield) >= 0
+
+	# the setting of the good differs from what market automatic sets (it never lowers a level, so a higher one is fine)
+	def isMarketDeviating(self, iYield):
+		pCity = self.getCity()
+		iMaintain = pCity.getMarketImportMaintain(iYield)
+		iLimit = pCity.getMarketImportLimit(iYield)
+		if iMaintain < 0:
+			return False
+		d = self.dData[iYield]
+		return (not d["imp"]) or (not d["feeder"]) or d["exp"] or d["maintain"] < iMaintain or d["impLimit"] < iLimit
+
+	def checkMarketChange(self, iYield):
+		if self.isMarketLocked(iYield) and self.isMarketDeviating(iYield):
+			szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1", (self.dNames[iYield],))
+			szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_2", ())
+			self.showWarn(szLine1, szLine2, iYield)
+
+	# back to the setting of market automatic (the export is taken away: the market does not manage exported goods)
+	def resetMarketGood(self, iYield):
+		pCity = self.getCity()
+		iMaintain = pCity.getMarketImportMaintain(iYield)
+		iLimit = pCity.getMarketImportLimit(iYield)
+		if iMaintain >= 0:
+			d = self.dData[iYield]
+			d["imp"] = True
+			d["feeder"] = True
+			d["exp"] = False
+			d["auto"] = False
+			d["maintain"] = iMaintain
+			d["impLimit"] = iLimit
+			self.apply()
+			self.iReload = 60
+		self.hideWarn()
+		self.drawRows()
+
+	# the goods a preset did not change because market automatic manages them: a notice
+	def warnSkipped(self, aSkipped):
+		if len(aSkipped) == 0:
+			return
+		aNames = [self.dNames[i] for i in aSkipped[:4]]
+		szNames = ", ".join(aNames)
+		if len(aSkipped) > 4:
+			szNames += ", ..."
+		szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_1", (str(len(aSkipped)),))
+		szLine2 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_2", (szNames,))
+		self.showWarn(szLine1, szLine2, -1)
+
+	def showWarn(self, szLine1, szLine2, iYield):
+		self.tWarn = (szLine1, szLine2, iYield)
+		self.drawWarn()
+
+	def hideWarn(self):
+		self.tWarn = None
+		for szName in self.aWarnDrawn:
+			self.drop(szName)
+		for szName in ("TRSWarnReset", "TRSWarnOk"):
+			self.removeButton(szName)
+		self.aWarnDrawn = []
+
+	# the notice in the middle of the window: a dark panel, two lines and the buttons (Reset only for a changed good)
+	def drawWarn(self):
+		if self.tWarn == None:
+			return
+		screen = self.pHost
+		for szName in self.aWarnDrawn:
+			self.drop(szName)
+		for szName in ("TRSWarnReset", "TRSWarnOk"):
+			self.removeButton(szName)
+		self.aWarnDrawn = []
+		iW = 640
+		iH = 130
+		iX = self.OX + (self.W - iW) / 2
+		iY = self.OY + (self.H - iH) / 2
+		for iLayer in range(3):
+			szBack = "TRSWarnBack" + str(iLayer)
+			screen.addPanel(szBack, u"", u"", True, False, iX, iY, iW, iH, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			self.aWarnDrawn.append(szBack)
+		screen.setText("TRSWarnText1", "", u"<font=3b><color=255,220,100>" + self.tWarn[0] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 20, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
+		screen.setText("TRSWarnText2", "", u"<font=3b><color=255,255,255>" + self.tWarn[1] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 50, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
+		self.aWarnDrawn.append("TRSWarnText1")
+		self.aWarnDrawn.append("TRSWarnText2")
+		if self.tWarn[2] >= 0:
+			self.addButton("TRSWarnReset", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_RESET", ()), False, iX + iW / 2 - 165, iY + iH - 42, 160, 28, BTN_WARN_RESET)
+			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE", ()), False, iX + iW / 2 + 5, iY + iH - 42, 160, 28, BTN_WARN_OK)
+		else:
+			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_MAIN_MENU_OK", ()), False, iX + iW / 2 - 80, iY + iH - 42, 160, 28, BTN_WARN_OK)
+
 	# market automatic: on remembers the settings of the goods the market asks for, off restores them
 	def toggleMarket(self):
 		pCity = self.getCity()
 		if pCity == None or pCity.isNone():
+			return
+		if self.iView != VIEW_ALL:
+			# (it works in the view with all goods only)
+			self.showWarn(localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_1", ()), localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_2", ()), -1)
 			return
 		try:
 			dMarket = loadMarket()
@@ -695,6 +807,7 @@ class CvTradeRouteScreen:
 		self.iView = VIEW_ALL
 		self.dBtn = {}
 		self.sHover = ""
+		self.tWarn = None
 		for iYield in range(YieldTypes.NUM_YIELD_TYPES):
 			if not gc.getYieldInfo(iYield).isCargo():
 				continue
@@ -942,6 +1055,7 @@ class CvTradeRouteScreen:
 			self.drawCheck("TRSc" + str(iSlot) + "_fe", szFav, bFav, self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + 2, BTN_FAV_EXP + iSlot)
 			# below it: the good is part of the filter (the goods of the searches, view "Filter")
 			self.drawCheck("TRSc" + str(iSlot) + "_ff", szFilter, self.isInFilter(iYield), self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + 2 + self.CHECK_H + 2, BTN_FILTER + iSlot)
+		self.drawWarn() # (the notice stays on top of the rows)
 
 	def drawSpin(self, iSlot, iBlock, iValue, iX, iY, iMinusCode, iPlusCode):
 		screen = self.pHost
@@ -997,6 +1111,7 @@ class CvTradeRouteScreen:
 			szKey = "maintain"
 		d[szKey] = max(0, min(MAX_VALUE, d[szKey] + iDelta))
 		self.drawRows()
+		self.checkMarketChange(self.aYields[iIndex])
 
 	def toggleField(self, iSlot, iField):
 		iIndex = self.iFirst + iSlot
@@ -1020,6 +1135,7 @@ class CvTradeRouteScreen:
 		elif iField == F_EXP_SEA:
 			d["expDom"] = d["expDom"] ^ 2
 		self.drawRows()
+		self.checkMarketChange(self.aYields[iIndex])
 
 	def apply(self):
 		pCity = self.getCity()
@@ -1073,15 +1189,22 @@ class CvTradeRouteScreen:
 			if iCode - BTN_PRESET == 4:
 				pCity = self.getCity()
 				if pCity != None and not pCity.isNone() and pCity.isAutoMarketImport():
-					return localText.getText("TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO_OFF", ())
+					return localText.getText("TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO_OFF", ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
+				return localText.getText(aszKey[iCode - BTN_PRESET], ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
 			return localText.getText(aszKey[iCode - BTN_PRESET], ())
 		return u""
 
 	# a preset: the changes of the window are sent first, the window stays open and shows the result a moment later
 	# clear all / import all goods / auto-export all goods for the goods of the current filter only (all pages of the view / search)
 	def runFilteredPreset(self, iPreset):
+		aSkipped = []
 		for iYield in self.aYields:
 			d = self.dData[iYield]
+			if self.isMarketLocked(iYield):
+				# market automatic manages the good: only a manual change touches it (import all changes nothing there)
+				if iPreset == 0 or (iPreset == 2 and not d["auto"]):
+					aSkipped.append(iYield)
+				continue
 			if iPreset == 0:
 				d["imp"] = False
 				d["feeder"] = False
@@ -1100,6 +1223,7 @@ class CvTradeRouteScreen:
 			self.buildView()
 			self.drawPage()
 		self.drawRows()
+		self.warnSkipped(aSkipped)
 		self.iReload = 60
 
 	def runPreset(self, iPreset):
@@ -1110,8 +1234,8 @@ class CvTradeRouteScreen:
 			self.toggleMarket()
 			return
 		try:
-			if iPreset <= 2 and len(self.aYields) != len(self.aAllYields):
-				# a filter is active (view / search): only the goods of the filter, over all pages
+			if iPreset <= 2 and (len(self.aYields) != len(self.aAllYields) or self.isMarketOn()):
+				# only the goods of the current view (all pages); with market automatic on also here: the goods it manages stay as they are
 				self.runFilteredPreset(iPreset)
 				return
 			self.apply()
@@ -1127,6 +1251,9 @@ class CvTradeRouteScreen:
 
 	def teardownLayout(self):
 		try:
+			for szName in self.aWarnDrawn:
+				self.drop(szName)
+			self.aWarnDrawn = []
 			self.clearRows()
 			self.clearHover()
 			for szName in self.dBtn.keys():
@@ -1303,6 +1430,11 @@ class CvTradeRouteScreen:
 			else:
 				aMod = self.getModifiers()
 				self.queueMove(iData - BTN_MOVE, self.getMoveStep(aMod[0], aMod[1]))
+		elif iData == BTN_WARN_RESET:
+			if self.tWarn != None and self.tWarn[2] >= 0:
+				self.resetMarketGood(self.tWarn[2])
+		elif iData == BTN_WARN_OK:
+			self.hideWarn()
 		elif iData == BTN_CLEAR_SEARCH:
 			self.szQuery = u""
 			self.aConfirmed = []
