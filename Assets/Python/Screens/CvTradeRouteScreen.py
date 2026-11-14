@@ -643,6 +643,7 @@ class CvTradeRouteScreen:
 			if not bActive:
 				# the preset is off: its goods go back to what they were
 				aSkipped = self.revertPresetGoods(p, dBuild[self.iCity])
+				self.clearPresetLeftovers(p)
 				del dBuild[self.iCity]
 				saveBuild(dBuild, p["prefix"])
 				bChanged = True
@@ -708,11 +709,26 @@ class CvTradeRouteScreen:
 						dOther[self.iCity].append(list(aType))
 						saveBuild(dOther, q["prefix"])
 				continue
-			self.dData[iYield]["imp"] = len(aType) > 3 and aType[3] != 0 # (an import with the amount 0 before stays)
+			self.dData[iYield]["imp"] = False # (the import goes too, also an import with the amount 0 that was there before)
 			self.dData[iYield]["feeder"] = False
 			self.dData[iYield]["maintain"] = aType[1]
 			self.dData[iYield]["impLimit"] = aType[2]
 		return aSkipped
+
+	# a preset that went off: what is left of it at its goods is switched off too (an import with the amount 0 and no feeder);
+	# not the goods market automatic manages and not the goods another preset that is on still asks for
+	def clearPresetLeftovers(self, p):
+		for szType in p["goods"]:
+			iYield = self.getYieldByType(szType)
+			if iYield < 0 or self.isMarketLocked(iYield):
+				continue
+			bOther = False
+			for q in self.getPresetsOfGood(iYield):
+				if q["id"] != p["id"]:
+					bOther = True
+			d = self.dData[iYield]
+			if not bOther and d["imp"] and not d["feeder"] and d["impLimit"] == 0:
+				d["imp"] = False
 
 	# a preset (building material, livestock) as a switch: on remembers the goods it turned on (and their levels before), off takes only those away
 	def toggleBuild(self, p):
@@ -921,6 +937,7 @@ class CvTradeRouteScreen:
 					bActive = True
 			if not bActive:
 				self.revertPresetGoods(p, dBuild[self.iCity])
+				self.clearPresetLeftovers(p)
 				del dBuild[self.iCity]
 			saveBuild(dBuild, p["prefix"])
 		self.apply()
@@ -1184,16 +1201,21 @@ class CvTradeRouteScreen:
 		self.drawSearchText()
 		self.iViewX = self.W - 20 - 160
 		screen.addDropDownBoxGFC("TRSView", self.OX + self.iViewX, self.OY + self.H - 44, 160, WidgetTypes.WIDGET_GENERAL, BTN_VIEW, -1, FontTypes.GAME_FONT)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_ALL", ()), 0, 0, self.iView == 0)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FAV", ()), 1, 1, self.iView == 1)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED", ()), 2, 2, self.iView == 2)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", ()), 3, 3, self.iView == 3)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT", ()), 4, 4, self.iView == 4)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED", ()), 5, 5, self.iView == 5)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED", ()), 6, 6, self.iView == 6)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ()), 7, 7, self.iView == 7)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", ()), 8, 8, self.iView == 8)
-		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", ()), 9, 9, self.iView == 9)
+		# the views in alphabetical order (of the text of the language; the number of the view is the data of the entry)
+		aViews = []
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_ALL", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_ALL", ()), 0))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FAV", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FAV", ()), 1))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED", ()), 2))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", ()), 3))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT", ()), 4))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED", ()), 5))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED", ()), 6))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ()), 7))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", ()), 8))
+		aViews.append((localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", ()).lower(), localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", ()), 9))
+		aViews.sort()
+		for iPos in range(len(aViews)):
+			screen.addPullDownString("TRSView", aViews[iPos][1], iPos, aViews[iPos][2], self.iView == aViews[iPos][2])
 		self.aDrawn.append("TRSView")
 		self.drawRows()
 		self.drawPage()
