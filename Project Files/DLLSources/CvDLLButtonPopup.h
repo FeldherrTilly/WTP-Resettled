@@ -15,6 +15,15 @@
 #include "CvPopupReturn.h"
 
 class CvPopup;
+// WTP: right click on a building of the city screen: a popup to upgrade it (the construction order of a building of the same slot)
+// The popup is a BUTTONPOPUP_CHOOSE_EDUCATION (that type is shown in the city screen) with this value as data3, the building as data2
+static const int WTP_BUILDING_UPGRADE_POPUP = 1000;
+namespace WtpBuildingUpgrade
+{
+	// opens the popup for the building of the special building slot iSpecialBuilding of the selected city. false if there is nothing to upgrade
+	bool open(int iSpecialBuilding, int iBuildingOfSlot);
+}
+
 class CvDLLButtonPopup
 {
 
