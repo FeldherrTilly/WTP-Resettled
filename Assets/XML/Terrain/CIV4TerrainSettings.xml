@@ -12,12 +12,12 @@
 			<EnvironmentTexture>Art/Terrain/Textures/TerrainEnvironment.dds</EnvironmentTexture>
 			<fTextureScaleX>2.0</fTextureScaleX>
 			<fTextureScaleY>2.0</fTextureScaleY>
-			<iPlotsPerCellX>6</iPlotsPerCellX>
-			<iPlotsPerCellY>6</iPlotsPerCellY>
+			<iPlotsPerCellX>3</iPlotsPerCellX>
+			<iPlotsPerCellY>3</iPlotsPerCellY>
 			<iPlotVertsWide>17</iPlotVertsWide>
 			<iPlotVertsHigh>17</iPlotVertsHigh>
 			<fZScale>1.0</fZScale>
-			<fPeakScale>0.40</fPeakScale>
+			<fPeakScale>0.60</fPeakScale>
 			<fHillScale>0.13</fHillScale>
 		</LandscapeInfo>
 	</LandscapeInfos>
