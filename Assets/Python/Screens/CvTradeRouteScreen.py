@@ -704,9 +704,10 @@ class CvTradeRouteScreen:
 		return (not d["imp"]) or (not d["feeder"]) or d["exp"] or d["maintain"] < iMaintain or d["impLimit"] < iLimit
 
 	# a manual change: reported when it breaks market automatic or switches off a good a preset has set
-	def checkMarketChange(self, iYield):
+	def checkMarketChange(self, iYield, dOld = None):
 		if not self.isMarketLocked(iYield):
-			self.checkPresetLost([iYield])
+			if dOld != None:
+				self.checkPresetLost([iYield], False, {iYield: dOld})
 			return
 		if self.isMarketDeviating(iYield):
 			szLine1 = localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1", (self.dNames[iYield],))
@@ -757,20 +758,44 @@ class CvTradeRouteScreen:
 	def getPresetNames(self, iYield):
 		return [localText.getText(p["text"], ()) for p in self.getPresetsOfGood(iYield)]
 
-	# a good that a preset asks for (owned by it or not) is off / zero now; goods the player chose to ignore are left alone
-	def isPresetLost(self, iYield):
+	# what the presets (switched on) ask for a good: (maintain level or -1, import limit); the highest of them
+	def getPresetLevels(self, iYield):
+		iMaintain = -1
+		iLimit = 0
+		for p in self.getPresetsOfGood(iYield):
+			iMaintain = max(iMaintain, p["maintain"])
+			iLimit = max(iLimit, p["limit"])
+		return (iMaintain, iLimit)
+
+	# a good that a preset asks for (owned or not) was lowered by the last change: import or feeder switched off, or the maintain level or
+	# the import limit lowered below what the presets ask for (raising something is fine); goods the player chose to ignore are left alone.
+	# dOld: the settings of the good before the change
+	def isPresetLost(self, iYield, dOld):
 		if not self.dData.has_key(iYield) or len(self.getPresetsOfGood(iYield)) == 0 or self.isMarketLocked(iYield):
 			return False
 		d = self.dData[iYield]
-		if (not d["imp"] and not d["feeder"]) or (d["maintain"] == 0 and d["impLimit"] == 0):
-			return not self.dIgnored.has_key(iYield)
 		if self.dIgnored.has_key(iYield):
-			del self.dIgnored[iYield] # active again: protected again
+			if d["imp"] and d["feeder"]:
+				del self.dIgnored[iYield] # active again: protected again
+			return False
+		iMaintain, iLimit = self.getPresetLevels(iYield)
+		if dOld == None:
+			return False
+		if dOld["imp"] and not d["imp"]:
+			return True
+		if dOld["feeder"] and not d["feeder"]:
+			return True
+		if iMaintain >= 0 and d["maintain"] < dOld["maintain"] and d["maintain"] < iMaintain:
+			return True
+		if d["impLimit"] < dOld["impLimit"] and d["impLimit"] < iLimit:
+			return True
 		return False
 
 	# the notice lists every switched off good with all presets that ask for it
-	def checkPresetLost(self, aGoods, bQueue = False):
-		aLost = [i for i in aGoods if self.isPresetLost(i)]
+	def checkPresetLost(self, aGoods, bQueue = False, dOldAll = None):
+		if dOldAll == None:
+			return
+		aLost = [i for i in aGoods if dOldAll.has_key(i) and self.isPresetLost(i, dOldAll[i])]
 		if len(aLost) == 0:
 			return
 		aNames = []
@@ -789,15 +814,10 @@ class CvTradeRouteScreen:
 			d = self.dData[iYield]
 			d["imp"] = True
 			d["feeder"] = True
-			iMaintain = -1
-			iLimit = 0
-			for p in self.getPresetsOfGood(iYield):
-				iMaintain = max(iMaintain, p["maintain"])
-				iLimit = max(iLimit, p["limit"])
+			iMaintain, iLimit = self.getPresetLevels(iYield)
 			if iMaintain >= 0:
-				d["maintain"] = iMaintain
-			if iLimit > 0:
-				d["impLimit"] = iLimit
+				d["maintain"] = max(d["maintain"], iMaintain)
+			d["impLimit"] = max(d["impLimit"], iLimit)
 			if d["maintain"] > d["impLimit"]:
 				d["maintain"] = d["impLimit"]
 		self.apply()
@@ -1268,18 +1288,20 @@ class CvTradeRouteScreen:
 		if iIndex >= len(self.aYields):
 			return
 		d = self.dData[self.aYields[iIndex]]
+		dOld = dict(d)
 		szKey = "impLimit"
 		if iBlock == 1:
 			szKey = "maintain"
 		d[szKey] = max(0, min(MAX_VALUE, d[szKey] + iDelta))
 		self.drawRows()
-		self.checkMarketChange(self.aYields[iIndex])
+		self.checkMarketChange(self.aYields[iIndex], dOld)
 
 	def toggleField(self, iSlot, iField):
 		iIndex = self.iFirst + iSlot
 		if iIndex >= len(self.aYields):
 			return
 		d = self.dData[self.aYields[iIndex]]
+		dOld = dict(d)
 		if iField == F_IMP_CHECK:
 			d["imp"] = not d["imp"]
 		elif iField == F_IMP_FEEDER:
@@ -1297,7 +1319,7 @@ class CvTradeRouteScreen:
 		elif iField == F_EXP_SEA:
 			d["expDom"] = d["expDom"] ^ 2
 		self.drawRows()
-		self.checkMarketChange(self.aYields[iIndex])
+		self.checkMarketChange(self.aYields[iIndex], dOld)
 
 	def apply(self):
 		pCity = self.getCity()
@@ -1362,6 +1384,9 @@ class CvTradeRouteScreen:
 	# clear all / import all goods / auto-export all goods for the goods of the current filter only (all pages of the view / search)
 	def runFilteredPreset(self, iPreset):
 		aSkipped = []
+		dOldAll = {}
+		for iYield in self.aYields:
+			dOldAll[iYield] = dict(self.dData[iYield])
 		for iYield in self.aYields:
 			d = self.dData[iYield]
 			if self.isMarketLocked(iYield):
@@ -1389,7 +1414,7 @@ class CvTradeRouteScreen:
 		self.drawRows()
 		self.warnSkipped(aSkipped)
 		if iPreset == 0:
-			self.checkPresetLost(self.aYields, True)
+			self.checkPresetLost(self.aYields, True, dOldAll)
 		self.iReload = 60
 
 	def runPreset(self, iPreset):
