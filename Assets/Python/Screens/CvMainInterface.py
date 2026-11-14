@@ -4941,8 +4941,6 @@ class CvMainInterface:
 			szSelect = self.getPlainCommandText(localText.getText("TXT_KEY_CITY_BAR_SELECT", (pCity.getName(),)))
 			if szPara == szSelect:
 				return (pCity, 0)
-			if iPara >= len(aszParas) - 3:
-				pass
 		except:
 			pass
 		return None
@@ -5169,10 +5167,6 @@ class CvMainInterface:
 			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_CONTACT_CIV) and not self.isCursorInScoreTable():
 				# (log: after a click on a unit the game reports the contact help of the score table although the cursor is on the map)
 				return
-			if szText and len(szText) > 0:
-				pass
-			elif int(eWidgetType) != self.iLastLogType:
-				self.iLastLogType = int(eWidgetType)
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			if szText and len(szText) > 0:
 				self.iWidgetHelpTick = self.iTick
@@ -5348,8 +5342,6 @@ class CvMainInterface:
 			self.hideCursorTooltip(screen)
 		else:
 			szHelp = CyInterface().getHelpString()
-			if len(szHelp) > 0:
-				pass
 			self.showCursorTooltip(screen, szHelp)
 			# while the cursor is on a HUD element the plot help behind it must not replace the help of the element
 			if not self.bHoverTip:
