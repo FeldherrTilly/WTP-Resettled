@@ -2171,6 +2171,7 @@ char const* CvPlayer::getUnitButton(UnitTypes eUnit) const
 
 void CvPlayer::doTurn()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_PLAYER_DOTURN);
 	OOS_LOG("CvPlayer::doTurn start", getID());
 	PROFILE_FUNC();
 
@@ -2338,6 +2339,7 @@ void CvPlayer::doTurn()
 		doPrices();
 		doAfricaPrices(); // R&R, ray, Africa
 		doPortRoyalPrices(); // R&R, ray, Port Royal
+		refreshHumanQuestMessages();
 		doTaxRaises();
 	}
 	EXTRA_POWER_CHECK
@@ -2469,6 +2471,7 @@ int CvPlayer::NBMOD_GetNewTaxRate(int iWantedTax) const
 
 void CvPlayer::doTurnUnits()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_PLAYER_DOTURNUNITS);
 	PROFILE_FUNC();
 
 	CvSelectionGroup* pLoopSelectionGroup;
@@ -11135,7 +11138,7 @@ int CvPlayer::getCultureHistory(int iTurn) const
 }
 
 
-int CvPlayer::addTradeRoute(const IDInfo& kSource, const IDInfo& kDestination, YieldTypes eYield)
+int CvPlayer::addTradeRoute(const IDInfo& kSource, const IDInfo& kDestination, YieldTypes eYield, bool bPrivate)
 {
 	FAssert(eYield != NO_YIELD);
 
@@ -11161,7 +11164,8 @@ int CvPlayer::addTradeRoute(const IDInfo& kSource, const IDInfo& kDestination, Y
 		CvTradeRoute* pTradeRoute = it->second;
 		if (pTradeRoute->getSourceCity() == kSource
 			&& pTradeRoute->getDestinationCity() == kDestination
-			&& pTradeRoute->getYield() == eYield)
+			&& pTradeRoute->getYield() == eYield
+			&& pTradeRoute->isPrivate() == bPrivate) // WTP: a private route beside the public one of the same goods
 		{
 			return pTradeRoute->getID();
 		}
@@ -11169,14 +11173,26 @@ int CvPlayer::addTradeRoute(const IDInfo& kSource, const IDInfo& kDestination, Y
 
 	CvTradeRoute* pTradeRoute = m_tradeRoutes.addNew();
 	pTradeRoute->init(kSource, kDestination, eYield);
-	pSourceCity->addExport(eYield, false);
-	if (pDestinationCity != NULL)
+	// WTP: a private route leaves the export and import settings alone
+	if (bPrivate)
 	{
-		pDestinationCity->addImport(eYield, false);
+		pTradeRoute->setPrivate(true);
+	}
+	else
+	{
+		pSourceCity->addExport(eYield, false);
+		if (pDestinationCity != NULL)
+		{
+			pDestinationCity->addImport(eYield, false);
+		}
 	}
 	if (getID() == GC.getGameINLINE().getActivePlayer())
 	{
 		gDLL->getInterfaceIFace()->setDirty(Domestic_Advisor_DIRTY_BIT, true);
+		if (bPrivate)
+		{
+			gDLL->getInterfaceIFace()->setDirty(TradeRoutesAdvisor_DIRTY_BIT, true);
+		}
 	}
 
 	return pTradeRoute->getID();
@@ -11227,17 +11243,18 @@ bool CvPlayer::removeTradeRoute(int iId, bool bRemoveImport) // auto traderoute 
 
 	CvCity* pSourceCity = ::getCity(pTradeRoute->getSourceCity());
 	CvCity* pDestinationCity = ::getCity(pTradeRoute->getDestinationCity());
+	const bool bPrivate = pTradeRoute->isPrivate(); // WTP: a private route leaves the export and import settings alone
 	if(!m_tradeRoutes.removeById(iId))
 	{
 		return false;
 	}
 
-	if (pSourceCity != NULL)
+	if (pSourceCity != NULL && !bPrivate)
 	{
 		pSourceCity->updateExports();
 	}
 
-	if (pDestinationCity != NULL && bRemoveImport) // auto traderoute - Nightinggale
+	if (pDestinationCity != NULL && bRemoveImport && !bPrivate) // auto traderoute - Nightinggale
 	{
 		pDestinationCity->updateImports();
 	}
@@ -11245,6 +11262,7 @@ bool CvPlayer::removeTradeRoute(int iId, bool bRemoveImport) // auto traderoute 
 	if (getID() == GC.getGameINLINE().getActivePlayer())
 	{
 		gDLL->getInterfaceIFace()->setDirty(Domestic_Advisor_DIRTY_BIT, true);
+		gDLL->getInterfaceIFace()->setDirty(TradeRoutesAdvisor_DIRTY_BIT, true);
 	}
 
 	return true;
@@ -19253,7 +19271,7 @@ int CvPlayer::getHighestStoredYieldCityId(YieldTypes eYield) const
 	return iBestCityId;
 }
 
-void CvPlayer::changeYieldTradedTaxCounter(TradeLocationTypes eLocation, YieldTypes eYield, int iAmountSold)
+void CvPlayer::changeYieldTradedTaxCounter(TradeLocationTypes eLocation, YieldTypes eYield, int iAmountSold, bool bRefreshQuests)
 {
 	const int MAX = 2000000000;
 
@@ -19280,6 +19298,16 @@ void CvPlayer::changeYieldTradedTaxCounter(TradeLocationTypes eLocation, YieldTy
 		}
 	}
 
+	if (bRefreshQuests)
+	{
+		refreshHumanQuestMessages();
+	}
+}
+
+// WTP: the quest texts are rebuilt with python calls, so the price decay of the kings (every yield, every
+// trade location, every king) refreshes them once per turn instead of once per counter change
+void CvPlayer::refreshHumanQuestMessages()
+{
 	for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
 	{
 		CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iPlayer);

@@ -2234,6 +2234,39 @@
 		<Hungarian>A szállítás teljes automatizálása</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_TRADEROUTE_PRESET_BUILD</Tag>
+		<English>Building material: import clay, stone, tools (feeder 100/150), feeder for horses, sailcloth, hardwood, rope</English>
+		<Portuguese>Material de construção: importar argila, pedra, ferramentas (alimentador 100/150), alimentador para cavalos, lona, madeira de lei, cordas</Portuguese>
+		<French>Matériaux : importer argile, pierre, outils (approvisionnement 100/150), approvisionnement pour chevaux, toile, bois dur, cordes</French>
+		<German>Baumaterial: Lehm, Stein, Werkzeug importieren (Feeder 100/150), Feeder für Pferde, Segeltuch, Hartholz, Seile</German>
+		<Italian>Materiali edili: importa argilla, pietra, attrezzi (rifornimento 100/150), rifornimento per cavalli, tela, legno duro, corde</Italian>
+		<Spanish>Materiales: importar arcilla, piedra, herramientas (abastecimiento 100/150), abastecimiento para caballos, lona, madera dura, cuerdas</Spanish>
+		<Russian>Стройматериалы: импорт глины, камня, инструментов (подвоз 100/150), подвоз лошадей, парусины, твёрдой древесины, канатов</Russian>
+		<Hungarian>Építőanyag: agyag, kő, szerszám importja (utánpótlás 100/150), utánpótlás lóhoz, vitorlavászonhoz, keményfához, kötélhez</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO</Tag>
+		<English>Market automatic: import the goods the market asks for, levels follow the demand (keep 5 turns of it, bring at most 7, at least 10, updated every 5 turns)</English>
+		<Portuguese>Mercado automático: importar os bens que o mercado procura, os níveis seguem a procura (manter 5 turnos dela, trazer no máximo 7, pelo menos 10, atualizado a cada 5 turnos)</Portuguese>
+		<French>Marché automatique : importer les marchandises demandées par le marché, les niveaux suivent la demande (garder 5 tours de celle-ci, apporter au plus 7, au moins 10, mis à jour tous les 5 tours)</French>
+		<German>Markt automatisch: vom Markt nachgefragte Waren importieren, Mengen folgen der Nachfrage (5 Runden davon halten, höchstens 7 bringen, mind. 10, alle 5 Runden aktualisiert)</German>
+		<Italian>Mercato automatico: importa le merci richieste dal mercato, i livelli seguono la domanda (tenere 5 turni di essa, portare al massimo 7, almeno 10, aggiornato ogni 5 turni)</Italian>
+		<Spanish>Mercado automático: importar los bienes que pide el mercado, los niveles siguen la demanda (mantener 5 turnos de ella, traer como máximo 7, al menos 10, actualizado cada 5 turnos)</Spanish>
+		<Russian>Рынок автоматически: импорт товаров, нужных рынку, объёмы следуют за спросом (запас на 5 ходов спроса, подвоз не больше 7, не меньше 10, обновление каждые 5 ходов)</Russian>
+		<Hungarian>Piac automatikusan: a piac által keresett áruk importja, a mennyiségek követik a keresletet (5 környi kereslet tartása, legfeljebb 7 hozása, legalább 10, 5 körönként frissül)</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO_OFF</Tag>
+		<English>Market automatic: switch off (the imports stay as they are)</English>
+		<Portuguese>Mercado automático: desligar (as importações ficam como estão)</Portuguese>
+		<French>Marché automatique : désactiver (les importations restent telles quelles)</French>
+		<German>Markt automatisch: ausschalten (Importe bleiben wie sie sind)</German>
+		<Italian>Mercato automatico: disattiva (le importazioni restano come sono)</Italian>
+		<Spanish>Mercado automático: desactivar (las importaciones quedan como están)</Spanish>
+		<Russian>Рынок автоматически: выключить (импорт остаётся как есть)</Russian>
+		<Hungarian>Piac automatikusan: kikapcsolás (az importok maradnak, ahogy vannak)</Hungarian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_ACTION_AUTOMATE_FULL_HELP</Tag>
 		<English>Automate this unit</English>
 		<Portuguese>Automatizar unidade</Portuguese>
