@@ -77,13 +77,10 @@ STEP_CTRL = 10
 MAX_VALUE = 0xFFFF
 
 # the game option "new import / export window" (GAMEOPTION_WTP_TRADE_WINDOW): off = the original popup of the DLL with its original tooltips
-# (not found in the XML: the window stays on)
+# (a DLL without the option: the window stays on)
 def isNewWindowEnabled():
 	try:
-		iOption = gc.getInfoTypeForString("GAMEOPTION_WTP_TRADE_WINDOW")
-		if iOption < 0:
-			return True
-		return gc.getGame().isOption(iOption)
+		return gc.getGame().isOption(GameOptionTypes.GAMEOPTION_WTP_TRADE_WINDOW)
 	except:
 		return True
 

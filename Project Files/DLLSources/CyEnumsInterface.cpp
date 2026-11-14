@@ -412,6 +412,7 @@ void CyEnumsPythonInterface()
 		.value("GAMEOPTION_REDUCED_CITY_DISTANCE", GAMEOPTION_REDUCED_CITY_DISTANCE) /// reduced city distance - Nightinggale
 		.value("GAMEOPTION_DEACTIVATE_HEMISPHERE_RESTRICTIONS", GAMEOPTION_DEACTIVATE_HEMISPHERE_RESTRICTIONS) // ray, deactivate Hemisphere Restrictions
 		.value("GAMEOPTION_ONLY_ONE_COLONIST_PER_VILLAGE", GAMEOPTION_ONLY_ONE_COLONIST_PER_VILLAGE) // WTP, ray, Game Option only 1 Colonist living in Village - START
+		.value("GAMEOPTION_WTP_TRADE_WINDOW", GAMEOPTION_WTP_TRADE_WINDOW) // WTP: game option for the new import / export window of the city screen
 		.value("NUM_GAMEOPTION_TYPES", NUM_GAMEOPTION_TYPES)
 		;
 	python::enum_<MultiplayerOptionTypes>("MultiplayerOptionTypes")
