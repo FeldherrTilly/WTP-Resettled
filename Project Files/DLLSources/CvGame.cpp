@@ -2680,6 +2680,11 @@ void CvGame::setupActionCache()
 
 void CvGame::handleAction(int iAction)
 {
+	handleActionEx(iAction, false);
+}
+
+void CvGame::handleActionEx(int iAction, bool bClicked)
+{
 	CxDesyncMonitor StartMonitoring;
 
 	CvUnit* pHeadSelectedUnit;
@@ -2762,7 +2767,14 @@ void CvGame::handleAction(int iAction)
 			}
 			else
 			{
-				selectionListGameNetMessage(GAMEMESSAGE_DO_COMMAND, GC.getActionInfo(iAction).getCommandType(), GC.getActionInfo(iAction).getCommandData(), -1, 0, bAlt);
+				int iCommandData = GC.getActionInfo(iAction).getCommandData();
+				// WTP: unload all with Shift + click on the button or with Ctrl + Shift + U (the second hotkey of the command): all transports on
+				// the plot of the selected one are unloaded (iData1 = 1), Shift + U unloads the selected transport only as before
+				if (GC.getActionInfo(iAction).getCommandType() == COMMAND_UNLOAD_ALL && bShift && (bClicked || gDLL->ctrlKey()))
+				{
+					iCommandData = 1;
+				}
+				selectionListGameNetMessage(GAMEMESSAGE_DO_COMMAND, GC.getActionInfo(iAction).getCommandType(), iCommandData, -1, 0, bAlt);
 			}
 		}
 	}
