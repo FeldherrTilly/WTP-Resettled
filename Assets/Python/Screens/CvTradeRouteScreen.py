@@ -187,7 +187,7 @@ MIL_GOODS = ["YIELD_MUSKETS", "YIELD_BLADES", "YIELD_CANNONS", "YIELD_BLACK_POWD
 # data of the player (prefix), "maintain" -1: the level of the good stays, the preset protection (see below) works for all of them
 PRESETS = [
 	{"id": "BLD", "prefix": BLD_PREFIX, "goods": BLD_MATERIAL + BLD_OTHER, "maintain": 100, "limit": 150, "code": 3, "view": VIEW_BUILD, "slot": 0, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON"},
-	{"id": "LIV", "prefix": LIV_PREFIX, "goods": LIV_GOODS, "maintain": -1, "limit": 100, "code": 5, "view": VIEW_LIVESTOCK, "slot": 1, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON"},
+	{"id": "LIV", "prefix": LIV_PREFIX, "goods": LIV_GOODS, "maintain": 150, "limit": 150, "code": 5, "view": VIEW_LIVESTOCK, "slot": 1, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON"},
 	{"id": "MIL", "prefix": MIL_PREFIX, "goods": MIL_GOODS, "maintain": -1, "limit": 100, "code": 6, "view": VIEW_MILITARY, "slot": 2, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON"},
 ]
 
@@ -1332,8 +1332,8 @@ class CvTradeRouteScreen:
 				or d["expDom"] != pCity.getExportDomains(iYield) or d["maintain"] != pCity.getMaintainLevel(iYield)
 				or d["impLimit"] != pCity.getImportsLimit(iYield)):
 				iData1 = iYield | (d["impDom"] << 8) | (d["expDom"] << 10)
-				# (see NetworkDataTradeRouteInts: the maintain level in the lower, the import limit in the upper 16 bits)
-				iData2 = (d["maintain"] & 0xFFFF) | ((d["impLimit"] & 0xFFFF) << 16)
+				# (see NetworkDataTradeRouteInts: the import limit in the lower, the maintain level in the upper 16 bits)
+				iData2 = (d["impLimit"] & 0xFFFF) | ((d["maintain"] & 0xFFFF) << 16)
 				if iData2 >= 2147483648L:
 					iData2 = iData2 - 4294967296L
 				CyMessageControl().sendDoTask(self.iCity, TaskTypes.TASK_YIELD_TRADEROUTE, iData1, int(iData2), d["imp"], d["exp"], d["feeder"], d["auto"])
