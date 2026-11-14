@@ -361,6 +361,7 @@ class CvTradeRouteScreen:
 		self.iPendY = 0
 		self.iMoveX = 0 # the window moved by the player
 		self.iMoveY = 0
+		self.aViewOrder = [] # the views in the order of the dropdown
 		self.dBtn = {} # the buttons (name: [x, y, w, h, code, text, marked, font, dy, panels])
 		self.szQuery = u""
 		self.aConfirmed = [] # the goods confirmed with Enter (lowercase names)
@@ -581,6 +582,21 @@ class CvTradeRouteScreen:
 		aKeys = self.dData.keys()
 		aKeys.sort()
 		return aKeys
+
+	# the entry of the dropdown at a position (keys 1 to 9 and 0 of the numpad): the dropdown shows it (the window is built again)
+	def selectViewByPosition(self, iPos):
+		if iPos >= len(self.aViewOrder):
+			return
+		iView = self.aViewOrder[iPos]
+		if iView == self.iView:
+			return
+		self.iView = iView
+		if iView != VIEW_FILTER and len(self.szQuery) > 0:
+			self.szQuery = u""
+			self.findSuggestion()
+		self.tLayout = (-1, False)
+		self.buildView()
+		self.refreshList()
 
 	def setView(self, iView):
 		if iView == self.iView:
@@ -1111,6 +1127,9 @@ class CvTradeRouteScreen:
 		self.iKeyBack = self.getKeyId("KB_BACKSPACE")
 		self.aKeyAccept = [self.getKeyId("KB_TAB")]
 		self.aKeyConfirm = [self.getKeyId("KB_RETURN"), self.getKeyId("KB_NUMPADENTER")]
+		self.aKeyView = [] # the number keys of the numpad 1 to 9 and 0: the entries of the view dropdown
+		for iNumber in (1, 2, 3, 4, 5, 6, 7, 8, 9, 0):
+			self.aKeyView.append(self.getKeyId("KB_NUMPAD" + str(iNumber)))
 		self.aKeyArrows = [self.getKeyId("KB_LEFT"), self.getKeyId("KB_RIGHT"), self.getKeyId("KB_UP"), self.getKeyId("KB_DOWN")]
 		self.iKey6 = self.getKeyId("KB_6")
 		self.iKey7 = self.getKeyId("KB_7")
@@ -1215,8 +1234,16 @@ class CvTradeRouteScreen:
 			aViews.append((aView[0], localText.getText(aView[1], ())))
 		for aView in aPresetViews:
 			aViews.append((aView[2], localText.getText(aView[1], ())))
+		# numbered 1 to 9 and 0 (the number keys of the numpad choose the entry), further entries 11, 12, ...
+		self.aViewOrder = []
 		for iPos in range(len(aViews)):
-			screen.addPullDownString("TRSView", aViews[iPos][1], iPos, aViews[iPos][0], self.iView == aViews[iPos][0])
+			szNumber = str(iPos + 1)
+			if iPos == 9:
+				szNumber = "0"
+			elif iPos > 9:
+				szNumber = str(iPos + 1)
+			screen.addPullDownString("TRSView", szNumber + u". " + aViews[iPos][1], iPos, aViews[iPos][0], self.iView == aViews[iPos][0])
+			self.aViewOrder.append(aViews[iPos][0])
 		self.aDrawn.append("TRSView")
 		self.drawRows()
 		self.drawPage()
@@ -1704,6 +1731,8 @@ class CvTradeRouteScreen:
 			self.resetPosition()
 		elif iKey in self.aKeyArrows:
 			self.pressArrow(self.aKeyArrows.index(iKey), bCtrl, bShift)
+		elif iKey in self.aKeyView:
+			self.selectViewByPosition(self.aKeyView.index(iKey))
 		else:
 			self.handleSearchKey(iKey, bShift)
 
