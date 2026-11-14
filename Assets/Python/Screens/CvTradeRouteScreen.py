@@ -637,10 +637,13 @@ class CvTradeRouteScreen:
 				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActive(iYield):
 					bActive = True
 			if not bActive:
+				# the preset is off: its goods go back to what they were
+				aSkipped = self.revertPresetGoods(p, dBuild[self.iCity])
 				del dBuild[self.iCity]
 				saveBuild(dBuild, p["prefix"])
 				bChanged = True
 		if bChanged:
+			self.apply()
 			self.drawBuildButton()
 			if self.iView == VIEW_MARKED:
 				self.buildView()
@@ -672,21 +675,36 @@ class CvTradeRouteScreen:
 				return iYield
 		return -1
 
+	# the goods a preset turned on go back to what they were (off, the levels before); not the goods market automatic manages
+	# (market automatic always wins: returned) and not the goods another preset that is on still asks for
+	def revertPresetGoods(self, p, aEntries):
+		aSkipped = []
+		for aType in aEntries:
+			iYield = self.getYieldByType(aType[0])
+			if iYield < 0:
+				continue
+			if self.isMarketLocked(iYield):
+				aSkipped.append(iYield)
+				continue
+			bOther = False
+			for q in self.getPresetsOfGood(iYield):
+				if q["id"] != p["id"]:
+					bOther = True
+			if bOther:
+				continue
+			self.dData[iYield]["imp"] = False
+			self.dData[iYield]["feeder"] = False
+			self.dData[iYield]["maintain"] = aType[1]
+			self.dData[iYield]["impLimit"] = aType[2]
+		return aSkipped
+
 	# a preset (building material, livestock) as a switch: on remembers the goods it turned on (and their levels before), off takes only those away
 	def toggleBuild(self, p):
 		dBuild = loadBuild(p["prefix"])
 		aSkipped = []
 		if dBuild.has_key(self.iCity):
 			# off: only the goods the preset turned on are taken away again
-			for aType in dBuild[self.iCity]:
-				iYield = self.getYieldByType(aType[0])
-				if iYield >= 0 and self.isMarketLocked(iYield):
-					aSkipped.append(iYield) # (market automatic manages the good)
-				elif iYield >= 0:
-					self.dData[iYield]["imp"] = False
-					self.dData[iYield]["feeder"] = False
-					self.dData[iYield]["maintain"] = aType[1]
-					self.dData[iYield]["impLimit"] = aType[2]
+			aSkipped = self.revertPresetGoods(p, dBuild[self.iCity])
 			del dBuild[self.iCity]
 		else:
 			aAdded = []
@@ -886,8 +904,10 @@ class CvTradeRouteScreen:
 				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActive(iYield):
 					bActive = True
 			if not bActive:
+				self.revertPresetGoods(p, dBuild[self.iCity])
 				del dBuild[self.iCity]
 			saveBuild(dBuild, p["prefix"])
+		self.apply()
 		self.drawBuildButton()
 		if self.iView == VIEW_MARKED:
 			self.buildView()
