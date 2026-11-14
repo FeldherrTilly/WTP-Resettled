@@ -16,6 +16,8 @@ import CvScreensInterface
 # Achievements END
 import CvEventInterface
 import time
+import re
+import sys
 import math
 
 # GLOBAL SYSTEM SHORTCUTS
