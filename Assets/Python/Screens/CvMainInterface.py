@@ -301,6 +301,7 @@ class CvMainInterface:
 	dMessageLineIndex = {}
 	dMessageRects = {} # message -> (x, y, width, height) of its rows in the panel
 	tMsgPanelRect = None
+	tMsgAutoRect = None # the auto expand label at the top right of the panel (for its help window)
 	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
 	iMsgSelIdx = 0
 	bMsgWheel = False
@@ -4271,6 +4272,8 @@ class CvMainInterface:
 				szAuto = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON", ())
 			else:
 				szAuto = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_OFF", ())
+			iAutoWidth = int(len(re.sub(u"<[^>]*>", u"", szAuto)) * iLine * 0.32) + iPad
+			self.tMsgAutoRect = (iX + iWidth - iPad - iAutoWidth, iY, iAutoWidth + iPad, iHeaderHeight + iPad)
 			screen.setText("HudMsgAuto", "Background", self.setFontSize(szAuto, -1), CvUtil.FONT_RIGHT_JUSTIFY, iX + iWidth - iPad, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_AUTO, -1)
 			screen.show("HudMsgAuto")
 			screen.moveToFront("HudMsgAuto")
@@ -4346,9 +4349,13 @@ class CvMainInterface:
 	def updateMessageScroll( self ):
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 		iMsg = -1
+		bAuto = False
 		if len(self.aszMessageLines) > 0 and self.tMsgPanelRect is not None:
 			iCX = gc.getGame().getCursorClientX()
 			iCY = gc.getGame().getCursorClientY()
+			if self.tMsgAutoRect is not None:
+				(iAX, iAY, iAW, iAH) = self.tMsgAutoRect
+				bAuto = (iCX >= iAX and iCX < iAX + iAW and iCY >= iAY and iCY < iAY + iAH)
 			for iIndex in self.dMessageRects.keys():
 				(iRX, iRY, iRW, iRH) = self.dMessageRects[iIndex]
 				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
@@ -4386,9 +4393,16 @@ class CvMainInterface:
 			iSel = 0
 			if self.isMessageSelected(iMsg):
 				iSel = self.iMsgSelIdx
-		tKey = (iMsg, iSel, bShow)
+		# the help of the line under the cursor / of the auto expand label: a window beside the panel (not at the cursor)
+		szHelp = u""
+		if not bShow:
+			if bAuto:
+				szHelp = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP", (self.iMsgX, self.iMsgY))
+			elif iMsg >= 0:
+				szHelp = self.getMessagePediaHelp(iMsg)
+		tKey = (iMsg, iSel, bShow, szHelp)
 		if iMsg >= 0:
-			tKey = (self.aszMessageTexts[iMsg], iSel, bShow)
+			tKey = (self.aszMessageTexts[iMsg], iSel, bShow, szHelp)
 		if tKey == self.tMsgPickKey:
 			return
 		self.tMsgPickKey = tKey
@@ -4401,6 +4415,8 @@ class CvMainInterface:
 				else:
 					szText += u"\n  " + aAll[i][0]
 			self.showMessagePick(screen, szText, gc.getGame().getCursorClientY())
+		elif szHelp != u"":
+			self.showMessagePick(screen, szHelp, gc.getGame().getCursorClientY())
 
 	def getMessagePediaTargets(self, iMessage):
 		try:
@@ -4830,10 +4846,9 @@ class CvMainInterface:
 				return localText.getText("TXT_KEY_INTERFACE_ACHIEVE_ADVISOR", ("F10", ""));
 			elif iData1 == self.BUTTON_TERRITORIAL_INFLUENCE:
 				return localText.getText("TXT_KEY_INTERFACE_TERRITORIAL_INFLUENCE", ("Ctrl+I", ""));
-			elif iData1 == self.BUTTON_MESSAGE_LINE:
-				return self.getMessagePediaHelp(iData2)
-			elif iData1 == self.BUTTON_MESSAGE_AUTO:
-				return localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP", (self.iMsgX, self.iMsgY))
+			elif iData1 == self.BUTTON_MESSAGE_LINE or iData1 == self.BUTTON_MESSAGE_AUTO:
+				# (the help of the message panel is a window beside the panel, see updateMessageScroll)
+				return u""
 			elif iData1 == VET_NEW_CAPACITY:
 				return localText.getText("TXT_KEY_NEW_STORAGE_CITY_SCREEN", ());
 			elif iData1 == NEW_HARBOUR_SYSTEM:
