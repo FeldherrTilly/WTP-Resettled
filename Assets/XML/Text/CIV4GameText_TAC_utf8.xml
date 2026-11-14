@@ -3564,4 +3564,29 @@
 		<English>Military goods: import and feeder for muskets, blades, cannons, black powder, bakery goods (provisions) and horses, at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
 		<German>Militärgüter: Import und Feeder für Musketen, Säbel, Kanonen, Schießpulver, Proviant (Backwaren) und Pferde, höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_ON_BY</Tag>
+		<English>Switched on by: </English>
+		<German>Eingeschaltet durch: </German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_HAND</Tag>
+		<English>by hand</English>
+		<German>von Hand</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_MARKET</Tag>
+		<English>market automatic</English>
+		<German>Market automatic</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_LIMIT</Tag>
+		<English>Import limit</English>
+		<German>Importlimit</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_MAINTAIN</Tag>
+		<English>Maintain level</English>
+		<German>Maintain-Level</German>
+	</TEXT>
 </Civ4GameText>

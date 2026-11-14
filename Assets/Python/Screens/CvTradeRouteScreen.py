@@ -1500,7 +1500,12 @@ class CvTradeRouteScreen:
 			iField = (iCode - BTN_ROW) % 16
 			aszKey = {F_IMP_MINUS: "TXT_KEY_WTP_TRADEROUTE_WIN_IMPORT_HELP", F_IMP_PLUS: "TXT_KEY_WTP_TRADEROUTE_WIN_IMPORT_HELP", F_IMP_CHECK: "TXT_KEY_WTP_TRADEROUTE_WIN_IMPORT_HELP", F_IMP_FEEDER: "TXT_KEY_WTP_TRADEROUTE_WIN_FEEDER_HELP", F_IMP_LAND: "TXT_KEY_POPUP_IMPORT_LAND_HELP", F_IMP_SEA: "TXT_KEY_POPUP_IMPORT_SEA_HELP", F_EXP_MINUS: "TXT_KEY_WTP_TRADEROUTE_WIN_EXPORT_HELP", F_EXP_PLUS: "TXT_KEY_WTP_TRADEROUTE_WIN_EXPORT_HELP", F_EXP_CHECK: "TXT_KEY_WTP_TRADEROUTE_WIN_EXPORT_HELP", F_EXP_AUTO: "TXT_KEY_WTP_TRADEROUTE_WIN_AUTO_EXPORT_HELP", F_EXP_LAND: "TXT_KEY_POPUP_EXPORT_LAND_HELP", F_EXP_SEA: "TXT_KEY_POPUP_EXPORT_SEA_HELP"}
 			if aszKey.has_key(iField):
-				return localText.getText(aszKey[iField], ())
+				szHelp = localText.getText(aszKey[iField], ())
+				try:
+					szHelp += self.getSourceHelp((iCode - BTN_ROW) / 16, iField)
+				except:
+					pass
+				return szHelp
 		if iCode >= BTN_PRESET and iCode < BTN_PRESET + 7:
 			aszKey = ["TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP", "TXT_KEY_WTP_TRADEROUTE_WIN_PRESET_BUILD_HELP", "TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO", "TXT_KEY_WTP_TRADEROUTE_PRESET5_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET6_HELP"]
 			if iCode - BTN_PRESET == 4:
@@ -1745,6 +1750,74 @@ class CvTradeRouteScreen:
 		self.tLayout = (-1, False)
 		self.refreshList()
 		self.drawSearchText()
+
+	# the presets that turned the good on (it is in their remembered goods)
+	def getPresetOwners(self, iYield):
+		aOwners = []
+		szType = gc.getYieldInfo(iYield).getType()
+		for p in PRESETS:
+			dBuild = loadBuild(p["prefix"])
+			if dBuild.has_key(self.iCity):
+				for aType in dBuild[self.iCity]:
+					if aType[0] == szType:
+						aOwners.append(p)
+		return aOwners
+
+	# where a level (the import limit or the maintain level) comes from: market automatic, the presets that set that value, or by hand
+	def getLevelSource(self, iYield, szKey, aOwners):
+		iValue = self.dData[iYield][szKey]
+		if self.isMarketLocked(iYield):
+			return localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_MARKET", ())
+		aNames = []
+		for p in aOwners:
+			iPreset = p["limit"]
+			if szKey == "maintain":
+				iPreset = p["maintain"]
+			if iPreset >= 0 and iPreset == iValue:
+				aNames.append(localText.getText(p["text"], ()))
+		if len(aNames) > 0:
+			return ", ".join(aNames)
+		if iValue == 0:
+			return ""
+		return localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_HAND", ())
+
+	# the lines added to the tooltips of the import / export buttons of a row: what switched it on and where the amount comes from
+	def getSourceHelp(self, iSlot, iField):
+		iIndex = self.iFirst + iSlot
+		if iIndex < 0 or iIndex >= len(self.aYields):
+			return ""
+		iYield = self.aYields[iIndex]
+		d = self.dData[iYield]
+		aOwners = self.getPresetOwners(iYield)
+		bImport = iField in (F_IMP_MINUS, F_IMP_PLUS, F_IMP_CHECK)
+		bExport = iField in (F_EXP_MINUS, F_EXP_PLUS, F_EXP_CHECK)
+		if not bImport and not bExport:
+			return ""
+		szHand = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_HAND", ())
+		szMarket = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_MARKET", ())
+		szOnBy = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_ON_BY", ())
+		szText = u"[NEWLINE][NEWLINE]"
+		if bImport:
+			if d["imp"]:
+				if self.isMarketLocked(iYield):
+					szText += szOnBy + szMarket
+				elif len(aOwners) > 0:
+					szText += szOnBy + ", ".join([localText.getText(p["text"], ()) for p in aOwners])
+				else:
+					szText += szOnBy + szHand
+				szText += u"[NEWLINE]"
+			szKey = "impLimit"
+			szLabel = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_LIMIT", ())
+		else:
+			if d["exp"]:
+				szText += szOnBy + szHand + u"[NEWLINE]"
+			szKey = "maintain"
+			szLabel = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_MAINTAIN", ())
+		szSource = self.getLevelSource(iYield, szKey, aOwners)
+		szText += szLabel + u": " + unicode(d[szKey])
+		if szSource != "":
+			szText += u" (" + szSource + u")"
+		return szText
 
 	# the clicks on the buttons of the window; returns 1 if the event was for it
 	def handleEmbeddedInput(self, inputClass):
