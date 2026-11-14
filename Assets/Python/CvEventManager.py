@@ -224,6 +224,11 @@ class CvEventManager:
 					CvScreensInterface.tradeRouteScreen.handleKey(int(key), self.bCtrl, self.bShift)
 				except:
 					pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.tradeRouteScreen.handleKeyUp(int(key))
+				except:
+					pass
 			return 1
 
 		if (self.bAllowCheats):
