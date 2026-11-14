@@ -605,11 +605,11 @@ class CvTradeRouteScreen:
 		self.drawBuildButton()
 		self.drawRows()
 
-	# a good does something for the trade routes: it imports, or the feeder works with an import limit
-	# (a feeder without import and without an import limit does nothing)
+	# a good does something for the trade routes: it imports or the feeder is on
+	# (the game switches the import on by itself when the feeder is on, so the feeder alone is enough)
 	def isGoodActive(self, iYield):
 		d = self.dData[iYield]
-		return d["imp"] or (d["feeder"] and d["impLimit"] > 0)
+		return d["imp"] or d["feeder"]
 
 	# a preset none of whose goods is active any more is off (its button shows it)
 	def updatePresetState(self):
@@ -1335,8 +1335,12 @@ class CvTradeRouteScreen:
 		dOld = dict(d)
 		if iField == F_IMP_CHECK:
 			d["imp"] = not d["imp"]
+			if not d["imp"]:
+				d["feeder"] = False # (the game keeps the import on as long as the feeder is on)
 		elif iField == F_IMP_FEEDER:
 			d["feeder"] = not d["feeder"]
+			if d["feeder"]:
+				d["imp"] = True # (the game switches the import on with the feeder)
 		elif iField == F_IMP_LAND:
 			d["impDom"] = (d["impDom"] ^ 1) & 1
 		elif iField == F_IMP_SEA:
