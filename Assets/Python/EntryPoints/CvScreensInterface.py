@@ -10,6 +10,8 @@ import CvAchieveAdvisor
 # Achievements END
 # TAC - Trade Route Advisor - koma13 - START
 import CvTradeRoutesAdvisor
+import CvTransportRoutesOverview
+import CvTradeRouteScreen
 # TAC - Trade Route Advisor - koma13 - END
 
 import CvRevolutionAdvisor
@@ -118,6 +120,27 @@ def showTradeRoutesAdvisor(argsList):
 	if (-1 != CyGame().getActivePlayer()):
 		tradeRoutesAdvisor.interfaceScreen()
 # TAC - Trade Routes Advisor - koma13 - END
+
+# WTP: overview of the trade route assignments of all transports (button of the trade routes tab of the domestic advisor)
+transportRoutesOverview = CvTransportRoutesOverview.CvTransportRoutesOverview()
+# WTP: the DLL offers a numbered name for a transport that was just automated / got its first trade route
+def askTransportName(argsList):
+	CvTransportRoutesOverview.offerTransportName(argsList[0], argsList[1])
+
+# WTP: the DLL asks for the import / export settings of a city (instead of its popup); returns 1 if the window is open
+tradeRouteScreen = CvTradeRouteScreen.CvTradeRouteScreen()
+def askTradeRouteSetup(argsList):
+	try:
+		return tradeRouteScreen.open(argsList[0], argsList[1] != 0)
+	except:
+		import traceback
+		CvTradeRouteScreen.logTrade(traceback.format_exc())
+		return 0
+
+def showTransportRoutesOverview(argsList):
+	DesyncDetectorInstance = gc.startDesyncMonitor()
+	if (-1 != CyGame().getActivePlayer()):
+		transportRoutesOverview.interfaceScreen()
 
 revolutionAdvisor = CvRevolutionAdvisor.CvRevolutionAdvisor()
 def showRevolutionAdvisorScreen(argsList):
@@ -581,6 +604,11 @@ def handleInput (argsList):
 	' handle input is called when a screen is up '
 	inputClass = PyScreenInput.ScreenInput(argsList)
 
+	# WTP: the buttons of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen()):
+		if (tradeRouteScreen.handleEmbeddedInput(inputClass)):
+			return 0
+
 	# allows overides for mods
 	ret = CvScreenUtilsInterface.getScreenUtils().handleInput( (inputClass.getPythonFile(),inputClass) )
 
@@ -600,6 +628,10 @@ def update (argsList):
 	if (HandleInputMap.has_key(argsList[0])):
 		screen = HandleInputMap.get(argsList[0])
 		screen.update(argsList[1])
+
+	# WTP: the mouse wheel of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen()):
+		tradeRouteScreen.update(argsList[1])
 
 def onClose (argsList):
 	# allows overides for mods
@@ -668,6 +700,9 @@ def handleForward(screens):
 
 def getWidgetHelp(argsList):
 	iScreen = argsList[0]
+	# WTP: the tooltips of the import / export window of the city screen
+	if (tradeRouteScreen.isOpen() and argsList[1] == WidgetTypes.WIDGET_GENERAL and argsList[2] >= 41001 and argsList[2] < 43000):
+		return tradeRouteScreen.getHelp(argsList[2])
 	if (HandleMouseoverMap.has_key(iScreen)):
 		screen = HandleMouseoverMap.get(iScreen)
 		return screen.getWidgetHelp(argsList)
@@ -779,6 +814,7 @@ HandleCloseMap = {  DAWN_OF_MAN : dawnOfMan,
 				# TAC - Trade Routes Advisor - koma13 - START
 					TRADE_ROUTES_ADVISOR : tradeRoutesAdvisor,
 				# TAC - Trade Routes Advisor - koma13 - END
+					TRANSPORT_ROUTES_OVERVIEW : transportRoutesOverview,
 				}
 #######################################################################################
 ## Handle Mouseover Map
@@ -853,6 +889,7 @@ HandleInputMap = {  MAIN_INTERFACE : mainInterface,
 				# TAC - Trade Routes Advisor - koma13 - START
 					TRADE_ROUTES_ADVISOR : tradeRoutesAdvisor,
 				# TAC - Trade Routes Advisor - koma13 - END
+					TRANSPORT_ROUTES_OVERVIEW : transportRoutesOverview,
 					XML_EDITOR : xmlEditor,
 				}
 
