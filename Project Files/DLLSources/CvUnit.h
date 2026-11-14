@@ -179,7 +179,7 @@ public:
 	void unloadStoredAmountIntoCity(int iAmount);
 	bool canUnloadAll() const;
 	void unloadAll();
-	void unloadAllTransportsOnPlot(); // WTP: unload all of all own transports on the plot (Shift + click on Unload all, Ctrl + Shift + U)
+	void unloadAllTransportsOnPlot(); // WTP: unload all of all own transports of the same domain on the plot (Shift + click on Unload all, Ctrl + Shift + U)
 
 	bool canLearn(bool bIgnoreTradeBan = false) const;
 	void learn();
