@@ -223,6 +223,11 @@ class CvEventManager:
 					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
 				except:
 					pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKeyUp(int(key))
+				except:
+					pass
 			return 1
 
 		if (self.bAllowCheats):

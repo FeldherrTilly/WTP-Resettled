@@ -63,6 +63,8 @@ class CvYieldAmountScreen:
 		self.iGY = 0
 		self.iMoveDir = -1
 		self.iMoveWait = 0
+		self.aHeld = [] # the arrow keys that are down
+		self.iHoldWait = 0
 		self.bMouseWasDown = False
 		self.bRepeatDone = False
 		self.iPendX = 0
@@ -144,6 +146,7 @@ class CvYieldAmountScreen:
 		if iFromPlayer >= 0:
 			iY = int(iYRes * 0.597) - self.H
 		self.iMoveDir = -1
+		self.aHeld = []
 		self.iPendX = 0
 		self.iPendY = 0
 		self.bMouseWasDown = False
@@ -271,6 +274,33 @@ class CvYieldAmountScreen:
 		self.applyPosition(screen)
 		self.drawLayout(screen)
 
+	# an arrow key goes down (the repeats of the keyboard are ignored: the held keys are handled in updateMove)
+	def pressArrow(self, iDir, bCtrl, bShift):
+		if iDir in self.aHeld:
+			return
+		self.aHeld.append(iDir)
+		self.iHoldWait = MOVE_DELAY
+		self.queueMove(iDir, self.getMoveStep(bCtrl, bShift))
+
+	# Ctrl + Shift + Q: back to the default place
+	def resetPosition(self):
+		self.iPendX = 0
+		self.iPendY = 0
+		self.dMove[self.szCtx] = [0, 0]
+		if self.pHost == None:
+			self.applyPosition(self.getScreen())
+			return
+		screen = self.pHost
+		self.dropWidgets()
+		self.applyPosition(screen)
+		self.drawLayout(screen)
+
+	def handleKeyUp(self, iKey):
+		if iKey in self.aKeyArrows:
+			iDir = self.aKeyArrows.index(iKey)
+			if iDir in self.aHeld:
+				self.aHeld.remove(iDir)
+
 	# the move buttons held down: the steps go on until the mouse button is released (the first step is the click itself)
 	def updateMove(self):
 		try:
@@ -300,6 +330,14 @@ class CvYieldAmountScreen:
 				self.bRepeatDone = True
 				aMod = self.getModifiers()
 				self.queueMove(self.iMoveDir, self.getMoveStep(aMod[0], aMod[1]))
+		# the arrow keys held: the window goes on moving, two keys at once move it diagonally
+		if len(self.aHeld) > 0:
+			self.iHoldWait -= 1
+			if self.iHoldWait <= 0:
+				self.iHoldWait = MOVE_REPEAT
+				aMod = self.getModifiers()
+				for iHeld in self.aHeld:
+					self.queueMove(iHeld, self.getMoveStep(aMod[0], aMod[1]))
 		self.applyPending()
 
 	def dropWidgets(self):
@@ -394,8 +432,10 @@ class CvYieldAmountScreen:
 
 	# a key down event (CvEventManager.onKbdEvent gives them to the dialog while it is open)
 	def handleKey(self, iKey, bCtrl, bShift = False, bAlt = False):
-		if iKey in self.aKeyArrows:
-			self.queueMove(self.aKeyArrows.index(iKey), self.getMoveStep(bCtrl, bShift))
+		if bCtrl and bShift and iKey == self.getKeyId("KB_Q"):
+			self.resetPosition()
+		elif iKey in self.aKeyArrows:
+			self.pressArrow(self.aKeyArrows.index(iKey), bCtrl, bShift)
 		elif self.dDigits.has_key(iKey):
 			if self.bSelected:
 				self.szValue = u""
