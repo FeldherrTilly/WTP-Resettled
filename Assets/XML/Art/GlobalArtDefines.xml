@@ -19,7 +19,7 @@
 	</Define>
 	<Define>
 		<DefineName>GAME_CITY_SIZE_METHOD</DefineName>
-		<DefineTextVal>METHOD_EXPONENTIAL</DefineTextVal>
+		<DefineTextVal>METHOD_LINMAP</DefineTextVal>
 	</Define>
 	<Define>
 		<DefineName>GAME_CITY_SIZE_MAX_PERCENT_UNIQUE</DefineName>
@@ -35,7 +35,7 @@
 	</Define>
 	<Define>
 		<DefineName>GAME_CITY_SIZE_LINMAP_AT_50</DefineName>
-		<fDefineFloatVal>240</fDefineFloatVal>
+		<fDefineFloatVal>300</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>PLOT_SIZE</DefineName>
@@ -95,7 +95,7 @@
 	</Define>
 	<Define>
 		<DefineName>CAMERA_NEAR_FAR_PLANE_RATIO</DefineName>
-		<fDefineFloatVal>200</fDefineFloatVal>
+		<fDefineFloatVal>100</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>CAMERA_CITY_ZOOM_IN_DISTANCE</DefineName>
@@ -131,7 +131,7 @@
 	</Define>
 	<Define>
 		<DefineName>IMPROVEMENT_SCALE</DefineName>
-		<fDefineFloatVal>0.5</fDefineFloatVal>
+		<fDefineFloatVal>0.35</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>BONUS_SCALE</DefineName>
