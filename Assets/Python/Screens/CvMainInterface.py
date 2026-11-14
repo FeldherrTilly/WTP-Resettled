@@ -3804,6 +3804,10 @@ class CvMainInterface:
 	# Updates the Screen
 	def update( self, fDelta ):
 		self.updateTerritorialInfluenceEditor()
+		try:
+			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
+		except:
+			pass
 		return
 
 	# Adds Mouse Over Help to General Widgets
