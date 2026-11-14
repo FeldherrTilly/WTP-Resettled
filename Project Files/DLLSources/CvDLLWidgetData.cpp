@@ -1,6 +1,7 @@
 #include "CvGameCoreDLL.h"
 #include "CvGameCoreUtils.h"
 #include "CvCity.h"
+#include "CvDLLButtonPopup.h"
 #include "CvUnit.h"
 #include "CvGlobals.h"
 #include "CvGameAI.h"
@@ -917,7 +918,6 @@ bool CvDLLWidgetData::executeAltAction(const CvWidgetDataStruct &widgetDataStruc
 	}
 
 	CvWidgetDataStruct widgetData = widgetDataStruct;
-
 	bool bHandled = true;
 	switch (widgetDataStruct.m_eWidgetType)
 	{
@@ -1229,7 +1229,8 @@ void CvDLLWidgetData::doConstruct(const CvWidgetDataStruct &widgetDataStruct)
 
 	if (widgetDataStruct.m_iData2 != FFreeList::INVALID_INDEX)
 	{
-		gDLL->sendPushOrder(widgetDataStruct.m_iData2, ORDER_CONSTRUCT, eBuilding, false, false, false);
+		// WTP: like a ctrl click on the construction list: put the building on top of the queue, the current project stays in the queue
+		gDLL->sendPushOrder(widgetDataStruct.m_iData2, ORDER_CONSTRUCT, eBuilding, false, false, true);
 	}
 	else
 	{
