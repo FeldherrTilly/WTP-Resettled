@@ -3549,4 +3549,19 @@
 		<English>Livestock: import and feeder for all livestock (horses, cattle, geese, goats, pigs, sheep, chicken), at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
 		<German>Viehzucht: Import und Feeder für alles Vieh (Pferde, Rinder, Gänse, Ziegen, Schweine, Schafe, Hühner), höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT</Tag>
+		<English>Military goods</English>
+		<German>Militärgüter</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON</Tag>
+		<English>Military goods: ON</English>
+		<German>Militärgüter: AN</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_HELP</Tag>
+		<English>Military goods: import and feeder for muskets, blades, cannons, black powder, food (provisions) and horses, at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
+		<German>Militärgüter: Import und Feeder für Musketen, Säbel, Kanonen, Schießpulver, Proviant und Pferde, höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
+	</TEXT>
 </Civ4GameText>

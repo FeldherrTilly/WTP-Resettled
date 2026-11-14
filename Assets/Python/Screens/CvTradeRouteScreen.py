@@ -15,7 +15,7 @@ BTN_OK = 41001
 BTN_CANCEL = 41002
 BTN_UP = 41003
 BTN_DOWN = 41004
-BTN_PRESET = 41010 # + 0..5 (0 clear all, 1 import all, 2 auto export all, 3 building material, 4 market automatic, 5 livestock)
+BTN_PRESET = 41010 # + 0..6 (0 clear all, 1 import all, 2 auto export all, 3 building material, 4 market automatic, 5 livestock, 6 military goods)
 BTN_FAV_IMP = 41020 # (the favorite checkbox of a row: 41020 + slot)
 BTN_FAV_EXP = 41100 # + slot
 BTN_FILTER = 41400 # + slot (the filter checkbox of a row)
@@ -38,6 +38,7 @@ VIEW_PRODUCED = 5 # the goods the city produces
 VIEW_NEEDED = 6 # the goods the current production needs
 VIEW_FILTER = 7 # the goods of the searches (kept, goods can be taken out again)
 VIEW_LIVESTOCK = 8 # the goods of the livestock preset
+VIEW_MILITARY = 9 # the goods of the military goods preset
 
 # fields of a row
 F_IMP_MINUS = 0
@@ -178,12 +179,16 @@ BLD_OTHER = []
 # the livestock preset: import and feeder for all livestock, at most 100 imported (the maintain level stays as it is)
 LIV_PREFIX = "[[WTPLIV:"
 LIV_GOODS = ["YIELD_HORSES", "YIELD_CATTLE", "YIELD_GEESE", "YIELD_GOATS", "YIELD_PIGS", "YIELD_SHEEP", "YIELD_CHICKEN"]
+# the military goods preset: import and feeder for muskets, blades, cannons, black powder, food (provisions) and horses, at most 100 imported
+MIL_PREFIX = "[[WTPMIL:"
+MIL_GOODS = ["YIELD_MUSKETS", "YIELD_BLADES", "YIELD_CANNONS", "YIELD_BLACK_POWDER", "YIELD_FOOD", "YIELD_HORSES"]
 
 # the presets that switch goods on (the market automatic is a preset of its own, handled by the DLL): the data is kept per city in the script
 # data of the player (prefix), "maintain" -1: the level of the good stays, the preset protection (see below) works for all of them
 PRESETS = [
 	{"id": "BLD", "prefix": BLD_PREFIX, "goods": BLD_MATERIAL + BLD_OTHER, "maintain": 100, "limit": 150, "code": 3, "view": VIEW_BUILD, "slot": 0, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON"},
 	{"id": "LIV", "prefix": LIV_PREFIX, "goods": LIV_GOODS, "maintain": -1, "limit": 100, "code": 5, "view": VIEW_LIVESTOCK, "slot": 1, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON"},
+	{"id": "MIL", "prefix": MIL_PREFIX, "goods": MIL_GOODS, "maintain": -1, "limit": 100, "code": 6, "view": VIEW_MILITARY, "slot": 2, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON"},
 ]
 
 def loadBuild(szPrefix = szPrefix):
@@ -526,6 +531,8 @@ class CvTradeRouteScreen:
 			self.aYields = [i for i in self.getAllCargo() if gc.getYieldInfo(i).getType() in BLD_MATERIAL + BLD_OTHER]
 		elif self.iView == VIEW_LIVESTOCK:
 			self.aYields = [i for i in self.getAllCargo() if gc.getYieldInfo(i).getType() in LIV_GOODS]
+		elif self.iView == VIEW_MILITARY:
+			self.aYields = [i for i in self.getAllCargo() if gc.getYieldInfo(i).getType() in MIL_GOODS]
 		elif self.iView == VIEW_MARKET:
 			pCity = self.getCity()
 			self.aYields = []
@@ -607,9 +614,9 @@ class CvTradeRouteScreen:
 				return True
 		return False
 
-	# the buttons of the presets (building material, livestock) and of market automatic in one row, a third of the window each
+	# the buttons of the presets (building material, livestock, military goods) and of market automatic in one row, a quarter of the window each
 	def drawBuildButton(self):
-		iThird = (self.W - 40 - 20) / 3
+		iThird = (self.W - 40 - 30) / 4
 		for p in PRESETS:
 			szKey = p["text"]
 			bOn = self.isPresetOn(p)
@@ -893,8 +900,8 @@ class CvTradeRouteScreen:
 		szMarket = "TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT"
 		if pCity.isAutoMarketImport():
 			szMarket = "TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT_ON"
-		iThird = (self.W - 40 - 20) / 3
-		self.addButton("TRSPreset4", localText.getText(szMarket, ()), pCity.isAutoMarketImport(), self.OX + 20 + 2 * (iThird + 10), self.OY + 96, iThird, 28, BTN_PRESET + 4)
+		iThird = (self.W - 40 - 30) / 4
+		self.addButton("TRSPreset4", localText.getText(szMarket, ()), pCity.isAutoMarketImport(), self.OX + 20 + 3 * (iThird + 10), self.OY + 96, iThird, 28, BTN_PRESET + 4)
 
 	# opens the window (1: it is open, 0: the DLL shows its own popup instead)
 	def open(self, iCity, bCondensed):
@@ -1041,6 +1048,7 @@ class CvTradeRouteScreen:
 		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED", ()), 6, 6, self.iView == 6)
 		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER", ()), 7, 7, self.iView == 7)
 		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", ()), 8, 8, self.iView == 8)
+		screen.addPullDownString("TRSView", localText.getText("TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", ()), 9, 9, self.iView == 9)
 		self.aDrawn.append("TRSView")
 		self.drawRows()
 		self.drawPage()
@@ -1290,14 +1298,14 @@ class CvTradeRouteScreen:
 			aszKey = {F_IMP_MINUS: "TXT_KEY_POPUP_IMPORT_IMPORT_HELP", F_IMP_PLUS: "TXT_KEY_POPUP_IMPORT_IMPORT_HELP", F_IMP_CHECK: "TXT_KEY_POPUP_IMPORT_IMPORT_HELP", F_IMP_FEEDER: "TXT_KEY_POPUP_IMPORT_FEEDER_HELP", F_IMP_LAND: "TXT_KEY_POPUP_IMPORT_LAND_HELP", F_IMP_SEA: "TXT_KEY_POPUP_IMPORT_SEA_HELP", F_EXP_MINUS: "TXT_KEY_POPUP_IMPORT_EXPORT_HELP", F_EXP_PLUS: "TXT_KEY_POPUP_IMPORT_EXPORT_HELP", F_EXP_CHECK: "TXT_KEY_POPUP_IMPORT_EXPORT_HELP", F_EXP_AUTO: "TXT_KEY_POPUP_IMPORT_AUTO_EXPORT_HELP", F_EXP_LAND: "TXT_KEY_POPUP_EXPORT_LAND_HELP", F_EXP_SEA: "TXT_KEY_POPUP_EXPORT_SEA_HELP"}
 			if aszKey.has_key(iField):
 				return localText.getText(aszKey[iField], ())
-		if iCode >= BTN_PRESET and iCode < BTN_PRESET + 6:
-			aszKey = ["TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP", "TXT_KEY_TRADEROUTE_PRESET_BUILD", "TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO", "TXT_KEY_WTP_TRADEROUTE_PRESET5_HELP"]
+		if iCode >= BTN_PRESET and iCode < BTN_PRESET + 7:
+			aszKey = ["TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP", "TXT_KEY_TRADEROUTE_PRESET_BUILD", "TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO", "TXT_KEY_WTP_TRADEROUTE_PRESET5_HELP", "TXT_KEY_WTP_TRADEROUTE_PRESET6_HELP"]
 			if iCode - BTN_PRESET == 4:
 				pCity = self.getCity()
 				if pCity != None and not pCity.isNone() and pCity.isAutoMarketImport():
 					return localText.getText("TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO_OFF", ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
 				return localText.getText(aszKey[iCode - BTN_PRESET], ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
-			if iCode - BTN_PRESET == 3 or iCode - BTN_PRESET == 5:
+			if iCode - BTN_PRESET == 3 or iCode - BTN_PRESET >= 5:
 				return localText.getText(aszKey[iCode - BTN_PRESET], ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT", ())
 			return localText.getText(aszKey[iCode - BTN_PRESET], ())
 		return u""
@@ -1337,7 +1345,7 @@ class CvTradeRouteScreen:
 		self.iReload = 60
 
 	def runPreset(self, iPreset):
-		if iPreset == 3 or iPreset == 5:
+		if iPreset == 3 or iPreset == 5 or iPreset == 6:
 			for p in PRESETS:
 				if p["code"] == iPreset:
 					self.toggleBuild(p)
@@ -1374,7 +1382,7 @@ class CvTradeRouteScreen:
 				self.drop(szName)
 			for szName in ("TRSOk", "TRSCancel", "TRSUp", "TRSDown", "TRSPage", "TRSSearchText", "TRSSearchBG", "TRSHeadImp", "TRSHeadExp", "TRSTitle", "TRSHint", "TRSBack1", "TRSBack2", self.BACKGROUND_ID):
 				self.drop(szName)
-			for i in range(6):
+			for i in range(7):
 				self.drop("TRSPreset" + str(i))
 		except:
 			import traceback
@@ -1567,7 +1575,7 @@ class CvTradeRouteScreen:
 			self.scroll(-1)
 		elif iData == BTN_DOWN:
 			self.scroll(1)
-		elif iData >= BTN_PRESET and iData < BTN_PRESET + 6:
+		elif iData >= BTN_PRESET and iData < BTN_PRESET + 7:
 			self.runPreset(iData - BTN_PRESET)
 		elif iData >= BTN_FAV_IMP and iData < BTN_FAV_IMP + 80:
 			self.favClicked(iData - BTN_FAV_IMP)
