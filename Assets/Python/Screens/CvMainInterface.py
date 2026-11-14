@@ -3609,7 +3609,7 @@ class CvMainInterface:
 			aszLines = []
 			aiPara = [] # the paragraph (text between two line breaks of the help) of every line: right click in the frozen window
 			aiIndent = [] # indent of continued rows of icons (pixels)
-			aszRaw = self.carryColors(szHelp.split(u"\n"))
+			aszRaw = self.carryColors(self.stripCarries(szHelp).split(u"\n"))
 			aszParas = self.foldCityDetails(aszRaw)
 			if aszParas is None:
 				aszParas = self.foldUnitDetails(aszRaw)
@@ -3638,6 +3638,21 @@ class CvMainInterface:
 			self.tCursorTipAt = (iCursorX, iCursorY)
 		except:
 			self.bCursorTipShown = False
+
+	# the cargo line of a unit that carries only goods ends with "(carries Goods)" (text of the game): the child tooltip of the line tells that, so it
+	# is removed here (the text is taken from the translation, with a placeholder for the name)
+	def stripCarries( self, szHelp ):
+		try:
+			aParts = localText.getText("TXT_KEY_UNIT_CARRIES", (u"QQQQ",)).split(u"QQQQ")
+			if len(aParts) != 2:
+				return szHelp
+			szPre = aParts[0].strip()
+			szPost = aParts[1].strip()
+			if len(szPre) == 0 or len(szPost) == 0:
+				return szHelp
+			return re.sub(u"[ \t]*" + re.escape(szPre) + u"[^\n]*?" + re.escape(szPost), u"", szHelp)
+		except:
+			return szHelp
 
 	# A color of the game text can go over several lines ("[COLOR_CYAN]...[NEWLINE]...[COLOR_REVERT]"), but every line is drawn on its own: a line
 	# that begins inside of a color gets the color again.
