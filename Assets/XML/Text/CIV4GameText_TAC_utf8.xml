@@ -3476,8 +3476,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT</Tag>
-		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] works in the view "All goods" only. While it is on, the goods it manages cannot be changed by the buttons Clear All, Import all goods, Auto-export all goods or Building material, only by hand (you get a notice then, with a button to set the good back).</English>
-		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] funktioniert nur in der Ansicht „Alle Waren". Solange er an ist, können die Waren, die er verwaltet, nicht durch die Knöpfe Alles löschen, Alle Waren importieren, Alle Waren automatisch exportieren oder Baumaterial verändert werden, nur von Hand (dann erscheint ein Hinweis mit einem Knopf, der die Ware zurücksetzt).</German>
+		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] works in the view "All goods" only. While it is on, the goods it manages cannot be changed by the buttons Clear All, Import all goods, Auto-export all goods or presets, only by hand (you get a notice then, with a button to set the good back).</English>
+		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] funktioniert nur in der Ansicht „Alle Waren". Solange er an ist, können die Waren, die er verwaltet, nicht durch die Knöpfe Alles löschen, Alle Waren importieren, Alle Waren automatisch exportieren oder Presets verändert werden, nur von Hand (dann erscheint ein Hinweis mit einem Knopf, der die Ware zurücksetzt).</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1</Tag>
@@ -3533,5 +3533,20 @@
 		<Tag>TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT</Tag>
 		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] while the preset is on, you get a notice when its goods are switched off again (by hand or by Clear All), with a button to put them back. If you ignore it and none of its goods is left, the preset switches itself off.</English>
 		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] solange das Preset an ist, erscheint ein Hinweis, wenn seine Waren wieder ausgeschaltet werden (von Hand oder durch Alles löschen), mit einem Knopf, der sie zurücksetzt. Ignorierst du ihn und ist keine seiner Waren mehr übrig, schaltet sich das Preset selbst aus.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT</Tag>
+		<English>Livestock</English>
+		<German>Viehzucht</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON</Tag>
+		<English>Livestock: ON</English>
+		<German>Viehzucht: AN</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_HELP</Tag>
+		<English>Livestock: import and feeder for all livestock (horses, cattle, geese, goats, pigs, sheep, chicken), at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
+		<German>Viehzucht: Import und Feeder für alles Vieh (Pferde, Rinder, Gänse, Ziegen, Schweine, Schafe, Hühner), höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
 	</TEXT>
 </Civ4GameText>
