@@ -74,6 +74,10 @@ void CyGamePythonInterface2(python::class_<CyGame>& x)
 		.def("isShiftKeyPressed", &CyGame::isShiftKeyPressed, "bool () - is the shift key down")
 		.def("getCursorClientX", &CyGame::getCursorClientX, "int () - mouse x in the game window")
 		.def("getCursorClientY", &CyGame::getCursorClientY, "int () - mouse y in the game window")
+		.def("getWidgetHelpText", &CyGame::getWidgetHelpText, "wstring () - the last help text of a widget of the interface")
+		.def("getWidgetHelpCount", &CyGame::getWidgetHelpCount, "int () - number of help requests so far")
+		.def("getWidgetHelpType", &CyGame::getWidgetHelpType, "int () - widget type of the last help request")
+		.def("getWidgetHelpFor", &CyGame::getWidgetHelpFor, "wstring (int eWidgetType, int iData1, int iData2, bool bOption) - the help text of a widget")
 		.def("getReplayInfo", &CyGame::getReplayInfo, python::return_value_policy<python::manage_new_object>())
 		;
 }

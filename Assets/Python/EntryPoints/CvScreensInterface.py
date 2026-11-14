@@ -667,6 +667,15 @@ def handleForward(screens):
 	return 0
 
 def getWidgetHelp(argsList):
+	szText = getWidgetHelpText(argsList)
+	# WTP: the own tooltip window at the cursor shows the same text
+	try:
+		mainInterface.widgetHelpSeen(szText, argsList[1])
+	except:
+		pass
+	return szText
+
+def getWidgetHelpText(argsList):
 	iScreen = argsList[0]
 	if (HandleMouseoverMap.has_key(iScreen)):
 		screen = HandleMouseoverMap.get(iScreen)
@@ -909,3 +918,13 @@ def selectOneEvent(argsList):
 	pPlayer.trigger(eventTriggerNumber)
 
 #TAC: EventTriggerMenu END
+
+# WTP debug log: every show... function (a screen or a menu that is opened) is logged with its arguments
+def wtpLoggedShow(szName, fxn):
+	def logged(*args):
+		return fxn(*args)
+	return logged
+
+for szWtpName in globals().keys():
+	if szWtpName.startswith("show") and callable(globals()[szWtpName]):
+		globals()[szWtpName] = wtpLoggedShow(szWtpName, globals()[szWtpName])

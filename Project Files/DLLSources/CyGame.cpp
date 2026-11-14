@@ -4,6 +4,7 @@
 
 #include "CvGameCoreDLL.h"
 #include "CyGame.h"
+#include "CvDLLWidgetData.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
 #include "CyPlayer.h"
@@ -752,6 +753,36 @@ int CyGame::getCursorClientY() const
 {
 	POINT pt;
 	return wtpGetCursor(pt) ? (int)pt.y : -1;
+}
+
+// WTP: the last help text of a widget of the interface (see CvDLLWidgetData::parseHelp)
+extern CvWString wtpGetWidgetHelpText();
+extern int wtpGetWidgetHelpCount();
+extern int wtpGetWidgetHelpType();
+std::wstring CyGame::getWidgetHelpText() const
+{
+	return std::wstring(wtpGetWidgetHelpText().GetCString());
+}
+int CyGame::getWidgetHelpCount() const
+{
+	return wtpGetWidgetHelpCount();
+}
+int CyGame::getWidgetHelpType() const
+{
+	return wtpGetWidgetHelpType();
+}
+std::wstring CyGame::getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const
+{
+	// the same text the game gets from CvDLLWidgetData::parseHelp for this widget; asked for inside the Python help callback, so that the
+	// own tooltip window is made before the game shows its own tooltip (changing the screen afterwards makes the game tooltip disappear)
+	CvWidgetDataStruct widgetData;
+	widgetData.m_iData1 = iData1;
+	widgetData.m_iData2 = iData2;
+	widgetData.m_bOption = bOption;
+	widgetData.m_eWidgetType = (WidgetTypes)eWidgetType;
+	CvWStringBuffer szBuffer;
+	CvDLLWidgetData::getInstance().parseHelp(szBuffer, widgetData);
+	return std::wstring(szBuffer.getCString());
 }
 
 uint CyGame::getNumReplayMessages() const
