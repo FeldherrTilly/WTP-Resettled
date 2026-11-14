@@ -129,7 +129,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>64</iModelCopies>
+				<iModelCopies>512</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,5,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -167,7 +167,7 @@
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>48</iModelCopies>
+				<iModelCopies>384</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,3,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
