@@ -605,6 +605,36 @@ class CvTradeRouteScreen:
 		self.drawBuildButton()
 		self.drawRows()
 
+	# a good does something for the trade routes: it imports, or the feeder works with an import limit
+	# (a feeder without import and without an import limit does nothing)
+	def isGoodActive(self, iYield):
+		d = self.dData[iYield]
+		return d["imp"] or (d["feeder"] and d["impLimit"] > 0)
+
+	# a preset none of whose goods is active any more is off (its button shows it)
+	def updatePresetState(self):
+		if self.tWarn != None or len(self.aWarnQueue) > 0 or self.iCity < 0:
+			return # (a notice is open: the player may still reset the goods)
+		bChanged = False
+		for p in PRESETS:
+			dBuild = loadBuild(p["prefix"])
+			if not dBuild.has_key(self.iCity):
+				continue
+			bActive = False
+			for szType in p["goods"]:
+				iYield = self.getYieldByType(szType)
+				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActive(iYield):
+					bActive = True
+			if not bActive:
+				del dBuild[self.iCity]
+				saveBuild(dBuild, p["prefix"])
+				bChanged = True
+		if bChanged:
+			self.drawBuildButton()
+			if self.iView == VIEW_MARKED:
+				self.buildView()
+				self.drawPage()
+
 	def isPresetOn(self, p):
 		return loadBuild(p["prefix"]).has_key(self.iCity)
 
@@ -842,7 +872,7 @@ class CvTradeRouteScreen:
 			bActive = False
 			for szType in p["goods"]:
 				iYield = self.getYieldByType(szType)
-				if iYield >= 0 and not self.isMarketLocked(iYield) and (self.dData[iYield]["imp"] or self.dData[iYield]["feeder"]):
+				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActive(iYield):
 					bActive = True
 			if not bActive:
 				del dBuild[self.iCity]
@@ -1196,6 +1226,7 @@ class CvTradeRouteScreen:
 	def drawRows(self):
 		screen = self.pHost
 		self.clearHover()
+		self.updatePresetState()
 		szImport = localText.getText("TXT_KEY_POPUP_IMPORT_IMPORT", ())
 		szFeeder = localText.getText("TXT_KEY_POPUP_IMPORT_FEEDER", ())
 		szLand = localText.getText("TXT_KEY_POPUP_IMPORT_LAND", ())

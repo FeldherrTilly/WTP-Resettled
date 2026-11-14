@@ -151,14 +151,14 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_IMPORT_FEEDER_HELP</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Import feeder[COLOR_REVERT][NEWLINE]Turn import on at 75%[NEWLINE]Turn import off at 100%[NEWLINE]Compared to maintain level (bottom spinbutton)</English>
-		<Portuguese>[COLOR_HIGHLIGHT_TEXT]Gestor de Importação[COLOR_REVERT][NEWLINE]Ativar importação em 75%[NEWLINE]Desativar importação em 100%[NEWLINE]Em comparação com manter o nível (botão giratório inferior)</Portuguese>
-		<French>[COLOR_HIGHLIGHT_TEXT]Gestionnaire d'importation[COLOR_REVERT][NEWLINE]Démarre l'importation à 75%[NEWLINE]Arrête l'importation à 100%[NEWLINE]Par rapport au niveau de maintien (bouton rotatif inférieur)</French>
-		<German>[COLOR_HIGHLIGHT_TEXT]Importsteuerung[COLOR_REVERT][NEWLINE]Schaltet Import bei 75% an[NEWLINE]Schaltet Import bei 100% aus[NEWLINE]In Relation zur Obergrenze für Importe (unterer Button)</German>
-		<Italian>[COLOR_HIGHLIGHT_TEXT]Import feeder[COLOR_REVERT][NEWLINE]Attiva l'importazione al 75%[NEWLINE]Disattiva l'importazione al 100%[NEWLINE]Rispetto al mantenimento del livello (pulsante in basso)</Italian>
-		<Spanish>[COLOR_HIGHLIGHT_TEXT]Alimentador de importación[COLOR_REVERT][NEWLINE]Activar la importación al 75%[NEWLINE]Desactivar la importación al 100%[NEWLINE]En comparación con mantener el nivel (botón giratorio inferior)</Spanish>
-		<Russian>[COLOR_HIGHLIGHT_TEXT]Фидер импорта[COLOR_REVERT][NEWLINE]Включить импорт при 75%[NEWLINE]Выключить импорт при 100%[NEWLINE]Автоматическое поддержание нижнего счетчика</Russian>
-		<Hungarian>[COLOR_HIGHLIGHT_TEXT]Import beállítás[COLOR_REVERT][NEWLINE]Import elindítása 75%-nál[NEWLINE]Import leállítása 100%-nál[NEWLINE]A szint fenntartásához képest (alsó léptetőgomb)</Hungarian>
+		<English>[COLOR_HIGHLIGHT_TEXT]Import feeder[COLOR_REVERT][NEWLINE]Turn import on at 75%[NEWLINE]Turn import off at 100%[NEWLINE]Compared to the maintain level (the number left of Export)</English>
+		<Portuguese>[COLOR_HIGHLIGHT_TEXT]Gestor de Importação[COLOR_REVERT][NEWLINE]Ativar importação em 75%[NEWLINE]Desativar importação em 100%[NEWLINE]Em comparação com o nível a manter (o número à esquerda de Exportar)</Portuguese>
+		<French>[COLOR_HIGHLIGHT_TEXT]Gestionnaire d'importation[COLOR_REVERT][NEWLINE]Démarre l'importation à 75%[NEWLINE]Arrête l'importation à 100%[NEWLINE]Par rapport au niveau de maintien (le nombre à gauche d'Exporter)</French>
+		<German>[COLOR_HIGHLIGHT_TEXT]Importsteuerung[COLOR_REVERT][NEWLINE]Schaltet Import bei 75% an[NEWLINE]Schaltet Import bei 100% aus[NEWLINE]In Relation zum einzuhaltenden Lagerbestand (Zahl links neben Export)</German>
+		<Italian>[COLOR_HIGHLIGHT_TEXT]Import feeder[COLOR_REVERT][NEWLINE]Attiva l'importazione al 75%[NEWLINE]Disattiva l'importazione al 100%[NEWLINE]Rispetto al livello da mantenere (il numero a sinistra di Esporta)</Italian>
+		<Spanish>[COLOR_HIGHLIGHT_TEXT]Alimentador de importación[COLOR_REVERT][NEWLINE]Activar la importación al 75%[NEWLINE]Desactivar la importación al 100%[NEWLINE]En comparación con el nivel a mantener (el número a la izquierda de Exportar)</Spanish>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Фидер импорта[COLOR_REVERT][NEWLINE]Включить импорт при 75%[NEWLINE]Выключить импорт при 100%[NEWLINE]Относительно поддерживаемого уровня (число слева от «Экспорт»)</Russian>
+		<Hungarian>[COLOR_HIGHLIGHT_TEXT]Import beállítás[COLOR_REVERT][NEWLINE]Import elindítása 75%-nál[NEWLINE]Import leállítása 100%-nál[NEWLINE]A fenntartandó szinthez képest (az Export melletti bal oldali szám)</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_IMPORT_EXPORT</Tag>
