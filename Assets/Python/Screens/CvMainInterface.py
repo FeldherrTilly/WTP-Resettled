@@ -4323,6 +4323,12 @@ class CvMainInterface:
 				fSum += 7.1 # other letters (accents)
 		return fSum * iLine / 22.0
 
+	def hasControlChar( self, szText ):
+		for c in szText:
+			if ord(c) < 32:
+				return True
+		return False
+
 	def getTipTextWidth( self, aszLines, iChar, iMaxWidth, iPad, aiIndent = None ):
 		iLine = iChar / 0.32
 		fPixel = 0
@@ -4331,7 +4337,7 @@ class CvMainInterface:
 			fThis = self.getTextPixels(re.sub(u"<[^>]*>", u"", aszLines[i]), iLine) + len(re.findall(u"<img=", aszLines[i].lower())) * 18.0 * iLine / 22.0
 			if aiIndent is not None and i < len(aiIndent):
 				fThis += aiIndent[i]
-			if re.search(u"[\x00-\x1f]", aszLines[i]) is not None:
+			if self.hasControlChar(aszLines[i]):
 				fTabPixel = max(fTabPixel, fThis)
 			else:
 				fPixel = max(fPixel, fThis)
