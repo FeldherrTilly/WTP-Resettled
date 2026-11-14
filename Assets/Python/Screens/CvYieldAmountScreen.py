@@ -330,6 +330,19 @@ class CvYieldAmountScreen:
 				self.bRepeatDone = True
 				aMod = self.getModifiers()
 				self.queueMove(self.iMoveDir, self.getMoveStep(aMod[0], aMod[1]))
+		# drawn on a harbor screen (Europe / Africa / Port Royal): the screen does not pass the arrow keys on to the key event, they are
+		# asked from the keyboard directly
+		if self.pHost != None and not self.bHostMain:
+			aMod = self.getModifiers()
+			for iDir in range(4):
+				try:
+					bKey = CyGame().isArrowKeyPressed(iDir)
+				except:
+					bKey = False
+				if bKey:
+					self.pressArrow(iDir, aMod[0], aMod[1])
+				elif iDir in self.aHeld:
+					self.aHeld.remove(iDir)
 		# the arrow keys held: the window goes on moving, two keys at once move it diagonally
 		if len(self.aHeld) > 0:
 			self.iHoldWait -= 1
