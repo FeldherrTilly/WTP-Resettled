@@ -47,6 +47,24 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 				knownList.append(pLoopCity)
 		return knownList
 
+	def contactNation(self, iRow):
+		try:
+			citylist = self.getKnownSettlementList()
+			if iRow < 0 or iRow >= len(citylist):
+				return False
+			iNative = citylist[iRow].getOwner()
+			player = gc.getPlayer(gc.getGame().getActivePlayer())
+			if not player.canContact(iNative):
+				return False
+			self.parent.getScreen().hideScreen()
+			# back to the native info tab when the diplomacy screen is closed (see CvDiplomacy)
+			import CvScreensInterface
+			CvScreensInterface.bReturnToDomesticAfterDiplomacy = True
+			player.contact(iNative)
+			return True
+		except:
+			return False
+
 	def lookAtSettlement(self, iPlotID):
 		plot = gc.getMap().plotByIndex(iPlotID)
 		if plot is None or plot.isNone():
@@ -72,7 +90,8 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 			if True:
 				self.tableManager.addPanelButton(self.settlementIcon, WidgetTypes.WIDGET_JUMP_TO_SETTLEMENT, pLoopCity.plot().getIndex(), iNativeCity)
 				self.tableManager.addText(pLoopCity.getName())
-				self.tableManager.addText(gc.getPlayer(pLoopCity.getOwner()).getCivilizationShortDescription(0))
+				# clickable: opens the diplomacy screen (symbol in front)
+				self.tableManager.addText(u"%c " % CyGame().getSymbolID(FontSymbols.OPEN_BORDERS_CHAR) + gc.getPlayer(pLoopCity.getOwner()).getCivilizationShortDescription(0))
 				self.tableManager.addInt(pLoopCity.getPopulation())
 				
 				if bIsVisited:
@@ -120,6 +139,10 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 			if (inputClass.getMouseX() == 0):
 				self.lookAtSettlement(inputClass.getData1())
 				return 0
+			# WTP: a click on the civ column opens the diplomacy screen of this nation
+			if (inputClass.getMouseX() == 2):
+				if self.contactNation(inputClass.getMouseY()):
+					return 0
 			return -1
 
 		if (inputClass.getNotifyCode() == NotifyCode.NOTIFY_CLICKED):
