@@ -15,14 +15,6 @@ gc = CyGlobalContext()
 ArtFileMgr = CyArtFileMgr()
 localText = CyTranslator()
 
-def logWaypoint(szText):
-	try:
-		f = open("WTP_Waypoint.log", "a")
-		f.write(szText + "\n")
-		f.close()
-	except:
-		pass
-
 # the order of the rows (names) when the table was left: the sorting is kept when the advisor is opened again
 g_NativeRowOrder = []
 
@@ -92,13 +84,11 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 		citylist = self.getKnownSettlementList()
 		try:
 			szName = self.tableManager.getScreen().getTableText(self.tableManager.currentPageName(), 1, iRow)
-			logWaypoint("row %d shows '%s'" % (iRow, szName))
 			for pCity in citylist:
 				if pCity.getName() == szName:
 					return pCity
 		except:
-			import traceback
-			logWaypoint(traceback.format_exc())
+			pass
 		if iRow >= 0 and iRow < len(citylist):
 			return citylist[iRow]
 		return None
@@ -117,7 +107,6 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 				return False
 			player = gc.getPlayer(gc.getGame().getActivePlayer())
 			if not self.hasOwnPresence(pNative, player):
-				logWaypoint("no own presence in row %d" % iRow)
 				return False
 			self.parent.getScreen().hideScreen()
 			popupInfo = CyPopupInfo()
@@ -125,11 +114,9 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 			popupInfo.setData1(pNative.plot().getIndex())
 			popupInfo.setData2(1002)
 			popupInfo.addPopup(player.getID())
-			logWaypoint("popup opened for plot %d" % pNative.plot().getIndex())
 			return True
 		except:
-			import traceback
-			logWaypoint(traceback.format_exc())
+			pass
 			return False
 
 	def lookAtSettlement(self, iPlotID):
@@ -238,7 +225,6 @@ class NativeAdvisor(BaseAdvisorWindow.BaseAdvisorWindow):
 				if self.contactNation(inputClass.getMouseY(), inputClass.getData1()):
 					return 0
 			# WTP: waypoint column
-			logWaypoint("click: column %d row %d data1 %d data2 %d" % (inputClass.getMouseX(), inputClass.getMouseY(), inputClass.getData1(), inputClass.getData2()))
 			if (inputClass.getMouseX() == 8):
 				if self.openWaypointPopup(inputClass.getMouseY(), inputClass.getData1()):
 					return 0
