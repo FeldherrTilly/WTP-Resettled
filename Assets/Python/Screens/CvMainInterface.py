@@ -3790,14 +3790,24 @@ class CvMainInterface:
 	# Every line of a message is a clickable label (the game does not pass clicks on a multiline text): a click centers the map on the place
 	# of the message (colony, battle, unit ...) or on the named colony / native settlement. A message that names a native tribe or its chief
 	# and has no place of its own also opens the diplomacy with the tribe (and centers its main settlement).
+	# widths of the letters of a proportional font in thousandths of an em (a wide W or M and a narrow i or l differ by a factor of 4; with the
+	# same number of characters a line of wide letters would be much wider than the panel). 450 = the average of a line of English text.
+	dMessageCharWidths = {}
+	for szWidthChar, iWidthChar in zip(u"abcdefghijklmnopqrstuvwxyz", (556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833, 556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500)):
+		dMessageCharWidths[szWidthChar] = iWidthChar
+	for szWidthChar in u"ABCDEFGHKLNOPQRSTUVXYZ":
+		dMessageCharWidths[szWidthChar] = 667
+	for szWidthChar, iWidthChar in ((u"M", 833), (u"W", 944), (u"I", 278), (u"J", 500), (u" ", 278), (u".", 278), (u",", 278), (u":", 278), (u";", 278), (u"!", 278), (u"'", 191), (u"-", 333), (u"(", 333), (u")", 333)):
+		dMessageCharWidths[szWidthChar] = iWidthChar
+
 	def getMessageWidth(self, szText):
-		# width in characters: the symbols of the game font (icons) are wider than letters
+		# width in characters of an average letter: the symbols of the game font (icons) are wider than letters
 		iWidth = 0
 		for szChar in szText:
 			if ord(szChar) >= 0x2000:
 				iWidth += 3.4
 			else:
-				iWidth += 1
+				iWidth += self.dMessageCharWidths.get(szChar, 556) / 450.0
 		return iWidth
 
 	def wrapMessage(self, szMessage, iCharsPerLine):
@@ -3870,7 +3880,7 @@ class CvMainInterface:
 						pCapital = pBest
 				except:
 					pass
-				for szName in (pPlayer.getName(), pPlayer.getCivilizationShortDescription(0)):
+				for szName in (pPlayer.getName(), pPlayer.getCivilizationShortDescription(0), pPlayer.getCivilizationAdjective(0)):
 					if szName and len(szName) >= 3:
 						aNatives.append((szName, ePlayer, pCapital.getX(), pCapital.getY()))
 		aCities.sort(key = lambda t: -len(t[0]))
@@ -3880,7 +3890,14 @@ class CvMainInterface:
 			iX = aiX[i]
 			iY = aiY[i]
 			if iX >= 0 and iY >= 0 and iX < pMap.getGridWidth() and iY < pMap.getGridHeight() and not pMap.plot(iX, iY).isNone():
-				atTargets.append((iX, iY, -1))
+				ePlace = -1
+				# every message about a raid (raid, raiding party, Überfall ...) also offers the contact to the tribe that raids
+				if re.search(u"raid|\u00fcberfall|incursi", szPlain, re.IGNORECASE | re.UNICODE):
+					for (szName, ePlayer, iPX, iPY) in aNatives:
+						if szName in szPlain:
+							ePlace = ePlayer
+							break
+				atTargets.append((iX, iY, ePlace))
 				continue
 			tTarget = None
 			for (szName, ePlayer, iPX, iPY) in aNatives:
