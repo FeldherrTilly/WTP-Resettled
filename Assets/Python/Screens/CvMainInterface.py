@@ -5622,6 +5622,12 @@ class CvMainInterface:
 		except:
 			pass
 		aRects.append(self.tMsgRect)
+		try:
+			if gc.getGame().isDiplomacyUp():
+				# the diplomacy window (left side of the screen, nearly the full height; measured on a screenshot, may need a correction)
+				aRects.append((40, 30, 480, CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution() - 60))
+		except:
+			pass
 		for (x, y, w, h) in aRects:
 			if w > 0 and iCursorX >= x and iCursorX < x + w and iCursorY >= y and iCursorY < y + h:
 				return (x, y, w, h)

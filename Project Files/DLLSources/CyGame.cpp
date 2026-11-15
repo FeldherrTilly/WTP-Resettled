@@ -749,6 +749,7 @@ extern int wtpGetWidgetHelpCount();
 extern int wtpGetWidgetHelpType();
 extern void wtpSetHideGameHelp(bool b);
 extern void wtpSetInternalHelp(bool b);
+extern bool wtpIsDiplomacyUp();
 std::wstring CyGame::getWidgetHelpText() const
 {
 	return std::wstring(wtpGetWidgetHelpText().GetCString());
@@ -775,6 +776,11 @@ std::wstring CyGame::getWidgetHelpFor(int eWidgetType, int iData1, int iData2, b
 	CvDLLWidgetData::getInstance().parseHelp(szBuffer, widgetData);
 	wtpSetInternalHelp(false);
 	return std::wstring(szBuffer.getCString());
+}
+
+bool CyGame::isDiplomacyUp() const
+{
+	return wtpIsDiplomacyUp();
 }
 
 void CyGame::setHideGameHelp(bool bNewValue)
