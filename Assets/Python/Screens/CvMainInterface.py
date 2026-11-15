@@ -372,6 +372,7 @@ class CvMainInterface:
 	szExplainPrefix = "HudTipE1"
 	tExplainLayout = None # its layout, to freeze it together with the window of the list of goods
 	aszExplainParas = []
+	dFrozenDark = {} # frozen windows that are always drawn in the darker variant (the explanation of a folded line)
 	dFrozenCompanion = {} # frozen windows that belong to the frozen window below them (the explanation of a folded line): they close together
 	tSecondTipKey = None
 	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
@@ -4407,12 +4408,15 @@ class CvMainInterface:
 			screen.deleteWidget(szName)
 
 	# a tooltip window; the lines of a frozen one can be clicked (right click: Colopedia), their data is the level of the window and the paragraph
-	def drawTipWindow( self, screen, szPrefix, tLayout, bClickable, iLevel, aiIndent ):
+	def drawTipWindow( self, screen, szPrefix, tLayout, bClickable, iLevel, aiIndent, bDark = False ):
 		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
 		screen.addPanel(szPrefix + "Back1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		screen.addPanel(szPrefix + "Back2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		# over an element of the HUD (the panel style is semi-transparent) one more layer, as the expanded message panel has
 		bOverHud = self.isTipOverHud(screen, iX, iY, iWidth, iHeight)
+		if bDark:
+			# (the darker variant, as over an element of the HUD, wherever the window is)
+			bOverHud = True
 		if bOverHud:
 			screen.addPanel(szPrefix + "Back3", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		for i in range(len(aszLines)):
@@ -4513,11 +4517,13 @@ class CvMainInterface:
 			self.freezeCursorTooltip()
 
 	# a frozen window: its widgets get names of their own, its lines can be clicked
-	def addFrozenWindow( self, screen, tLayout, aszParas, aiIndent, dDetails, tAnchor = None, iParent = -1 ):
+	def addFrozenWindow( self, screen, tLayout, aszParas, aiIndent, dDetails, tAnchor = None, iParent = -1, bDark = False ):
 		iLevel = len(self.aFrozen)
 		self.iFzCounter += 1
 		szPrefix = "HudFz%d" % self.iFzCounter
-		self.drawTipWindow(screen, szPrefix, tLayout, True, iLevel, aiIndent)
+		if bDark:
+			self.dFrozenDark[szPrefix] = True
+		self.drawTipWindow(screen, szPrefix, tLayout, True, iLevel, aiIndent, self.dFrozenDark.has_key(szPrefix))
 		tRel = None
 		if iParent >= 0:
 			# a child window keeps its place to its parent window
@@ -4536,7 +4542,7 @@ class CvMainInterface:
 				szPrefix = self.aFrozen[i][0]
 				tLayout = self.aFrozen[i][1]
 				self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
-				self.drawTipWindow(screen, szPrefix, tLayout, True, i, self.aFrozen[i][3])
+				self.drawTipWindow(screen, szPrefix, tLayout, True, i, self.aFrozen[i][3], self.dFrozenDark.has_key(szPrefix))
 		except:
 			pass
 
@@ -4573,7 +4579,7 @@ class CvMainInterface:
 		self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
 		tNew = (iNX, iNY, tLayout[2], tLayout[3], tLayout[4], tLayout[5], tLayout[6], tLayout[7])
 		self.aFrozen[i][1] = tNew
-		self.drawTipWindow(screen, szPrefix, tNew, True, i, self.aFrozen[i][3])
+		self.drawTipWindow(screen, szPrefix, tNew, True, i, self.aFrozen[i][3], self.dFrozenDark.has_key(szPrefix))
 
 	# every frame: the frozen windows of the map follow the map, the child windows follow their parent window
 	def updateFrozenAnchors( self, screen ):
@@ -4763,7 +4769,7 @@ class CvMainInterface:
 				tE = self.tExplainLayout
 				tELayout = (tE[0], tE[1], tE[2], tE[3], list(tE[4]), [-1] * len(tE[4]), tE[6], tE[7])
 				(tELayout, aiEIndent) = self.addFrozenHint(screen, tELayout, [0] * len(tE[4]))
-				self.addFrozenWindow(screen, tELayout, self.aszExplainParas, aiEIndent, {}, None, iParent)
+				self.addFrozenWindow(screen, tELayout, self.aszExplainParas, aiEIndent, {}, None, iParent, True)
 				self.dFrozenCompanion[self.aFrozen[-1][0]] = True
 			self.bSecondTipShown = False
 			self.iSecondTipLines = 0
@@ -4973,7 +4979,7 @@ class CvMainInterface:
 			self.iExplainLines = len(aszLines)
 			self.tExplainLayout = tLayout
 			self.aszExplainParas = aszParas
-			self.drawTipWindow(screen, self.szExplainPrefix, tLayout, False, 0, [])
+			self.drawTipWindow(screen, self.szExplainPrefix, tLayout, False, 0, [], True)
 			self.bExplainShown = True
 		except:
 			self.bExplainShown = False
