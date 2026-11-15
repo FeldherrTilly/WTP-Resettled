@@ -4953,10 +4953,11 @@ class CvMainInterface:
 		elif iPara >= 0 and self.isCommandLine(iFz, aszTopParas, iPara):
 			# the command lines of a city tooltip: no Colopedia, a right click runs the command
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_RUN_COMMAND", ()), iCY, tTop, iFz)
-		elif iPara >= 0 and iSel < 0 and self.isStoredGoodsWindow(aszTopParas):
-			# the window with the goods of a city: what the colors of the goods mean
+		elif iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx) and self.isStoredGoodsWindow(aszTopParas):
+			# the last line of the window with the goods of a city (the hint "Frozen - Esc or hold X: close"): what the colors of the goods
+			# mean. Not on the lines of the goods: the highlight that the game draws under a line would hide the colors there.
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ()), iCY, tTop, iFz)
-		elif iPara >= 0 and iSel < 0 and self.isStoredGoodsWindow(aszTopParas, "TXT_KEY_CITY_BAR_PRODUCING"):
+		elif iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx) and self.isStoredGoodsWindow(aszTopParas, "TXT_KEY_CITY_BAR_PRODUCING"):
 			# the window with the goods that a city produces: the same
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_PRODUCED_COLORS", ()), iCY, tTop, iFz)
 		elif iPara >= 0 and iSel < 0 and self.showAloneUnitTip(screen, iFz, aszTopParas, iPara, iCY, tTop):
@@ -4969,6 +4970,17 @@ class CvMainInterface:
 				szText = self.getTipSecondText(iPara, -1, aszTopParas, iFz)
 			if len(szText) > 0:
 				self.showSecondTip(screen, szText, iCY, tTop, iFz)
+
+	# is the line one of the lines after the last line of the content (the hint at the end of a frozen window)?
+	def isHintLine( self, aiPara, iLineIdx ):
+		try:
+			iLast = -1
+			for i in range(len(aiPara)):
+				if aiPara[i] >= 0:
+					iLast = i
+			return iLineIdx > iLast
+		except:
+			return False
 
 	# the child window with the goods stored in a city (its first line begins like the line "Stored" of the city tooltip)
 	def isStoredGoodsWindow( self, aszParas, szKey = "TXT_KEY_CITY_BAR_STORED" ):
