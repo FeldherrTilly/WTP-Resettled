@@ -4228,7 +4228,7 @@ class CvMainInterface:
 								if pCity.isImport(iYield):
 									szColor = u"255,200,110,255"
 								elif pCity.isExport(iYield):
-									szColor = u"255,230,0,255"
+									szColor = u"255,240,0,255"
 								break
 						if szColor is not None:
 							aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
