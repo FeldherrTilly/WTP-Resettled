@@ -5114,7 +5114,15 @@ class CvMainInterface:
 		try:
 			if iLevel < 0 or iLevel >= len(self.aFrozen) or iPara < 0 or iPara >= len(aszParas):
 				return None
-			if self.aFrozen[iLevel][6] >= 0 or self.dUnitWin.get(tuple(aszParas)) is not None:
+			tUnitWin = self.dUnitWin.get(tuple(aszParas))
+			if tUnitWin is not None:
+				# a window that lists units (the child window "more...units"): every line is a unit, its plot lines are those of the stack window
+				if iPara < len(tUnitWin[0]) and tUnitWin[0][iPara] is not None:
+					pListed = gc.getPlayer(tUnitWin[0][iPara][0]).getUnit(tUnitWin[0][iPara][1])
+					if pListed is not None and not pListed.isNone():
+						return (pListed, iPara, -1)
+				return None
+			if self.aFrozen[iLevel][6] >= 0:
 				return None
 			tAnchor = self.aFrozen[iLevel][5]
 			if tAnchor is not None:
@@ -5146,6 +5154,22 @@ class CvMainInterface:
 			pass
 		return None
 
+	# the plot lines of the stack window that a window belongs to (the window itself, or its parent of the parents): the paragraphs of the tooltip
+	# from the first line of the plot on
+	def getRootPlotLines( self, iLevel ):
+		iRoot = iLevel
+		for k in range(10):
+			if self.aFrozen[iRoot][6] < 0:
+				break
+			iRoot = self.aFrozen[iRoot][6]
+		aszRoot = self.aFrozen[iRoot][2]
+		tAnchor = self.aFrozen[iRoot][5]
+		if tAnchor is not None:
+			pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+		else:
+			pPlot = self.getStackPlot()
+		return list(aszRoot[self.getPlotStartPara(aszRoot, pPlot):])
+
 	# the child window of a line of a unit of a stack: the tooltip that the unit would have if it stood alone on the plot (its own help text,
 	# then the lines of the plot). The hint of the right click (select the unit / talk) stands above the hint of the freezing; the Colopedia
 	# is not offered here, it begins with the lines of this child window
@@ -5162,7 +5186,10 @@ class CvMainInterface:
 			szInfo = self.getUnitMoveInfoText(aszParas[iHead])
 			if len(szInfo) > 0:
 				aLines.append(szInfo)
-			aLines += list(aszParas[iPlotStart:])
+			if iPlotStart >= 0:
+				aLines += list(aszParas[iPlotStart:])
+			else:
+				aLines += self.getRootPlotLines(iLevel)
 			szHint = u""
 			if pUnit.getOwner() == gc.getGame().getActivePlayer():
 				szHint = localText.getText("TXT_KEY_WTP_TIP_SELECT_UNIT", (pUnit.getName(),))
