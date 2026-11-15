@@ -62,6 +62,10 @@ USE_OVERLAY = True
 MARK_ART = "Art/Interface/Screens/TradeRoutes/WTPMark.dds"
 HOVER_ART = "Art/Interface/Screens/TradeRoutes/WTPHover.dds"
 HILITE_LAYERS = 1
+# the frame around the picture of a good: light orange (the color of the imports in the tooltips) when a setting of the import is on, yellow (the
+# color of the exports) when one of the export is on; both: the upper half in the import color, the lower half in the export color
+FRAME_IMP_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameImp.dds"
+FRAME_EXP_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameExp.dds"
 HOVER_LAYERS = 1
 MARGIN_X = 2
 MARGIN_Y = 3
@@ -1421,6 +1425,7 @@ class CvTradeRouteScreen:
 			szIcon = "TRSIcon" + str(iSlot)
 			self.drop(szIcon)
 			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - 32) / 2, 32, 32, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
+			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
 			# import block
 			iX = self.OX + self.BLOCK_IMP_X
 			self.drawSpin(iSlot, 0, d["impLimit"], iX, iY, iBase + F_IMP_MINUS, iBase + F_IMP_PLUS)
@@ -1444,6 +1449,34 @@ class CvTradeRouteScreen:
 			self.drawCheck("TRSc" + str(iSlot) + "_ff", szFilter, self.isInFilter(iYield), self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + 2 + self.CHECK_H + 2, BTN_FILTER + iSlot)
 		self.drawWarn() # (the notice stays on top of the rows)
 
+	# the frame around the picture of a good (32 x 32 at iX, iY): 4 thin strips; import and export: the upper half and the lower half
+	def drawFrame( self, iSlot, iX, iY, bImp, bExp ):
+		screen = self.pHost
+		iGap = 3
+		iT = 2
+		x0 = iX - iGap
+		y0 = iY - iGap
+		iW = 32 + 2 * iGap
+		iH = 32 + 2 * iGap
+		iMid = iH / 2
+		aStrips = []
+		if bImp and bExp:
+			aStrips = [(x0, y0, iW, iT, FRAME_IMP_ART), (x0, y0, iT, iMid, FRAME_IMP_ART), (x0 + iW - iT, y0, iT, iMid, FRAME_IMP_ART),
+				(x0, y0 + iH - iT, iW, iT, FRAME_EXP_ART), (x0, y0 + iMid, iT, iH - iMid, FRAME_EXP_ART), (x0 + iW - iT, y0 + iMid, iT, iH - iMid, FRAME_EXP_ART)]
+		elif bImp or bExp:
+			szArt = FRAME_IMP_ART
+			if bExp:
+				szArt = FRAME_EXP_ART
+			aStrips = [(x0, y0, iW, iT, szArt), (x0, y0 + iH - iT, iW, iT, szArt), (x0, y0, iT, iH, szArt), (x0 + iW - iT, y0, iT, iH, szArt)]
+		for i in range(6):
+			szName = "TRSfr" + str(iSlot) + "_" + str(i)
+			if i < len(aStrips):
+				(x, y, w, h, szArt) = aStrips[i]
+				self.drop(szName)
+				screen.setImageButton(szName, szArt, x, y, w, h, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			else:
+				self.drop(szName)
+
 	def drawSpin(self, iSlot, iBlock, iValue, iX, iY, iMinusCode, iPlusCode):
 		screen = self.pHost
 		szTag = str(iSlot) + "_" + str(iBlock)
@@ -1460,6 +1493,8 @@ class CvTradeRouteScreen:
 
 	def clearSlot(self, iSlot):
 		self.drop("TRSIcon" + str(iSlot))
+		for i in range(6):
+			self.drop("TRSfr" + str(iSlot) + "_" + str(i))
 		for iBlock in range(2):
 			self.removeButton("TRSm" + str(iSlot) + "_" + str(iBlock))
 			self.removeButton("TRSp" + str(iSlot) + "_" + str(iBlock))
