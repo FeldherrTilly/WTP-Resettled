@@ -51,8 +51,6 @@ public:
 	// the colonies alone, unloads without import limit and is never served by Automate Transport (full)
 	bool isPrivate() const;
 	void setPrivate(bool bNewValue);
-	// WTP: the land only / sea only settings of the import and export of the colonies: can a transport of this domain serve the route?
-	bool isAllowedForDomain(DomainTypes eDomain) const;
 
 protected:
 	int m_iId;

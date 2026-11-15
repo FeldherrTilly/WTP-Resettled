@@ -2779,15 +2779,7 @@ bool CvUnit::canDoCommand(CommandTypes eCommand, int iData1, int iData2, bool bT
 		break;
 
 	case COMMAND_AUTOMATE:
-		// WTP: NO_AUTOMATE switches the automation of an automated unit off (transport overview)
-		if ((AutomateTypes)iData1 == NO_AUTOMATE)
-		{
-			if (isAutomated())
-			{
-				return true;
-			}
-		}
-		else if (canAutomate((AutomateTypes)iData1))
+		if (canAutomate((AutomateTypes)iData1))
 		{
 			return true;
 		}
@@ -3251,14 +3243,7 @@ void CvUnit::doCommand(CommandTypes eCommand, int iData1, int iData2)
 			break;
 
 		case COMMAND_AUTOMATE:
-			if ((AutomateTypes)iData1 == NO_AUTOMATE)
-			{
-				getGroup()->setAutomateType(NO_AUTOMATE); // WTP: back to manual
-			}
-			else
-			{
-				automate((AutomateTypes)iData1);
-			}
+			automate((AutomateTypes)iData1);
 			bCycle = true;
 			break;
 
@@ -11855,10 +11840,6 @@ bool CvUnit::canAssignTradeRoute(int iRouteID, bool bReusePath) const
 	const CvPlayer& kPlayer = GET_PLAYER(ePlayer);
 	const CvTradeRoute* const pRoute = kPlayer.getTradeRoute(iRouteID);
 	if (pRoute == NULL || pRoute->getYield() == NO_YIELD)
-		return false;
-
-	// WTP: the colonies can restrict the import and export of a yield to land or to sea transports
-	if (!pRoute->isAllowedForDomain(getDomainType()))
 		return false;
 
 	const IDInfo& kSrc = pRoute->getSourceCity();

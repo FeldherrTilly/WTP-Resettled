@@ -67,33 +67,6 @@ def handleLanguagesDropdownBoxInput ( argsList ):
 
 	return 1
 
-def handleTipModeDropdownInput ( argsList ):
-	"WTP: tooltip mode (0 hover tooltip, 1 own window at the original position, 2 game tooltip)"
-	iValue, szName = argsList
-	try:
-		CvScreensInterface.mainInterface.setHoverTipMode(iValue, False)
-	except:
-		pass
-	return 1
-
-def handleTipDelayDropdownInput ( argsList ):
-	"WTP: tooltip delay (index of the list in CvMainInterface.setTipDelay)"
-	iValue, szName = argsList
-	try:
-		CvScreensInterface.mainInterface.setTipDelay(iValue)
-	except:
-		pass
-	return 1
-
-def handleTipQuickClicked ( argsList ):
-	"WTP: the next tooltip appears without delay while a tooltip is shown"
-	bValue, szName = argsList
-	try:
-		CvScreensInterface.mainInterface.setTipQuick(bValue)
-	except:
-		pass
-	return 1
-
 def handleGameReset ( argsList ):
 	"Resets these options"
 	szName = argsList

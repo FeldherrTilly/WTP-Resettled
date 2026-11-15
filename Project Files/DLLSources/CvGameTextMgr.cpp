@@ -32,7 +32,6 @@
 #include "CyArgsList.h"
 #include "CvDLLPythonIFaceBase.h"
 #include "DesyncMonitor.h"
-#include "CvDLLButtonPopup.h"
 
 int shortenID(int iId)
 {
@@ -63,8 +62,6 @@ CvGameTextMgr& CvGameTextMgr::GetInstance()
 //
 //----------------------------------------------------------------------------
 CvGameTextMgr::CvGameTextMgr()
-:m_iYieldTotalForHelp(0)
-,m_bSkipYieldPrices(false)
 {
 
 }
@@ -357,7 +354,7 @@ void CvGameTextMgr::setMinimizePopupHelp(CvWString& szString, const CvPopupInfo 
 		{
 			CvPlayer& kPlayer = GET_PLAYER(GC.getGameINLINE().getActivePlayer());
 			CvCity* pCity = kPlayer.getCity(info.getData1());
-			CvUnit* pUnit = (info.getData3() == WTP_BUILDING_UPGRADE_POPUP) ? NULL : kPlayer.getUnit(info.getData2());
+			CvUnit* pUnit = kPlayer.getUnit(info.getData2());
 			if (pCity != NULL && pUnit != NULL)
 			{
 				BuildingTypes eSchoolBuilding = pCity->getYieldBuilding(YIELD_EDUCATION);
@@ -446,14 +443,7 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 		szString.append(szTempBuffer);
 	}
 
-	if (pUnit->getYield() != NO_YIELD && m_bSkipYieldPrices)
-	{
-		// same yield in another cargo slot: only the amount, the sell prices were shown with the first slot of this yield
-		szString.append(L", ");
-		szTempBuffer.Format(L"%d%c", pUnit->getYieldStored(), GC.getYieldInfo(pUnit->getYield()).getChar());
-		szString.append(szTempBuffer);
-	}
-	else if (pUnit->getYield() != NO_YIELD)
+	if (pUnit->getYield() != NO_YIELD)
 	{
 		// R&R, ray, Africa - START
 		szString.append(L", ");
@@ -490,18 +480,6 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 			szString.append(szTempBuffer);
 		}
 		// R&R, ray, Port Royal - END
-
-		// WTP: more than one cargo slot with this yield: a fourth line with the sell prices of the total amount
-		if (m_iYieldTotalForHelp > pUnit->getYieldStored())
-		{
-			const CvPlayer& kOwner = GET_PLAYER(pUnit->getOwnerINLINE());
-			szString.append(L", ");
-			szString.append(gDLL->getText("TXT_KEY_WTP_TOTAL_PRICE_HELP"));
-			szTempBuffer.Format(L"%d%c (%d / %d / %d%c)", m_iYieldTotalForHelp, GC.getYieldInfo(pUnit->getYield()).getChar(),
-				kOwner.getSellToEuropeProfit(pUnit->getYield(), m_iYieldTotalForHelp), kOwner.getSellToAfricaProfit(pUnit->getYield(), m_iYieldTotalForHelp),
-				kOwner.getSellToPortRoyalProfit(pUnit->getYield(), m_iYieldTotalForHelp), GC.getSymbolID(GOLD_CHAR));
-			szString.append(szTempBuffer);
-		}
 	}
 
 	eBuild = pUnit->getBuildType();
@@ -732,60 +710,6 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 			{
 				szString.append(NEWLINE);
 				szString.append(gDLL->getText("TXT_KEY_UNIT_ONLY_DEFENSIVE"));
-			}
-
-			// WTP: the current orders of an automated transport (cyan): what it brings or fetches, from colony to colony
-			if (pUnit->getTeam() == GC.getGameINLINE().getActiveTeam() && pUnit->getGroup() != NULL && pUnit->getGroup()->getAutomateType() != NO_AUTOMATE)
-			{
-				const CvSelectionGroupAI* pGroupAI = static_cast<const CvSelectionGroupAI*>(pUnit->getGroup());
-				const std::vector<CvSelectionGroupAI::WtpTradeOrder>& aOrders = pGroupAI->getTradeOrders();
-				for (uint i = 0; i < aOrders.size(); ++i)
-				{
-					const CvSelectionGroupAI::WtpTradeOrder& kOrder = aOrders[i];
-					const CvCity* pSource = ::getCity(kOrder.kSource);
-					const CvCity* pDestination = ::getCity(kOrder.kDestination);
-					if (pSource == NULL || pDestination == NULL)
-					{
-						continue;
-					}
-					// a yield to bring must be on board, yields to fetch are shown while the transport is empty
-					bool bOnBoard = false;
-					bool bAnyCargo = false;
-					CLinkList<IDInfo> aCargoUnits;
-					pUnit->getGroup()->buildCargoUnitList(aCargoUnits);
-					for (CLLNode<IDInfo>* pNode = aCargoUnits.head(); pNode != NULL; pNode = aCargoUnits.next(pNode))
-					{
-						const CvUnit* pCargo = ::getUnit(pNode->m_data);
-						if (pCargo != NULL && pCargo->getYield() != NO_YIELD && pCargo->getYieldStored() > 0)
-						{
-							bAnyCargo = true;
-							bOnBoard = bOnBoard || pCargo->getYield() == kOrder.eYield;
-						}
-					}
-					if (kOrder.bLoaded ? !bOnBoard : bAnyCargo)
-					{
-						continue;
-					}
-					szString.append(NEWLINE);
-					szString.append(gDLL->getText(kOrder.bLoaded ? "TXT_KEY_WTP_TRADE_ORDER_BRING" : "TXT_KEY_WTP_TRADE_ORDER_FETCH",
-						GC.getYieldInfo(kOrder.eYield).getChar(), GC.getYieldInfo(kOrder.eYield).getDescription(), pSource->getName().GetCString(), pDestination->getName().GetCString()));
-				}
-				// the stop on the way (loads yields there) or the waiting for production
-				const CvCity* pStopCity = ::getCity(pGroupAI->getTooltipStop());
-				if (pStopCity != NULL)
-				{
-					CvWString szStopYields;
-					const std::vector<int>& aiStopYields = pGroupAI->getTooltipStopYields();
-					for (uint iStopYield = 0; iStopYield < aiStopYields.size() && iStopYield < (uint)NUM_YIELD_TYPES; ++iStopYield)
-					{
-						if (aiStopYields[iStopYield] > 0)
-						{
-							szStopYields += CvWString::format(L" %c", GC.getYieldInfo((YieldTypes)iStopYield).getChar());
-						}
-					}
-					szString.append(NEWLINE);
-					szString.append(gDLL->getText(pGroupAI->isTooltipWaiting() ? "TXT_KEY_WTP_TRADE_ORDER_WAIT" : "TXT_KEY_WTP_TRADE_ORDER_STOP", pStopCity->getName().GetCString(), szStopYields.GetCString()));
-				}
 			}
 		}
 
@@ -1991,29 +1915,9 @@ void CvGameTextMgr::setPlotListHelp(CvWStringBuffer &szString, const CvPlot* pPl
 
 	if (iNumVisibleUnits > 0)
 	{
-		// WTP: the sell prices of a cargo yield are shown once, for the first slot of this yield only
-		std::vector<bool> abYieldPricesShown(NUM_YIELD_TYPES, false);
-		std::vector<int> aiYieldTotal(NUM_YIELD_TYPES, 0);
-		for (uint iK = 0; iK < plotUnits.size(); ++iK)
-		{
-			if (plotUnits[iK]->getYield() != NO_YIELD)
-			{
-				aiYieldTotal[plotUnits[iK]->getYield()] += plotUnits[iK]->getYieldStored();
-			}
-		}
-
 		if (pPlot->getCenterUnit())
 		{
-			if (pPlot->getCenterUnit()->getYield() != NO_YIELD)
-			{
-				m_iYieldTotalForHelp = aiYieldTotal[pPlot->getCenterUnit()->getYield()];
-			}
 			setUnitHelp(szString, pPlot->getCenterUnit(), iNumVisibleUnits > iMaxNumUnits, true);
-			m_iYieldTotalForHelp = 0;
-			if (pPlot->getCenterUnit()->getYield() != NO_YIELD)
-			{
-				abYieldPricesShown[pPlot->getCenterUnit()->getYield()] = true;
-			}
 		}
 
 		uint iNumShown = std::min<uint>(iMaxNumUnits, iNumVisibleUnits);
@@ -2023,16 +1927,7 @@ void CvGameTextMgr::setPlotListHelp(CvWStringBuffer &szString, const CvPlot* pPl
 			if (pLoopUnit != pPlot->getCenterUnit())
 			{
 				szString.append(NEWLINE);
-				YieldTypes eLoopYield = pLoopUnit->getYield();
-				if (eLoopYield != NO_YIELD)
-				{
-					m_bSkipYieldPrices = abYieldPricesShown[eLoopYield];
-					abYieldPricesShown[eLoopYield] = true;
-					m_iYieldTotalForHelp = aiYieldTotal[eLoopYield];
-				}
 				setUnitHelp(szString, pLoopUnit, true, true);
-				m_bSkipYieldPrices = false;
-				m_iYieldTotalForHelp = 0;
 			}
 		}
 
@@ -9739,15 +9634,6 @@ void CvGameTextMgr::buildCityBillboardIconString( CvWStringBuffer& szBuffer, CvC
 		szBuffer.append(CvWString::format(L" %c", GC.getCivilizationInfo(GET_PLAYER(pCity->getMissionaryPlayer()).getCivilizationType()).getMissionaryChar()));
 	}
 
-	// WTP: marker for a native settlement with a waypoint of the active player
-	if (GC.getGameINLINE().getActivePlayer() != NO_PLAYER && GET_PLAYER(pCity->getOwnerINLINE()).isNative())
-	{
-		if (GET_PLAYER(GC.getGameINLINE().getActivePlayer()).getNativeWaypoint(GC.getMap().plotNumINLINE(pCity->getX_INLINE(), pCity->getY_INLINE())) >= 0)
-		{
-			szBuffer.append(CvWString::format(L" %c", GC.getYieldInfo(YIELD_HORSES).getChar()));
-		}
-	}
-
 	// WTP, ray, Native Trade Posts - START
 	if (pCity->getTradePostPlayer() != NO_PLAYER)
 	{
@@ -10153,25 +10039,14 @@ void CvGameTextMgr::setCitizenHelp(CvWStringBuffer &szString, const CvCity& kCit
 						szString.append(NEWLINE);
 						szString.append(gDLL->getText("TXT_KEY_MISC_HELP_STUDENT", iTurns));
 					}
-					// WTP: the professions that can be learned, alphabetical
-					std::vector<WtpEducationEntry> aEducationEntries;
 					for (int iUnit = 0; iUnit < GC.getNumUnitInfos(); ++iUnit)
 					{
-						if (kCity.getSpecialistTuition((UnitTypes) iUnit) >= 0)
+						int iPrice = kCity.getSpecialistTuition((UnitTypes) iUnit);
+						if (iPrice >= 0)
 						{
-							WtpEducationEntry kEntry;
-							kEntry.szName = GC.getUnitInfo((UnitTypes) iUnit).getDescription();
-							kEntry.eUnit = (UnitTypes) iUnit;
-							kEntry.bStudent = false;
-							aEducationEntries.push_back(kEntry);
+							szString.append(NEWLINE);
+							szString.append(gDLL->getText("TXT_KEY_MISC_HELP_GRADUATION_CHANCE", GC.getUnitInfo((UnitTypes) iUnit).getTextKeyWide(), iPrice));
 						}
-					}
-					wtpSortEducationEntries(aEducationEntries);
-					for (size_t iEntry = 0; iEntry < aEducationEntries.size(); ++iEntry)
-					{
-						const UnitTypes eEducationUnit = aEducationEntries[iEntry].eUnit;
-						szString.append(NEWLINE);
-						szString.append(gDLL->getText("TXT_KEY_MISC_HELP_GRADUATION_CHANCE", GC.getUnitInfo(eEducationUnit).getTextKeyWide(), kCity.getSpecialistTuition(eEducationUnit)));
 					}
 				}
 			}

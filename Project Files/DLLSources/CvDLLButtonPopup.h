@@ -15,40 +15,6 @@
 #include "CvPopupReturn.h"
 
 class CvPopup;
-
-// WTP: graduating students whose specialty the player wants to choose at the end of the turn ("ask me again at the end of the turn" in the education popup)
-// WTP: the panel to buy the missing materials of a project that is finished next turn: asked for when the turn is about to end (once per city and turn)
-namespace WtpBuyMaterialsPanel
-{
-	// opens the panels; true if one was opened (the turn must not end yet)
-	bool relaunch();
-}
-
-namespace WtpDeferredEducation
-{
-	void add(int iCityId, int iUnitId);
-	// opens the education popups of the deferred students that still wait. true if a popup was opened (the turn must not end yet)
-	bool relaunch();
-}
-
-// WTP: right click on a building of the city screen: a popup to upgrade it (the construction order of a building of the same slot)
-// The popup is a BUTTONPOPUP_CHOOSE_EDUCATION (that type is shown in the city screen) with this value as data3, the building as data2
-static const int WTP_BUILDING_UPGRADE_POPUP = 1000;
-namespace WtpBuildingUpgrade
-{
-	// opens the popup for the building of the special building slot iSpecialBuilding of the selected city. false if there is nothing to upgrade
-	bool open(int iSpecialBuilding, int iBuildingOfSlot);
-}
-
-// WTP: the units of the education lists: alphabetical, a student first
-struct WtpEducationEntry
-{
-	CvWString szName;
-	UnitTypes eUnit;
-	bool bStudent;
-};
-void wtpSortEducationEntries(std::vector<WtpEducationEntry>& aEntries);
-
 class CvDLLButtonPopup
 {
 
