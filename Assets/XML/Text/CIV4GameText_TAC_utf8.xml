@@ -3474,6 +3474,26 @@
 		<German>[COLOR_NEGATIVE_TEXT]Lager : %d1 / %d2[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_HEAD</Tag>
+		<English>Surplus at the next turn change (estimate):</English>
+		<German>Überschuss beim nächsten Rundenwechsel (geschätzt):</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_SOLD</Tag>
+		<English>%s1 %s2 : -%d3, sold for %d4 gold</English>
+		<German>%s1 %s2 : -%d3, verkauft für %d4 Gold</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_LOST</Tag>
+		<English>%s1 %s2 : -%d3, lost</English>
+		<German>%s1 %s2 : -%d3, verloren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_TOTAL</Tag>
+		<English>Gold from the sale: +%d1</English>
+		<German>Ertrag aus dem Verkauf: +%d1 Gold</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_BUILDINGS</Tag>
 		<English>[COLOR_SELECTED_TEXT]Buildings...[COLOR_REVERT]</English>
 		<German>[COLOR_SELECTED_TEXT]Gebäude...[COLOR_REVERT]</German>
