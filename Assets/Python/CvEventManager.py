@@ -16,6 +16,7 @@ import sys
 import CvWorldBuilderScreen
 import CvAdvisorUtils
 import CvRandomEventInterface
+import WtpGameOptions
 
 gc = CyGlobalContext()
 localText = CyTranslator()
@@ -412,10 +413,13 @@ class CvEventManager:
 		return ""
 
 	def onLoadGame(self, argsList):
+		# WTP: storage / upkeep multiplier of the game options
+		WtpGameOptions.applyToGame()
 		return 0
 
 	def onGameStart(self, argsList):
 		'Called at the start of the game'
+		WtpGameOptions.applyToGame()
 		if (gc.getGame().getGameTurnYear() == GlobalDefines.START_YEAR and not gc.getGame().isOption(GameOptionTypes.GAMEOPTION_ADVANCED_START)):
 			for iPlayer in range(gc.getMAX_PLAYERS()):
 				player = gc.getPlayer(iPlayer)
@@ -447,6 +451,8 @@ class CvEventManager:
 	def onBeginGameTurn(self, argsList):
 		'Called at the beginning of the end of each turn'
 		iGameTurn = argsList[0]
+		# WTP: storage / upkeep multiplier of the game options
+		WtpGameOptions.applyToGame()
 
 	def onEndGameTurn(self, argsList):
 		'Called at the end of the end of each turn'
