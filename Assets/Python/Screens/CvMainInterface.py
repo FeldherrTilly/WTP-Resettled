@@ -2568,12 +2568,12 @@ class CvMainInterface:
 			if (gc.getPlayer(ePlayer).isAlive()):
 				szText = CyGameTextMgr().getGoldStr(ePlayer)
 				screen.setLabel("GoldText", "Background", self.setFontSize(szText, 1), CvUtil.FONT_LEFT_JUSTIFY, 17, 17, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, TIMETEXT_ID, -1 )
-				# WTP: the gold pile icon follows the amount: every digit moves it 11 pixels to the right (6 digits = 86 as before), so the amount only just touches it
+				# WTP: the gold pile icon follows the amount: up to 4 digits it keeps its place, from 5 digits every digit moves it 11 pixels to the right (5 = 75, 6 = 86), so the amount only just touches it
 				try:
 					iDigits = len([c for c in unicode(szText) if c.isdigit()])
-					iPileX = 20 + iDigits * 11
-					if iPileX < 40:
-						iPileX = 40
+					iPileX = 60
+					if iDigits > 4:
+						iPileX = 20 + iDigits * 11
 					screen.moveItem("GoldPile", iPileX, 8, -0.3)
 				except:
 					pass
