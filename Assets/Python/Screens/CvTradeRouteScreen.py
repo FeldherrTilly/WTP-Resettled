@@ -1872,7 +1872,7 @@ class CvTradeRouteScreen:
 		szHand = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_HAND", ())
 		szMarket = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_MARKET", ())
 		szOnBy = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_ON_BY", ())
-		szText = u"[NEWLINE][NEWLINE]"
+		szText = u"\n\n"
 		if bImport:
 			if d["imp"]:
 				if self.isMarketLocked(iYield):
@@ -1881,14 +1881,14 @@ class CvTradeRouteScreen:
 					szText += szOnBy + ", ".join([localText.getText(p["text"], ()) for p in aOwners])
 				else:
 					szText += szOnBy + szHand
-				szText += u"[NEWLINE]"
+				szText += u"\n"
 			szKey = "impLimit"
 			szLabel = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_LIMIT", ())
 		else:
 			if d["auto"] and self.isMarketLocked(iYield) == False and len(aAutoOwners) > 0:
-				szText += szOnBy + ", ".join([localText.getText(p["text"], ()) for p in aAutoOwners]) + u"[NEWLINE]"
+				szText += szOnBy + ", ".join([localText.getText(p["text"], ()) for p in aAutoOwners]) + u"\n"
 			elif d["auto"] or d["exp"]:
-				szText += szOnBy + szHand + u"[NEWLINE]"
+				szText += szOnBy + szHand + u"\n"
 			szKey = "maintain"
 			szLabel = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_MAINTAIN", ())
 		szSource = self.getLevelSource(iYield, szKey, aOwners)
