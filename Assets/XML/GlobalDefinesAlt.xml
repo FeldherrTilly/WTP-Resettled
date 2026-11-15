@@ -1865,9 +1865,9 @@
 		<DefineName>MILITARY_UPKEEP_MAX_DISMISSALS</DefineName>
 		<iDefineIntVal>2</iDefineIntVal>
 	</Define>
-	<!-- WTP: factor for the map scroll speed (edge scrolling) while the shift key is held. 1.0 = no change, 2.0 = twice as fast -->
+	<!-- WTP: factor for the map scroll speed (edge scrolling) while the shift key is held. 1.0 = no change, 2.0 = twice as fast, default 2.5 -->
 	<Define>
 		<DefineName>SHIFT_SCROLL_SPEED_MULTIPLIER</DefineName>
-		<fDefineFloatVal>2.0</fDefineFloatVal>
+		<fDefineFloatVal>2.5</fDefineFloatVal>
 	</Define>
 </Civ4Defines>
