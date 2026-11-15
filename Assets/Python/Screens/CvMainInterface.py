@@ -1774,18 +1774,15 @@ class CvMainInterface:
 			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
 			(pUnit, iter) = pPlayer.firstUnit()
 			bFound = False
-			szSeaUnits = ""
 			while (pUnit):
 				# the ships in a port have this travel state (the docks list of the player only holds the colonists)
 				if gc.getUnitInfo(pUnit.getUnitType()).getDomainType() == DomainTypes.DOMAIN_SEA:
-					szSeaUnits += "%d:state=%d cargo=%d dying=%d; " % (pUnit.getID(), pUnit.getUnitTravelState(), pUnit.isCargo(), pUnit.isDelayedDeath())
 					if (pUnit.getUnitTravelState() == eState and not pUnit.isCargo() and not pUnit.isDelayedDeath()):
 						bFound = True
 				(pUnit, iter) = pPlayer.nextUnit(iter)
-			self.logPort("action %d button %s -> state %d, found %s" % (iAction, szButton, eState, bFound))
 			return bFound
 		except:
-			self.logPort("isOwnShipInPort failed: " + str(sys.exc_info()[1]))
+			pass
 		return False
 
 	# WTP: the automate type a HUD button stands for (R button: trade routes, C button: full automation), -1 for other buttons
@@ -1862,15 +1859,6 @@ class CvMainInterface:
 			return int(pUnit.getGroup().getAutomateType()) == iType
 		except:
 			return False
-
-	# WTP: temporary debug output for the port ring (WTP_PortDebug.log in the game folder)
-	def logPort(self, szText):
-		try:
-			f = open("WTP_PortDebug.log", "a")
-			f.write(szText + "\n")
-			f.close()
-		except:
-			pass
 
 	def updateSelectionButtons( self ):
 		global g_pSelectedUnit
@@ -2157,7 +2145,6 @@ class CvMainInterface:
 					g_pSelectedUnit = pHeadSelectedUnit
 					iCount = 0
 					actions = CyInterface().getActionsToShow()
-					self.logPort("action buttons built for unit %d, %d actions" % (pHeadSelectedUnit.getID(), len(actions)))
 					self.SADDLE_BUTTON_SIZE = LARGE_BUTTON_SIZE * 2
 
 					iTotalActions = 0
@@ -3987,14 +3974,6 @@ class CvMainInterface:
 
 	# WTP: the game selects the next unit when a transport gets automated: the transport stays selected (the game does its
 	# selection change within a moment, so the transport is selected again during the first updates) and the camera follows it
-	def logFollow(self, szText):
-		try:
-			f = open("WTP_Follow.log", "a")
-			f.write("%.2f %s\n" % (time.time(), szText))
-			f.close()
-		except:
-			pass
-
 	def updateAutomatedFollow(self):
 		global g_LastSelUnit, g_LastSelAuto, g_FollowUnit, g_FollowTicks, g_FollowTurn, g_FollowX, g_FollowY
 		try:
@@ -4023,17 +4002,14 @@ class CvMainInterface:
 						g_FollowTurn = gc.getGame().getGameTurn()
 						g_FollowX = -1
 						g_FollowY = -1
-						self.logFollow("start: unit %d, selected now %d" % (g_FollowUnit, iSel))
 
 			if g_FollowUnit != -1:
 				pFollow = pPlayer.getUnit(g_FollowUnit)
 				if pFollow == None or pFollow.isNone() or g_FollowTurn != gc.getGame().getGameTurn():
-					self.logFollow("end: unit gone or turn changed")
 					g_FollowUnit = -1
 				elif g_FollowTicks < 8:
 					g_FollowTicks += 1
 					if iSel != g_FollowUnit:
-						self.logFollow("window: selected %d, selecting unit %d again" % (iSel, g_FollowUnit))
 						CyInterface().selectUnit(pFollow, True, False, True)
 						pFollow.centerCamera()
 						g_FollowX = pFollow.getX()
@@ -4048,14 +4024,12 @@ class CvMainInterface:
 						g_FollowX = pFollow.getX()
 						g_FollowY = pFollow.getY()
 				else:
-					self.logFollow("end: selection is now %d (followed unit %d)" % (iSel, g_FollowUnit))
 					g_FollowUnit = -1 # another unit was selected: the following ends
 
 			g_LastSelUnit = iSel
 			g_LastSelAuto = iSelAuto
 		except:
-			import traceback
-			self.logFollow(traceback.format_exc())
+			pass
 		return
 
 	# Adds Mouse Over Help to General Widgets
