@@ -5054,8 +5054,9 @@ class CvMainInterface:
 
 	# the own unit that a line of the first window names (the lines of the units of a plot: one line per unit, a right click selects the unit):
 	# the plot is the one that the window was frozen at
-	# the paragraph where the lines of the plot under the units begin (the line "Defense bonus", else the terrain line); from there on the
-	# lines are no lines of a unit. No such line: the number of paragraphs
+	# the paragraph where the lines of the plot under the units begin. The terrain line is always there ("Hills/Jungle/Savanna, 7 ..."); the
+	# lines of the plot that the game writes in front of it (the owner of the plot, the pioneer plan, the defense bonus: it is missing for many
+	# plots) belong to the plot too. No terrain line found: the line "Defense bonus"; none of both: the number of paragraphs
 	def getPlotStartPara( self, aszParas, pPlot ):
 		try:
 			iFirst = -1
@@ -5066,6 +5067,8 @@ class CvMainInterface:
 			if iFirst < 0:
 				return len(aszParas)
 			szDefense = self.getTipPrefix("TXT_KEY_PLOT_BONUS", (0,))
+			aPre = [szDefense, self.getTipPrefix("TXT_KEY_PLOT_DEFENSIVE_BONUS_OWNED_PLOT", (0,)), self.getTipPrefix("TXT_KEY_PIONEER_PLAN_PLOT_HELP", (u"", 0))]
+			aPre = [x for x in aPre if len(x) > 3]
 			reTerrain = None
 			if pPlot is not None and not pPlot.isNone() and pPlot.getTerrainType() >= 0:
 				aNames = [self.normTipText(gc.getTerrainInfo(pPlot.getTerrainType()).getDescription()), self.normTipText(localText.getText("TXT_KEY_PLOT_PEAK", ()))]
@@ -5073,12 +5076,34 @@ class CvMainInterface:
 				if len(aNames) > 0:
 					# (hills and the feature in front of the terrain: "Hills/Jungle/Savanna, 7 ...")
 					reTerrain = re.compile(u"^(?:[^/,]{1,40}/){0,2}(?:" + u"|".join(aNames) + u")(?:[ ,]|$)", re.UNICODE)
-			for k in range(iFirst + 1, len(aszParas)):
-				szPlain = self.normTipText(aszParas[k])
-				if len(szDefense) > 0 and szPlain.find(szDefense) == 0:
-					return k
-				if reTerrain is not None and reTerrain.match(szPlain) is not None:
-					return k
+			iTerrain = -1
+			if reTerrain is not None:
+				for k in range(iFirst + 1, len(aszParas)):
+					if reTerrain.match(self.normTipText(aszParas[k])) is not None:
+						iTerrain = k
+						break
+			if iTerrain < 0:
+				for k in range(iFirst + 1, len(aszParas)):
+					if len(szDefense) > 0 and self.normTipText(aszParas[k]).find(szDefense) == 0:
+						return k
+				return len(aszParas)
+			# the names of the nations: a line with only the name of the owner of the plot
+			aOwners = []
+			for ePlayer in range(gc.getMAX_PLAYERS()):
+				pPlayer = gc.getPlayer(ePlayer)
+				if pPlayer.isAlive():
+					aOwners.append(self.normTipText(pPlayer.getCivilizationDescription(0)))
+			iStart = iTerrain
+			while iStart - 1 > iFirst:
+				szPlain = self.normTipText(aszParas[iStart - 1])
+				bPlotLine = (szPlain in aOwners)
+				for szPre in aPre:
+					if szPlain.find(szPre) == 0:
+						bPlotLine = True
+				if not bPlotLine:
+					break
+				iStart -= 1
+			return iStart
 		except:
 			pass
 		return len(aszParas)
