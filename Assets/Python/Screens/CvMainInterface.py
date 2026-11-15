@@ -3579,6 +3579,11 @@ class CvMainInterface:
 			# the help of the map plot is not shown while the cursor is on a HUD element (the game reports the plot behind it)
 			if not bWidget and self.isHudHover():
 				return
+			# the same on the own panels of the HUD: no plot help while the cursor is on them (a shown one goes away)
+			if not bWidget and self.isCursorOnOwnPanel():
+				self.szSuppressHelp = u""
+				self.hideCursorTooltip(screen)
+				return
 			if CyInterface().isCityScreenUp() or len(szHelp) == 0:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
@@ -5551,6 +5556,22 @@ class CvMainInterface:
 	iTipDelayIndex = aiTipSettings[1]
 	bTipQuick = (aiTipSettings[2] == 1) # options screen: the next tooltip appears without delay while a tooltip is shown
 
+	# the cursor is on a panel of the HUD that is not part of the map (message panel): the plot under it is not interesting, only the
+	# tooltips of the panel itself are wanted. (getattr: the panel belongs to another branch, without it this is always False)
+	def isCursorOnOwnPanel( self ):
+		try:
+			if getattr(self, "tMessagePanelKey", None) is None:
+				return False
+			tRect = getattr(self, "tMsgPanelRect", None)
+			if tRect is None:
+				return False
+			(iX, iY, iW, iH) = tRect
+			iCX = gc.getGame().getCursorClientX()
+			iCY = gc.getGame().getCursorClientY()
+			return iCX >= iX and iCX < iX + iW and iCY >= iY and iCY < iY + iH
+		except:
+			return False
+
 	def isCursorInScoreTable( self ):
 		if self.tScoreRect is None:
 			return True
@@ -5594,6 +5615,14 @@ class CvMainInterface:
 					return
 			except:
 				pass
+		if self.bHoverTip and not self.bHudHover and self.isCursorOnOwnPanel():
+			# the cursor moved onto the message panel with a plot tooltip shown (or waiting): it goes away
+			try:
+				if self.bCursorTipShown or self.szPendingHelp is not None:
+					self.hideCursorTooltip(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
+			except:
+				pass
+			return
 		if self.bHoverTip and self.bHudHover and not self.isHudHover():
 			# the cursor has left the HUD element: the help of what is under it now (map plot) takes the place of the element help at once
 			try:
