@@ -4566,17 +4566,72 @@ class CvMainInterface:
 
 	# every frame: the frozen windows of the map follow the map, the child windows follow their parent window
 	def updateFrozenAnchors( self, screen ):
+		xRes = screen.getXResolution()
+		yRes = screen.getYResolution()
+		# the windows that do not move with the map are obstacles for the others; the others are placed one after the other (the older one first,
+		# a child window after its parent) and a window that would lie on or touch one that is placed already is pushed away from it
+		aPlaced = []
+		for i in range(len(self.aFrozen)):
+			if self.aFrozen[i][6] < 0 and self.aFrozen[i][5] is None:
+				aPlaced.append(self.aFrozen[i][1][:4])
 		for i in range(len(self.aFrozen)):
 			iParent = self.aFrozen[i][6]
 			tAnchor = self.aFrozen[i][5]
 			try:
-				if iParent >= 0:
-					self.moveFrozenWindow(screen, i, self.aFrozen[iParent][1][0] + self.aFrozen[i][7][0], self.aFrozen[iParent][1][1] + self.aFrozen[i][7][1])
-				elif tAnchor is not None:
-					(iSX, iSY) = self.getPlotScreen(tAnchor[0], tAnchor[1])
-					self.moveFrozenWindow(screen, i, iSX + tAnchor[2], iSY + tAnchor[3])
+				if iParent >= 0 or tAnchor is not None:
+					tLayout = self.aFrozen[i][1]
+					if iParent >= 0:
+						iNX = self.aFrozen[iParent][1][0] + self.aFrozen[i][7][0]
+						iNY = self.aFrozen[iParent][1][1] + self.aFrozen[i][7][1]
+					else:
+						(iSX, iSY) = self.getPlotScreen(tAnchor[0], tAnchor[1])
+						iNX = iSX + tAnchor[2]
+						iNY = iSY + tAnchor[3]
+					iNX = max(4, min(xRes - tLayout[2] - 4, iNX))
+					iNY = max(4, min(yRes - tLayout[3] - 4, iNY))
+					(iNX, iNY) = self.pushOutOfWindows(iNX, iNY, tLayout[2], tLayout[3], aPlaced, xRes, yRes)
+					self.moveFrozenWindow(screen, i, iNX, iNY)
+					aPlaced.append(self.aFrozen[i][1][:4])
 			except:
 				pass
+
+	# a window at (iX, iY) that lies on a window of the list or comes closer than a few pixels to it goes to the nearest place beside, above or
+	# below that window that is on the screen (again and again, for the next window it touches); the windows of the frozen tooltips never overlap
+	def pushOutOfWindows( self, iX, iY, iW, iH, aRects, xRes, yRes ):
+		iGap = 6
+		for iTry in range(8):
+			tHit = None
+			for tRect in aRects:
+				(iRX, iRY, iRW, iRH) = tRect
+				if iX < iRX + iRW + iGap and iX + iW > iRX - iGap and iY < iRY + iRH + iGap and iY + iH > iRY - iGap:
+					tHit = tRect
+					break
+			if tHit is None:
+				return (iX, iY)
+			(iRX, iRY, iRW, iRH) = tHit
+			aCands = [(iRX - iW - iGap, iY), (iRX + iRW + iGap, iY), (iX, iRY - iH - iGap), (iX, iRY + iRH + iGap)]
+			tBest = None
+			iBest = 0
+			for (iCX, iCY) in aCands:
+				if iCX < 4 or iCY < 4 or iCX + iW > xRes - 4 or iCY + iH > yRes - 4:
+					continue
+				iDist = abs(iCX - iX) + abs(iCY - iY)
+				if tBest is None or iDist < iBest:
+					tBest = (iCX, iCY)
+					iBest = iDist
+			if tBest is None:
+				# (no side has room: the nearest one, pushed back onto the screen)
+				for (iCX, iCY) in aCands:
+					iCX = max(4, min(xRes - iW - 4, iCX))
+					iCY = max(4, min(yRes - iH - 4, iCY))
+					iDist = abs(iCX - iX) + abs(iCY - iY)
+					if tBest is None or iDist < iBest:
+						tBest = (iCX, iCY)
+						iBest = iDist
+			if tBest[0] == iX and tBest[1] == iY:
+				return (iX, iY)
+			(iX, iY) = tBest
+		return (iX, iY)
 
 	# Shift + X: the frozen parent windows are brought to the cursor and stacked diagonally there, each one below the one before and beside it
 	# (to the left, to the right if there is no room), so that the child windows beside them do not get in the way of each other. The oldest
@@ -5012,11 +5067,12 @@ class CvMainInterface:
 	# lines are no lines of a unit. No such line: the number of paragraphs
 	def getPlotStartPara( self, aszParas, pPlot ):
 		try:
-			iLast = -1
+			iFirst = -1
 			for k in range(len(aszParas)):
 				if self.isUnitHeader(aszParas[k]):
-					iLast = k
-			if iLast < 0:
+					iFirst = k
+					break
+			if iFirst < 0:
 				return len(aszParas)
 			szDefense = self.getTipPrefix("TXT_KEY_PLOT_BONUS", (0,))
 			reTerrain = None
@@ -5026,7 +5082,7 @@ class CvMainInterface:
 				if len(aNames) > 0:
 					# (hills and the feature in front of the terrain: "Hills/Jungle/Savanna, 7 ...")
 					reTerrain = re.compile(u"^(?:[^/,]{1,40}/){0,2}(?:" + u"|".join(aNames) + u")(?:[ ,]|$)", re.UNICODE)
-			for k in range(iLast + 1, len(aszParas)):
+			for k in range(iFirst + 1, len(aszParas)):
 				szPlain = self.normTipText(aszParas[k])
 				if len(szDefense) > 0 and szPlain.find(szDefense) == 0:
 					return k
@@ -5044,9 +5100,17 @@ class CvMainInterface:
 				return None
 			if self.aFrozen[iLevel][6] >= 0 or self.dUnitWin.get(tuple(aszParas)) is not None:
 				return None
+			tAnchor = self.aFrozen[iLevel][5]
+			if tAnchor is not None:
+				pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+			else:
+				pPlot = self.getStackPlot()
+			iPlotStart = self.getPlotStartPara(aszParas, pPlot)
+			if iPara >= iPlotStart:
+				return None
 			# (a window with one unit only is the tooltip of that unit alone: no child window that repeats it)
 			iHeaders = 0
-			for k in range(len(aszParas)):
+			for k in range(iPlotStart):
 				if self.isUnitHeader(aszParas[k]):
 					iHeaders += 1
 			if iHeaders < 2:
@@ -5057,14 +5121,6 @@ class CvMainInterface:
 					iHead = k
 					break
 			if iHead < 0:
-				return None
-			tAnchor = self.aFrozen[iLevel][5]
-			if tAnchor is not None:
-				pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
-			else:
-				pPlot = self.getStackPlot()
-			iPlotStart = self.getPlotStartPara(aszParas, pPlot)
-			if iPara >= iPlotStart:
 				return None
 			pUnit = self.getHeaderUnit(iLevel, aszParas, iHead, True)
 			if pUnit is None:
