@@ -1501,7 +1501,7 @@
 			<Type>ART_DEF_FEATURE_ROCK_FORMATIONS_DESERT</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.5</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/Desert_Rock_Button.dds</Button>
 			<FeatureVariety>
@@ -1524,7 +1524,7 @@
 			<Type>ART_DEF_FEATURE_ROCK_FORMATIONS_TEMPERATE</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.5</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/Temperate_Rock_Button.dds</Button>
 			<FeatureVariety>
@@ -1547,7 +1547,7 @@
 			<Type>ART_DEF_FEATURE_ROCK_FORMATIONS_POLAR</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.5</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/Polar_Rock_Button.dds</Button>
 			<FeatureVariety>

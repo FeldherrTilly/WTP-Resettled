@@ -35,7 +35,7 @@
 	</Define>
 	<Define>
 		<DefineName>GAME_CITY_SIZE_LINMAP_AT_50</DefineName>
-		<fDefineFloatVal>300</fDefineFloatVal>
+		<fDefineFloatVal>200</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>PLOT_SIZE</DefineName>

@@ -8,7 +8,7 @@
 	<BonusArtInfos>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_IRON</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Iron/Iron.nif</NIF>
 			<KFM>Art/Terrain/Resources/Iron/Iron.kfm</KFM>
@@ -19,7 +19,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_FUR</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Fur/Fur.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fur/Fur.kfm</KFM>
@@ -30,7 +30,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_POLAR_FOX</Type>
-			<fScale>1.1</fScale>
+			<fScale>0.77</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/arcticfox/Arctic_Fox_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -41,7 +41,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_RED_FOX</Type>
-			<fScale>1.3</fScale>
+			<fScale>0.91</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/redfox/Red_Fox_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -52,7 +52,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_COTTON</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Cotton/Cotton_civlopedia.nif</NIF>
 			<KFM/>
@@ -63,7 +63,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SILVER</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Silver/Silver.nif</NIF>
 			<KFM>Art/Terrain/Resources/Silver/Silver.kfm</KFM>
@@ -74,7 +74,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_GOLD</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Gold/Gold.nif</NIF>
 			<KFM/>
@@ -85,7 +85,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_GEMS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Gems/gems.nif</NIF>
 			<KFM>Art/Terrain/Resources/Gems/gems.kfm</KFM>
@@ -96,7 +96,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BOG_ORE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Bog_Ore/gems.nif</NIF>
 			<KFM>Art/Terrain/Resources/Bog_Ore/gems.kfm</KFM>
@@ -107,7 +107,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PEARLS_2</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.25</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Pearls_2/Clam.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pearls_2/Clam.kfm</KFM>
@@ -118,7 +118,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_TOBACCO</Type>
-			<fScale>0.5</fScale>
+			<fScale>0.35</fScale>
 			<fInterfaceScale>1.6</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Tobacco/tobacco_civlopedia.nif</NIF>
 			<KFM/>
@@ -129,7 +129,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SUGAR</Type>
-			<fScale>0.5</fScale>
+			<fScale>0.35</fScale>
 			<fInterfaceScale>1.3</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Sugar/Sugar.nif</NIF>
 			<KFM/>
@@ -140,7 +140,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BANANA</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Banana/Banana.nif</NIF>
 			<KFM>Art/Terrain/Resources/Banana/Banana.kfm</KFM>
@@ -151,7 +151,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PASSION_FRUIT</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Passion_Fruit/Passion_Fruit.nif</NIF>
 			<KFM/>
@@ -162,7 +162,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_GUAVA</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Guava/Guava.nif</NIF>
 			<KFM/>
@@ -173,7 +173,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CORN</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Corn/Corn.nif</NIF>
 			<KFM/>
@@ -184,7 +184,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CRAB</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Crab/Crab.nif</NIF>
 			<KFM>Art/Terrain/Resources/Crab/Crab.kfm</KFM>
@@ -195,7 +195,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_DEER</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Deer/Deer.nif</NIF>
 			<KFM>Art/Terrain/Resources/Deer/Deer.kfm</KFM>
@@ -206,7 +206,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_LLAMA</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/llama/llama.nif</NIF>
 			<KFM>Art/Terrain/Resources/Horse/Horse.kfm</KFM>
@@ -217,7 +217,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_GUINEA_PIG</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/guinea_pig/Guinea_Pig_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pig/Pig.kfm</KFM>
@@ -228,7 +228,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PARROTS</Type>
-			<fScale>4.0</fScale>
+			<fScale>2.8</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Parrots/bird2.nif</NIF>
 			<KFM/>
@@ -239,7 +239,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_TOUCAN</Type>
-			<fScale>4.0</fScale>
+			<fScale>2.8</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/toucan/toucan.nif</NIF>
 			<KFM/>
@@ -250,7 +250,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CAPYBARA</Type>
-			<fScale>1.1</fScale>
+			<fScale>0.77</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/capybara/Capybara_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pig_NO_SOUND/Pig_NO_SOUND.kfm</KFM>
@@ -261,7 +261,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_TAPIR</Type>
-			<fScale>1.1</fScale>
+			<fScale>0.77</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/tapir/Tapir_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pig_NO_SOUND/Pig_NO_SOUND.kfm</KFM>
@@ -272,7 +272,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_RABBIT</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Rabbits/Rabbit_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fur/Fur.kfm</KFM>
@@ -283,7 +283,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CARIBOU</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Caribou/Caribou_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Deer/Deer.kfm</KFM>
@@ -294,7 +294,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_MOOSE</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Moose/Moose_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Deer/Deer.kfm</KFM>
@@ -305,7 +305,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BIG_HORN</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/big_horn_sheep/Bighorn_Sheep_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Deer/Deer.kfm</KFM>
@@ -316,7 +316,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_GOAT</Type>
-			<fScale>0.9</fScale>
+			<fScale>0.63</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/terrain/resources/Goat/Goat_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Horse/Horse.kfm</KFM>
@@ -327,7 +327,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_MUSK_OX</Type>
-			<fScale>1.1</fScale>
+			<fScale>0.77</fScale>
 			<fInterfaceScale>0.9</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Muskox/Muskox_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Cow/Cow.kfm</KFM>
@@ -338,7 +338,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_FISH</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Fish/Fish.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fish/Fish.kfm</KFM>
@@ -349,7 +349,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BOOBY</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/terrain/resources/booby/Booby_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -360,7 +360,7 @@
 		</BonusArtInfo>
 	   <BonusArtInfo>
 			<Type>ART_DEF_BONUS_GULL</Type>
-			<fScale>0.4</fScale>
+			<fScale>0.28</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/gull/Gull_FX.nif</NIF>
 			<KFM/>
@@ -371,7 +371,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_DUCK</Type>
-			<fScale>1.5</fScale>
+			<fScale>1.05</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/duck/Duck_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -382,7 +382,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_LOON</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/loon/Loon_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -393,7 +393,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CANADA_GOOSE</Type>
-			<fScale>2.0</fScale>
+			<fScale>1.4</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Canada_Goose/Goose_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -404,7 +404,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_OASIS</Type>
-			<fScale>1.5</fScale>
+			<fScale>1.05</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Oase/Oase.nif</NIF>
 			<KFM>Art/Terrain/Resources/Oase/Oase.kfm</KFM>
@@ -415,7 +415,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_WATERHOLE</Type>
-			<fScale>1.5</fScale>
+			<fScale>1.05</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/waterhole/Oase.nif</NIF>
 			<KFM>Art/Terrain/Resources/waterhole/Oase.kfm</KFM>
@@ -426,7 +426,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_MINERALS</Type>
-			<fScale>30.0</fScale>
+			<fScale>21</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Bodenschatz/Gems.nif</NIF>
 			<KFM/>
@@ -437,7 +437,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_TIMBER</Type>
-			<fScale>1.5</fScale>
+			<fScale>1.05</fScale>
 			<fInterfaceScale>1.3</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Holz/Timber.nif</NIF>
 			<KFM/>
@@ -448,7 +448,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PEARLS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Pearls/Clam.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pearls/Clam.kfm</KFM>
@@ -459,7 +459,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BISON</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Bison/cow_fx2.nif</NIF>
 			<KFM>Art/Terrain/Resources/Bison/Cow.kfm</KFM>
@@ -470,7 +470,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_POTATO</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Potato/potato.nif</NIF>
 			<KFM/>
@@ -481,7 +481,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SWEET_POTATO</Type>
-			<fScale>0.7</fScale>
+			<fScale>0.49</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Sweet_Potato/sweet_potato.nif</NIF>
 			<KFM/>
@@ -492,7 +492,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_COCOA</Type>
-			<fScale>1</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Cocoa/cocoa.nif</NIF>
 			<KFM>Art/Terrain/Resources/Coffee/Cofwes.kfm</KFM>
@@ -503,7 +503,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_COCA</Type>
-			<fScale>1</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Coca/wheat.nif</NIF>
 			<KFM>Art/Terrain/Resources/Coca/wheat.kfm</KFM>
@@ -514,7 +514,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_YERBA</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Yerba/Cnq.nif</NIF>
 			<KFM/>
@@ -525,7 +525,7 @@
 		</BonusArtInfo>			
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_COFFEE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Coffee/Cofwes.nif</NIF>
 			<KFM>Art/Terrain/Resources/Coffee/Cofwes.kfm</KFM>
@@ -536,7 +536,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_WHALE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Whale/Whale.nif</NIF>
 			<KFM>Art/Terrain/Resources/Whale/Whale.kfm</KFM>
@@ -547,7 +547,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HUMPBACK_WHALE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/humpback_whale/Whale.nif</NIF>
 			<KFM>Art/Terrain/Resources/Whale/Whale.kfm</KFM>
@@ -558,7 +558,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HIGH_SEA_FISH</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/HighSeaFish/Fish.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fish/Fish.kfm</KFM>
@@ -569,7 +569,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HIGH_SEA_FISH2</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/mackerel/mackerel_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fish/Fish.kfm</KFM>
@@ -580,7 +580,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HIGH_SEA_FISH3</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/marlin/marlin_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fish/Fish.kfm</KFM>
@@ -591,7 +591,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HIGH_SEA_FISH4</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/tuna/tuna_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fish/Fish.kfm</KFM>
@@ -602,7 +602,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HORSES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Horse/Horse.nif</NIF>
 			<KFM>Art/Terrain/Resources/Horse/Horse.kfm</KFM>
@@ -613,7 +613,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_COCONUT</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Coconut/coconut.nif</NIF>
 			<KFM/>
@@ -624,7 +624,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PINE_APPLE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Pine_Apple/banana.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pine_Apple/banana.kfm</KFM>
@@ -635,7 +635,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PAPAYA</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Papaya/papaya.nif</NIF>
 			<KFM/>
@@ -646,7 +646,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_TURKEYS</Type>
-			<fScale>2.0</fScale>
+			<fScale>1.4</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/turkeys/Turkey_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -657,7 +657,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PUMPKIN</Type>
-			<fScale>0.75</fScale>
+			<fScale>0.525</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Pumpkin/wheat.nif</NIF>
 			<KFM/>
@@ -668,7 +668,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SQUASH</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Squash/Lemqes.nif</NIF>
 			<KFM>Art/Terrain/Resources/Squash/Lemqes.kfm</KFM>
@@ -679,7 +679,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_AVOCADO</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Avocado/Avocado.nif</NIF>
 			<KFM/>
@@ -690,7 +690,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_MELON</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Melon/watermelon.nif</NIF>
 			<KFM/>
@@ -701,7 +701,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SEALS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Sea_Lions/fish.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sea_Lions/fish.kfm</KFM>
@@ -712,7 +712,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_FUR_SEAL</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Fur_Seal/Crab.nif</NIF>
 			<KFM>Art/Terrain/Resources/Fur_Seal/Crab.kfm</KFM>
@@ -723,7 +723,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_WALRUSS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Sea_Walrus/Sea_Lions_fx.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sea_Walrus/Sea_Lions.kfm</KFM>
@@ -734,7 +734,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PENGUIN</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Penguin/Penguin_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -745,7 +745,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SEA_OTTERS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Sea_Otter/Fur.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sea_Otter/Fur.kfm</KFM>
@@ -756,7 +756,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HEMP</Type>
-			<fScale>1.1</fScale>
+			<fScale>0.77</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Hemp/Cnq.nif</NIF>
 			<KFM>Art/Terrain/Resources/Hemp/Cnq.kfm</KFM>
@@ -767,7 +767,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_FLAX</Type>
-			<fScale>0.8</fScale>
+			<fScale>0.56</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Flax/flax_pedia.nif</NIF>
 			<KFM/>
@@ -778,7 +778,7 @@
 		</BonusArtInfo>		
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_INDIGO</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Indigo/Indigo.nif</NIF>
 			<KFM>Art/Terrain/Resources/Indigo/Indigo.kfm</KFM>
@@ -789,7 +789,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BLOODWOOD</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Bloodwood/blauholz.nif</NIF>
 			<KFM/>
@@ -800,7 +800,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_STONE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Stone/Stone.nif</NIF>
 			<KFM/>
@@ -811,7 +811,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CLAY</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Clay/clay.nif</NIF>
 			<KFM/>
@@ -822,7 +822,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_COAL</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Coal/coal.nif</NIF>
 			<KFM>Art/Terrain/Resources/Coal/coal.kfm</KFM>
@@ -833,7 +833,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PEAT</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Peat/peat.nif</NIF>
 			<KFM/>
@@ -844,7 +844,7 @@
 		</BonusArtInfo>		
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CATTLE</Type>
-			<fScale>1.1</fScale>
+			<fScale>0.77</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/cow/cow_fx.nif</NIF>
 			<KFM>Art/Terrain/Resources/cow/cow.kfm</KFM>
@@ -855,7 +855,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PIG</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Pig/Pig_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pig/Pig.kfm</KFM>
@@ -866,7 +866,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CHICKEN</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Chickens/Chickens_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -877,7 +877,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_DOMESTIC_GOOSE</Type>
-			<fScale>2.0</fScale>
+			<fScale>1.4</fScale>
 			<fInterfaceScale>1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Goose/Goose_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Sheep_NO_SOUND/Sheep_NO_SOUND.kfm</KFM>
@@ -888,7 +888,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SHEEP</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/sheep/sheep_fx.nif</NIF>
 			<KFM>Art/Terrain/Resources/sheep/sheep.kfm</KFM>
@@ -899,7 +899,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_GRAPES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Grape/wine.nif</NIF>
 			<KFM>Art/Terrain/Resources/Grape/wine.kfm</KFM>
@@ -910,7 +910,7 @@
 		</BonusArtInfo>	
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_OLIVES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Olive/olives.nif</NIF>
 			<KFM/>
@@ -921,7 +921,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_RAPE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Rape/rape_colopedia.nif</NIF>
 			<KFM/>
@@ -932,7 +932,7 @@
 		</BonusArtInfo>	
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BOREAL_FOREST</Type>
-			<fScale>1.6</fScale>
+			<fScale>1.12</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Valuable_Wood/spices.nif</NIF>
 			<KFM>Art/Terrain/Resources/Valuable_Wood/spices.kfm</KFM>
@@ -943,7 +943,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HARDWOOD</Type>
-			<fScale>1.8</fScale>
+			<fScale>1.26</fScale>
 			<fInterfaceScale>1.3</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Hard_Wood/olive_press.nif</NIF>
 			<KFM/>
@@ -954,7 +954,7 @@
 		</BonusArtInfo>	
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_RED_PEPPER</Type>
-			<fScale>0.8</fScale>
+			<fScale>0.56</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Paprika/Paprika.nif</NIF>
 			<KFM/>
@@ -965,7 +965,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_VANILLA</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Vanilla/Vanilla.nif</NIF>
 			<KFM>Art/Terrain/Resources/Vanilla/Vanilla.kfm</KFM>
@@ -976,7 +976,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_MAPLE_TREES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Maple_Trees/blauholz.nif</NIF>
 			<KFM/>
@@ -987,7 +987,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_KAUTSCHUK</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/rubber/silk.nif</NIF>
 			<KFM/>
@@ -998,7 +998,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BARLEY</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Barley/wheat.nif</NIF>
 			<KFM>Art/Terrain/Resources/Barley/wheat.kfm</KFM>
@@ -1009,7 +1009,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_WHEAT</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Wheat_new/wheat.nif</NIF>
 			<KFM>Art/Terrain/Resources/Barley/wheat.kfm</KFM>
@@ -1020,7 +1020,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SALT</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Salt/Marble.nif</NIF>
 			<KFM/>
@@ -1031,7 +1031,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_GIANT_TREE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/giant_tree/giant_tree.nif</NIF>
 			<KFM/>
@@ -1042,7 +1042,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CACTUS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Cactus/cactus.nif</NIF>
 			<KFM/>
@@ -1053,7 +1053,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_VULTURE</Type>
-			<fScale>0.4</fScale>
+			<fScale>0.28</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/vulture/Vulture_FX.nif</NIF>
 			<KFM/>
@@ -1064,7 +1064,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_IGUANA</Type>
-			<fScale>1.1</fScale>
+			<fScale>0.77</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/iguana/Iguana_FX.nif</NIF>
 			<KFM>Art/Terrain/Resources/Pig_NO_SOUND/Pig_NO_SOUND.kfm</KFM>
@@ -1075,7 +1075,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_APPLES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/apple/banana.nif</NIF>
 			<KFM>Art/Terrain/Resources/apple/banana.kfm</KFM>
@@ -1086,7 +1086,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CHERRIES</Type>
-			<fScale>4.0</fScale>
+			<fScale>2.8</fScale>
 			<fInterfaceScale>6</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Cherries/Cherry_Trees.nif</NIF>
 			<KFM/>
@@ -1097,7 +1097,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_LEMONS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.1</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/lemon/lemqes.nif</NIF>
 			<KFM/>
@@ -1108,7 +1108,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_TOMATO</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Tomato/lemqes.nif</NIF>
 			<KFM/>
@@ -1119,7 +1119,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BEE_HIVE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/BeeHive/Banana.nif</NIF>
 			<KFM>Art/Terrain/Resources/BeeHive/Banana.kfm</KFM>
@@ -1130,7 +1130,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PEANUT</Type>
-			<fScale>1.2</fScale>
+			<fScale>0.84</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Peanut/cnq.nif</NIF>
 			<KFM/>
@@ -1141,7 +1141,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_TUNDRA_BERRIES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Berries/lemqes.nif</NIF>
 			<KFM>Art/Terrain/Resources/Berries/lemqes.kfm</KFM>
@@ -1152,7 +1152,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_HUCKLE_BERRIES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Huckle_Berries/dye.nif</NIF>
 			<KFM/>
@@ -1163,7 +1163,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BLUE_BERRIES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Blue_Berries/dye.nif</NIF>
 			<KFM/>
@@ -1174,7 +1174,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CRAN_BERRIES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Cran_Berries/wheat.nif</NIF>
 			<KFM>Art/Terrain/Resources/Cran_Berries/wheat.kfm</KFM>
@@ -1185,7 +1185,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_SHRIMP</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Shrimp/shrimp.nif</NIF>
 			<KFM>Art/Terrain/Resources/Crab/Crab.kfm</KFM>
@@ -1196,7 +1196,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_RICE</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/rice/rice.nif</NIF>
 			<KFM/>
@@ -1207,7 +1207,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CASSAVA</Type>
-			<fScale>0.7</fScale>
+			<fScale>0.49</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Cassava/cassava.nif</NIF>
 			<KFM/>
@@ -1218,7 +1218,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_BEANS</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Beans/cnq.nif</NIF>
 			<KFM>Art/Terrain/Resources/Beans/cnq.kfm</KFM>
@@ -1229,7 +1229,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_MUSHROOMS</Type>
-			<fScale>0.5</fScale>
+			<fScale>0.35</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Mushrooms/mushrooms.nif</NIF>
 			<KFM/>
@@ -1240,7 +1240,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_CHERRIES</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/Cherries/Cherry_Trees.nif</NIF>
 			<KFM/>
@@ -1251,7 +1251,7 @@
 		</BonusArtInfo>
 		<BonusArtInfo>
 			<Type>ART_DEF_BONUS_PRICKLY_PEAR</Type>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<NIF>Art/Terrain/Resources/pricklypear/baradye.nif</NIF>
 			<KFM/>
