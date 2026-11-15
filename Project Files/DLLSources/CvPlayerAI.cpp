@@ -18250,6 +18250,28 @@ bool CvPlayerAI::AI_isWfUnreachable(int iUnitID, int iCityID) const
 void CvPlayerAI::AI_wfUpdateTravel(const CvUnit& kColonist)
 {
 	MOD_PROFILE("CvPlayerAI::AI_wfUpdateTravel");
+	// WTP: the travel times (a Dijkstra over the map for every colony and a flood over the water for every port) change slowly, but cost
+	// most of the turn time of the workforce plan in the late game: they are calculated again after WF_TRAVEL_REFRESH_TURNS turns or when
+	// the speed of the colonist or the colonies change (a new road or transport is noticed a few turns later)
+	{
+		const int WF_TRAVEL_REFRESH_TURNS = 4;
+		std::vector<int> aiKey;
+		aiKey.push_back(0); // [0]: the turn
+		aiKey.push_back(std::max(1, kColonist.maxMoves()));
+		int iLoopKey;
+		for (CvCity* pKeyCity = firstCity(&iLoopKey); pKeyCity != NULL; pKeyCity = nextCity(&iLoopKey))
+		{
+			aiKey.push_back(pKeyCity->getID());
+		}
+		const int iNow = GC.getGameINLINE().getGameTurn();
+		if (!m_mapWfLandCost.empty() && m_aiWfTravelKey.size() == aiKey.size() && iNow >= m_aiWfTravelKey[0] && iNow - m_aiWfTravelKey[0] < WF_TRAVEL_REFRESH_TURNS
+			&& std::equal(aiKey.begin() + 1, aiKey.end(), m_aiWfTravelKey.begin() + 1))
+		{
+			return;
+		}
+		aiKey[0] = iNow;
+		m_aiWfTravelKey = aiKey;
+	}
 	m_mapWfLandCost.clear();
 	m_mapWfSeaTurns.clear();
 	const CvMap& kMap = GC.getMap();
@@ -19033,6 +19055,7 @@ void CvPlayerAI::AI_doWorkforcePlan()
 		}
 		if (pColonist != NULL)
 		{
+			WtpTiming::Scope wtpTravelTimer(WtpTiming::SLOT_WF_TRAVEL);
 			AI_wfUpdateTravel(*pColonist);
 		}
 	}

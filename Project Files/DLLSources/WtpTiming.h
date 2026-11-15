@@ -52,6 +52,7 @@ namespace WtpTiming
 		SLOT_PRE_DOSURPLUSPIONEERS,
 		SLOT_PRE_DONATIVEMERCDEFENSE,
 		SLOT_PRE_LOGSTATUSSUMMARY,
+		SLOT_WF_TRAVEL,
 		SLOT_COUNT
 	};
 
@@ -87,7 +88,8 @@ namespace WtpTiming
 		"  in AI_doTurnPre: AI_doReclaimTerritory",
 		"  in AI_doTurnPre: AI_doSurplusPioneers",
 		"  in AI_doTurnPre: AI_doNativeMercDefense",
-		"  in AI_doTurnPre: AI_logStatusSummary"
+		"  in AI_doTurnPre: AI_logStatusSummary",
+		"    in AI_doWorkforcePlan: AI_wfUpdateTravel (travel times of the colonies)"
 	};
 
 	struct Data
