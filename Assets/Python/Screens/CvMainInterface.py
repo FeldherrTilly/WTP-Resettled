@@ -4944,6 +4944,9 @@ class CvMainInterface:
 		elif iPara >= 0 and self.isCommandLine(iFz, aszTopParas, iPara):
 			# the command lines of a city tooltip: no Colopedia, a right click runs the command
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_RUN_COMMAND", ()), iCY, tTop, iFz)
+		elif iPara >= 0 and iSel < 0 and self.isStoredGoodsWindow(aszTopParas):
+			# the window with the goods of a city: what the colors of the goods mean
+			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ()), iCY, tTop, iFz)
 		elif iPara >= 0 and iSel < 0 and self.showAloneUnitTip(screen, iFz, aszTopParas, iPara, iCY, tTop):
 			# a line of a unit of a stack: the tooltip of the unit as if it stood alone on the plot
 			pass
@@ -4954,6 +4957,17 @@ class CvMainInterface:
 				szText = self.getTipSecondText(iPara, -1, aszTopParas, iFz)
 			if len(szText) > 0:
 				self.showSecondTip(screen, szText, iCY, tTop, iFz)
+
+	# the child window with the goods stored in a city (its first line begins like the line "Stored" of the city tooltip)
+	def isStoredGoodsWindow( self, aszParas ):
+		try:
+			if len(aszParas) == 0:
+				return False
+			szStored = self.getTipPrefix("TXT_KEY_CITY_BAR_STORED", (u"",))
+			szFirst = self.normTipText(re.sub(u"<[^>]*>", u"", aszParas[0]))
+			return len(szStored) > 3 and szFirst.find(szStored) == 0
+		except:
+			return False
 
 	# the promotions named by the pictures of a line (<img=button path size=16>): their names and what they do
 	def getPromotionTipText( self, szLine ):
