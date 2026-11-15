@@ -747,6 +747,8 @@ static bool wtpGetCursor(POINT& pt)
 extern CvWString wtpGetWidgetHelpText();
 extern int wtpGetWidgetHelpCount();
 extern int wtpGetWidgetHelpType();
+extern void wtpSetHideGameHelp(bool b);
+extern void wtpSetInternalHelp(bool b);
 std::wstring CyGame::getWidgetHelpText() const
 {
 	return std::wstring(wtpGetWidgetHelpText().GetCString());
@@ -769,8 +771,15 @@ std::wstring CyGame::getWidgetHelpFor(int eWidgetType, int iData1, int iData2, b
 	widgetData.m_bOption = bOption;
 	widgetData.m_eWidgetType = (WidgetTypes)eWidgetType;
 	CvWStringBuffer szBuffer;
+	wtpSetInternalHelp(true);
 	CvDLLWidgetData::getInstance().parseHelp(szBuffer, widgetData);
+	wtpSetInternalHelp(false);
 	return std::wstring(szBuffer.getCString());
+}
+
+void CyGame::setHideGameHelp(bool bNewValue)
+{
+	wtpSetHideGameHelp(bNewValue);
 }
 
 int CyGame::getCursorClientX() const

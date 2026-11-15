@@ -5636,10 +5636,18 @@ class CvMainInterface:
 		# 0: hover tooltip at the cursor, 1: own tooltip window at the place of the game tooltip, 2: off (game tooltip)
 		self.setHoverTipMode((self.iTipMode + 1) % 3, True)
 
+	# the DLL hides the game help of HUD elements while the diplomacy screen is open and the own tooltip is on
+	def sendHideGameHelp( self ):
+		try:
+			gc.getGame().setHideGameHelp(self.bHoverTip)
+		except:
+			pass
+
 	# also called by the options screen (Game tab); bMessage: the message of the hotkey
 	def setHoverTipMode( self, iMode, bMessage ):
 		self.iTipMode = iMode
 		self.bHoverTip = (self.iTipMode != 2)
+		self.sendHideGameHelp()
 		self.saveTipSettings()
 		self.unfreezeAllTips()
 		self.bTipFrozen = False
@@ -5870,6 +5878,7 @@ class CvMainInterface:
 			self.bCursorTipShown = False
 	# Will update the help Strings
 	def updateHelpStrings( self ):
+		self.sendHideGameHelp()
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
 
 		if ( CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL ):

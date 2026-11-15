@@ -232,6 +232,12 @@ static int g_iWtpWidgetHelpType = 0;
 CvWString wtpGetWidgetHelpText() { return g_szWtpWidgetHelp; }
 int wtpGetWidgetHelpCount() { return g_iWtpWidgetHelpCount; }
 int wtpGetWidgetHelpType() { return g_iWtpWidgetHelpType; }
+// WTP: with the diplomacy screen open the game shows the help of the HUD elements itself, python cannot clear it there. While the own
+// tooltip is on (set from python) the DLL gives the game an empty text then; the text for python is kept
+static bool g_bWtpHideGameHelp = false;
+static bool g_bWtpInternalHelp = false;
+void wtpSetHideGameHelp(bool b) { g_bWtpHideGameHelp = b; }
+void wtpSetInternalHelp(bool b) { g_bWtpInternalHelp = b; }
 
 void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
 {
@@ -239,6 +245,10 @@ void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, const CvWidgetDataStr
 	g_szWtpWidgetHelp = szBuffer.getCString();
 	g_iWtpWidgetHelpType = (int)widgetDataStruct.m_eWidgetType;
 	g_iWtpWidgetHelpCount++;
+	if (g_bWtpHideGameHelp && !g_bWtpInternalHelp && (gDLL->isDiplomacy() || gDLL->isMPDiplomacyScreenUp()))
+	{
+		szBuffer.clear();
+	}
 }
 
 void CvDLLWidgetData::parseHelpInner(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
