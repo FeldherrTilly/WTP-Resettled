@@ -5615,9 +5615,10 @@ class CvMainInterface:
 		aRects.append(self.tMsgRect)
 		try:
 			if gc.getGame().isDiplomacyUp():
-				# the diplomacy window: in the middle of the screen, about 474 x 730 pixels (measured at 2560 x 1440; a little margin)
+				# the diplomacy window: in the middle of the screen, about 474 x 730 pixels (measured at 2560 x 1440; a little margin). The trade
+				# window (two lists beside it) is about 1005 x 735: the game does not tell which of both is open, so the wider rectangle is used
 				scrDiplo = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-				aRects.append((scrDiplo.getXResolution() / 2 - 245, scrDiplo.getYResolution() / 2 - 375, 490, 750))
+				aRects.append((scrDiplo.getXResolution() / 2 - 512, scrDiplo.getYResolution() / 2 - 376, 1024, 752))
 		except:
 			pass
 		for (x, y, w, h) in aRects:
