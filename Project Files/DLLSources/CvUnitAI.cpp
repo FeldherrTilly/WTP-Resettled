@@ -24813,7 +24813,7 @@ int CvUnitAI::AI_travelShipApproach(const CvUnit& kShip, const CvPlot& kPickup) 
 			int iBestSail = MAX_INT;
 			for (uint i = 0; i < aAboard.size(); ++i)
 			{
-				int iSail = MAX_INT;
+				int iSail;
 				CvPlot* const pShipPlot = (aAboard[i].first != NULL) ? travelShipPlot(kShip, *pAt, *aAboard[i].first, iSail) : NULL;
 				if (pShipPlot != NULL && iSail < iBestSail)
 				{
