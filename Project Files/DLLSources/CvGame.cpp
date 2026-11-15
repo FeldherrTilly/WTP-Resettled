@@ -5455,6 +5455,13 @@ void CvGame::doTurn()
 {
 	// WTP: the data of the timing report (map, players: type, civilization, cities, units)
 	WtpTiming::noteMap(GC.getMapINLINE().getGridWidthINLINE(), GC.getMapINLINE().getGridHeightINLINE());
+	WtpTiming::noteGame(
+		((int)getGameSpeedType() >= 0) ? GC.getGameSpeedInfo(getGameSpeedType()).getType() : "",
+		((int)getHandicapType() >= 0) ? GC.getHandicapInfo(getHandicapType()).getType() : "",
+		((int)GC.getMapINLINE().getWorldSize() >= 0) ? GC.getWorldInfo(GC.getMapINLINE().getWorldSize()).getType() : "",
+		((int)GC.getMapINLINE().getClimate() >= 0) ? GC.getClimateInfo(GC.getMapINLINE().getClimate()).getType() : "",
+		((int)GC.getMapINLINE().getSeaLevel() >= 0) ? GC.getSeaLevelInfo(GC.getMapINLINE().getSeaLevel()).getType() : "",
+		isGameMultiPlayer());
 	for (int iWtpPlayer = 0; iWtpPlayer < MAX_PLAYERS; ++iWtpPlayer)
 	{
 		const CvPlayer& kWtpPlayer = GET_PLAYER((PlayerTypes)iWtpPlayer);
