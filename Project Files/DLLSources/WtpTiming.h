@@ -37,6 +37,13 @@
 //       one block per turn change. The header repeats session, wall clock time and version, so a block is attributable even if the
 //       file was cut or several files were pasted together. Lines starting with "=== Turn change" start a block, "---" lines start
 //       a section of a block, "#####" starts a session. Fields are tab separated, the first columns are numbers.
+//   The block header also has game=<fingerprint> and continuity=<ok | first report of this session | savegame loaded | other game |
+//       turn went back | skipped N turns>. The turn number is the game's own turn (CvGame::getGameTurn), NOT a counter of the log,
+//       so playing another savegame in between shows up as a jump or a drop of the turn number. The load of a savegame
+//       (CvGame::read) throws away what was collected before and marks the next block "savegame loaded"; a block with a changed
+//       fingerprint (different settings / map size / players) is marked "other game". Such blocks carry a "note:" line and should be
+//       left out of comparisons and trends (right after a load the caches are empty, so they are slower, not faster).
+//       Only the time spent in the measured functions is counted, not the time the human needs for the own turn.
 //   settings: speed=.. handicap=.. world=.. climate=.. sea level=.. multiplayer=..
 //       the game settings (XML type names), because the same code behaves very differently on a small and a huge map.
 //   When the layout of the report changes, "format" is increased. Parse by the section headers, not by line numbers.
@@ -298,6 +305,9 @@ namespace WtpTiming
 		__int64 aiCounter[CNT_COUNT];
 		// identification of the log (see the comment at the top: session, game settings)
 		char szSession[48];
+		int iLastTurn; // game turn of the previous report, -1: none yet
+		unsigned int iLastFingerprint;
+		bool bSaveLoaded; // a savegame was loaded since the last report
 		bool bSessionWritten;
 		bool bGameInfo;
 		bool bMultiplayer;
@@ -318,6 +328,7 @@ namespace WtpTiming
 			kData.bInit = true;
 			kData.iCurUnitAI = -1;
 			kData.iCurNative = 0;
+			kData.iLastTurn = -1;
 			kData.iPathfinderParallel = 0; // measured: serial is about 25-30% faster in the late game
 			kData.iPathfinderMinChildren = 0;
 			LARGE_INTEGER kFreq;
@@ -684,9 +695,46 @@ namespace WtpTiming
 	inline void notePlayer(int, char, int, int, const char*) {}
 	inline void noteMap(int, int) {}
 	inline void noteGame(const char*, const char*, const char*, const char*, const char*, bool) {}
+	inline void noteSaveLoaded() {}
 #endif
 
 #ifdef WTP_TIMING
+	// clears everything that is collected for the next report (the player info is noted again before every report and cleared by flush)
+	inline void resetAccumulators()
+	{
+		Data& kData = data();
+		memset(kData.aiTicks, 0, sizeof(kData.aiTicks));
+		memset(kData.aiCalls, 0, sizeof(kData.aiCalls));
+		memset(kData.aiMaxTicks, 0, sizeof(kData.aiMaxTicks));
+		memset(kData.aiUnitTicks, 0, sizeof(kData.aiUnitTicks));
+		memset(kData.aiUnitCalls, 0, sizeof(kData.aiUnitCalls));
+		memset(kData.aiUnitMaxTicks, 0, sizeof(kData.aiUnitMaxTicks));
+		memset(kData.aiUnitPathTicks, 0, sizeof(kData.aiUnitPathTicks));
+		memset(kData.aiUnitPathCalls, 0, sizeof(kData.aiUnitPathCalls));
+		memset(kData.aiUnitPathMaxTicks, 0, sizeof(kData.aiUnitPathMaxTicks));
+		kData.iNoUnitPathTicks = 0;
+		kData.iNoUnitPathCalls = 0;
+		kData.iNoUnitPathMaxTicks = 0;
+		kData.iPathTicksRun = 0;
+		kData.iPathCallsRun = 0;
+		memset(kData.aiFreezeCalls, 0, sizeof(kData.aiFreezeCalls));
+		memset(kData.aiFreezeTicks, 0, sizeof(kData.aiFreezeTicks));
+		kData.iNumTopUnits = 0;
+		memset(kData.aiPlayerTicks, 0, sizeof(kData.aiPlayerTicks));
+		memset(kData.aiPlayerCalls, 0, sizeof(kData.aiPlayerCalls));
+		memset(kData.aiPlayerMaxTicks, 0, sizeof(kData.aiPlayerMaxTicks));
+		memset(kData.aiCounter, 0, sizeof(kData.aiCounter));
+	}
+
+	// called when a savegame is read (CvGame::read): what was collected so far belongs to the game that was played before, so it is
+	// dropped, and the next report is marked as the first one after a load
+	inline void noteSaveLoaded()
+	{
+		Data& kData = data();
+		kData.bSaveLoaded = true;
+		resetAccumulators();
+	}
+
 	// ---- installation info for the session line (once per start of the game; plain Win32, no extra libraries) ----
 
 	struct FolderScan
@@ -970,6 +1018,7 @@ namespace WtpTiming
 			// one id per start of the game (process): lets blocks from several logs / sessions be told apart
 			_snprintf(kData.szSession, sizeof(kData.szSession) - 1, "%lx-%lx", (unsigned long)time(NULL), (unsigned long)GetCurrentProcessId());
 			kData.szSession[sizeof(kData.szSession) - 1] = 0;
+			kData.bSaveLoaded = false;
 			return;
 		}
 
@@ -1023,9 +1072,66 @@ namespace WtpTiming
 						szBuild.empty() ? " (none)" : szBuild.c_str(), (unsigned long)kSystem.dwNumberOfProcessors);
 					writeInstallInfo(f, szBase);
 				}
-				fprintf(f, "=== Turn change at game turn %d | PathfinderParallel=%d PathfinderMinChildren=%d | format 2 | session=%s | time=%s | version=%s ===\n",
+				// Is this block comparable with the previous one? The turn number is the game's own (CvGame::getGameTurn), not a
+				// counter of the log. A fingerprint of the game (settings, map size, which civilization the human plays) and the load of a
+				// savegame tell when another game or save was played in between.
+				unsigned int iFingerprint = 2166136261u;
+				iFingerprint = hashText(iFingerprint, kData.szGameSpeed);
+				iFingerprint = hashText(iFingerprint, kData.szHandicap);
+				iFingerprint = hashText(iFingerprint, kData.szWorldSize);
+				iFingerprint = hashText(iFingerprint, kData.szClimate);
+				iFingerprint = hashText(iFingerprint, kData.szSeaLevel);
+				iFingerprint = (iFingerprint ^ (unsigned int)kData.iMapWidth) * 16777619u;
+				iFingerprint = (iFingerprint ^ (unsigned int)kData.iMapHeight) * 16777619u;
+				for (int iP = 0; iP < MAX_PLAYERS; iP++)
+				{
+					// (only the human players: AI players die during a game, that must not look like another game)
+					if (kData.abPlayerInfo[iP] && kData.acPlayerType[iP] == 'H')
+					{
+						iFingerprint = (iFingerprint ^ (unsigned int)(iP + 1)) * 16777619u;
+						iFingerprint = hashText(iFingerprint, kData.aszPlayerName[iP]);
+					}
+				}
+				char szContinuity[128];
+				bool bComparable = true;
+				if (kData.iLastTurn < 0)
+				{
+					strcpy(szContinuity, "first report of this session");
+				}
+				else if (kData.bSaveLoaded)
+				{
+					_snprintf(szContinuity, sizeof(szContinuity) - 1, "savegame loaded (turn %d before)", kData.iLastTurn);
+					bComparable = false;
+				}
+				else if (iFingerprint != kData.iLastFingerprint)
+				{
+					_snprintf(szContinuity, sizeof(szContinuity) - 1, "other game (settings or players differ, turn %d before)", kData.iLastTurn);
+					bComparable = false;
+				}
+				else if (iGameTurn <= kData.iLastTurn)
+				{
+					_snprintf(szContinuity, sizeof(szContinuity) - 1, "turn went back (turn %d before)", kData.iLastTurn);
+					bComparable = false;
+				}
+				else if (iGameTurn > kData.iLastTurn + 1)
+				{
+					_snprintf(szContinuity, sizeof(szContinuity) - 1, "skipped %d turns (turn %d before)", iGameTurn - kData.iLastTurn - 1, kData.iLastTurn);
+				}
+				else
+				{
+					strcpy(szContinuity, "ok");
+				}
+				szContinuity[sizeof(szContinuity) - 1] = 0;
+				fprintf(f, "=== Turn change at game turn %d | PathfinderParallel=%d PathfinderMinChildren=%d | format 2 | session=%s | time=%s | version=%s | game=%08x | continuity=%s ===\n",
 					iGameTurn, kData.iPathfinderParallel, kData.iPathfinderMinChildren, kData.szSession, szTime,
-					(szGitVersion != NULL) ? szGitVersion : "?");
+					(szGitVersion != NULL) ? szGitVersion : "?", iFingerprint, szContinuity);
+				if (!bComparable)
+				{
+					fprintf(f, "note: another game or savegame; the time of this block is not comparable with the blocks before (caches are empty after a load, so it is usually slower, not faster)\n");
+				}
+				kData.iLastTurn = iGameTurn;
+				kData.iLastFingerprint = iFingerprint;
+				kData.bSaveLoaded = false;
 				if (kData.bGameInfo)
 				{
 					fprintf(f, "settings: speed=%s handicap=%s world=%s climate=%s sea level=%s multiplayer=%d\n",
@@ -1181,28 +1287,8 @@ namespace WtpTiming
 			}
 		}
 
-		memset(kData.aiTicks, 0, sizeof(kData.aiTicks));
-		memset(kData.aiCalls, 0, sizeof(kData.aiCalls));
-		memset(kData.aiMaxTicks, 0, sizeof(kData.aiMaxTicks));
-		memset(kData.aiUnitTicks, 0, sizeof(kData.aiUnitTicks));
-		memset(kData.aiUnitCalls, 0, sizeof(kData.aiUnitCalls));
-		memset(kData.aiUnitMaxTicks, 0, sizeof(kData.aiUnitMaxTicks));
-		memset(kData.aiUnitPathTicks, 0, sizeof(kData.aiUnitPathTicks));
-		memset(kData.aiUnitPathCalls, 0, sizeof(kData.aiUnitPathCalls));
-		memset(kData.aiUnitPathMaxTicks, 0, sizeof(kData.aiUnitPathMaxTicks));
-		kData.iNoUnitPathTicks = 0;
-		kData.iNoUnitPathCalls = 0;
-		kData.iNoUnitPathMaxTicks = 0;
-		kData.iPathTicksRun = 0;
-		kData.iPathCallsRun = 0;
-		memset(kData.aiFreezeCalls, 0, sizeof(kData.aiFreezeCalls));
-		memset(kData.aiFreezeTicks, 0, sizeof(kData.aiFreezeTicks));
-		kData.iNumTopUnits = 0;
-		memset(kData.aiPlayerTicks, 0, sizeof(kData.aiPlayerTicks));
-		memset(kData.aiPlayerCalls, 0, sizeof(kData.aiPlayerCalls));
-		memset(kData.aiPlayerMaxTicks, 0, sizeof(kData.aiPlayerMaxTicks));
+		resetAccumulators();
 		memset(kData.abPlayerInfo, 0, sizeof(kData.abPlayerInfo));
-		memset(kData.aiCounter, 0, sizeof(kData.aiCounter));
 		// aiDepth is not reset, scopes may be open (flush runs inside nothing, but stay safe)
 #endif
 	}
