@@ -7056,6 +7056,7 @@ uint CvGame::getNumReplayMessages() const
 
 void CvGame::read(FDataStreamBase* pStream)
 {
+	WtpTiming::noteSaveLoaded(); // WTP: timing log: a savegame is loaded, the next report starts new
 	CvSavegameReaderBase readerbase(pStream);
 	CvSavegameReader reader(readerbase);
 
