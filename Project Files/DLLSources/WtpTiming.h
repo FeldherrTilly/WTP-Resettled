@@ -72,7 +72,10 @@
 //   PathfinderParallel=1     1 = child nodes of the path search are expanded with TBB, 0 = always serial (default, faster in the measurements)
 //   PathfinderMinChildren=0  parallel only when at least this many child nodes have to be expanded in one step
 //
-// Remove the following define to compile all timing out. The settings keep working.
+// This logging is meant to stay in the mod permanently: it is the basis for judging performance changes and for evaluating logs
+// sent in by other players. It is cheap (a few clock reads per call, main thread only, one file write per turn change).
+// To switch it off in the code, remove (or comment out) the following define: all Scope / Lap / UnitScope / PlayerScope /
+// count / note* calls then compile to nothing and WTP_Timing.txt is no longer written. The settings (WTP_Settings.txt) keep working.
 #define WTP_TIMING
 
 namespace WtpTiming
