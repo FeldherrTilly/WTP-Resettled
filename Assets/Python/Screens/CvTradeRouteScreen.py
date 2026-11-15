@@ -799,6 +799,8 @@ class CvTradeRouteScreen:
 					aSkipped.append(iYield) # (market automatic manages the good)
 					continue
 				aAdded.append([szType, d["maintain"], d["impLimit"], int(d["imp"])])
+				if self.dIgnored.has_key(iYield):
+					del self.dIgnored[iYield] # (a preset takes the good again: protected again)
 				if p["kind"] == "auto":
 					d["auto"] = True
 					d["exp"] = True
@@ -933,8 +935,8 @@ class CvTradeRouteScreen:
 		iMaintain, iLimit = self.getPresetLevels(iYield)
 		if dOld == None:
 			return False
-		if bAuto and dOld["auto"] and not d["auto"]:
-			return True # (the automatic export was switched off: the game switches the export with it)
+		if bAuto and dOld["auto"] and (not d["auto"] or not d["exp"]):
+			return True # (the automatic export was switched off, by hand or with the export: auto export is export too)
 		if not bImport:
 			return False
 		if dOld["imp"] and not d["imp"]:
