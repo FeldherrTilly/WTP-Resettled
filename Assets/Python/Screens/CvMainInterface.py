@@ -4953,11 +4953,11 @@ class CvMainInterface:
 		elif iPara >= 0 and self.isCommandLine(iFz, aszTopParas, iPara):
 			# the command lines of a city tooltip: no Colopedia, a right click runs the command
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_RUN_COMMAND", ()), iCY, tTop, iFz)
-		elif iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx) and self.isStoredGoodsWindow(aszTopParas):
-			# the last line of the window with the goods of a city (the hint "Frozen - Esc or hold X: close"): what the colors of the goods
-			# mean. Not on the lines of the goods: the highlight that the game draws under a line would hide the colors there.
+		elif ((iPara >= 0 and iSel < 0) or (iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx))) and self.isStoredGoodsWindow(aszTopParas):
+			# the window with the goods of a city: what the colors of the goods mean, on the lines of the goods and on the last line
+			# (the hint "Frozen - Esc or hold X: close"; there the highlight that the game draws under a line does not hide the colors)
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ()), iCY, tTop, iFz)
-		elif iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx) and self.isStoredGoodsWindow(aszTopParas, "TXT_KEY_CITY_BAR_PRODUCING"):
+		elif ((iPara >= 0 and iSel < 0) or (iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx))) and self.isStoredGoodsWindow(aszTopParas, "TXT_KEY_CITY_BAR_PRODUCING"):
 			# the window with the goods that a city produces: the same
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_PRODUCED_COLORS", ()), iCY, tTop, iFz)
 		elif iPara >= 0 and iSel < 0 and self.showAloneUnitTip(screen, iFz, aszTopParas, iPara, iCY, tTop):
