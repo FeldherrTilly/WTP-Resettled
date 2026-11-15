@@ -370,6 +370,9 @@ class CvMainInterface:
 	bExplainShown = False # the window that explains the colored label of a folded line (Stored..., Produced...), on the other side of the parent
 	iExplainLines = 0
 	szExplainPrefix = "HudTipE1"
+	tExplainLayout = None # its layout, to freeze it together with the window of the list of goods
+	aszExplainParas = []
+	dFrozenCompanion = {} # frozen windows that belong to the frozen window below them (the explanation of a folded line): they close together
 	tSecondTipKey = None
 	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
 	iTipSelIdx = 0
@@ -4761,6 +4764,16 @@ class CvMainInterface:
 			self.addFrozenWindow(screen, tLayout, self.aszPreviewParas, aiIndent, {}, None, iParent)
 			if iParent >= 0:
 				self.dFrozenPrefDY[self.aFrozen[-1][0]] = self.iPreviewPrefDY
+			# the explanation of the colors of the line (beside the parent window) is frozen with it and closes with it
+			if self.bExplainShown and self.tExplainLayout is not None:
+				self.deleteTipWindow(screen, self.szExplainPrefix, self.iExplainLines)
+				self.bExplainShown = False
+				self.iExplainLines = 0
+				tE = self.tExplainLayout
+				tELayout = (tE[0], tE[1], tE[2], tE[3], list(tE[4]), [-1] * len(tE[4]), tE[6], tE[7])
+				(tELayout, aiEIndent) = self.addFrozenHint(screen, tELayout, [0] * len(tE[4]))
+				self.addFrozenWindow(screen, tELayout, self.aszExplainParas, aiEIndent, {}, None, iParent)
+				self.dFrozenCompanion[self.aFrozen[-1][0]] = True
 			self.bSecondTipShown = False
 			self.iSecondTipLines = 0
 			self.tSecondTipKey = None
@@ -4960,6 +4973,8 @@ class CvMainInterface:
 			(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, aExtra)
 			tLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
 			self.iExplainLines = len(aszLines)
+			self.tExplainLayout = tLayout
+			self.aszExplainParas = aszParas
 			self.drawTipWindow(screen, self.szExplainPrefix, tLayout, False, 0, [])
 			self.bExplainShown = True
 		except:
@@ -5500,6 +5515,15 @@ class CvMainInterface:
 			self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
 		except:
 			pass
+		# a companion window (the explanation of a folded line) goes together with the window it belongs to (the one below it)
+		if self.dFrozenCompanion.has_key(szPrefix):
+			del self.dFrozenCompanion[szPrefix]
+			if len(self.aFrozen) > 0:
+				(szPrefix, tLayout, aszParas, aiIndent, dDetails, tAnchor, iParent, tRel) = self.aFrozen.pop()
+				try:
+					self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
+				except:
+					pass
 		self.bTipFrozen = (len(self.aFrozen) > 0)
 		if not self.bTipFrozen:
 			self.szSuppressHelp = u""
