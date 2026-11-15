@@ -4237,7 +4237,7 @@ class CvMainInterface:
 								if pCity.isImport(iYield):
 									szColor = u"255,200,110,255"
 								elif pCity.isExport(iYield):
-									szColor = u"255,215,0,255"
+									szColor = u"255,230,0,255"
 								break
 						if szColor is not None:
 							aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
@@ -4956,6 +4956,9 @@ class CvMainInterface:
 		elif iPara >= 0 and iSel < 0 and self.isStoredGoodsWindow(aszTopParas):
 			# the window with the goods of a city: what the colors of the goods mean
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ()), iCY, tTop, iFz)
+		elif iPara >= 0 and iSel < 0 and self.isStoredGoodsWindow(aszTopParas, "TXT_KEY_CITY_BAR_PRODUCING"):
+			# the window with the goods that a city produces: the same
+			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_PRODUCED_COLORS", ()), iCY, tTop, iFz)
 		elif iPara >= 0 and iSel < 0 and self.showAloneUnitTip(screen, iFz, aszTopParas, iPara, iCY, tTop):
 			# a line of a unit of a stack: the tooltip of the unit as if it stood alone on the plot
 			pass
@@ -4968,11 +4971,11 @@ class CvMainInterface:
 				self.showSecondTip(screen, szText, iCY, tTop, iFz)
 
 	# the child window with the goods stored in a city (its first line begins like the line "Stored" of the city tooltip)
-	def isStoredGoodsWindow( self, aszParas ):
+	def isStoredGoodsWindow( self, aszParas, szKey = "TXT_KEY_CITY_BAR_STORED" ):
 		try:
 			if len(aszParas) == 0:
 				return False
-			szStored = self.getTipPrefix("TXT_KEY_CITY_BAR_STORED", (u"",))
+			szStored = self.getTipPrefix(szKey, (u"",))
 			szFirst = self.normTipText(re.sub(u"<[^>]*>", u"", aszParas[0]))
 			return len(szStored) > 3 and szFirst.find(szStored) == 0
 		except:
