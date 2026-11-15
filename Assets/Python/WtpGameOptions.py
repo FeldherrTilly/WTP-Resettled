@@ -32,11 +32,13 @@ dSpeedBase = {
 dApplied = {}
 
 LOG_FILE = "WTP_GameOptions.log"
+szLastWhere = ""
 
 def log(szText):
 	try:
+		import time
 		f = open(LOG_FILE, "a")
-		f.write(szText + "\n")
+		f.write("%s [%s] %s\n" % (time.strftime("%H:%M:%S"), szLastWhere, szText))
 		f.close()
 	except:
 		pass
@@ -79,15 +81,22 @@ def save(aiValues):
 	except:
 		pass
 
+def logOption(szName, iValue):
+	global szLastWhere
+	szLastWhere = "Option"
+	log("option %s changed to index %d (saved in the ini file)" % (szName, iValue))
+
 def setStorage(iIndex):
 	aiValues = load()
 	aiValues[0] = max(0, min(len(STORAGE_PERCENTS) - 1, iIndex))
 	save(aiValues)
+	logOption("storage", aiValues[0])
 
 def setUpkeep(iIndex):
 	aiValues = load()
 	aiValues[1] = max(0, min(len(UPKEEP_PERCENTS) - 1, iIndex))
 	save(aiValues)
+	logOption("upkeep", aiValues[1])
 
 def setSpeedDependence(bValue):
 	aiValues = load()
@@ -96,11 +105,16 @@ def setSpeedDependence(bValue):
 	else:
 		aiValues[2] = 0
 	save(aiValues)
+	logOption("speed", aiValues[2])
 
 def applyToGame(szWhere = ""):
 	"Puts the saved choices into the defines (load of a savegame, game start, start of a turn)"
+	global szLastWhere
+	szLastWhere = szWhere
 	try:
 		aiValues = load()
+		if szWhere != "LoadGame" and szWhere != "GameStart":
+			log("called, file: storage index %d, upkeep index %d, speed %d" % (aiValues[0], aiValues[1], aiValues[2]))
 		setDefine("WAREHOUSE_STORAGE_PERCENT", STORAGE_PERCENTS[aiValues[0]])
 		iUpkeep = UPKEEP_PERCENTS[aiValues[1]]
 		for szDefine in SPEED_DEFINES:
