@@ -8132,6 +8132,11 @@ void CvCity::calculateStorageOverflow(const int aiYields[NUM_YIELD_TYPES], const
 			{
 				sellThreshold = getCustomHouseSellThreshold(eYield);
 			}
+			// WTP: the materials of a protected project are not sold by the Custom House either
+			if (bProtectProject)
+			{
+				sellThreshold = std::max(sellThreshold, aiProjectReserve[eYield]);
+			}
 			iExcess = iStored - sellThreshold;
 		}
 		// normal overflow
