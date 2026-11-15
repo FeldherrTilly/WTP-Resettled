@@ -174,6 +174,7 @@ public:
 	int getWidgetHelpCount() const; // WTP: counts the help requests (a change means a new request)
 	int getWidgetHelpType() const; // WTP: widget type of the last help request
 	std::wstring getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const; // WTP: the help text of a widget (as parseHelp makes it)
+	void setHideGameHelp(bool bNewValue); // WTP: no game help text for HUD elements while the diplomacy screen is open (own tooltip on)
 	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
 	int getCursorClientY() const;
 	uint getNumReplayMessages() const;
