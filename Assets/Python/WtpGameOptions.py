@@ -18,8 +18,23 @@ UPKEEP_DEFAULT = 2
 SPEED_DEFINES = ("MILITARY_UPKEEP_SPEED_QUICK", "MILITARY_UPKEEP_SPEED_NORMAL", "MILITARY_UPKEEP_SPEED_EPIC", "MILITARY_UPKEEP_SPEED_MARATHON", "MILITARY_UPKEEP_SPEED_BUILDUP")
 NORMAL_DEFINE = "MILITARY_UPKEEP_SPEED_NORMAL"
 
-# the values of GlobalDefinesAlt.xml, read once before the first change
-dSpeedBase = {}
+# the factors of the game speeds in percent (the build does not allow reading defines in Python, so they are kept here;
+# the values of MILITARY_UPKEEP_SPEED_* in GlobalDefinesAlt.xml are replaced by this module)
+dSpeedBase = {
+	"MILITARY_UPKEEP_SPEED_QUICK": 135,
+	"MILITARY_UPKEEP_SPEED_NORMAL": 100,
+	"MILITARY_UPKEEP_SPEED_EPIC": 50,
+	"MILITARY_UPKEEP_SPEED_MARATHON": 35,
+	"MILITARY_UPKEEP_SPEED_BUILDUP": 100
+}
+
+# what was put into the defines in this session
+dApplied = {}
+
+def setDefine(szDefine, iValue):
+	if dApplied.get(szDefine) != iValue:
+		gc.setDefineINT(szDefine, iValue)
+		dApplied[szDefine] = iValue
 
 def load():
 	"(storage index, upkeep index, game speed dependence 0/1)"
@@ -75,12 +90,7 @@ def applyToGame():
 	"Puts the saved choices into the defines (load of a savegame, game start, start of a turn)"
 	try:
 		aiValues = load()
-		if len(dSpeedBase) == 0:
-			for szDefine in SPEED_DEFINES:
-				dSpeedBase[szDefine] = gc.getDefineINT(szDefine)
-		iStorage = STORAGE_PERCENTS[aiValues[0]]
-		if gc.getDefineINT("WAREHOUSE_STORAGE_PERCENT") != iStorage:
-			gc.setDefineINT("WAREHOUSE_STORAGE_PERCENT", iStorage)
+		setDefine("WAREHOUSE_STORAGE_PERCENT", STORAGE_PERCENTS[aiValues[0]])
 		iUpkeep = UPKEEP_PERCENTS[aiValues[1]]
 		for szDefine in SPEED_DEFINES:
 			if aiValues[2] == 1:
@@ -88,8 +98,6 @@ def applyToGame():
 			else:
 				# without the game speed dependence every speed uses the value of the normal speed
 				iBase = dSpeedBase[NORMAL_DEFINE]
-			iValue = max(1, (iBase * iUpkeep + 50) / 100)
-			if gc.getDefineINT(szDefine) != iValue:
-				gc.setDefineINT(szDefine, iValue)
+			setDefine(szDefine, max(1, (iBase * iUpkeep + 50) / 100))
 	except:
 		pass
