@@ -4930,8 +4930,8 @@ class CvMainInterface:
 			pass
 		return u""
 
-	# the window with the explanation of a folded line: on the side of the parent window that is opposite to the window with the list of goods
-	# (when it fits there), otherwise around the parent window where nothing is covered
+	# the window with the explanation of a folded line: above the parent window, flush with its right edge (when there is room), otherwise
+	# beside or below the parent window where nothing is covered
 	def showFoldExplain( self, screen, szText, tAnchor ):
 		try:
 			(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iPad, iLine) = tAnchor
@@ -4959,12 +4959,15 @@ class CvMainInterface:
 				aExtra.append((iCX, iCY, iCW, iCH))
 				iY0 = iCY
 				bChildRight = (iCX + iCW / 2 >= iFX + iFW / 2)
+			# above the parent window, flush with its right edge; where that is not possible: the side opposite to the list of goods, then
+			# below the parent window, then the other side
+			aCands = [(iFX + iFW - iWidth, iFY - 12 - iHeight)]
 			if bChildRight:
-				aCands = [(iLeft, iY0), (iLeft, iFY), (iLeft, iFY + iFH - iHeight)]
-				aCands += [(iFX, iFY - 12 - iHeight), (iFX, iFY + iFH + 12), (iRight, iFY), (iRight, iFY + iFH - iHeight)]
+				aCands += [(iLeft, iY0), (iLeft, iFY), (iLeft, iFY + iFH - iHeight)]
+				aCands += [(iFX + iFW - iWidth, iFY + iFH + 12), (iRight, iFY), (iRight, iFY + iFH - iHeight)]
 			else:
-				aCands = [(iRight, iY0), (iRight, iFY), (iRight, iFY + iFH - iHeight)]
-				aCands += [(iFX, iFY - 12 - iHeight), (iFX, iFY + iFH + 12), (iLeft, iFY), (iLeft, iFY + iFH - iHeight)]
+				aCands += [(iRight, iY0), (iRight, iFY), (iRight, iFY + iFH - iHeight)]
+				aCands += [(iFX + iFW - iWidth, iFY + iFH + 12), (iLeft, iFY), (iLeft, iFY + iFH - iHeight)]
 			(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, aExtra)
 			tLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
 			self.iExplainLines = len(aszLines)
