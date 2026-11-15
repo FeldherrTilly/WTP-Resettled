@@ -116,20 +116,148 @@
 			<Type>ART_DEF_FEATURE_JUNGLE</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,5,3</Button>
 			<FeatureVariety>
 				<FeatureArtPieces>
 					<FeatureArtPiece>
-						<ModelFile>Art/Terrain/Features/Jungle/Jungle_single_tree.nif</ModelFile>
-						<ModelFile>Art/Terrain/Features/Jungle/Jungle_single_tree_01.nif</ModelFile>
-						<ModelFile>Art/Terrain/Features/Jungle/Jungle_single_tree_02.nif</ModelFile>
-						<ModelFile>Art/Terrain/Features/Jungle/Jungle_single_tree_03.nif</ModelFile>
-						<Connections/>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_06.nif</ModelFile>
+						<Connections>NW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_07.nif</ModelFile>
+						<Connections>NE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_08.nif</ModelFile>
+						<Connections>NW NE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_09.nif</ModelFile>
+						<Connections>SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_10.nif</ModelFile>
+						<Connections>NW SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_11.nif</ModelFile>
+						<Connections>NE SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_12.nif</ModelFile>
+						<Connections>NW NE SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_13.nif</ModelFile>
+						<Connections>SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_14.nif</ModelFile>
+						<Connections>NW SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_15.nif</ModelFile>
+						<Connections>NE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_01.nif</ModelFile>
+						<Connections>NW NE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_02.nif</ModelFile>
+						<Connections>SE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_03.nif</ModelFile>
+						<Connections>NW SE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_04.nif</ModelFile>
+						<Connections>NE SE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Jungle/Jungle_dense_05.nif</ModelFile>
+						<Connections>NW NE SE SW</Connections>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>64</iModelCopies>
+				<iModelCopies>6</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,5,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -155,19 +283,148 @@
 			<Type>ART_DEF_FEATURE_FOREST</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,3,3</Button>
 			<FeatureVariety>
 				<FeatureArtPieces>
 					<FeatureArtPiece>
-						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_single_tree.nif</ModelFile>
-						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_single_tree_01.nif</ModelFile>
-						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_single_tree_02.nif</ModelFile>
-						<Connections/>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_06.nif</ModelFile>
+						<Connections>NW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_07.nif</ModelFile>
+						<Connections>NE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_08.nif</ModelFile>
+						<Connections>NW NE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_09.nif</ModelFile>
+						<Connections>SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_05.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_10.nif</ModelFile>
+						<Connections>NW SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_06.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_11.nif</ModelFile>
+						<Connections>NE SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_07.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_12.nif</ModelFile>
+						<Connections>NW NE SE</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_08.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_13.nif</ModelFile>
+						<Connections>SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_09.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_14.nif</ModelFile>
+						<Connections>NW SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_10.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_15.nif</ModelFile>
+						<Connections>NE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_11.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_01.nif</ModelFile>
+						<Connections>NW NE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_12.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_02.nif</ModelFile>
+						<Connections>SE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_13.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_03.nif</ModelFile>
+						<Connections>NW SE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_14.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_04.nif</ModelFile>
+						<Connections>NE SE SW</Connections>
+					</FeatureArtPiece>
+					<FeatureArtPiece>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_15.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_04.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeLeafy/Leafy_dense_05.nif</ModelFile>
+						<Connections>NW NE SE SW</Connections>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
-				<iModelCopies>48</iModelCopies>
+				<iModelCopies>6</iModelCopies>
 				<VarietyButton>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,3,3</VarietyButton>
 			</FeatureVariety>
 		</FeatureArtInfo>
@@ -175,13 +432,16 @@
 			<Type>ART_DEF_FEATURE_FOREST_EVERGREEN</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>0.8</fScale>
+			<fScale>0.4</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<Button>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,7,3</Button>
 			<FeatureVariety>
 				<FeatureArtPieces>
 					<FeatureArtPiece>
-						<ModelFile>Art/Terrain/Features/TreeEvergreen/Evergreen_single_tree.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeEvergreen/Evergreen_clump_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeEvergreen/Evergreen_clump_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeEvergreen/Evergreen_clump_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeEvergreen/Evergreen_clump_04.nif</ModelFile>
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
@@ -193,13 +453,16 @@
 			<Type>ART_DEF_FEATURE_FOREST_TUNDRA</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>0.8</fScale>
+			<fScale>0.4</fScale>
 			<fInterfaceScale>0.8</fInterfaceScale>
 			<Button>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,8,3</Button>
 			<FeatureVariety>
 				<FeatureArtPieces>
 					<FeatureArtPiece>
-						<ModelFile>Art/Terrain/Features/TreeSnowy/Snowy_single_tree.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeSnowy/Snowy_clump_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeSnowy/Snowy_clump_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeSnowy/Snowy_clump_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/TreeSnowy/Snowy_clump_04.nif</ModelFile>
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
@@ -211,15 +474,16 @@
 			<Type>ART_DEF_FEATURE_LIGHT_FOREST</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.2</fScale>
+			<fScale>0.59</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>,Art/Interface/Buttons/BaseTerrain_TerrainFeatures_Atlas.dds,1,3</Button>
 			<FeatureVariety>
 				<FeatureArtPieces>
 					<FeatureArtPiece>
-						<ModelFile>Art/Terrain/Features/Light_forest/Light_forest_single_tree.nif</ModelFile>
-						<ModelFile>Art/Terrain/Features/Light_forest/Light_forest_single_tree_01.nif</ModelFile>
-						<ModelFile>Art/Terrain/Features/Light_forest/Light_forest_single_tree_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Light_forest/Light_forest_clump_01.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Light_forest/Light_forest_clump_02.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Light_forest/Light_forest_clump_03.nif</ModelFile>
+						<ModelFile>Art/Terrain/Features/Light_forest/Light_forest_clump_04.nif</ModelFile>
 						<Connections/>
 					</FeatureArtPiece>
 				</FeatureArtPieces>
@@ -285,7 +549,7 @@
 			<Type>ART_DEF_FEATURE_SHRUB</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.4</fScale>
+			<fScale>0.69</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/shrub.dds</Button>
 			<FeatureVariety>
@@ -323,7 +587,7 @@
 			<Type>ART_DEF_FEATURE_TROPICAL_GROVES</Type>
 			<bAnimated>1</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.5</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/button_tropical_grove.dds</Button>
 			<FeatureVariety>
@@ -442,7 +706,7 @@
 			<Type>ART_DEF_FEATURE_DENSE_FOREST</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/button_dense_forest.dds</Button>
 			<FeatureVariety>
@@ -591,7 +855,7 @@
 			<Type>ART_DEF_FEATURE_ANCIENT_FOREST</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.7</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/Ancient_Forest_Button.dds</Button>
 			<FeatureVariety>
@@ -1493,7 +1757,7 @@
 			<Type>ART_DEF_FEATURE_ROCK_FORMATIONS_DESERT</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.5</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/Desert_Rock_Button.dds</Button>
 			<FeatureVariety>
@@ -1516,7 +1780,7 @@
 			<Type>ART_DEF_FEATURE_ROCK_FORMATIONS_TEMPERATE</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.5</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/Temperate_Rock_Button.dds</Button>
 			<FeatureVariety>
@@ -1539,7 +1803,7 @@
 			<Type>ART_DEF_FEATURE_ROCK_FORMATIONS_POLAR</Type>
 			<bAnimated>0</bAnimated>
 			<TileArtType>TILE_ART_TYPE_TREES</TileArtType>
-			<fScale>1.0</fScale>
+			<fScale>0.5</fScale>
 			<fInterfaceScale>1.0</fInterfaceScale>
 			<Button>Art/Interface/Buttons/Polar_Rock_Button.dds</Button>
 			<FeatureVariety>

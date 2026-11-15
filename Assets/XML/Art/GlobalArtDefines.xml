@@ -19,7 +19,7 @@
 	</Define>
 	<Define>
 		<DefineName>GAME_CITY_SIZE_METHOD</DefineName>
-		<DefineTextVal>METHOD_EXPONENTIAL</DefineTextVal>
+		<DefineTextVal>METHOD_LINMAP</DefineTextVal>
 	</Define>
 	<Define>
 		<DefineName>GAME_CITY_SIZE_MAX_PERCENT_UNIQUE</DefineName>
@@ -35,7 +35,7 @@
 	</Define>
 	<Define>
 		<DefineName>GAME_CITY_SIZE_LINMAP_AT_50</DefineName>
-		<fDefineFloatVal>240</fDefineFloatVal>
+		<fDefineFloatVal>200</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>PLOT_SIZE</DefineName>
@@ -131,11 +131,11 @@
 	</Define>
 	<Define>
 		<DefineName>IMPROVEMENT_SCALE</DefineName>
-		<fDefineFloatVal>0.7</fDefineFloatVal>
+		<fDefineFloatVal>0.35</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>BONUS_SCALE</DefineName>
-		<fDefineFloatVal>0.7</fDefineFloatVal>
+		<fDefineFloatVal>0.5</fDefineFloatVal>
 	</Define>
 	<Define>
 		<DefineName>HEALTH_BAR_WIDTH</DefineName>
