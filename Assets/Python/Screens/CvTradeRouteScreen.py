@@ -1423,9 +1423,10 @@ class CvTradeRouteScreen:
 			iY = self.OY + self.LIST_Y + iSlot * self.ROW_H
 			iBase = BTN_ROW + iSlot * 16
 			szIcon = "TRSIcon" + str(iSlot)
+			# (the frame is made before the picture: the picture lies on top of it)
+			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
 			self.drop(szIcon)
 			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - 32) / 2, 32, 32, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
-			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
 			# import block
 			iX = self.OX + self.BLOCK_IMP_X
 			self.drawSpin(iSlot, 0, d["impLimit"], iX, iY, iBase + F_IMP_MINUS, iBase + F_IMP_PLUS)
@@ -1449,33 +1450,29 @@ class CvTradeRouteScreen:
 			self.drawCheck("TRSc" + str(iSlot) + "_ff", szFilter, self.isInFilter(iYield), self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + 2 + self.CHECK_H + 2, BTN_FILTER + iSlot)
 		self.drawWarn() # (the notice stays on top of the rows)
 
-	# the frame around the picture of a good (32 x 32 at iX, iY): 4 thin strips; import and export: the upper half and the lower half
+	# the frame around the picture of a good (32 x 32 at iX, iY): a colored rectangle behind the picture that is a little larger than it (thin
+	# strips were drawn as dots by the game); import and export: the upper half and the lower half
 	def drawFrame( self, iSlot, iX, iY, bImp, bExp ):
 		screen = self.pHost
 		iGap = 3
-		iT = 2
 		x0 = iX - iGap
 		y0 = iY - iGap
 		iW = 32 + 2 * iGap
 		iH = 32 + 2 * iGap
 		iMid = iH / 2
-		aStrips = []
+		aRects = []
 		if bImp and bExp:
-			aStrips = [(x0, y0, iW, iT, FRAME_IMP_ART), (x0, y0, iT, iMid, FRAME_IMP_ART), (x0 + iW - iT, y0, iT, iMid, FRAME_IMP_ART),
-				(x0, y0 + iH - iT, iW, iT, FRAME_EXP_ART), (x0, y0 + iMid, iT, iH - iMid, FRAME_EXP_ART), (x0 + iW - iT, y0 + iMid, iT, iH - iMid, FRAME_EXP_ART)]
-		elif bImp or bExp:
-			szArt = FRAME_IMP_ART
-			if bExp:
-				szArt = FRAME_EXP_ART
-			aStrips = [(x0, y0, iW, iT, szArt), (x0, y0 + iH - iT, iW, iT, szArt), (x0, y0, iT, iH, szArt), (x0 + iW - iT, y0, iT, iH, szArt)]
+			aRects = [(x0, y0, iW, iMid, FRAME_IMP_ART), (x0, y0 + iMid, iW, iH - iMid, FRAME_EXP_ART)]
+		elif bImp:
+			aRects = [(x0, y0, iW, iH, FRAME_IMP_ART)]
+		elif bExp:
+			aRects = [(x0, y0, iW, iH, FRAME_EXP_ART)]
 		for i in range(6):
 			szName = "TRSfr" + str(iSlot) + "_" + str(i)
-			if i < len(aStrips):
-				(x, y, w, h, szArt) = aStrips[i]
-				self.drop(szName)
+			self.drop(szName)
+			if i < len(aRects):
+				(x, y, w, h, szArt) = aRects[i]
 				screen.setImageButton(szName, szArt, x, y, w, h, WidgetTypes.WIDGET_GENERAL, -1, -1)
-			else:
-				self.drop(szName)
 
 	def drawSpin(self, iSlot, iBlock, iValue, iX, iY, iMinusCode, iPlusCode):
 		screen = self.pHost
