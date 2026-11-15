@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!-- WTP: texts of the game options for the storage and military upkeep multipliers -->
+<Civ4GameText xmlns="http://www.firaxis.com">
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_STORAGE</Tag>
+		<English>Storage multiplier:</English>
+		<German>Lager-Multiplikator:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_STORAGE_HELP</Tag>
+		<English>Storage of the Warehouse, Warehouse Expansions, Custom House and Custom Office in percent of the normal value (100% = as in the game speed alone, 50% = half, 200% = double). Applies to all colonies. The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
+		<German>Lagerkapazität von Lagerhaus, Lagerhaus-Erweiterungen, Zollhaus und Zollamt in Prozent des normalen Werts (100% = wie durch die Spielgeschwindigkeit allein, 50% = halb, 200% = doppelt). Gilt für alle Kolonien. Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_UPKEEP</Tag>
+		<English>Military upkeep multiplier:</English>
+		<German>Militärunterhalt-Multiplikator:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_UPKEEP_HELP</Tag>
+		<English>Multiplies the gold upkeep of military units (not the number of free units). Without the game speed dependence below, the multiplier applies to the value of the normal game speed for every game speed: 100% = the values of GlobalDefinesAlt.xml (MILITARY_UPKEEP_*), 50% = half, 200% = double. With the game speed dependence it is applied on top of the factor of the game speed (MILITARY_UPKEEP_SPEED_*). The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
+		<German>Multipliziert den Gold-Unterhalt der Militäreinheiten (nicht die Zahl der freien Einheiten). Ohne die Spielgeschwindigkeits-Abhängigkeit unten gilt der Multiplikator für jede Spielgeschwindigkeit auf den Wert der normalen Geschwindigkeit: 100% = die Werte aus GlobalDefinesAlt.xml (MILITARY_UPKEEP_*), 50% = halb, 200% = doppelt. Mit der Abhängigkeit wird er zusätzlich auf den Faktor der Spielgeschwindigkeit angewendet (MILITARY_UPKEEP_SPEED_*). Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_UPKEEP_SPEED</Tag>
+		<English>Military upkeep depends on the game speed</English>
+		<German>Militärunterhalt hängt von der Spielgeschwindigkeit ab</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_UPKEEP_SPEED_HELP</Tag>
+		<English>Off (default): the upkeep is the same on every game speed. The multiplier above is applied to the value of the normal game speed. On: every game speed has its own factor (MILITARY_UPKEEP_SPEED_* in GlobalDefinesAlt.xml, by default Fast 135%, Normal 100%, Epic 50%, Marathon 35%, Buildup 100%) and the multiplier above is applied on top of it, so e.g. 150% on Epic makes 75%. The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
+		<German>Aus (Standard): Der Unterhalt ist auf jeder Spielgeschwindigkeit gleich. Der Multiplikator oben wird auf den Wert der normalen Spielgeschwindigkeit angewendet. An: Jede Spielgeschwindigkeit hat ihren eigenen Faktor (MILITARY_UPKEEP_SPEED_* in GlobalDefinesAlt.xml, standardmäßig Schnell 135%, Normal 100%, Episch 50%, Marathon 35%, Aufbau 100%) und der Multiplikator oben wird zusätzlich darauf angewendet, z. B. 150% bei Episch ergibt 75%. Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_STORAGE_WARN</Tag>
+		<English>Storage multiplier changed. The new value comes into effect at the start of the next turn or when a savegame is loaded.[NEWLINE][NEWLINE]Caution: if the storage becomes smaller, the storage of colonies can suddenly overflow. The goods above the new limit are lost (sold) as with any surplus.</English>
+		<German>Lager-Multiplikator geändert. Der neue Wert wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.[NEWLINE][NEWLINE]Achtung: Wird das Lager kleiner, können die Lager der Kolonien plötzlich überlaufen. Waren über der neuen Grenze gehen verloren (werden verkauft) wie bei jedem Überschuss.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_UPKEEP_WARN</Tag>
+		<English>Military upkeep multiplier changed. The new value comes into effect at the start of the next turn or when a savegame is loaded.[NEWLINE][NEWLINE]Caution: if the upkeep becomes higher, the gold may suddenly not be enough. Units can then be dismissed as with any upkeep shortfall.</English>
+		<German>Militärunterhalt-Multiplikator geändert. Der neue Wert wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.[NEWLINE][NEWLINE]Achtung: Wird der Unterhalt höher, kann das Gold plötzlich nicht mehr reichen. Einheiten können dann entlassen werden wie bei jedem Unterhalts-Engpass.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_UPKEEP_SPEED_WARN</Tag>
+		<English>Game speed dependence of the military upkeep changed. The new setting comes into effect at the start of the next turn or when a savegame is loaded.[NEWLINE][NEWLINE]Caution: the upkeep can change a lot (e.g. on Marathon it is 35% with the dependence and 100% without). If it becomes higher, the gold may suddenly not be enough and units can be dismissed as with any upkeep shortfall.</English>
+		<German>Spielgeschwindigkeits-Abhängigkeit des Militärunterhalts geändert. Die neue Einstellung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.[NEWLINE][NEWLINE]Achtung: Der Unterhalt kann sich stark ändern (z. B. auf Marathon 35% mit der Abhängigkeit und 100% ohne). Wird er höher, kann das Gold plötzlich nicht mehr reichen und Einheiten können entlassen werden wie bei jedem Unterhalts-Engpass.</German>
+	</TEXT>
+</Civ4GameText>

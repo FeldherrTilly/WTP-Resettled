@@ -327,6 +327,36 @@ class CvOptionsScreen:
 		tab.attachDropDown("LangHBox", szWidgetName, szDropdownDesc, aszDropdownElements, self.callbackIFace, szCallbackFunction, szWidgetName, iInitialSelection)
 		tab.setLayoutFlag(szWidgetName, "LAYOUT_LEFT")
 
+		# WTP: storage multiplier, military upkeep multiplier and its game speed dependence (applied from the next turn or after loading)
+		import WtpGameOptions
+		aiWtpValues = WtpGameOptions.load()
+		tab.attachSpacer("GamePanelCenter")
+		tab.attachHBox("GamePanelCenter", "WtpStorageHBox")
+		tab.attachLabel("WtpStorageHBox", "WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE", ()))
+		tab.setToolTip("WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
+		tab.attachSpacer("WtpStorageHBox")
+		aszWtpStorage = ()
+		for iWtpPercent in WtpGameOptions.STORAGE_PERCENTS:
+			aszWtpStorage = aszWtpStorage + ("%d%%" % iWtpPercent,)
+		tab.attachDropDown("WtpStorageHBox", "WtpStorageDropdownBox", "WtpStorageDropdownBox", aszWtpStorage, self.callbackIFace, "handleWtpStorageDropdownInput", "WtpStorageDropdownBox", aiWtpValues[0])
+		tab.setLayoutFlag("WtpStorageDropdownBox", "LAYOUT_LEFT")
+		tab.setToolTip("WtpStorageDropdownBox", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
+
+		tab.attachHBox("GamePanelCenter", "WtpUpkeepHBox")
+		tab.attachLabel("WtpUpkeepHBox", "WtpUpkeepLabel", localText.getText("TXT_KEY_WTP_OPT_UPKEEP", ()))
+		tab.setToolTip("WtpUpkeepLabel", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_HELP", ()))
+		tab.attachSpacer("WtpUpkeepHBox")
+		aszWtpUpkeep = ()
+		for iWtpPercent in WtpGameOptions.UPKEEP_PERCENTS:
+			aszWtpUpkeep = aszWtpUpkeep + ("%d%%" % iWtpPercent,)
+		tab.attachDropDown("WtpUpkeepHBox", "WtpUpkeepDropdownBox", "WtpUpkeepDropdownBox", aszWtpUpkeep, self.callbackIFace, "handleWtpUpkeepDropdownInput", "WtpUpkeepDropdownBox", aiWtpValues[1])
+		tab.setLayoutFlag("WtpUpkeepDropdownBox", "LAYOUT_LEFT")
+		tab.setToolTip("WtpUpkeepDropdownBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_HELP", ()))
+
+		bWtpSpeed = (aiWtpValues[2] == 1)
+		tab.attachCheckBox("GamePanelCenter", "WtpUpkeepSpeedCheckBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_SPEED", ()), self.callbackIFace, "handleWtpUpkeepSpeedClicked", "WtpUpkeepSpeedCheckBox", bWtpSpeed)
+		tab.setToolTip("WtpUpkeepSpeedCheckBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_SPEED_HELP", ()))
+
 		########## Lower Panel
 
 		tab.attachHSeparator("GameVBox", "GameExitSeparator")
