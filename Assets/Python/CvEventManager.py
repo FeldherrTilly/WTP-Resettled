@@ -414,12 +414,12 @@ class CvEventManager:
 
 	def onLoadGame(self, argsList):
 		# WTP: storage / upkeep multiplier of the game options
-		WtpGameOptions.applyToGame()
+		WtpGameOptions.applyToGame("LoadGame")
 		return 0
 
 	def onGameStart(self, argsList):
 		'Called at the start of the game'
-		WtpGameOptions.applyToGame()
+		WtpGameOptions.applyToGame("GameStart")
 		if (gc.getGame().getGameTurnYear() == GlobalDefines.START_YEAR and not gc.getGame().isOption(GameOptionTypes.GAMEOPTION_ADVANCED_START)):
 			for iPlayer in range(gc.getMAX_PLAYERS()):
 				player = gc.getPlayer(iPlayer)
@@ -452,7 +452,7 @@ class CvEventManager:
 		'Called at the beginning of the end of each turn'
 		iGameTurn = argsList[0]
 		# WTP: storage / upkeep multiplier of the game options
-		WtpGameOptions.applyToGame()
+		WtpGameOptions.applyToGame("BeginGameTurn")
 
 	def onEndGameTurn(self, argsList):
 		'Called at the end of the end of each turn'
