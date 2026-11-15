@@ -18,8 +18,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPT_UPKEEP_HELP</Tag>
-		<English>Multiplies the gold upkeep of military units (not the number of free units). Without the game speed dependence below, the multiplier applies to the value of the normal game speed for every game speed: 100% = the values of GlobalDefinesAlt.xml (MILITARY_UPKEEP_*), 50% = half, 200% = double. With the game speed dependence it is applied on top of the factor of the game speed (MILITARY_UPKEEP_SPEED_*). The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
-		<German>Multipliziert den Gold-Unterhalt der Militäreinheiten (nicht die Zahl der freien Einheiten). Ohne die Spielgeschwindigkeits-Abhängigkeit unten gilt der Multiplikator für jede Spielgeschwindigkeit auf den Wert der normalen Geschwindigkeit: 100% = die Werte aus GlobalDefinesAlt.xml (MILITARY_UPKEEP_*), 50% = halb, 200% = doppelt. Mit der Abhängigkeit wird er zusätzlich auf den Faktor der Spielgeschwindigkeit angewendet (MILITARY_UPKEEP_SPEED_*). Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
+		<English>Multiplies the gold upkeep of military units (not the number of free units). Without the game speed dependence below, the multiplier applies to the value of the normal game speed for every game speed: 100% = the values of GlobalDefinesAlt.xml (MILITARY_UPKEEP_*), 50% = half, 200% = double. With the game speed dependence it is applied on top of the factor of the game speed. The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
+		<German>Multipliziert den Gold-Unterhalt der Militäreinheiten (nicht die Zahl der freien Einheiten). Ohne die Spielgeschwindigkeits-Abhängigkeit unten gilt der Multiplikator für jede Spielgeschwindigkeit auf den Wert der normalen Geschwindigkeit: 100% = die Werte aus GlobalDefinesAlt.xml (MILITARY_UPKEEP_*), 50% = halb, 200% = doppelt. Mit der Abhängigkeit wird er zusätzlich auf den Faktor der Spielgeschwindigkeit angewendet. Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPT_UPKEEP_SPEED</Tag>
@@ -28,8 +28,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPT_UPKEEP_SPEED_HELP</Tag>
-		<English>Off (default): the upkeep is the same on every game speed. The multiplier above is applied to the value of the normal game speed. On: every game speed has its own factor (MILITARY_UPKEEP_SPEED_* in GlobalDefinesAlt.xml, by default Fast 135%, Normal 100%, Epic 50%, Marathon 35%, Buildup 100%) and the multiplier above is applied on top of it, so e.g. 150% on Epic makes 75%. The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
-		<German>Aus (Standard): Der Unterhalt ist auf jeder Spielgeschwindigkeit gleich. Der Multiplikator oben wird auf den Wert der normalen Spielgeschwindigkeit angewendet. An: Jede Spielgeschwindigkeit hat ihren eigenen Faktor (MILITARY_UPKEEP_SPEED_* in GlobalDefinesAlt.xml, standardmäßig Schnell 135%, Normal 100%, Episch 50%, Marathon 35%, Aufbau 100%) und der Multiplikator oben wird zusätzlich darauf angewendet, z. B. 150% bei Episch ergibt 75%. Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
+		<English>Off (default): the upkeep is the same on every game speed. The multiplier above is applied to the value of the normal game speed. On: every game speed has its own factor (by default Fast 135%, Normal 100%, Epic 50%, Marathon 35%, Buildup 100%) and the multiplier above is applied on top of it, so e.g. 150% on Epic makes 75%. The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
+		<German>Aus (Standard): Der Unterhalt ist auf jeder Spielgeschwindigkeit gleich. Der Multiplikator oben wird auf den Wert der normalen Spielgeschwindigkeit angewendet. An: Jede Spielgeschwindigkeit hat ihren eigenen Faktor (standardmäßig Schnell 135%, Normal 100%, Episch 50%, Marathon 35%, Aufbau 100%) und der Multiplikator oben wird zusätzlich darauf angewendet, z. B. 150% bei Episch ergibt 75%. Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPT_STORAGE_WARN</Tag>
