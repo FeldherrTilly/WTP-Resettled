@@ -4917,18 +4917,22 @@ class CvMainInterface:
 		]
 
 	# the text of the window that explains the colored labels of the folded line "Stored..." or "Produced..." (all colored states of that line,
-	# each in its color); empty when the label is not one of the colored ones (then there is nothing to explain)
+	# each in its color, the state of the city now first); empty when the label is not one of the colored ones (then there is nothing to explain)
 	def getFoldLegend( self, szLabel ):
 		try:
 			szNorm = self.normTipText(szLabel)
 			for aGroup in self.getFoldGroups():
-				bHit = False
-				for (szLabelKey, szColor, szExplainKey) in aGroup:
-					if self.normTipText(localText.getText(szLabelKey, ())) == szNorm:
-						bHit = True
-				if bHit:
+				aCurrent = []
+				aOthers = []
+				for tState in aGroup:
+					if self.normTipText(localText.getText(tState[0], ())) == szNorm:
+						aCurrent.append(tState)
+					else:
+						aOthers.append(tState)
+				if len(aCurrent) > 0:
+					# the state the city is in now comes first
 					aLines = []
-					for (szLabelKey, szColor, szExplainKey) in aGroup:
+					for (szLabelKey, szColor, szExplainKey) in aCurrent + aOthers:
 						aLines.append(u"<color=" + szColor + u">" + localText.getText(szLabelKey, ()) + u"</color>: " + localText.getText(szExplainKey, ()))
 					return u"\n".join(aLines)
 		except:
