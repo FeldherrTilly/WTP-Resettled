@@ -4211,8 +4211,10 @@ class CvMainInterface:
 				if len(szStored) > 3 and szNorm.find(szStored) == 0:
 					iTotal = pCity.getTotalYieldStored()
 					iMax = pCity.getMaxYieldCapacity()
+					# what the next turn change takes from the storage (child tooltip of the storage line)
+					szForecast = self.getOverflowForecastText(pCity)
 					if iTotal > iMax:
-						aOut.append([localText.getText("TXT_KEY_WTP_TIP_STORAGE_FULL", (iTotal, iMax)), None])
+						aOut.append([localText.getText("TXT_KEY_WTP_TIP_STORAGE_FULL", (iTotal, iMax)), szForecast])
 					else:
 						szStorage = localText.getText("TXT_KEY_WTP_TIP_STORAGE", (iTotal, iMax))
 						# orange: only about 10 % free, or the maximum is reached within 5 turns with the current net yields
@@ -4222,7 +4224,7 @@ class CvMainInterface:
 								iNet += pCity.calculateNetYield(iYield)
 						if iTotal * 10 >= iMax * 9 or iTotal + 5 * iNet >= iMax:
 							szStorage = u"<color=255,140,0,255>" + szStorage + u"</color>"
-						aOut.append([szStorage, None])
+						aOut.append([szStorage, szForecast])
 					# the line of the stock in one line; red: no food or no lumber in the city
 					szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOLD", ())
 					bNoFood = pCity.getYieldStored(YieldTypes.YIELD_FOOD) <= 0
@@ -4417,6 +4419,37 @@ class CvMainInterface:
 			screen.deleteWidget(szName)
 
 	# a tooltip window; the lines of a frozen one can be clicked (right click: Colopedia), their data is the level of the window and the paragraph
+	def getOverflowForecastText( self, pCity ):
+		# the goods that the storage overflow (or the sale threshold of a custom house) takes at the next turn change, and the gold of their sale:
+		# the forecast comes from the DLL, the same calculation as the turn change (None: nothing is lost, or the DLL has no forecast)
+		try:
+			aiForecast = pCity.getStorageOverflowForecast()
+		except:
+			return None
+		iNum = YieldTypes.NUM_YIELD_TYPES
+		if len(aiForecast) < 2 * iNum:
+			return None
+		aLines = []
+		iGold = 0
+		for iYield in range(iNum):
+			iLoss = aiForecast[iYield]
+			if iLoss <= 0:
+				continue
+			iYieldGold = aiForecast[iNum + iYield]
+			iGold += iYieldGold
+			szIcon = u"%c" % gc.getYieldInfo(iYield).getChar()
+			szName = gc.getYieldInfo(iYield).getDescription()
+			if iYieldGold > 0:
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_OVERFLOW_SOLD", (szIcon, szName, iLoss, iYieldGold)))
+			else:
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_OVERFLOW_LOST", (szIcon, szName, iLoss)))
+		if len(aLines) == 0:
+			return None
+		aLines.insert(0, localText.getText("TXT_KEY_WTP_TIP_OVERFLOW_HEAD", ()))
+		if iGold > 0:
+			aLines.append(localText.getText("TXT_KEY_WTP_TIP_OVERFLOW_TOTAL", (iGold, )))
+		return u"\n".join(aLines)
+
 	def drawTipWindow( self, screen, szPrefix, tLayout, bClickable, iLevel, aiIndent, bDark = False ):
 		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
 		screen.addPanel(szPrefix + "Back1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
