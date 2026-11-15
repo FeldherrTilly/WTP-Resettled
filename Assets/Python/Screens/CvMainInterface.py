@@ -367,6 +367,9 @@ class CvMainInterface:
 	dTipDetails = {}
 	aiWrapIndent = []
 	bSecondTipShown = False # the window with the Colopedia hint of the line under the cursor in the frozen tooltip
+	bExplainShown = False # the window that explains the colored label of a folded line (Stored..., Produced...), on the other side of the parent
+	iExplainLines = 0
+	szExplainPrefix = "HudTipE1"
 	tSecondTipKey = None
 	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
 	iTipSelIdx = 0
@@ -4772,7 +4775,17 @@ class CvMainInterface:
 	def getSecondTipNames( self ):
 		return self.getTipWindowNames(self.szPreviewPrefix, self.iSecondTipLines)
 
+	def hideFoldExplain( self, screen ):
+		try:
+			if self.bExplainShown:
+				self.deleteTipWindow(screen, self.szExplainPrefix, self.iExplainLines)
+		except:
+			pass
+		self.bExplainShown = False
+		self.iExplainLines = 0
+
 	def hideSecondTip( self, screen ):
+		self.hideFoldExplain(screen)
 		try:
 			if self.bSecondTipShown:
 				for szName in self.getSecondTipNames():
@@ -4794,13 +4807,20 @@ class CvMainInterface:
 
 	# the first of the places (x, y) where a window of this size covers no frozen window (kept on the screen); the one that covers the least if
 	# there is none
-	def pickFreeSpot( self, aCands, iWidth, iHeight, xRes, yRes, iExclude = -1 ):
+	def pickFreeSpot( self, aCands, iWidth, iHeight, xRes, yRes, iExclude = -1, aExtra = None ):
 		tBest = None
 		iBest = -1
 		for (iX, iY) in aCands:
 			iX = max(4, min(xRes - iWidth - 4, iX))
 			iY = max(4, min(yRes - iHeight - 4, iY))
 			iOver = 0
+			# (more windows to keep free: x, y, width, height)
+			if aExtra is not None:
+				for (iEX, iEY, iEW, iEH) in aExtra:
+					iDX = min(iX + iWidth, iEX + iEW) - max(iX, iEX)
+					iDY = min(iY + iHeight, iEY + iEH) - max(iY, iEY)
+					if iDX > 0 and iDY > 0:
+						iOver += iDX * iDY
 			for iFz in range(len(self.aFrozen)):
 				if iFz == iExclude:
 					continue
@@ -4870,6 +4890,80 @@ class CvMainInterface:
 			self.bSecondTipShown = True
 		except:
 			self.bSecondTipShown = False
+
+	# the folded lines of a city tooltip that change their text and color with the state of the city: for each group the colored states
+	# (text of the label, color, text that explains it)
+	def getFoldGroups( self ):
+		return [
+			[("TXT_KEY_WTP_TIP_STORED_WOOD", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_WOOD"),
+			("TXT_KEY_WTP_TIP_STORED_FOOD", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_FOOD"),
+			("TXT_KEY_WTP_TIP_STORED_BOTH", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_BOTH")],
+			[("TXT_KEY_WTP_TIP_PRODUCED_MISSING", u"255,0,0,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"),
+			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", u"255,140,0,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"),
+			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", u"255,200,110,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET")]
+		]
+
+	# the text of the window that explains the colored labels of the folded line "Stored..." or "Produced..." (all colored states of that line,
+	# each in its color); empty when the label is not one of the colored ones (then there is nothing to explain)
+	def getFoldLegend( self, szLabel ):
+		try:
+			szNorm = self.normTipText(szLabel)
+			for aGroup in self.getFoldGroups():
+				bHit = False
+				for (szLabelKey, szColor, szExplainKey) in aGroup:
+					if self.normTipText(localText.getText(szLabelKey, ())) == szNorm:
+						bHit = True
+				if bHit:
+					aLines = []
+					for (szLabelKey, szColor, szExplainKey) in aGroup:
+						aLines.append(u"<color=" + szColor + u">" + localText.getText(szLabelKey, ()) + u"</color>: " + localText.getText(szExplainKey, ()))
+					return u"\n".join(aLines)
+		except:
+			pass
+		return u""
+
+	# the window with the explanation of a folded line: on the side of the parent window that is opposite to the window with the list of goods
+	# (when it fits there), otherwise around the parent window where nothing is covered
+	def showFoldExplain( self, screen, szText, tAnchor ):
+		try:
+			(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iPad, iLine) = tAnchor
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			iChar = iLine * 0.32
+			iMaxWidth = max(300, int(xRes * 0.2))
+			iCharsPerLine = max(20, int((iMaxWidth - 2 * iPad) / iChar))
+			aszParas = self.carryColors(szText.split(u"\n"))
+			aszLines = []
+			aiPara = []
+			for iPart in range(len(aszParas)):
+				aszWrapped = self.wrapMessage(aszParas[iPart], iCharsPerLine)
+				aszLines += aszWrapped
+				aiPara += [iPart] * len(aszWrapped)
+			iWidth = self.getTipTextWidth(aszLines, iChar, iMaxWidth, iPad)
+			iHeight = len(aszLines) * iLine + 2 * iPad
+			iRight = iFX + iFW + 12
+			iLeft = iFX - 12 - iWidth
+			iY0 = iFY
+			aExtra = []
+			bChildRight = True
+			if self.bSecondTipShown and self.tPreviewLayout is not None:
+				(iCX, iCY, iCW, iCH) = self.tPreviewLayout[:4]
+				aExtra.append((iCX, iCY, iCW, iCH))
+				iY0 = iCY
+				bChildRight = (iCX + iCW / 2 >= iFX + iFW / 2)
+			if bChildRight:
+				aCands = [(iLeft, iY0), (iLeft, iFY), (iLeft, iFY + iFH - iHeight)]
+				aCands += [(iFX, iFY - 12 - iHeight), (iFX, iFY + iFH + 12), (iRight, iFY), (iRight, iFY + iFH - iHeight)]
+			else:
+				aCands = [(iRight, iY0), (iRight, iFY), (iRight, iFY + iFH - iHeight)]
+				aCands += [(iFX, iFY - 12 - iHeight), (iFX, iFY + iFH + 12), (iLeft, iFY), (iLeft, iFY + iFH - iHeight)]
+			(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, aExtra)
+			tLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
+			self.iExplainLines = len(aszLines)
+			self.drawTipWindow(screen, self.szExplainPrefix, tLayout, False, 0, [])
+			self.bExplainShown = True
+		except:
+			self.bExplainShown = False
 
 	# every frame while frozen: the line of the frozen window under the cursor decides about the second window. Shift + mouse wheel on a line
 	# chooses among all the things named in it (the window lists them, the chosen one in yellow; a right click opens its page)
@@ -4950,6 +5044,10 @@ class CvMainInterface:
 			else:
 				# the line "Details" of a military unit: the lines folded into it
 				self.showSecondTip(screen, dDetails[iPara], iCY, tTop, iFz)
+				# the folded line "Stored..." / "Produced..." in a color: its explanation, in a second window beside the parent
+				szLegend = self.getFoldLegend(aszTopParas[iPara])
+				if len(szLegend) > 0:
+					self.showFoldExplain(screen, szLegend, tTop)
 		elif iPara >= 0 and self.isCommandLine(iFz, aszTopParas, iPara):
 			# the command lines of a city tooltip: no Colopedia, a right click runs the command
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_RUN_COMMAND", ()), iCY, tTop, iFz)
