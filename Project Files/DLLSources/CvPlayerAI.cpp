@@ -19709,243 +19709,323 @@ void CvPlayerAI::AI_doWorkforcePlan()
 	// first. The first carpenter of a colony (with its lumber) comes before all other jobs (a colony without hammers builds
 	// nothing), and expert carpenters, statesmen and preachers always get a job of their trade.
 	const int WF_PRIORITY = 10000000;
+	// WTP performance: a round scanned every free worker with every free job of all colonies and took one pair, so the plan cost
+	// (workers x workers x jobs) and was by far the largest part of the turn of an AI with many colonies. What the scan finds for a
+	// colony (its best pair and its partner candidates) depends only on the state of that colony (surplus, raw goods, free jobs) and
+	// on which workers are free. So it is kept per colony and made again only for the colonies an assignment touched: the colony of
+	// the job, the colonies that have a job on the same plot, and the colonies whose kept candidates name the assigned worker (a
+	// worker that is named nowhere in the kept candidates of a colony changes none of them by leaving). The pairs chosen are the
+	// same as with the full scan, tie breaks included (checked with a model of both variants on random cases).
+	const WfCand kWfNoCand = { -1, -1, 0, 0 };
+	std::vector<std::vector<int> > aaiCityJobs(iNumCities);
+	for (int j = 0; j < iNumJobs; ++j)
+	{
+		aaiCityJobs[aJobs[j].iCity].push_back(j);
+	}
+	std::vector<bool> abWfDirty(iNumCities, true);
+	std::vector<WfCand> aCityBest(iNumCities, kWfNoCand);
+	// per colony: the two best food jobs and the two best lumber jobs (distinct workers), the three best jobs that need
+	// more food and the two best carpenter jobs that need lumber
+	std::vector<WfCand> aFood1(iNumCities, kWfNoCand);
+	std::vector<WfCand> aFood2(iNumCities, kWfNoCand);
+	std::vector<WfCand> aLumber1(iNumCities, kWfNoCand);
+	std::vector<WfCand> aLumber2(iNumCities, kWfNoCand);
+	std::vector<WfCand> aShort(iNumCities * 3, kWfNoCand);
+	std::vector<WfCand> aNoLumber(iNumCities * 2, kWfNoCand);
+	// WTP: per (colony, yield): a building job that uses this mine good is still free
+	std::vector<bool> abMaterialSlot(iNumCities * NUM_YIELD_TYPES, false);
+	// after an assignment: the colonies whose kept candidates are not valid any more
+	#define WF_PLAN_TOUCH(wTouch, jTouch) \
+	{ \
+		const int iTouchWorker = (wTouch); \
+		const int iTouchJob = (jTouch); \
+		abWfDirty[aJobs[iTouchJob].iCity] = true; \
+		if (aJobs[iTouchJob].iPlotKey >= 0) \
+		{ \
+			for (int iTouchOther = 0; iTouchOther < iNumJobs; ++iTouchOther) \
+			{ \
+				if (aJobs[iTouchOther].iPlotKey == aJobs[iTouchJob].iPlotKey) abWfDirty[aJobs[iTouchOther].iCity] = true; \
+			} \
+		} \
+		for (int iTouchCity = 0; iTouchCity < iNumCities; ++iTouchCity) \
+		{ \
+			if (abWfDirty[iTouchCity]) continue; \
+			if (aCityBest[iTouchCity].iWorker == iTouchWorker || aFood1[iTouchCity].iWorker == iTouchWorker || aFood2[iTouchCity].iWorker == iTouchWorker \
+				|| aLumber1[iTouchCity].iWorker == iTouchWorker || aLumber2[iTouchCity].iWorker == iTouchWorker \
+				|| aShort[iTouchCity * 3].iWorker == iTouchWorker || aShort[iTouchCity * 3 + 1].iWorker == iTouchWorker || aShort[iTouchCity * 3 + 2].iWorker == iTouchWorker \
+				|| aNoLumber[iTouchCity * 2].iWorker == iTouchWorker || aNoLumber[iTouchCity * 2 + 1].iWorker == iTouchWorker) \
+			{ \
+				abWfDirty[iTouchCity] = true; \
+			} \
+		} \
+	}
+	{ // (a block of its own: the timer of step 3 ends with it)
+	WtpTiming::Scope wtpPlanTimer(WtpTiming::SLOT_WF_PLAN);
 	for (int iRound = 0; iRound < iNumWorkers * 2 + 10; ++iRound)
 	{
+		for (int iScanCity = 0; iScanCity < iNumCities; ++iScanCity)
+		{
+			if (!abWfDirty[iScanCity])
+			{
+				continue;
+			}
+			abWfDirty[iScanCity] = false;
+			aCities[iScanCity].iBlockedValue = 0;
+			aCities[iScanCity].iBlockedJob = -1;
+			aCityBest[iScanCity] = kWfNoCand;
+			aFood1[iScanCity] = kWfNoCand;
+			aFood2[iScanCity] = kWfNoCand;
+			aLumber1[iScanCity] = kWfNoCand;
+			aLumber2[iScanCity] = kWfNoCand;
+			for (int s = 0; s < 3; ++s)
+			{
+				aShort[iScanCity * 3 + s] = kWfNoCand;
+			}
+			for (int s = 0; s < 2; ++s)
+			{
+				aNoLumber[iScanCity * 2 + s] = kWfNoCand;
+			}
+			for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+			{
+				abMaterialSlot[iScanCity * NUM_YIELD_TYPES + eYield] = false;
+			}
+			const std::vector<int>& aiCityJobs = aaiCityJobs[iScanCity];
+			const int iNumCityJobs = (int)aiCityJobs.size();
+			// (the best pair of this colony; the best one of all colonies is picked below)
+			WfCand& kBest = aCityBest[iScanCity];
+			for (int iCityJob = 0; iCityJob < iNumCityJobs; ++iCityJob)
+			{
+				const int j = aiCityJobs[iCityJob];
+				if (aJobs[j].pPlot != NULL || !WF_IS_FREE_JOB(j))
+				{
+					continue;
+				}
+				const CvProfessionInfo& kFreeProfession = GC.getProfessionInfo(aJobs[j].eProfession);
+				for (int k = 0; k < kFreeProfession.getNumYieldsConsumed(); ++k)
+				{
+					const YieldTypes eInput = (YieldTypes)kFreeProfession.getYieldsConsumed(k);
+					if (eInput != NO_YIELD)
+					{
+						abMaterialSlot[aJobs[j].iCity * NUM_YIELD_TYPES + eInput] = true;
+					}
+				}
+			}
+			for (int w = 0; w < iNumWorkers; ++w)
+			{
+				const WfWorker& kWorker = aWorkers[w];
+				if (kWorker.iJob >= 0 || kWorker.bLearning)
+				{
+					continue;
+				}
+				for (int iCityJob = 0; iCityJob < iNumCityJobs; ++iCityJob)
+				{
+					const int j = aiCityJobs[iCityJob];
+					if (!WF_IS_FREE_JOB(j))
+					{
+						continue;
+					}
+					const WfJob& kJob = aJobs[j];
+					const int iT = WF_TYPE(w, j);
+					const int iGold = aiGold[iT * iNumJobs + j];
+					if (iGold <= -1000000 || aiEta[w * iNumCities + kJob.iCity] >= 1000)
+					{
+						continue;
+					}
+					// a regular colonist takes only jobs it reaches within 12 turns (one 35 turns away held a coal mine, and the
+					// colonist standing in for it left the lumber the carpenters needed); experts go to a job of their trade anywhere
+					if (aiEta[w * iNumCities + kJob.iCity] > 12 && !wfIsExpertFor(*kWorker.pUnit, kJob.eProfession))
+					{
+						continue;
+					}
+					WfCity& kCity = aCities[kJob.iCity];
+					const int iOutput = aiOutput[iT * iNumJobs + j];
+					const bool bCarpenter = kJob.eYield == YIELD_HAMMERS;
+					// a building job needs its input (stock, center plot or planned production); a carpenter without lumber may
+					// still be planned together with a lumberjack
+					const CvProfessionInfo& kProfession = GC.getProfessionInfo(kJob.eProfession);
+					bool bInput;
+					WF_JOB_HAS_INPUT(kCity, kProfession, iOutput, bInput);
+					if (!bInput && !bCarpenter)
+					{
+						continue;
+					}
+					const int iFoodDelta = aiFood[iT * iNumJobs + j] - iConsumption;
+					int iJobGold = iGold;
+					// lumber the carpenters need (planned ones, or the first one still to come) is worth WF_LUMBER_SHORT_GOLD
+					if (kJob.eYield == YIELD_LUMBER && kJob.pPlot != NULL)
+					{
+						const int iUse = kCity.aiUse[YIELD_LUMBER];
+						const int iNeed = iUse + ((iUse == 0 && abHammerJob[kJob.iCity]) ? 3 : 0) - kCity.aiRaw[YIELD_LUMBER];
+						if (iNeed > 0 && iOutput > 0)
+						{
+							const int iForCarpenters = std::min(iNeed, iOutput);
+							iJobGold = std::max(iGold, iGold * (iOutput - iForCarpenters) / iOutput + iForCarpenters * WF_LUMBER_SHORT_GOLD);
+						}
+					}
+					// WTP (user 2026-10-31): a mine good the smiths lack (planned ones, or a free slot of theirs) is worth what they make of it
+					else if (kJob.pPlot != NULL && wfIsMineGood(kJob.eYield) && iOutput > 0)
+					{
+						const int iMaterialIndex = kJob.iCity * NUM_YIELD_TYPES + kJob.eYield;
+						if (aiMaterialGold[iMaterialIndex] > 0)
+						{
+							const int iNeed = kCity.aiUse[kJob.eYield] + (abMaterialSlot[iMaterialIndex] ? 3 : 0) - kCity.aiRaw[kJob.eYield];
+							if (iNeed > 0)
+							{
+								const int iForSmiths = std::min(iNeed, iOutput);
+								iJobGold = std::max(iGold, iGold * (iOutput - iForSmiths) / iOutput + iForSmiths * aiMaterialGold[iMaterialIndex]);
+							}
+						}
+					}
+					// the first carpenter of a colony is a must; expert carpenters, statesmen and preachers always work in their
+					// trade (other experts get their job by value like everybody else)
+					const bool bExpertBuilding = !kProfession.isWorkPlot() && wfIsExpertFor(*kWorker.pUnit, kJob.eProfession)
+						&& (kJob.eYield == YIELD_HAMMERS || kJob.eYield == YIELD_BELLS || kJob.eYield == YIELD_CROSSES);
+					// the first carpenter job is a must for colonists in the colony (someone works as carpenter now, an expert on
+					// its way takes another carpenter job and the first one when it has arrived); not for an expert of another trade
+					// (a prospector, a fisherman): it gets 30 gold more there and takes the job unless it earns clearly more elsewhere
+					const bool bFirstCarpenterHere = bCarpenter && kJob.iSlot == 0 && aiEta[w * iNumCities + kJob.iCity] == 0;
+					const bool bOtherTradeExpert = kWorker.bExpert && !bExpertBuilding;
+					// expert farmers always farm (a land plot with 4 food or more as a free colonist works it), expert fishermen
+					// always fish (a water plot with food)
+					const bool bExpertFood = kJob.bFood && kJob.pPlot != NULL && kProfession.isWorkPlot() && wfIsExpertFor(*kWorker.pUnit, kJob.eProfession)
+						&& (kJob.pPlot->isWater() ? aiFood[j] > 0 : aiFood[j] >= 4);
+					// WTP (user 2026-10-23): a job on a gold, silver or gem deposit comes before the first carpenter and lumberjack
+					// (a colony founded for the deposit mined nothing while the plan seated a carpenter and a lumberjack)
+					const bool bPrecious = kProfession.isWorkPlot() && wfIsPreciousJob(kJob);
+					const bool bMust = (bFirstCarpenterHere && !bOtherTradeExpert) || bExpertBuilding || bExpertFood || bPrecious;
+					int iValue = iJobGold + wfFoodGold(kCity.iSurplus, iFoodDelta);
+					if (bFirstCarpenterHere && bOtherTradeExpert)
+					{
+						iValue += 3000;
+					}
+					if (iValue <= 0 && !bMust)
+					{
+						continue;
+					}
+					iValue = std::max(1, iValue) * 20 / (20 + aiEta[w * iNumCities + kJob.iCity]);
+					// a colonist in a colony or on its way to one goes to another colony only for a job worth half as much again
+					// (no going back and forth between two colonies for jobs of about the same value)
+					if (aiHomeCity[w] >= 0 && aiHomeCity[w] != kJob.iCity)
+					{
+						iValue = iValue * 2 / 3;
+					}
+					// the job held already x1.2 (no moving for a slightly better job); experts are fixed only on a resource of their
+					// trade, while learning or on their way
+					if (kWorker.iCurrentJob == j)
+					{
+						iValue = iValue * 6 / 5;
+					}
+					if (bFirstCarpenterHere && !bOtherTradeExpert)
+					{
+						iValue += WF_PRIORITY;
+					}
+					if (bExpertBuilding || bExpertFood)
+					{
+						iValue += WF_PRIORITY / 2;
+					}
+					if (bPrecious)
+					{
+						iValue += WF_PRIORITY * 2;
+					}
+					WfCand kCand = { w, j, iValue, iFoodDelta };
+					// a lumber job is a partner for a carpenter without lumber
+					if (kJob.eYield == YIELD_LUMBER && kJob.pPlot != NULL && iOutput > 0)
+					{
+						WfCand& kL1 = aLumber1[kJob.iCity];
+						WfCand& kL2 = aLumber2[kJob.iCity];
+						if (iValue > kL1.iValue)
+						{
+							if (kL1.iWorker != w)
+							{
+								kL2 = kL1;
+							}
+							kL1 = kCand;
+						}
+						else if (iValue > kL2.iValue && kL1.iWorker != w)
+						{
+							kL2 = kCand;
+						}
+					}
+					if (!bInput)
+					{
+						// a carpenter without lumber: only together with a lumberjack
+						for (int s = 0; s < 2; ++s)
+						{
+							WfCand& kNo = aNoLumber[kJob.iCity * 2 + s];
+							if (iValue > kNo.iValue)
+							{
+								if (s == 0)
+								{
+									aNoLumber[kJob.iCity * 2 + 1] = kNo;
+								}
+								kNo = kCand;
+								break;
+							}
+						}
+						continue;
+					}
+					// a job that raises the surplus is always possible (a colony below the green zone gets there with food jobs)
+					// (a must job, the first carpenter or an expert carpenter, statesman or preacher, may go below it: the food
+					// jobs planned afterwards bring the colony back)
+					if (kCity.iSurplus + iFoodDelta >= WF_FOOD_MIN || iFoodDelta > 0 || bMust)
+					{
+						if (iValue > kBest.iValue)
+						{
+							kBest = kCand;
+						}
+						// every job that raises the surplus (food jobs, hunters, fruit pickers, ...) is a food partner
+						if (iFoodDelta > 0)
+						{
+							WfCand& kF1 = aFood1[kJob.iCity];
+							WfCand& kF2 = aFood2[kJob.iCity];
+							if (iValue > kF1.iValue)
+							{
+								if (kF1.iWorker != w)
+								{
+									kF2 = kF1;
+								}
+								kF1 = kCand;
+							}
+							else if (iValue > kF2.iValue && kF1.iWorker != w)
+							{
+								kF2 = kCand;
+							}
+						}
+					}
+					else
+					{
+						// too little food: a candidate for a pair with a food job; also the blocked value of the colony
+						if (iValue > kCity.iBlockedValue)
+						{
+							kCity.iBlockedValue = iValue;
+							kCity.iBlockedJob = j;
+						}
+						for (int s = 0; s < 3; ++s)
+						{
+							WfCand& kShort = aShort[kJob.iCity * 3 + s];
+							if (iValue > kShort.iValue)
+							{
+								for (int s2 = 2; s2 > s; --s2)
+								{
+									aShort[kJob.iCity * 3 + s2] = aShort[kJob.iCity * 3 + s2 - 1];
+								}
+								kShort = kCand;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		// the best pair of all colonies: the highest value, on a tie the first one in the order of the full scan (worker, then job)
+		WfCand kBest = kWfNoCand;
 		for (int c = 0; c < iNumCities; ++c)
 		{
-			aCities[c].iBlockedValue = 0;
-			aCities[c].iBlockedJob = -1;
-		}
-		WfCand kBest = { -1, -1, 0, 0 };
-		// per colony: the two best food jobs and the two best lumber jobs (distinct workers), the three best jobs that need
-		// more food and the two best carpenter jobs that need lumber
-		std::vector<WfCand> aFood1(iNumCities, kBest);
-		std::vector<WfCand> aFood2(iNumCities, kBest);
-		std::vector<WfCand> aLumber1(iNumCities, kBest);
-		std::vector<WfCand> aLumber2(iNumCities, kBest);
-		std::vector<WfCand> aShort(iNumCities * 3, kBest);
-		std::vector<WfCand> aNoLumber(iNumCities * 2, kBest);
-		// WTP: per (colony, yield): a building job that uses this mine good is still free
-		std::vector<bool> abMaterialSlot(iNumCities * NUM_YIELD_TYPES, false);
-		for (int j = 0; j < iNumJobs; ++j)
-		{
-			if (aJobs[j].pPlot != NULL || !WF_IS_FREE_JOB(j))
+			const WfCand& kCityCand = aCityBest[c];
+			if (kCityCand.iWorker >= 0 && (kCityCand.iValue > kBest.iValue || (kCityCand.iValue == kBest.iValue && kBest.iWorker >= 0
+				&& (kCityCand.iWorker < kBest.iWorker || (kCityCand.iWorker == kBest.iWorker && kCityCand.iJob < kBest.iJob)))))
 			{
-				continue;
-			}
-			const CvProfessionInfo& kFreeProfession = GC.getProfessionInfo(aJobs[j].eProfession);
-			for (int k = 0; k < kFreeProfession.getNumYieldsConsumed(); ++k)
-			{
-				const YieldTypes eInput = (YieldTypes)kFreeProfession.getYieldsConsumed(k);
-				if (eInput != NO_YIELD)
-				{
-					abMaterialSlot[aJobs[j].iCity * NUM_YIELD_TYPES + eInput] = true;
-				}
-			}
-		}
-		for (int w = 0; w < iNumWorkers; ++w)
-		{
-			const WfWorker& kWorker = aWorkers[w];
-			if (kWorker.iJob >= 0 || kWorker.bLearning)
-			{
-				continue;
-			}
-			for (int j = 0; j < iNumJobs; ++j)
-			{
-				if (!WF_IS_FREE_JOB(j))
-				{
-					continue;
-				}
-				const WfJob& kJob = aJobs[j];
-				const int iT = WF_TYPE(w, j);
-				const int iGold = aiGold[iT * iNumJobs + j];
-				if (iGold <= -1000000 || aiEta[w * iNumCities + kJob.iCity] >= 1000)
-				{
-					continue;
-				}
-				// a regular colonist takes only jobs it reaches within 12 turns (one 35 turns away held a coal mine, and the
-				// colonist standing in for it left the lumber the carpenters needed); experts go to a job of their trade anywhere
-				if (aiEta[w * iNumCities + kJob.iCity] > 12 && !wfIsExpertFor(*kWorker.pUnit, kJob.eProfession))
-				{
-					continue;
-				}
-				WfCity& kCity = aCities[kJob.iCity];
-				const int iOutput = aiOutput[iT * iNumJobs + j];
-				const bool bCarpenter = kJob.eYield == YIELD_HAMMERS;
-				// a building job needs its input (stock, center plot or planned production); a carpenter without lumber may
-				// still be planned together with a lumberjack
-				const CvProfessionInfo& kProfession = GC.getProfessionInfo(kJob.eProfession);
-				bool bInput;
-				WF_JOB_HAS_INPUT(kCity, kProfession, iOutput, bInput);
-				if (!bInput && !bCarpenter)
-				{
-					continue;
-				}
-				const int iFoodDelta = aiFood[iT * iNumJobs + j] - iConsumption;
-				int iJobGold = iGold;
-				// lumber the carpenters need (planned ones, or the first one still to come) is worth WF_LUMBER_SHORT_GOLD
-				if (kJob.eYield == YIELD_LUMBER && kJob.pPlot != NULL)
-				{
-					const int iUse = kCity.aiUse[YIELD_LUMBER];
-					const int iNeed = iUse + ((iUse == 0 && abHammerJob[kJob.iCity]) ? 3 : 0) - kCity.aiRaw[YIELD_LUMBER];
-					if (iNeed > 0 && iOutput > 0)
-					{
-						const int iForCarpenters = std::min(iNeed, iOutput);
-						iJobGold = std::max(iGold, iGold * (iOutput - iForCarpenters) / iOutput + iForCarpenters * WF_LUMBER_SHORT_GOLD);
-					}
-				}
-				// WTP (user 2026-10-31): a mine good the smiths lack (planned ones, or a free slot of theirs) is worth what they make of it
-				else if (kJob.pPlot != NULL && wfIsMineGood(kJob.eYield) && iOutput > 0)
-				{
-					const int iMaterialIndex = kJob.iCity * NUM_YIELD_TYPES + kJob.eYield;
-					if (aiMaterialGold[iMaterialIndex] > 0)
-					{
-						const int iNeed = kCity.aiUse[kJob.eYield] + (abMaterialSlot[iMaterialIndex] ? 3 : 0) - kCity.aiRaw[kJob.eYield];
-						if (iNeed > 0)
-						{
-							const int iForSmiths = std::min(iNeed, iOutput);
-							iJobGold = std::max(iGold, iGold * (iOutput - iForSmiths) / iOutput + iForSmiths * aiMaterialGold[iMaterialIndex]);
-						}
-					}
-				}
-				// the first carpenter of a colony is a must; expert carpenters, statesmen and preachers always work in their
-				// trade (other experts get their job by value like everybody else)
-				const bool bExpertBuilding = !kProfession.isWorkPlot() && wfIsExpertFor(*kWorker.pUnit, kJob.eProfession)
-					&& (kJob.eYield == YIELD_HAMMERS || kJob.eYield == YIELD_BELLS || kJob.eYield == YIELD_CROSSES);
-				// the first carpenter job is a must for colonists in the colony (someone works as carpenter now, an expert on
-				// its way takes another carpenter job and the first one when it has arrived); not for an expert of another trade
-				// (a prospector, a fisherman): it gets 30 gold more there and takes the job unless it earns clearly more elsewhere
-				const bool bFirstCarpenterHere = bCarpenter && kJob.iSlot == 0 && aiEta[w * iNumCities + kJob.iCity] == 0;
-				const bool bOtherTradeExpert = kWorker.bExpert && !bExpertBuilding;
-				// expert farmers always farm (a land plot with 4 food or more as a free colonist works it), expert fishermen
-				// always fish (a water plot with food)
-				const bool bExpertFood = kJob.bFood && kJob.pPlot != NULL && kProfession.isWorkPlot() && wfIsExpertFor(*kWorker.pUnit, kJob.eProfession)
-					&& (kJob.pPlot->isWater() ? aiFood[j] > 0 : aiFood[j] >= 4);
-				// WTP (user 2026-10-23): a job on a gold, silver or gem deposit comes before the first carpenter and lumberjack
-				// (a colony founded for the deposit mined nothing while the plan seated a carpenter and a lumberjack)
-				const bool bPrecious = kProfession.isWorkPlot() && wfIsPreciousJob(kJob);
-				const bool bMust = (bFirstCarpenterHere && !bOtherTradeExpert) || bExpertBuilding || bExpertFood || bPrecious;
-				int iValue = iJobGold + wfFoodGold(kCity.iSurplus, iFoodDelta);
-				if (bFirstCarpenterHere && bOtherTradeExpert)
-				{
-					iValue += 3000;
-				}
-				if (iValue <= 0 && !bMust)
-				{
-					continue;
-				}
-				iValue = std::max(1, iValue) * 20 / (20 + aiEta[w * iNumCities + kJob.iCity]);
-				// a colonist in a colony or on its way to one goes to another colony only for a job worth half as much again
-				// (no going back and forth between two colonies for jobs of about the same value)
-				if (aiHomeCity[w] >= 0 && aiHomeCity[w] != kJob.iCity)
-				{
-					iValue = iValue * 2 / 3;
-				}
-				// the job held already x1.2 (no moving for a slightly better job); experts are fixed only on a resource of their
-				// trade, while learning or on their way
-				if (kWorker.iCurrentJob == j)
-				{
-					iValue = iValue * 6 / 5;
-				}
-				if (bFirstCarpenterHere && !bOtherTradeExpert)
-				{
-					iValue += WF_PRIORITY;
-				}
-				if (bExpertBuilding || bExpertFood)
-				{
-					iValue += WF_PRIORITY / 2;
-				}
-				if (bPrecious)
-				{
-					iValue += WF_PRIORITY * 2;
-				}
-				WfCand kCand = { w, j, iValue, iFoodDelta };
-				// a lumber job is a partner for a carpenter without lumber
-				if (kJob.eYield == YIELD_LUMBER && kJob.pPlot != NULL && iOutput > 0)
-				{
-					WfCand& kL1 = aLumber1[kJob.iCity];
-					WfCand& kL2 = aLumber2[kJob.iCity];
-					if (iValue > kL1.iValue)
-					{
-						if (kL1.iWorker != w)
-						{
-							kL2 = kL1;
-						}
-						kL1 = kCand;
-					}
-					else if (iValue > kL2.iValue && kL1.iWorker != w)
-					{
-						kL2 = kCand;
-					}
-				}
-				if (!bInput)
-				{
-					// a carpenter without lumber: only together with a lumberjack
-					for (int s = 0; s < 2; ++s)
-					{
-						WfCand& kNo = aNoLumber[kJob.iCity * 2 + s];
-						if (iValue > kNo.iValue)
-						{
-							if (s == 0)
-							{
-								aNoLumber[kJob.iCity * 2 + 1] = kNo;
-							}
-							kNo = kCand;
-							break;
-						}
-					}
-					continue;
-				}
-				// a job that raises the surplus is always possible (a colony below the green zone gets there with food jobs)
-				// (a must job, the first carpenter or an expert carpenter, statesman or preacher, may go below it: the food
-				// jobs planned afterwards bring the colony back)
-				if (kCity.iSurplus + iFoodDelta >= WF_FOOD_MIN || iFoodDelta > 0 || bMust)
-				{
-					if (iValue > kBest.iValue)
-					{
-						kBest = kCand;
-					}
-					// every job that raises the surplus (food jobs, hunters, fruit pickers, ...) is a food partner
-					if (iFoodDelta > 0)
-					{
-						WfCand& kF1 = aFood1[kJob.iCity];
-						WfCand& kF2 = aFood2[kJob.iCity];
-						if (iValue > kF1.iValue)
-						{
-							if (kF1.iWorker != w)
-							{
-								kF2 = kF1;
-							}
-							kF1 = kCand;
-						}
-						else if (iValue > kF2.iValue && kF1.iWorker != w)
-						{
-							kF2 = kCand;
-						}
-					}
-				}
-				else
-				{
-					// too little food: a candidate for a pair with a food job; also the blocked value of the colony
-					if (iValue > kCity.iBlockedValue)
-					{
-						kCity.iBlockedValue = iValue;
-						kCity.iBlockedJob = j;
-					}
-					for (int s = 0; s < 3; ++s)
-					{
-						WfCand& kShort = aShort[kJob.iCity * 3 + s];
-						if (iValue > kShort.iValue)
-						{
-							for (int s2 = 2; s2 > s; --s2)
-							{
-								aShort[kJob.iCity * 3 + s2] = aShort[kJob.iCity * 3 + s2 - 1];
-							}
-							kShort = kCand;
-							break;
-						}
-					}
-				}
+				kBest = kCityCand;
 			}
 		}
 		// pairs: a job short of food together with a food job, or a carpenter without lumber together with a lumberjack, of
@@ -20023,13 +20103,18 @@ void CvPlayerAI::AI_doWorkforcePlan()
 		if (kPairJob.iWorker >= 0 && iBestPairValue > kBest.iValue)
 		{
 			WF_ASSIGN(kPairFood.iWorker, kPairFood.iJob);
+			WF_PLAN_TOUCH(kPairFood.iWorker, kPairFood.iJob);
 			WF_ASSIGN(kPairJob.iWorker, kPairJob.iJob);
+			WF_PLAN_TOUCH(kPairJob.iWorker, kPairJob.iJob);
 		}
 		else
 		{
 			WF_ASSIGN(kBest.iWorker, kBest.iJob);
+			WF_PLAN_TOUCH(kBest.iWorker, kBest.iJob);
 		}
 	}
+	}
+	#undef WF_PLAN_TOUCH
 
 	// 4. seats now: the planned colonists present in the colony, food jobs first, as far as the present food carries
 	std::vector<int> aiOrder;
