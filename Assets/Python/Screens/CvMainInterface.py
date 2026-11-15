@@ -4403,6 +4403,10 @@ class CvMainInterface:
 	# a tooltip window; the lines of a frozen one can be clicked (right click: Colopedia), their data is the level of the window and the paragraph
 	def drawTipWindow( self, screen, szPrefix, tLayout, bClickable, iLevel, aiIndent ):
 		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
+		# the windows with the stored and the produced goods have no clickable lines: the game lights up a clickable line under the cursor and that
+		# (not changeable) light covers the colors of the goods
+		if bClickable and len(aszLines) > 0 and (self.isStoredGoodsWindow([aszLines[0]]) or self.isStoredGoodsWindow([aszLines[0]], "TXT_KEY_CITY_BAR_PRODUCING")):
+			bClickable = False
 		screen.addPanel(szPrefix + "Back1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		screen.addPanel(szPrefix + "Back2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		# over an element of the HUD (the panel style is semi-transparent) one more layer, as the expanded message panel has
