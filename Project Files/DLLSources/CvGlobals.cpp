@@ -2903,6 +2903,23 @@ void CvGlobals::setDefineINT( const char * szName, int iValue )
 {
 	GC.getDefinesVarSystem()->SetValue( szName, iValue );
 	cacheGlobals();
+
+	// WTP: the storage multiplier (game options) changes the capacity of the warehouses: the cached capacity of every city is calculated again
+	if (strcmp(szName, "WAREHOUSE_STORAGE_PERCENT") == 0 && GC.getGameINLINE().isFinalInitialized())
+	{
+		for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
+		{
+			CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iPlayer);
+			if (kPlayer.isAlive())
+			{
+				int iLoop;
+				for (CvCity* pLoopCity = kPlayer.firstCity(&iLoop); pLoopCity != NULL; pLoopCity = kPlayer.nextCity(&iLoop))
+				{
+					pLoopCity->UpdateBuildingAffectedCache();
+				}
+			}
+		}
+	}
 }
 
 void CvGlobals::setDefineFLOAT( const char * szName, float fValue )
