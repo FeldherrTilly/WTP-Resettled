@@ -3458,10 +3458,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PLOT_PEAK</Tag>
-		<English>[COLOR_CAT_TERRAIN]Peak[COLOR_REVERT]</English>
+		<English>[COLOR_CAT_HILLS]Peak[COLOR_REVERT]</English>
 		<Portuguese>Pico</Portuguese>
 		<French>Montagne</French>
-		<German>[COLOR_CAT_TERRAIN]Berg[COLOR_REVERT]</German>
+		<German>[COLOR_CAT_HILLS]Berg[COLOR_REVERT]</German>
 		<Italian>Montagna</Italian>
 		<Spanish>Pico</Spanish>
 		<Russian>Горы</Russian>
@@ -3469,10 +3469,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PLOT_HILLS</Tag>
-		<English>[COLOR_CAT_TERRAIN]Hills[COLOR_REVERT]/</English>
+		<English>[COLOR_CAT_HILLS]Hills[COLOR_REVERT]/</English>
 		<Portuguese>Colinas/</Portuguese>
 		<French>Collines/</French>
-		<German>[COLOR_CAT_TERRAIN]Hügel[COLOR_REVERT]/</German>
+		<German>[COLOR_CAT_HILLS]Hügel[COLOR_REVERT]/</German>
 		<Italian>Colline/</Italian>
 		<Spanish>Colina/</Spanish>
 		<Russian>Холмы/</Russian>

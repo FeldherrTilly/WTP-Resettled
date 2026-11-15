@@ -1210,5 +1210,12 @@
 			<fBlue>0.588</fBlue>
 			<fAlpha>1.000</fAlpha>
 		</ColorVal>
+		<ColorVal>
+			<Type>COLOR_CAT_HILLS</Type>
+			<fRed>0.941</fRed>
+			<fGreen>0.431</fGreen>
+			<fBlue>0.306</fBlue>
+			<fAlpha>1.000</fAlpha>
+		</ColorVal>
 	</ColorVals>
 </Civ4ColorVals>
