@@ -31,10 +31,21 @@ dSpeedBase = {
 # what was put into the defines in this session
 dApplied = {}
 
+LOG_FILE = "WTP_GameOptions.log"
+
+def log(szText):
+	try:
+		f = open(LOG_FILE, "a")
+		f.write(szText + "\n")
+		f.close()
+	except:
+		pass
+
 def setDefine(szDefine, iValue):
 	if dApplied.get(szDefine) != iValue:
 		gc.setDefineINT(szDefine, iValue)
 		dApplied[szDefine] = iValue
+		log("%s = %d" % (szDefine, iValue))
 
 def load():
 	"(storage index, upkeep index, game speed dependence 0/1)"
@@ -86,7 +97,7 @@ def setSpeedDependence(bValue):
 		aiValues[2] = 0
 	save(aiValues)
 
-def applyToGame():
+def applyToGame(szWhere = ""):
 	"Puts the saved choices into the defines (load of a savegame, game start, start of a turn)"
 	try:
 		aiValues = load()
@@ -100,4 +111,5 @@ def applyToGame():
 				iBase = dSpeedBase[NORMAL_DEFINE]
 			setDefine(szDefine, max(1, (iBase * iUpkeep + 50) / 100))
 	except:
-		pass
+		import traceback
+		log("applyToGame failed (%s): %s" % (szWhere, traceback.format_exc()))

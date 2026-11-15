@@ -461,6 +461,9 @@ class CvEventManager:
 	def onBeginPlayerTurn(self, argsList):
 		'Called at the beginning of a players turn'
 		iGameTurn, iPlayer = argsList
+		# WTP: storage / upkeep multiplier of the game options (also here: the active player starts his turn)
+		if iPlayer == gc.getGame().getActivePlayer():
+			WtpGameOptions.applyToGame("BeginPlayerTurn")
 		CvRandomEventInterface.checkEuropeanBorderDisputeKingWarDemand(iPlayer)
 		CvRandomEventInterface.checkTradeQuestLeadershipChanges(iPlayer)
 
