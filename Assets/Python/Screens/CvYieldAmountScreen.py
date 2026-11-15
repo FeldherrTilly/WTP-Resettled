@@ -23,15 +23,6 @@ MOVE_REPEAT = 3 # frames between the steps
 STEP = 25
 STEP_CTRL = 50
 
-# diagnosis of the events (WTP_Yield.log in the game folder): shows which event the mouse wheel sends
-def logYield(szText):
-	try:
-		f = open("WTP_Yield.log", "a")
-		f.write(szText + "\n")
-		f.close()
-	except:
-		pass
-
 class CvYieldAmountScreen:
 	"Amount of goods to transfer"
 
@@ -49,7 +40,6 @@ class CvYieldAmountScreen:
 		self.szValue = u""
 		self.bSelected = True
 		self.bFinished = True
-		self.iLog = 0
 		self.bHostMain = False
 		self.iRefresh = 0
 		self.pHost = None # the harbor screen (Europe / Africa / Port Royal) the dialog is drawn on, none: an own screen
@@ -99,7 +89,6 @@ class CvYieldAmountScreen:
 		self.szValue = unicode(iMax)
 		self.bSelected = True
 		self.bFinished = False
-		self.iLog = 0
 
 		# a harbor screen (Europe / Africa / Port Royal) that is open would be closed by the game when another screen opens: the
 		# dialog is drawn on that screen then (a screen of its own is used everywhere else)
@@ -259,8 +248,7 @@ class CvYieldAmountScreen:
 			try:
 				self.moveWindow(iX, iY)
 			except:
-				import traceback
-				logYield(traceback.format_exc())
+				pass
 
 	def moveWindow(self, iDX, iDY):
 		aMove = self.dMove.get(self.szCtx, [0, 0])
@@ -359,8 +347,7 @@ class CvYieldAmountScreen:
 			for szName in aNames:
 				self.pHost.deleteWidget(szName)
 		except:
-			import traceback
-			logYield(traceback.format_exc())
+			pass
 
 	def isHostMain(self):
 		return self.bHostMain and not self.bFinished
@@ -432,8 +419,7 @@ class CvYieldAmountScreen:
 				else:
 					CyGame().sendYieldTransfer(self.iUnit, self.iData3, self.iYield, iAmount, self.bPlayerAction)
 			except:
-				import traceback
-				logYield(traceback.format_exc())
+				pass
 		if self.pHost == None:
 			self.getScreen().hideScreen()
 		else:
@@ -519,10 +505,6 @@ class CvYieldAmountScreen:
 						aMod = self.getModifiers()
 						self.queueMove(iData - BTN_MOVE, self.getMoveStep(aMod[0], aMod[1]))
 			return 0
-		# the other events are logged (the first ones): this shows what the mouse wheel sends if it is none of the codes above
-		if self.iLog < 60 and iCode != int(NotifyCode.NOTIFY_CURSOR_MOVE_ON) and iCode != int(NotifyCode.NOTIFY_CURSOR_MOVE_OFF):
-			self.iLog += 1
-			logYield("event code %d name '%s' button %d data %d/%d" % (iCode, inputClass.getFunctionName(), int(inputClass.getButtonType()), inputClass.getData1(), inputClass.getData2()))
 		return 0
 
 	# the mouse wheel (collected by the DLL while the dialog is open)
@@ -537,9 +519,6 @@ class CvYieldAmountScreen:
 			iNotches = CyGame().takeWheelNotches()
 			if iNotches != 0:
 				bCtrl = CyGame().isCtrlKeyPressed()
-				if self.iLog < 60:
-					self.iLog += 1
-					logYield("wheel notches %d" % iNotches)
 				for i in range(abs(iNotches)):
 					if iNotches > 0:
 						self.step(1, bCtrl)
