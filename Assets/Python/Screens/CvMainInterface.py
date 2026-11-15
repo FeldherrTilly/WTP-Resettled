@@ -5624,8 +5624,9 @@ class CvMainInterface:
 		aRects.append(self.tMsgRect)
 		try:
 			if gc.getGame().isDiplomacyUp():
-				# the diplomacy window (left side of the screen, nearly the full height; measured on a screenshot, may need a correction)
-				aRects.append((40, 30, 480, CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution() - 60))
+				# the diplomacy window: in the middle of the screen, about 474 x 730 pixels (measured at 2560 x 1440; a little margin)
+				scrDiplo = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+				aRects.append((scrDiplo.getXResolution() / 2 - 245, scrDiplo.getYResolution() / 2 - 375, 490, 750))
 		except:
 			pass
 		for (x, y, w, h) in aRects:
