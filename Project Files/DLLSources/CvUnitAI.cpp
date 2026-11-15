@@ -92,7 +92,6 @@ bool CvUnitAI::AI_update()
 	}
 	Profiler profileSession(szProfileName.c_str());
 #endif
-	WtpTiming::UnitScope wtpTimer((int)AI_getUnitAIType(), isNative());
 	PROFILE_FUNC();
 
 	//FAssertMsg(getUnitTravelState() != NO_UNIT_TRAVEL_STATE || canMove(), "canMove is expected to be true");
