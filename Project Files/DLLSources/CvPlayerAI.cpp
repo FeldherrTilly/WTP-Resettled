@@ -226,6 +226,7 @@ void CvPlayerAI::AI_reset()
 void CvPlayerAI::AI_doTurnPre()
 {
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPRE);
+	WtpTiming::PlayerScope wtpPlayerTimer(WtpTiming::PS_AI_DOTURNPRE, (int)getID());
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPre (native)" : "CvPlayerAI::AI_doTurnPre");
 #endif
@@ -428,6 +429,7 @@ void CvPlayerAI::AI_logStatusSummary()
 void CvPlayerAI::AI_doTurnPost()
 {
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPOST);
+	WtpTiming::PlayerScope wtpPlayerTimer(WtpTiming::PS_AI_DOTURNPOST, (int)getID());
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPost (native)" : "CvPlayerAI::AI_doTurnPost");
 #endif
@@ -1277,6 +1279,7 @@ int CvPlayerAI::AI_movementPriority(CvSelectionGroup* pGroup)
 void CvPlayerAI::AI_unitUpdate()
 {
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_UNITUPDATE);
+	WtpTiming::PlayerScope wtpPlayerTimer(WtpTiming::PS_AI_UNITUPDATE, (int)getID());
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_unitUpdate (native)" : "CvPlayerAI::AI_unitUpdate");
 #endif
@@ -18961,6 +18964,8 @@ void CvPlayerAI::AI_doWorkforcePlan()
 		return;
 	}
 
+	WtpTiming::PlayerScope wtpPlanPlayerTimer(WtpTiming::PS_WORKFORCEPLAN, (int)getID());
+	WtpTiming::Lap wtpLap(WtpTiming::SLOT_WF_S0);
 	const CvCivilizationInfo& kCiv = GC.getCivilizationInfo(getCivilizationType());
 	const int iTurn = GC.getGameINLINE().getGameTurn();
 	const ProfessionTypes eDefaultProfession = kCiv.getDefaultProfession();
@@ -19060,6 +19065,7 @@ void CvPlayerAI::AI_doWorkforcePlan()
 		}
 	}
 
+	wtpLap.next(WtpTiming::SLOT_WF_S1);
 	// 1. jobs
 	std::vector<ProfessionTypes> aePlotProfessions;
 	std::vector<ProfessionTypes> aeBuildingProfessions;
@@ -19233,6 +19239,7 @@ void CvPlayerAI::AI_doWorkforcePlan()
 	}
 	const int iNumJobs = (int)aJobs.size();
 
+	wtpLap.next(WtpTiming::SLOT_WF_S2);
 	// 2. workforce
 	std::vector<WfWorker> aWorkers;
 	std::vector<UnitTypes> aeTypes; // unit types of the output table
@@ -19705,6 +19712,7 @@ void CvPlayerAI::AI_doWorkforcePlan()
 		}
 	}
 
+	wtpLap.next(WtpTiming::SLOT_WF_S3SETUP);
 	// 3. target plan: greedy, the best (worker, job) pair (or pair of a job and a food job, or of a carpenter and a lumberjack)
 	// first. The first carpenter of a colony (with its lumber) comes before all other jobs (a colony without hammers builds
 	// nothing), and expert carpenters, statesmen and preachers always get a job of their trade.
@@ -19759,16 +19767,20 @@ void CvPlayerAI::AI_doWorkforcePlan()
 			} \
 		} \
 	}
+	int iWtpRounds = 0; // (counters of the timing report)
+	int iWtpScans = 0;
 	{ // (a block of its own: the timer of step 3 ends with it)
 	WtpTiming::Scope wtpPlanTimer(WtpTiming::SLOT_WF_PLAN);
 	for (int iRound = 0; iRound < iNumWorkers * 2 + 10; ++iRound)
 	{
+		++iWtpRounds;
 		for (int iScanCity = 0; iScanCity < iNumCities; ++iScanCity)
 		{
 			if (!abWfDirty[iScanCity])
 			{
 				continue;
 			}
+			++iWtpScans;
 			abWfDirty[iScanCity] = false;
 			aCities[iScanCity].iBlockedValue = 0;
 			aCities[iScanCity].iBlockedJob = -1;
@@ -20114,8 +20126,15 @@ void CvPlayerAI::AI_doWorkforcePlan()
 		}
 	}
 	}
+	WtpTiming::count(WtpTiming::CNT_WF_PLANS, 1);
+	WtpTiming::count(WtpTiming::CNT_WF_COLONIES, iNumCities);
+	WtpTiming::count(WtpTiming::CNT_WF_WORKERS, iNumWorkers);
+	WtpTiming::count(WtpTiming::CNT_WF_JOBS, iNumJobs);
+	WtpTiming::count(WtpTiming::CNT_WF_ROUNDS, iWtpRounds);
+	WtpTiming::count(WtpTiming::CNT_WF_COLONY_SCANS, iWtpScans);
 	#undef WF_PLAN_TOUCH
 
+	wtpLap.next(WtpTiming::SLOT_WF_S4);
 	// 4. seats now: the planned colonists present in the colony, food jobs first, as far as the present food carries
 	std::vector<int> aiOrder;
 	// (for the diagnosis log: the stand-ins of this turn: worker, job left (-1), job taken, value of both)
@@ -20301,6 +20320,7 @@ void CvPlayerAI::AI_doWorkforcePlan()
 		}
 	}
 
+	wtpLap.next(WtpTiming::SLOT_WF_S5);
 	// 5. carry out: the colony the idle colonists wait in (where they are, else the colony with the most valuable job
 	// short of food, else the first one)
 	CvCity* pIdleCity = NULL;
