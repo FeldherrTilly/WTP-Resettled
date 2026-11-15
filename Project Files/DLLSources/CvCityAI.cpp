@@ -85,7 +85,6 @@ void CvCityAI::AI_reset()
 
 void CvCityAI::AI_doTurn()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_CITYAI_DOTURN);
 	PROFILE_FUNC();
 
 	UnitTypes eUnit = GC.getCivilizationInfo(getCivilizationType()).getCivilizationUnits(GLOBAL_DEFINE_DEFAULT_POPULATION_UNIT);

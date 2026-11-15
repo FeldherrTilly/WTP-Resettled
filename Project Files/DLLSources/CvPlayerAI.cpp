@@ -225,7 +225,6 @@ void CvPlayerAI::AI_reset()
 
 void CvPlayerAI::AI_doTurnPre()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPRE);
 	PROFILE_FUNC();
 
 	FAssertMsg(getPersonalityType() != NO_LEADER, "getPersonalityType() is not expected to be equal with NO_LEADER");
@@ -234,15 +233,9 @@ void CvPlayerAI::AI_doTurnPre()
 
 	AI_invalidateCloseBordersAttitudeCache();
 
-	{
-		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOCOUNTER);
-		AI_doCounter();
-	}
+	AI_doCounter();
 
-	{
-		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOENEMYUNITDATA);
-		AI_doEnemyUnitData();
-	}
+	AI_doEnemyUnitData();
 
 	if (isHuman())
 	{
@@ -256,36 +249,20 @@ void CvPlayerAI::AI_doTurnPre()
 		pUnit->AI_setMovePriority(0);
 	}
 
-	{
-		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOEMOTIONS);
-		AI_doEmotions();
-	}
+	AI_doEmotions();
 
-	{
-		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOUNITAIWEIGHTS);
-		AI_doUnitAIWeights();
-	}
+	AI_doUnitAIWeights();
 
-	{
-		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOMILITARY);
-		AI_doMilitary();
-	}
+	AI_doMilitary();
 
-	{
-		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOSTRATEGY);
-		AI_doStrategy();
-	}
+	AI_doStrategy();
 
-	{
-		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_UPDATEYIELDVALUES);
-		AI_updateYieldValues();
-	}
+	AI_updateYieldValues();
 }
 
 
 void CvPlayerAI::AI_doTurnPost()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPOST);
 	PROFILE_FUNC();
 
 	if (isHuman())
@@ -500,7 +477,6 @@ void CvPlayerAI::AI_doFleetModernization()
 
 void CvPlayerAI::AI_doTurnUnitsPre()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPRE);
 	PROFILE_FUNC();
 	AI_updateBestYieldPlots();
 	AI_updateFoundValues();
@@ -539,7 +515,6 @@ void CvPlayerAI::AI_doTurnUnitsPre()
 
 void CvPlayerAI::AI_doTurnUnitsPost()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPOST);
 	PROFILE_FUNC();
 
 	CvUnit* pLoopUnit;
@@ -1049,7 +1024,6 @@ int CvPlayerAI::AI_movementPriority(CvSelectionGroup* pGroup)
 
 void CvPlayerAI::AI_unitUpdate()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_UNITUPDATE);
 	PROFILE_FUNC();
 
 	CLLNode<int>* pCurrUnitNode;
@@ -1435,7 +1409,6 @@ struct ApplyAssignWorkingPlots
 
 void CvPlayerAI::AI_assignWorkingPlots()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_ASSIGN_WORKING_PLOTS);
 	AI_manageEconomy();
 
 	// Collect cities

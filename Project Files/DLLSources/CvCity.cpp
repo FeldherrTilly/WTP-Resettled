@@ -501,7 +501,6 @@ void CvCity::kill()
 
 void CvCity::doTurn()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_CITY_DOTURN);
 	OOS_LOG("CvCity::doTurn start", getID());
 
 	PROFILE_FUNC();

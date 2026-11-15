@@ -2171,7 +2171,6 @@ char const* CvPlayer::getUnitButton(UnitTypes eUnit) const
 
 void CvPlayer::doTurn()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_PLAYER_DOTURN);
 	OOS_LOG("CvPlayer::doTurn start", getID());
 	PROFILE_FUNC();
 
@@ -2471,7 +2470,6 @@ int CvPlayer::NBMOD_GetNewTaxRate(int iWantedTax) const
 
 void CvPlayer::doTurnUnits()
 {
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_PLAYER_DOTURNUNITS);
 	PROFILE_FUNC();
 
 	CvSelectionGroup* pLoopSelectionGroup;
