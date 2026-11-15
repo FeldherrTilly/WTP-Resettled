@@ -3520,8 +3520,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_COLORS</Tag>
-		<English>[COLOR:255:230:0:255]Golden yellow[COLOR_REVERT]: exported goods[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: imported goods</English>
-		<German>[COLOR:255:230:0:255]Goldgelb[COLOR_REVERT]: exportierte Waren[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: importierte Waren</German>
+		<English>[COLOR:255:240:0:255]Golden yellow[COLOR_REVERT]: exported goods[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: imported goods</English>
+		<German>[COLOR:255:240:0:255]Goldgelb[COLOR_REVERT]: exportierte Waren[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: importierte Waren</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_COLORS</Tag>
