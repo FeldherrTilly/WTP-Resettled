@@ -44,6 +44,13 @@
 //       fingerprint (different settings / map size / players) is marked "other game". Such blocks carry a "note:" line and should be
 //       left out of comparisons and trends (right after a load the caches are empty, so they are slower, not faster).
 //       Only the time spent in the measured functions is counted, not the time the human needs for the own turn.
+//   Animated fights with a human player (CvUnit::isCombatVisible): the engine plays the animation and the game waits for it. How
+//       much of that wait falls into the measured parts depends on the engine, so the log does not guess: it marks every part
+//       that overlapped a fight (a fight was running at its start or end, or began / ended inside it) and sums those times in
+//       the columns "fight overlap ms" (timed parts, unit AI updates), in the rows "overlapped" of the updateMoves histogram and in
+//       the column "animated fight" of the slowest unit updates. The block header has the number of animated fights, a "note:" line
+//       the animation wall time. To compare blocks without the influence of fights, subtract the overlap columns or skip blocks
+//       with fights.
 //   settings: speed=.. handicap=.. world=.. climate=.. sea level=.. multiplayer=..
 //       the game settings (XML type names), because the same code behaves very differently on a small and a huge map.
 //   When the layout of the report changes, "format" is increased. Parse by the section headers, not by line numbers.
@@ -276,6 +283,20 @@ namespace WtpTiming
 		// single updateMoves calls
 		__int64 aiFreezeCalls[FREEZE_BUCKETS];
 		__int64 aiFreezeTicks[FREEZE_BUCKETS];
+		// Animated fights with a human player (isCombatVisible): the engine plays the animation while the game waits. A part
+		// "overlaps" a fight when a fight was running at its start or end or began / ended inside it. The times of such parts are
+		// summed separately so that they can be left out when numbers are compared.
+		bool bFightActive;
+		__int64 iFightStart;
+		__int64 iFightEpoch; // +1 at every begin and end of a fight
+		__int64 iFightCount;
+		__int64 iFightWallTicks; // wall time from the start to the end of the animated fights
+		__int64 aiFightTicks[SLOT_COUNT];
+		__int64 aiFightCalls[SLOT_COUNT];
+		__int64 aiUnitFightTicks[2][NUM_UNITAI_TYPES + 1];
+		__int64 aiUnitFightCalls[2][NUM_UNITAI_TYPES + 1];
+		__int64 aiFreezeFightCalls[FREEZE_BUCKETS];
+		__int64 aiFreezeFightTicks[FREEZE_BUCKETS];
 		// the slowest single unit updates
 		struct TopUnit
 		{
@@ -288,6 +309,7 @@ namespace WtpTiming
 			int iID;
 			int iX;
 			int iY;
+			bool bFight; // overlapped an animated fight with a human
 		};
 		TopUnit aTopUnits[TOP_UNITS];
 		int iNumTopUnits;
@@ -355,7 +377,7 @@ namespace WtpTiming
 	}
 
 #ifdef WTP_TIMING
-	inline void addFreeze(__int64 iTicks)
+	inline void addFreeze(__int64 iTicks, bool bFight)
 	{
 		Data& kData = data();
 		const double dMs = 1000.0 * (double)iTicks / (double)kData.iFrequency;
@@ -368,8 +390,40 @@ namespace WtpTiming
 				break;
 			}
 		}
-		kData.aiFreezeCalls[iBucket]++;
-		kData.aiFreezeTicks[iBucket] += iTicks;
+		if (bFight)
+		{
+			kData.aiFreezeFightCalls[iBucket]++;
+			kData.aiFreezeFightTicks[iBucket] += iTicks;
+		}
+		else
+		{
+			kData.aiFreezeCalls[iBucket]++;
+			kData.aiFreezeTicks[iBucket] += iTicks;
+		}
+	}
+
+	// the animated fight with a human starts / ends (CvUnit::updateCombat, CvUnit::setCombatUnit)
+	inline void fightBegin()
+	{
+		Data& kData = data();
+		if (kData.iMainThread != 0 && kData.iMainThread == GetCurrentThreadId() && !kData.bFightActive)
+		{
+			kData.bFightActive = true;
+			kData.iFightStart = now();
+			kData.iFightEpoch++;
+		}
+	}
+
+	inline void fightEnd()
+	{
+		Data& kData = data();
+		if (kData.bFightActive && kData.iMainThread == GetCurrentThreadId())
+		{
+			kData.bFightActive = false;
+			kData.iFightCount++;
+			kData.iFightWallTicks += now() - kData.iFightStart;
+			kData.iFightEpoch++;
+		}
 	}
 
 	// a path search (outermost call) ended: add it to the unit AI that asked for it
@@ -401,7 +455,7 @@ namespace WtpTiming
 	class Scope
 	{
 	public:
-		explicit Scope(Slot eSlot) : m_eSlot(eSlot), m_iStart(0), m_bActive(false)
+		explicit Scope(Slot eSlot) : m_eSlot(eSlot), m_iStart(0), m_iEpoch(0), m_bFightAtOpen(false), m_bActive(false)
 		{
 			Data& kData = data();
 			if (kData.iMainThread != 0 && kData.iMainThread == GetCurrentThreadId())
@@ -410,6 +464,8 @@ namespace WtpTiming
 				if (kData.aiDepth[m_eSlot]++ == 0)
 				{
 					m_iStart = now();
+					m_iEpoch = kData.iFightEpoch;
+					m_bFightAtOpen = kData.bFightActive;
 				}
 			}
 		}
@@ -427,9 +483,15 @@ namespace WtpTiming
 					{
 						kData.aiMaxTicks[m_eSlot] = iTicks;
 					}
+					const bool bFight = m_bFightAtOpen || kData.bFightActive || kData.iFightEpoch != m_iEpoch;
+					if (bFight)
+					{
+						kData.aiFightTicks[m_eSlot] += iTicks;
+						kData.aiFightCalls[m_eSlot]++;
+					}
 					if (m_eSlot == SLOT_GAME_UPDATEMOVES)
 					{
-						addFreeze(iTicks);
+						addFreeze(iTicks, bFight);
 					}
 					else if (m_eSlot == SLOT_PATH_GENERATE)
 					{
@@ -441,6 +503,8 @@ namespace WtpTiming
 	private:
 		Slot m_eSlot;
 		__int64 m_iStart;
+		__int64 m_iEpoch;
+		bool m_bFightAtOpen;
 		bool m_bActive;
 	};
 
@@ -499,7 +563,7 @@ namespace WtpTiming
 	public:
 		UnitScope(int iUnitAI, bool bNative, int iOwner, int iID, int iX, int iY)
 			: m_iUnitAI(iUnitAI), m_iNative(bNative ? 1 : 0), m_iOwner(iOwner), m_iID(iID), m_iX(iX), m_iY(iY), m_iStart(0),
-			m_iPathTicks(0), m_iPathCalls(0), m_iPrevAI(-1), m_iPrevNative(0), m_bActive(false)
+			m_iPathTicks(0), m_iPathCalls(0), m_iEpoch(0), m_bFightAtOpen(false), m_iPrevAI(-1), m_iPrevNative(0), m_bActive(false)
 		{
 			Data& kData = data();
 			if (kData.iMainThread != 0 && kData.iMainThread == GetCurrentThreadId())
@@ -515,6 +579,8 @@ namespace WtpTiming
 				kData.iCurNative = m_iNative;
 				m_iPathTicks = kData.iPathTicksRun;
 				m_iPathCalls = kData.iPathCallsRun;
+				m_iEpoch = kData.iFightEpoch;
+				m_bFightAtOpen = kData.bFightActive;
 				m_iStart = now();
 			}
 		}
@@ -532,6 +598,12 @@ namespace WtpTiming
 				}
 				kData.iCurUnitAI = m_iPrevAI;
 				kData.iCurNative = m_iPrevNative;
+				const bool bFight = m_bFightAtOpen || kData.bFightActive || kData.iFightEpoch != m_iEpoch;
+				if (bFight)
+				{
+					kData.aiUnitFightTicks[m_iNative][m_iUnitAI] += iTicks;
+					kData.aiUnitFightCalls[m_iNative][m_iUnitAI]++;
+				}
 
 				// the slowest single updates: keep the TOP_UNITS longest
 				int iSlot = -1;
@@ -568,6 +640,7 @@ namespace WtpTiming
 					kTop.iID = m_iID;
 					kTop.iX = m_iX;
 					kTop.iY = m_iY;
+					kTop.bFight = bFight;
 				}
 			}
 		}
@@ -581,6 +654,8 @@ namespace WtpTiming
 		__int64 m_iStart;
 		__int64 m_iPathTicks;
 		__int64 m_iPathCalls;
+		__int64 m_iEpoch;
+		bool m_bFightAtOpen;
 		int m_iPrevAI;
 		int m_iPrevNative;
 		bool m_bActive;
@@ -696,6 +771,8 @@ namespace WtpTiming
 	inline void noteMap(int, int) {}
 	inline void noteGame(const char*, const char*, const char*, const char*, const char*, bool) {}
 	inline void noteSaveLoaded() {}
+	inline void fightBegin() {}
+	inline void fightEnd() {}
 #endif
 
 #ifdef WTP_TIMING
@@ -719,6 +796,14 @@ namespace WtpTiming
 		kData.iPathCallsRun = 0;
 		memset(kData.aiFreezeCalls, 0, sizeof(kData.aiFreezeCalls));
 		memset(kData.aiFreezeTicks, 0, sizeof(kData.aiFreezeTicks));
+		memset(kData.aiFreezeFightCalls, 0, sizeof(kData.aiFreezeFightCalls));
+		memset(kData.aiFreezeFightTicks, 0, sizeof(kData.aiFreezeFightTicks));
+		memset(kData.aiFightTicks, 0, sizeof(kData.aiFightTicks));
+		memset(kData.aiFightCalls, 0, sizeof(kData.aiFightCalls));
+		memset(kData.aiUnitFightTicks, 0, sizeof(kData.aiUnitFightTicks));
+		memset(kData.aiUnitFightCalls, 0, sizeof(kData.aiUnitFightCalls));
+		kData.iFightCount = 0;
+		kData.iFightWallTicks = 0;
 		kData.iNumTopUnits = 0;
 		memset(kData.aiPlayerTicks, 0, sizeof(kData.aiPlayerTicks));
 		memset(kData.aiPlayerCalls, 0, sizeof(kData.aiPlayerCalls));
@@ -732,6 +817,7 @@ namespace WtpTiming
 	{
 		Data& kData = data();
 		kData.bSaveLoaded = true;
+		kData.bFightActive = false;
 		resetAccumulators();
 	}
 
@@ -1122,12 +1208,17 @@ namespace WtpTiming
 					strcpy(szContinuity, "ok");
 				}
 				szContinuity[sizeof(szContinuity) - 1] = 0;
-				fprintf(f, "=== Turn change at game turn %d | PathfinderParallel=%d PathfinderMinChildren=%d | format 2 | session=%s | time=%s | version=%s | game=%08x | continuity=%s ===\n",
+				fprintf(f, "=== Turn change at game turn %d | PathfinderParallel=%d PathfinderMinChildren=%d | format 2 | session=%s | time=%s | version=%s | game=%08x | continuity=%s | animated fights with a human=%I64d ===\n",
 					iGameTurn, kData.iPathfinderParallel, kData.iPathfinderMinChildren, kData.szSession, szTime,
-					(szGitVersion != NULL) ? szGitVersion : "?", iFingerprint, szContinuity);
+					(szGitVersion != NULL) ? szGitVersion : "?", iFingerprint, szContinuity, kData.iFightCount);
 				if (!bComparable)
 				{
 					fprintf(f, "note: another game or savegame; the time of this block is not comparable with the blocks before (caches are empty after a load, so it is usually slower, not faster)\n");
+				}
+				if (kData.iFightCount > 0)
+				{
+					fprintf(f, "note: %I64d animated fight(s) with a human player in this block (%.0f ms from start to end of the animation). Parts that overlapped a fight are summed in the columns 'fight overlap'; subtract them to compare with blocks without fights.\n",
+						kData.iFightCount, (double)kData.iFightWallTicks * 1000.0 / (double)kData.iFrequency);
 				}
 				kData.iLastTurn = iGameTurn;
 				kData.iLastFingerprint = iFingerprint;
@@ -1154,34 +1245,39 @@ namespace WtpTiming
 				fprintf(f, "game: map %d x %d, %d living players (H human, A AI colony, K king, N native), %d cities, %d units\n",
 					kData.iMapWidth, kData.iMapHeight, iNumPlayers, iCities, iUnits);
 
-				fprintf(f, "--- timed parts\nms\tcalls\tms/call\tmax ms (longest single call)\tname (inclusive, parts overlap)\n");
+				fprintf(f, "--- timed parts\nms\tcalls\tms/call\tmax ms (longest single call)\tfight overlap ms (part of ms that overlapped an animated fight with a human)\tname (inclusive, parts overlap)\n");
 				for (int i = 0; i < SLOT_COUNT; i++)
 				{
 					if (kData.aiCalls[i] > 0)
 					{
 						const double dTotal = (double)kData.aiTicks[i] * dMs;
-						fprintf(f, "%.1f\t%I64d\t%.3f\t%.1f\t%s\n", dTotal, kData.aiCalls[i], dTotal / (double)kData.aiCalls[i],
-							(double)kData.aiMaxTicks[i] * dMs, g_aszSlotNames[i]);
+						fprintf(f, "%.1f\t%I64d\t%.3f\t%.1f\t%.1f\t%s\n", dTotal, kData.aiCalls[i], dTotal / (double)kData.aiCalls[i],
+							(double)kData.aiMaxTicks[i] * dMs, (double)kData.aiFightTicks[i] * dMs, g_aszSlotNames[i]);
 					}
 				}
 
-				fprintf(f, "--- single CvGame::updateMoves calls by duration (the screen is frozen during one call)\ncalls\tms\tduration\n");
-				for (int i = 0; i < FREEZE_BUCKETS; i++)
+				fprintf(f, "--- single CvGame::updateMoves calls by duration (the screen is frozen during one call)\ncalls\tms\tduration\tanimated fight with a human\n");
+				for (int iFight = 0; iFight < 2; iFight++)
 				{
-					if (kData.aiFreezeCalls[i] > 0)
+					for (int i = 0; i < FREEZE_BUCKETS; i++)
 					{
-						if (i < FREEZE_BUCKETS - 1)
+						const __int64 iCalls = iFight ? kData.aiFreezeFightCalls[i] : kData.aiFreezeCalls[i];
+						const __int64 iTicks = iFight ? kData.aiFreezeFightTicks[i] : kData.aiFreezeTicks[i];
+						if (iCalls > 0)
 						{
-							fprintf(f, "%I64d\t%.1f\t< %d ms\n", kData.aiFreezeCalls[i], (double)kData.aiFreezeTicks[i] * dMs, g_aiFreezeLimit[i]);
-						}
-						else
-						{
-							fprintf(f, "%I64d\t%.1f\t>= %d ms\n", kData.aiFreezeCalls[i], (double)kData.aiFreezeTicks[i] * dMs, g_aiFreezeLimit[FREEZE_BUCKETS - 2]);
+							if (i < FREEZE_BUCKETS - 1)
+							{
+								fprintf(f, "%I64d\t%.1f\t< %d ms\t%s\n", iCalls, (double)iTicks * dMs, g_aiFreezeLimit[i], iFight ? "overlapped" : "no");
+							}
+							else
+							{
+								fprintf(f, "%I64d\t%.1f\t>= %d ms\t%s\n", iCalls, (double)iTicks * dMs, g_aiFreezeLimit[FREEZE_BUCKETS - 2], iFight ? "overlapped" : "no");
+							}
 						}
 					}
 				}
 
-				fprintf(f, "--- unit AI updates\nms\tcalls\tms/call\tmax ms\tname\n");
+				fprintf(f, "--- unit AI updates\nms\tcalls\tms/call\tmax ms\tfight overlap ms\tname\n");
 				for (int iNative = 0; iNative < 2; iNative++)
 				{
 					for (int iAI = 0; iAI <= NUM_UNITAI_TYPES; iAI++)
@@ -1190,9 +1286,9 @@ namespace WtpTiming
 						{
 							const double dTotal = (double)kData.aiUnitTicks[iNative][iAI] * dMs;
 							const char* szType = (iAI < NUM_UNITAI_TYPES) ? GC.getUnitAIInfo((UnitAITypes)iAI).getType() : "unknown";
-							fprintf(f, "%.1f\t%I64d\t%.3f\t%.1f\tCvUnitAI::AI_update unitAI %s%s\n", dTotal, kData.aiUnitCalls[iNative][iAI],
+							fprintf(f, "%.1f\t%I64d\t%.3f\t%.1f\t%.1f\tCvUnitAI::AI_update unitAI %s%s\n", dTotal, kData.aiUnitCalls[iNative][iAI],
 								dTotal / (double)kData.aiUnitCalls[iNative][iAI], (double)kData.aiUnitMaxTicks[iNative][iAI] * dMs,
-								szType, iNative ? " (native)" : "");
+								(double)kData.aiUnitFightTicks[iNative][iAI] * dMs, szType, iNative ? " (native)" : "");
 						}
 					}
 				}
@@ -1234,13 +1330,13 @@ namespace WtpTiming
 							}
 						}
 					}
-					fprintf(f, "--- slowest single unit updates\nms\tpath ms\tpath calls\towner\tunit id\tplot x,y\tunitAI\n");
+					fprintf(f, "--- slowest single unit updates\nms\tpath ms\tpath calls\towner\tunit id\tplot x,y\tanimated fight with a human\tunitAI\n");
 					for (int i = 0; i < kData.iNumTopUnits; i++)
 					{
 						const Data::TopUnit& kTop = kData.aTopUnits[i];
 						const char* szType = (kTop.iUnitAI < NUM_UNITAI_TYPES) ? GC.getUnitAIInfo((UnitAITypes)kTop.iUnitAI).getType() : "unknown";
-						fprintf(f, "%.1f\t%.1f\t%I64d\t%d\t%d\t%d,%d\t%s%s\n", (double)kTop.iTicks * dMs, (double)kTop.iPathTicks * dMs,
-							kTop.iPathCalls, kTop.iOwner, kTop.iID, kTop.iX, kTop.iY, szType, kTop.iNative ? " (native)" : "");
+						fprintf(f, "%.1f\t%.1f\t%I64d\t%d\t%d\t%d,%d\t%s\t%s%s\n", (double)kTop.iTicks * dMs, (double)kTop.iPathTicks * dMs,
+							kTop.iPathCalls, kTop.iOwner, kTop.iID, kTop.iX, kTop.iY, kTop.bFight ? "overlapped" : "no", szType, kTop.iNative ? " (native)" : "");
 					}
 				}
 
@@ -1288,6 +1384,7 @@ namespace WtpTiming
 		}
 
 		resetAccumulators();
+		kData.bFightActive = false; // (a fight does not last over a turn change; also guards against a missed end)
 		memset(kData.abPlayerInfo, 0, sizeof(kData.abPlayerInfo));
 		// aiDepth is not reset, scopes may be open (flush runs inside nothing, but stay safe)
 #endif
