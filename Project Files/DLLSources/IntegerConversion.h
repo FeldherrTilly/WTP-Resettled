@@ -101,9 +101,7 @@ private:
 		if (f > fMax)
 		{
 			if (bASSERT)
-			{
 				FErrorMsg("integer limit exceeded (number too big)");
-			}
 			if (bTRUNCATE)
 				f = static_cast<FromType>(fMax);
 		}
@@ -115,9 +113,7 @@ private:
 		if (f < fMin)
 		{
 			if (bASSERT)
-			{
 				FErrorMsg("integer limit exceeded (number too small)");
-			}
 			if (bTRUNCATE)
 				f = static_cast<FromType>(fMin);
 		}
