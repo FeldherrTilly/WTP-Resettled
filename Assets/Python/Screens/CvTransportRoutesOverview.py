@@ -82,15 +82,6 @@ def offerTransportName(iUnit, bAuto):
 	g_PendingNumbers.append((szPrefix, iNumber, fNow))
 	openNamePopup(iUnit, localText.getText("TXT_KEY_WTP_TRANSPORT_OVERVIEW_RENAME", (pUnit.getName(),)), szPrefix + u" " + unicode(iNumber))
 
-# diagnosis of the clicks (WTP_Overview.log in the game folder)
-def logOverview(szText):
-	try:
-		f = open("WTP_Overview.log", "a")
-		f.write(szText + "\n")
-		f.close()
-	except:
-		pass
-
 # the keys of the search field: key name -> character
 SEARCH_KEY_NAMES = {}
 for _c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
@@ -352,7 +343,6 @@ class CvTransportRoutesOverview:
 		dTransport["land"] = (pHead.getDomainType() == DomainTypes.DOMAIN_LAND)
 		dTransport["auto"] = (int(pGroup.getAutomateType()) == int(AutomateTypes.AUTOMATE_TRANSPORT_FULL))
 		dTransport["rawName"] = pHead.getNameNoDesc()
-		logOverview("transport %d '%s' automate type %d" % (pHead.getID(), pHead.getNameNoDesc(), int(pGroup.getAutomateType())))
 		pPlot = pHead.plot()
 		szWhere = u"(%d, %d)" % (pHead.getX(), pHead.getY())
 		if pPlot != None and not pPlot.isNone() and pPlot.isCity():
@@ -520,13 +510,11 @@ class CvTransportRoutesOverview:
 		try:
 			iRoute = int(screen.getTableText(szTable, 0, iRow))
 		except:
-			logOverview("route id of row %d of %s not readable" % (iRow, szTable))
 			aShown = self.aShownRoutes.get(iSlot, [])
 			if iRow >= 0 and iRow < len(aShown):
 				iRoute = aShown[iRow][4]
 		dTransport = self.Transports[self.aVisible[iIndex]]
 		if not dTransport["assigned"].has_key(iRoute):
-			logOverview("route %d of row %d unknown" % (iRoute, iRow))
 			return
 		dTransport["assigned"][iRoute] = not dTransport["assigned"][iRoute]
 		dTransport["manualSet"] = False
@@ -539,18 +527,13 @@ class CvTransportRoutesOverview:
 
 	def handleInput(self, inputClass):
 		iCode = inputClass.getNotifyCode()
-		if iCode != NotifyCode.NOTIFY_CHARACTER and iCode != NotifyCode.NOTIFY_CURSOR_MOVE_ON and iCode != NotifyCode.NOTIFY_CURSOR_MOVE_OFF:
-			logOverview("event code %d name '%s' button %d data %d/%d x %d y %d" % (int(iCode), inputClass.getFunctionName(), int(inputClass.getButtonType()), inputClass.getData1(), inputClass.getData2(), inputClass.getMouseX(), inputClass.getMouseY()))
 		if inputClass.getNotifyCode() == NotifyCode.NOTIFY_CHARACTER:
 			self.iKeyLog += 1
-			if self.iKeyLog <= 40:
-				logOverview("key %d id %d" % (inputClass.getData(), inputClass.getID()))
 			if inputClass.getID() != 0:
 				try:
 					self.handleKey(inputClass.getData())
 				except:
-					import traceback
-					logOverview(traceback.format_exc())
+					pass
 			return 0
 		if inputClass.getNotifyCode() == NotifyCode.NOTIFY_LISTBOX_ITEM_SELECTED:
 			szName = inputClass.getFunctionName()
@@ -568,10 +551,7 @@ class CvTransportRoutesOverview:
 				try:
 					self.toggleRoute(ord(szName[8]) - 65, inputClass.getMouseY())
 				except:
-					import traceback
-					logOverview(traceback.format_exc())
-			else:
-				logOverview("selected: '%s' x %d y %d" % (szName, inputClass.getMouseX(), inputClass.getMouseY()))
+					pass
 		elif inputClass.getNotifyCode() == NotifyCode.NOTIFY_CLICKED:
 			if inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL:
 				iData = inputClass.getData1()
@@ -699,8 +679,7 @@ class CvTransportRoutesOverview:
 		try:
 			self.askForNames()
 		except:
-			import traceback
-			logOverview(traceback.format_exc())
+			pass
 		self.Transports = []
 
 	# a click on the unit icon: the overview closes, the transport is selected and centered on the map
@@ -726,8 +705,7 @@ class CvTransportRoutesOverview:
 			popupInfo.setText(u"showTradeRoutesAdvisor")
 			popupInfo.addPopup(pUnit.getOwner())
 		except:
-			import traceback
-			logOverview(traceback.format_exc())
+			pass
 
 	def onClose(self):
 		# the changes are sent when the screen is closed (as the R screen does), then the advisor opens again
