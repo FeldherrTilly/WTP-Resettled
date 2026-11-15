@@ -238,6 +238,7 @@ static bool g_bWtpHideGameHelp = false;
 static bool g_bWtpInternalHelp = false;
 void wtpSetHideGameHelp(bool b) { g_bWtpHideGameHelp = b; }
 void wtpSetInternalHelp(bool b) { g_bWtpInternalHelp = b; }
+bool wtpIsDiplomacyUp() { return gDLL->isDiplomacy() || gDLL->isMPDiplomacyScreenUp(); }
 
 void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
 {
