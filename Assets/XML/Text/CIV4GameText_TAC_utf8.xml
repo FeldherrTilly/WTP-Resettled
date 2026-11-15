@@ -3380,8 +3380,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Clear All[COLOR_REVERT][NEWLINE]Removes all import and export settings of this city.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic are not changed.</English>
-		<German>[COLOR_HIGHLIGHT_TEXT]Alles löschen[COLOR_REVERT][NEWLINE]Entfernt alle Import- und Export-Einstellungen dieser Stadt.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert.</German>
+		<English>[COLOR_HIGHLIGHT_TEXT]Clear All[COLOR_REVERT][NEWLINE]Removes all import and export settings of this city.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic and goods whose automatic export you set by hand are not changed. The switch turns itself off when no good has automatic export any more.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alles löschen[COLOR_REVERT][NEWLINE]Entfernt alle Import- und Export-Einstellungen dieser Stadt.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert, ebenso Waren, bei denen du den automatischen Export von Hand gesetzt hast. Der Schalter geht von selbst aus, wenn keine Ware mehr automatischen Export hat.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP</Tag>
@@ -3390,13 +3390,18 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Auto-export all goods[COLOR_REVERT][NEWLINE]Turns automatic export on for all goods.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic are not changed.</English>
-		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren automatisch exportieren[COLOR_REVERT][NEWLINE]Schaltet den automatischen Export für alle Waren ein.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert.</German>
+		<English>[COLOR_HIGHLIGHT_TEXT]Auto-export all goods[COLOR_REVERT][NEWLINE]Turns automatic export on for all goods. Click again to switch it off.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic and goods whose automatic export you set by hand are not changed. The switch turns itself off when no good has automatic export any more.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren automatisch exportieren[COLOR_REVERT][NEWLINE]Schaltet den automatischen Export für alle Waren ein. Erneut klicken schaltet ihn wieder aus.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT</Tag>
 		<English>Building material</English>
 		<German>Baumaterial</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_SHORT_ON</Tag>
+		<English>Auto-export all goods: ON</English>
+		<German>Automatischer Export aller Güter: AN</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON</Tag>

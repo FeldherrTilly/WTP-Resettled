@@ -190,14 +190,17 @@ LIV_PREFIX = "[[WTPLIV:"
 LIV_GOODS = ["YIELD_HORSES", "YIELD_CATTLE", "YIELD_GEESE", "YIELD_GOATS", "YIELD_PIGS", "YIELD_SHEEP", "YIELD_CHICKEN"]
 # the military goods preset: import and feeder for muskets, blades, cannons, black powder, bakery goods (provisions) and horses, at most 100 imported
 MIL_PREFIX = "[[WTPMIL:"
+# the auto-export preset: automatic export for the goods of the view that was chosen when it was switched on (the goods are remembered, "goods": None)
+AUT_PREFIX = "[[WTPAUT:"
 MIL_GOODS = ["YIELD_MUSKETS", "YIELD_BLADES", "YIELD_CANNONS", "YIELD_BLACK_POWDER", "YIELD_BAKERY_GOODS", "YIELD_HORSES"] # (the bakery goods are the provisions the soldier professions ask for)
 
 # the presets that switch goods on (the market automatic is a preset of its own, handled by the DLL): the data is kept per city in the script
 # data of the player (prefix), "maintain" -1: the level of the good stays, the preset protection (see below) works for all of them
 PRESETS = [
-	{"id": "BLD", "prefix": BLD_PREFIX, "goods": BLD_MATERIAL + BLD_OTHER, "maintain": 100, "limit": 150, "code": 3, "view": VIEW_BUILD, "slot": 0, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON"},
-	{"id": "LIV", "prefix": LIV_PREFIX, "goods": LIV_GOODS, "maintain": 150, "limit": 150, "code": 5, "view": VIEW_LIVESTOCK, "slot": 1, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON"},
-	{"id": "MIL", "prefix": MIL_PREFIX, "goods": MIL_GOODS, "maintain": -1, "limit": 100, "code": 6, "view": VIEW_MILITARY, "slot": 2, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON"},
+	{"id": "BLD", "kind": "import", "prefix": BLD_PREFIX, "goods": BLD_MATERIAL + BLD_OTHER, "maintain": 100, "limit": 150, "code": 3, "view": VIEW_BUILD, "slot": 0, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON"},
+	{"id": "LIV", "kind": "import", "prefix": LIV_PREFIX, "goods": LIV_GOODS, "maintain": 150, "limit": 150, "code": 5, "view": VIEW_LIVESTOCK, "slot": 1, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON"},
+	{"id": "MIL", "kind": "import", "prefix": MIL_PREFIX, "goods": MIL_GOODS, "maintain": -1, "limit": 100, "code": 6, "view": VIEW_MILITARY, "slot": 2, "text": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON"},
+	{"id": "AUTO", "kind": "auto", "prefix": AUT_PREFIX, "goods": None, "maintain": -1, "limit": 0, "code": 2, "view": None, "slot": 2, "text": "TXT_KEY_POPUP_IMPORT_EXPORT_ALL", "on": "TXT_KEY_WTP_TRADEROUTE_PRESET2_SHORT_ON"},
 ]
 
 def loadBuild(szPrefix = BLD_PREFIX):
@@ -652,9 +655,9 @@ class CvTradeRouteScreen:
 			if not dBuild.has_key(self.iCity):
 				continue
 			bActive = False
-			for szType in p["goods"]:
+			for szType in self.getPresetGoods(p):
 				iYield = self.getYieldByType(szType)
-				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActive(iYield):
+				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActiveFor(p, iYield):
 					bActive = True
 			if not bActive:
 				# the preset is off: its goods go back to what they were
@@ -669,6 +672,23 @@ class CvTradeRouteScreen:
 			if self.iView == VIEW_MARKED:
 				self.buildView()
 				self.drawPage()
+
+	# the goods of a preset: the fixed list, for the auto-export preset the goods it remembered
+	def getPresetGoods(self, p):
+		if p["goods"] != None:
+			return p["goods"]
+		dBuild = loadBuild(p["prefix"])
+		aTypes = []
+		if dBuild.has_key(self.iCity):
+			for aType in dBuild[self.iCity]:
+				aTypes.append(aType[0])
+		return aTypes
+
+	# the good does something for this preset: auto-export presets want automatic export, the others import / feeder (see isGoodActive)
+	def isGoodActiveFor(self, p, iYield):
+		if p["kind"] == "auto":
+			return self.dData[iYield]["auto"]
+		return self.isGoodActive(iYield)
 
 	def isPresetOn(self, p):
 		return loadBuild(p["prefix"]).has_key(self.iCity)
@@ -688,7 +708,10 @@ class CvTradeRouteScreen:
 			bOn = self.isPresetOn(p)
 			if bOn:
 				szKey = p["on"]
-			self.addButton("TRSPreset" + str(p["code"]), localText.getText(szKey, ()), bOn, self.OX + 20 + p["slot"] * (iThird + 10), self.OY + 130, iThird, 28, BTN_PRESET + p["code"])
+			iRowY = self.OY + 130
+			if p["kind"] == "auto":
+				iRowY = self.OY + 96 # (in the row of clear all / import all goods)
+			self.addButton("TRSPreset" + str(p["code"]), localText.getText(szKey, ()), bOn, self.OX + 20 + p["slot"] * (iThird + 10), iRowY, iThird, 28, BTN_PRESET + p["code"])
 
 	def getYieldByType(self, szType):
 		for iYield in self.dData.keys():
@@ -707,9 +730,12 @@ class CvTradeRouteScreen:
 			if self.isMarketLocked(iYield):
 				aSkipped.append(iYield)
 				continue
+			if p["kind"] == "auto":
+				self.dData[iYield]["auto"] = False # (the automatic export goes, the rest of the good stays)
+				continue
 			aOther = []
 			for q in self.getPresetsOfGood(iYield):
-				if q["id"] != p["id"]:
+				if q["id"] != p["id"] and q["kind"] == p["kind"]:
 					aOther.append(q)
 			if len(aOther) > 0:
 				# another preset that is on still asks for the good: it keeps it and takes over what it was before (so that the good
@@ -734,13 +760,15 @@ class CvTradeRouteScreen:
 	# a preset that went off: what is left of it at its goods is switched off too (an import with the amount 0 and no feeder);
 	# not the goods market automatic manages and not the goods another preset that is on still asks for
 	def clearPresetLeftovers(self, p):
+		if p["kind"] != "import":
+			return
 		for szType in p["goods"]:
 			iYield = self.getYieldByType(szType)
 			if iYield < 0 or self.isMarketLocked(iYield):
 				continue
 			bOther = False
 			for q in self.getPresetsOfGood(iYield):
-				if q["id"] != p["id"]:
+				if q["id"] != p["id"] and q["kind"] == "import":
 					bOther = True
 			d = self.dData[iYield]
 			if not bOther and d["imp"] and not d["feeder"] and d["impLimit"] == 0:
@@ -756,20 +784,27 @@ class CvTradeRouteScreen:
 			del dBuild[self.iCity]
 		else:
 			aAdded = []
-			for szType in p["goods"]:
+			aGoods = p["goods"]
+			if p["kind"] == "auto":
+				# the goods of the view at the moment of the click (all pages)
+				aGoods = [gc.getYieldInfo(i).getType() for i in self.aYields]
+			for szType in aGoods:
 				iYield = self.getYieldByType(szType)
 				if iYield < 0:
 					continue
 				d = self.dData[iYield]
-				if self.isGoodActive(iYield):
+				if self.isGoodActiveFor(p, iYield):
 					continue # set by hand before: stays as it is
 				if self.isMarketLocked(iYield):
 					aSkipped.append(iYield) # (market automatic manages the good)
 					continue
 				aAdded.append([szType, d["maintain"], d["impLimit"], int(d["imp"])])
-				d["imp"] = True
-				d["feeder"] = True
-				self.setPresetLevels(d, p)
+				if p["kind"] == "auto":
+					d["auto"] = True
+				else:
+					d["imp"] = True
+					d["feeder"] = True
+					self.setPresetLevels(d, p)
 			dBuild[self.iCity] = aAdded
 		saveBuild(dBuild, p["prefix"])
 		self.apply()
@@ -858,7 +893,7 @@ class CvTradeRouteScreen:
 		aPresets = []
 		szType = gc.getYieldInfo(iYield).getType()
 		for p in PRESETS:
-			if szType in p["goods"] and self.isPresetOn(p):
+			if self.isPresetOn(p) and szType in self.getPresetGoods(p):
 				aPresets.append(p)
 		return aPresets
 
@@ -870,6 +905,8 @@ class CvTradeRouteScreen:
 		iMaintain = -1
 		iLimit = 0
 		for p in self.getPresetsOfGood(iYield):
+			if p["kind"] != "import":
+				continue
 			iMaintain = max(iMaintain, p["maintain"])
 			iLimit = max(iLimit, p["limit"])
 		return (iMaintain, iLimit)
@@ -880,13 +917,24 @@ class CvTradeRouteScreen:
 	def isPresetLost(self, iYield, dOld):
 		if not self.dData.has_key(iYield) or len(self.getPresetsOfGood(iYield)) == 0 or self.isMarketLocked(iYield):
 			return False
+		bAuto = False
+		bImport = False
+		for q in self.getPresetsOfGood(iYield):
+			if q["kind"] == "auto":
+				bAuto = True
+			else:
+				bImport = True
 		d = self.dData[iYield]
 		if self.dIgnored.has_key(iYield):
-			if d["imp"] and d["feeder"]:
+			if (bImport and d["imp"] and d["feeder"]) or (bAuto and d["auto"]):
 				del self.dIgnored[iYield] # active again: protected again
 			return False
 		iMaintain, iLimit = self.getPresetLevels(iYield)
 		if dOld == None:
+			return False
+		if bAuto and dOld["auto"] and not d["auto"]:
+			return True # (the automatic export was switched off: the game switches the export with it)
+		if not bImport:
 			return False
 		if dOld["imp"] and not d["imp"]:
 			return True
@@ -919,6 +967,17 @@ class CvTradeRouteScreen:
 	def resetPresetGoods(self, aGoods):
 		for iYield in aGoods:
 			d = self.dData[iYield]
+			bAuto = False
+			bImport = False
+			for q in self.getPresetsOfGood(iYield):
+				if q["kind"] == "auto":
+					bAuto = True
+				else:
+					bImport = True
+			if bAuto:
+				d["auto"] = True
+			if not bImport:
+				continue
 			d["imp"] = True
 			d["feeder"] = True
 			iMaintain, iLimit = self.getPresetLevels(iYield)
@@ -947,9 +1006,12 @@ class CvTradeRouteScreen:
 					aRest.append(aType)
 			dBuild[self.iCity] = aRest
 			bActive = False
-			for szType in p["goods"]:
+			aPresetTypes = p["goods"]
+			if aPresetTypes == None:
+				aPresetTypes = [aType[0] for aType in aRest]
+			for szType in aPresetTypes:
 				iYield = self.getYieldByType(szType)
-				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActive(iYield):
+				if iYield >= 0 and not self.isMarketLocked(iYield) and self.isGoodActiveFor(p, iYield):
 					bActive = True
 			if not bActive:
 				self.revertPresetGoods(p, dBuild[self.iCity])
@@ -1191,8 +1253,8 @@ class CvTradeRouteScreen:
 
 		# the presets (the buttons of the old popup)
 		iBW = (self.W - 40 - 20) / 3
-		aszPreset = [localText.getText("TXT_KEY_POPUP_IMPORT_CLEAR_ALL", ()), localText.getText("TXT_KEY_POPUP_IMPORT_ALL", ()), localText.getText("TXT_KEY_POPUP_IMPORT_EXPORT_ALL", ())]
-		for i in range(3):
+		aszPreset = [localText.getText("TXT_KEY_POPUP_IMPORT_CLEAR_ALL", ()), localText.getText("TXT_KEY_POPUP_IMPORT_ALL", ())]
+		for i in range(2): # (auto-export all goods is a preset with an on state: drawBuildButton)
 			self.addButton("TRSPreset" + str(i), aszPreset[i], False, self.OX + 20 + i * (iBW + 10), self.OY + 96, iBW, 28, BTN_PRESET + i)
 		iHalf = (self.W - 40 - 10) / 2
 		self.drawBuildButton()
@@ -1227,7 +1289,8 @@ class CvTradeRouteScreen:
 			(5, "TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED")]
 		aPresetViews = []
 		for p in PRESETS:
-			aPresetViews.append((localText.getText(p["text"], ()).lower(), p["text"], p["view"]))
+			if p["view"] != None:
+				aPresetViews.append((localText.getText(p["text"], ()).lower(), p["text"], p["view"]))
 		aPresetViews.sort()
 		aViews = []
 		for aView in aFixed:
@@ -1513,7 +1576,7 @@ class CvTradeRouteScreen:
 				if pCity != None and not pCity.isNone() and pCity.isAutoMarketImport():
 					return localText.getText("TXT_KEY_TRADEROUTE_PRESET_MARKET_AUTO_OFF", ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
 				return localText.getText(aszKey[iCode - BTN_PRESET], ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT", ())
-			if iCode - BTN_PRESET == 3 or iCode - BTN_PRESET >= 5:
+			if iCode - BTN_PRESET == 2 or iCode - BTN_PRESET == 3 or iCode - BTN_PRESET >= 5:
 				return localText.getText(aszKey[iCode - BTN_PRESET], ()) + localText.getText("TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT", ())
 			return localText.getText(aszKey[iCode - BTN_PRESET], ())
 		return u""
@@ -1556,7 +1619,7 @@ class CvTradeRouteScreen:
 		self.iReload = 60
 
 	def runPreset(self, iPreset):
-		if iPreset == 3 or iPreset == 5 or iPreset == 6:
+		if iPreset == 2 or iPreset == 3 or iPreset == 5 or iPreset == 6:
 			for p in PRESETS:
 				if p["code"] == iPreset:
 					self.toggleBuild(p)
@@ -1752,10 +1815,12 @@ class CvTradeRouteScreen:
 		self.drawSearchText()
 
 	# the presets that turned the good on (it is in their remembered goods)
-	def getPresetOwners(self, iYield):
+	def getPresetOwners(self, iYield, szKind = "import"):
 		aOwners = []
 		szType = gc.getYieldInfo(iYield).getType()
 		for p in PRESETS:
+			if p["kind"] != szKind:
+				continue
 			dBuild = loadBuild(p["prefix"])
 			if dBuild.has_key(self.iCity):
 				for aType in dBuild[self.iCity]:
@@ -1789,6 +1854,7 @@ class CvTradeRouteScreen:
 		iYield = self.aYields[iIndex]
 		d = self.dData[iYield]
 		aOwners = self.getPresetOwners(iYield)
+		aAutoOwners = self.getPresetOwners(iYield, "auto")
 		bImport = iField in (F_IMP_MINUS, F_IMP_PLUS, F_IMP_CHECK)
 		bExport = iField in (F_EXP_MINUS, F_EXP_PLUS, F_EXP_CHECK)
 		if not bImport and not bExport:
@@ -1809,7 +1875,9 @@ class CvTradeRouteScreen:
 			szKey = "impLimit"
 			szLabel = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_LIMIT", ())
 		else:
-			if d["exp"]:
+			if d["auto"] and self.isMarketLocked(iYield) == False and len(aAutoOwners) > 0:
+				szText += szOnBy + ", ".join([localText.getText(p["text"], ()) for p in aAutoOwners]) + u"[NEWLINE]"
+			elif d["auto"] or d["exp"]:
 				szText += szOnBy + szHand + u"[NEWLINE]"
 			szKey = "maintain"
 			szLabel = localText.getText("TXT_KEY_WTP_TRADEROUTE_SRC_MAINTAIN", ())
