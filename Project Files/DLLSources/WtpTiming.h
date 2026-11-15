@@ -5,15 +5,68 @@
 
 // WTP: lightweight turn timing + runtime settings (no rebuild needed to switch).
 //
-// Writes "WTP_Timing.txt" into the mod folder: one block per turn change with the time (ms) spent in the big parts of the
-// turn processing (inclusive times, nested parts overlap on purpose, e.g. path searches are also part of the unit AI).
-// Only the main thread is measured, worker threads are ignored, so the timing itself never touches shared data.
+// ===========================================================================================================================
+// WHAT THIS IS FOR
+// ===========================================================================================================================
+// In the late game the turn change (all AI players move, cities and units are processed) took 45-70 seconds. This file measures
+// where that time goes, so changes can be judged by numbers instead of guesses. It only measures; it changes no game logic.
 //
-// Report format 2 (per turn change): the game (map size, players, cities, units), the timed parts with the longest single call
-// (a long single call freezes the screen), a histogram of the single CvGame::updateMoves calls, the path searches by the unit AI
-// that asked for them, the slowest single unit updates (owner, unit, plot, path search part), a table per player and counters of the
-// workforce plan (colonists, jobs, rounds, colony scans).
+// Output: "WTP_Timing.txt" in the mod folder (appended, one block per turn change, header "=== Turn change at game turn N ... ===").
+// A block covers everything measured since the previous report; the report is written at the start of CvGame::doTurn and the
+// turn number in the header is the game turn at that moment.
+// Only the main thread is measured; worker threads (TBB) are ignored, so the timing never touches shared data.
+// All times are wall clock, in milliseconds. "Inclusive" means a part contains the parts nested in it (they overlap on purpose).
 //
+// ===========================================================================================================================
+// HOW TO READ A BLOCK (report format 2)
+// ===========================================================================================================================
+//   game:                        map size, living players by type (H human, A AI colony, K king, N native), cities, units.
+//   --- timed parts              ms, calls, ms/call and "max ms" (the longest single call) of the big parts of the turn
+//                                (see enum Slot / g_aszSlotNames). A long single call can freeze the screen (assumption, not verified in
+//                                the engine): the screen can probably only be redrawn between two calls of CvGame::updateMoves.
+//   --- single updateMoves calls histogram of the single CvGame::updateMoves calls by duration: how often the screen stood
+//                                still for < 50 ms, < 200 ms, < 1 s, < 5 s, longer. (The engine calls updateMoves again and again;
+//                                CvUnitAI::AI_update may return true to "wait until the next slice".)
+//   --- unit AI updates          CvUnitAI::AI_update per unit AI type (natives separate): total, calls, per call, max.
+//   --- path searches by ...     KmodPathFinder::GeneratePath, attributed to the unit AI type that was running when the search
+//                                was asked for (only the outermost search is timed, nested ones are not added twice). The line
+//                                "paths outside of a unit AI update" is everything else (workforce plan, trade routes, ...).
+//   --- slowest single ...       the 8 slowest single unit updates: owner, unit id, plot, unit AI and how much of it was path search.
+//   --- per player               per player: doTurn, AI_doTurnPre, AI_doTurnPost, AI_unitUpdate, workforce plan, each as
+//                                "ms / calls / longest single call". Use it to see how the cost grows with the number of players.
+//   --- counters                 size of the workforce plan problem: colonies, free colonists (workers), free jobs, rounds of
+//                                step 3, colony scans in step 3 (the cost of step 3 grows with these).
+// The slots SLOT_WF_S0..S5 split CvPlayerAI::AI_doWorkforcePlan into its steps (0 experts without raw material, 1 jobs, 2 workforce,
+// 3 set-up of the target plan, 4 seats now, 5 carry out); SLOT_WF_PLAN is the greedy loop of step 3 itself.
+//
+// ===========================================================================================================================
+// WHAT WAS FOUND AND CHANGED SO FAR (history, newest last; numbers are from one late game save, 3 European AIs + natives)
+// ===========================================================================================================================
+//  1. Pathfinding: KmodPathFinder can expand child nodes with TBB (setting PathfinderParallel). Measured: serial is about 25-30%
+//     faster in the late game, so the default is 0 (serial). Pathfinding is still the largest single item (about 16 s per turn
+//     change with 250,000-370,000 searches), but the count does not grow steadily with the turns (noisy, no trend).
+//  2. AI_doWorkforcePlan (CvPlayerAI, the AI's plan which colonist works which job) was the part that GREW: turns 385-402 went
+//     from 26.7 s to 42.4 s (+59%), about 60% of the whole turn change (46 s -> 70 s). Only the European AIs run it, 9-14 s each.
+//  3. First suspect, the travel times of the colonies (AI_wfUpdateTravel), was cached; the log showed 0.0 ms for it from turn 398
+//     while the plan time kept growing, so it was NOT the cause.
+//  4. Cause: step 3 chose ONE (colonist, job) pair per round and scanned all free colonists against all free jobs of all colonies
+//     in every round: cost ~ colonists x colonists x jobs. Fix: the candidates are kept per colony and only the colonies an
+//     assignment touched are scanned again (the chosen pairs are the same as with the full scan, tie breaks included; checked with
+//     a model on random cases, not with the real game). Measured afterwards (turn 404, the only turn logged with the fix):
+//     workforce plan 42.4 s -> 4.0 s, turn change 70.5 s -> 28.8 s.
+//  5. What is left in the late game (turn 404): AI unit updates 20 s of 29 s; pathfinding ~16 s (285,000 searches);
+//     UNITAI_TRANSPORT_SEA ~8 s (125 calls, ~64 ms each) is the biggest unit AI type; CvSelectionGroupAI::AI_tradeRoutes ~6 s.
+//     Next candidate: where the sea transports' path searches come from (see "path searches by the unit AI").
+//  6. Considered and rejected for now: running AI players or AI_doWorkforcePlan in parallel threads. The game state (map, units,
+//     the shared random number generator, the engine's drawing and Python calls) is shared and not thread safe, the order of the
+//     players is part of the game rules, and the workforce plan costs only about 1 s per player after the fix. Only read-only
+//     computations could be split (as TBB already does for the city job search).
+//  7. The long times matter more with more AI players (the tester plays with only 3 opponents because of the turn time): the plan
+//     scales about linearly with the number of European AIs, so the per player table is there to measure that.
+//
+// ===========================================================================================================================
+// SETTINGS
+// ===========================================================================================================================
 // Reads "WTP_Settings.txt" from the mod folder at every turn change (created with defaults when missing), so values can be
 // changed while the game is running:
 //   PathfinderParallel=1     1 = child nodes of the path search are expanded with TBB, 0 = always serial (default, faster in the measurements)
