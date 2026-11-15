@@ -3891,8 +3891,8 @@ class CvMainInterface:
 			iY = aiY[i]
 			if iX >= 0 and iY >= 0 and iX < pMap.getGridWidth() and iY < pMap.getGridHeight() and not pMap.plot(iX, iY).isNone():
 				ePlace = -1
-				# every message about a raid (raid, raiding party, Überfall ...) also offers the contact to the tribe that raids
-				if re.search(u"raid|\u00fcberfall|incursi", szPlain, re.IGNORECASE | re.UNICODE):
+				# (also an attack that was fought off: "fought off an enemy Ngabe Warrior") every message about a raid (raid, raiding party, Überfall ...) also offers the contact to the tribe that raids
+				if re.search(u"raid|\u00fcberfall|incursi|fought off|repelled|abgewehrt|zur\u00fcckgeschlagen", szPlain, re.IGNORECASE | re.UNICODE):
 					for (szName, ePlayer, iPX, iPY) in aNatives:
 						if szName in szPlain:
 							ePlace = ePlayer
