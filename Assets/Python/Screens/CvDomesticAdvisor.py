@@ -46,6 +46,9 @@ gc = CyGlobalContext()
 ArtFileMgr = CyArtFileMgr()
 localText = CyTranslator()
 
+# WTP: which trade routes a transport can serve is expensive to find out (pathfinding), it is kept for the turn: key of a transport -> viable route ids
+g_ViableRoutesCache = {"turn": -1, "data": {}}
+
 class CvDomesticAdvisor:
 	"Domestic Advisor Screen"
 	def __init__(self):
@@ -885,6 +888,11 @@ class CvDomesticAdvisor:
 
 		# Route validity matrix
 		self.RouteValidity = []
+		iTurn = gc.getGame().getGameTurn()
+		if g_ViableRoutesCache["turn"] != iTurn:
+			g_ViableRoutesCache["turn"] = iTurn
+			g_ViableRoutesCache["data"] = {}
+		tRouteIds = tuple([Route.getID() for Route in self.Routes])
 		for iTransport in range(len(self.Transports)):
 			Transport = self.Transports[iTransport]
 
@@ -893,9 +901,15 @@ class CvDomesticAdvisor:
 
 			pHeadUnit = Transport.getHeadUnit()
 			if pHeadUnit != None:
-				viable_routes = player.getViableTradeRoutes(pHeadUnit)
-				for r in viable_routes:
-					viable_ids[r.getID()] = 1
+				# WTP: the same transport at the same place with the same routes has the same viable routes during the turn
+				tKey = (pHeadUnit.getID(), pHeadUnit.getX(), pHeadUnit.getY(), pHeadUnit.getUnitType(), Transport.getNumUnits(), tRouteIds)
+				if tKey in g_ViableRoutesCache["data"]:
+					viable_ids = g_ViableRoutesCache["data"][tKey]
+				else:
+					viable_routes = player.getViableTradeRoutes(pHeadUnit)
+					for r in viable_routes:
+						viable_ids[r.getID()] = 1
+					g_ViableRoutesCache["data"][tKey] = viable_ids
 
 			RouteValidArray = []
 			for Route in self.Routes:
