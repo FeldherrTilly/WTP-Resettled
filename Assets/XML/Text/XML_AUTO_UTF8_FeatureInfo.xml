@@ -341,7 +341,7 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_REMARKABLE_MOUNTAIN</Tag>
-		<English>[COLOR_CAT_TERRAIN]Remarkable high mountain[COLOR_REVERT]</English>
+		<English>[COLOR_CAT_HILLS]Remarkable high mountain[COLOR_REVERT]</English>
 		<Portuguese>
 			<Text>Montanha Intransponível</Text>
 			<Gender>Female</Gender>
@@ -349,7 +349,7 @@
 		</Portuguese>
 		<French>Montagne infranchissable</French>
 		<German>
-			<Text>[COLOR_CAT_TERRAIN]Außergewöhnlich hoher Berg[COLOR_REVERT]</Text>
+			<Text>[COLOR_CAT_HILLS]Außergewöhnlich hoher Berg[COLOR_REVERT]</Text>
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
@@ -1226,8 +1226,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEAK2</Tag>
-		<English>[COLOR_CAT_TERRAIN]Mountain Peak[COLOR_REVERT]</English>
-		<German>[COLOR_CAT_TERRAIN]Berggipfel[COLOR_REVERT]</German>
+		<English>[COLOR_CAT_HILLS]Mountain Peak[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_HILLS]Berggipfel[COLOR_REVERT]</German>
 		<Russian>Горная вершина</Russian>
 	</TEXT>
 	<TEXT>
@@ -1238,8 +1238,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEAK1</Tag>
-		<English>[COLOR_CAT_TERRAIN]Mountain Peak[COLOR_REVERT]</English>
-		<German>[COLOR_CAT_TERRAIN]Berggipfel[COLOR_REVERT]</German>
+		<English>[COLOR_CAT_HILLS]Mountain Peak[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_HILLS]Berggipfel[COLOR_REVERT]</German>
 		<Russian>Горная вершина</Russian>
 	</TEXT>
 	<TEXT>
@@ -1250,8 +1250,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEAK3</Tag>
-		<English>[COLOR_CAT_TERRAIN]Mountain Peak[COLOR_REVERT]</English>
-		<German>[COLOR_CAT_TERRAIN]Berggipfel[COLOR_REVERT]</German>
+		<English>[COLOR_CAT_HILLS]Mountain Peak[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_HILLS]Berggipfel[COLOR_REVERT]</German>
 		<Russian>Горная вершина</Russian>
 	</TEXT>
 	<TEXT>
