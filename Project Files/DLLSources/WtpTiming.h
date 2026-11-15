@@ -14,6 +14,7 @@
 // where that time goes, so changes can be judged by numbers instead of guesses. It only measures; it changes no game logic.
 //
 // Output: "WTP_Timing.txt" in the mod folder (appended, one block per turn change, header "=== Turn change at game turn N ... ===").
+// The first turn change after the start of the game is not measured; a one-line note "# game started | session=.." stands in the file instead.
 // A block covers everything measured since the previous report; the report is written at the start of CvGame::doTurn and the
 // turn number in the header is the game turn at that moment.
 // Only the main thread is measured; worker threads (TBB) are ignored, so the timing never touches shared data.
@@ -1105,6 +1106,15 @@ namespace WtpTiming
 			_snprintf(kData.szSession, sizeof(kData.szSession) - 1, "%lx-%lx", (unsigned long)time(NULL), (unsigned long)GetCurrentProcessId());
 			kData.szSession[sizeof(kData.szSession) - 1] = 0;
 			kData.bSaveLoaded = false;
+			// The first turn change of a started game is not measured (nothing came before it, and the first turn after the start of the game
+			// takes longer anyway). Only a note, so that nobody wonders why no block follows after the first turn.
+			FILE* const pNote = fopen((szBase + "WTP_Timing.txt").c_str(), "a");
+			if (pNote != NULL)
+			{
+				fprintf(pNote, "# game started | session=%s | version=%s | the turn change at game turn %d is not measured (first turn change after the start of the game); the blocks follow from the next turn change on\n",
+					kData.szSession, (szGitVersion != NULL) ? szGitVersion : "?", iGameTurn);
+				fclose(pNote);
+			}
 			return;
 		}
 
