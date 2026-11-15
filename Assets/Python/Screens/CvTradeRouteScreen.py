@@ -801,6 +801,7 @@ class CvTradeRouteScreen:
 				aAdded.append([szType, d["maintain"], d["impLimit"], int(d["imp"])])
 				if p["kind"] == "auto":
 					d["auto"] = True
+					d["exp"] = True
 				else:
 					d["imp"] = True
 					d["feeder"] = True
@@ -976,6 +977,7 @@ class CvTradeRouteScreen:
 					bImport = True
 			if bAuto:
 				d["auto"] = True
+				d["exp"] = True
 			if not bImport:
 				continue
 			d["imp"] = True
@@ -1420,7 +1422,7 @@ class CvTradeRouteScreen:
 			iX = self.OX + self.BLOCK_EXP_X
 			self.drawSpin(iSlot, 1, d["maintain"], iX, iY, iBase + F_EXP_MINUS, iBase + F_EXP_PLUS)
 			iCX = iX + self.BLOCK_SPIN_W + 8
-			self.drawCheck("TRSc" + str(iSlot) + "_8", szExport, d["exp"], iCX, iY + 2, iBase + F_EXP_CHECK)
+			self.drawCheck("TRSc" + str(iSlot) + "_8", szExport, d["exp"] or d["auto"], iCX, iY + 2, iBase + F_EXP_CHECK)
 			self.drawCheck("TRSc" + str(iSlot) + "_9", szAuto, d["auto"], iCX + self.CHECK_W + 4, iY + 2, iBase + F_EXP_AUTO)
 			self.drawCheck("TRSc" + str(iSlot) + "_10", szLand, (d["expDom"] & 1) != 0, iCX, iY + 2 + self.CHECK_H + 2, iBase + F_EXP_LAND)
 			self.drawCheck("TRSc" + str(iSlot) + "_11", szSea, (d["expDom"] & 2) != 0, iCX + self.CHECK_W + 4, iY + 2 + self.CHECK_H + 2, iBase + F_EXP_SEA)
@@ -1507,9 +1509,15 @@ class CvTradeRouteScreen:
 		elif iField == F_IMP_SEA:
 			d["impDom"] = (d["impDom"] ^ 2) & 2
 		elif iField == F_EXP_CHECK:
-			d["exp"] = not d["exp"]
+			if d["exp"] or d["auto"]:
+				d["exp"] = False
+				d["auto"] = False # (auto export is export too: without export no auto export)
+			else:
+				d["exp"] = True
 		elif iField == F_EXP_AUTO:
 			d["auto"] = not d["auto"]
+			if d["auto"]:
+				d["exp"] = True # (auto export switches the export on; the export alone can be on without auto)
 		elif iField == F_EXP_LAND:
 			d["expDom"] = (d["expDom"] ^ 1) & 1
 		elif iField == F_EXP_SEA:
