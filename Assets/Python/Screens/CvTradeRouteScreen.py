@@ -76,12 +76,12 @@ STEP = 50
 STEP_CTRL = 10
 MAX_VALUE = 0xFFFF
 
-# the player option "new import / export window" (options screen, tab Game; it uses the player option slot PLAYEROPTION_MODDER_1):
+# the player option "new import / export window" (options screen, tab Game; it uses the player option slot PLAYEROPTION_MODDER_2; slot 1 is the message panel of its own branch):
 # off (the default, the WTP community decides if the new window becomes the standard) = the original popup of the DLL with its original
 # tooltips (the option cannot be read: off)
 def isNewWindowEnabled():
 	try:
-		return CyUserProfile().getPlayerOption(PlayerOptionTypes.PLAYEROPTION_MODDER_1)
+		return CyUserProfile().getPlayerOption(PlayerOptionTypes.PLAYEROPTION_MODDER_2)
 	except:
 		return False
 

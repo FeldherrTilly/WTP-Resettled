@@ -102,6 +102,19 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PLAYEROPTION_MODDER_1</Tag>
+		<English>ModPlayerOption1</English>
+		<Portuguese>ModPlayerOption1</Portuguese>
+		<French>Mod Option du joueur 1</French>
+		<German>Mod-Spieleroption1</German>
+		<Italian>ModPlayerOption1</Italian>
+		<Spanish>ModPlayerOption1</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_PLAYEROPTION_MODDER_1_HELP</Tag>
+		<English>????</English>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_PLAYEROPTION_MODDER_2</Tag>
 		<English>New Import / Export Window</English>
 		<German>Neues Import-/Export-Fenster</German>
 		<French>Nouvelle fenêtre d'import / export</French>
@@ -112,7 +125,7 @@
 		<Hungarian>Új import / export ablak</Hungarian>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_PLAYEROPTION_MODDER_1_HELP</Tag>
+		<Tag>TXT_KEY_PLAYEROPTION_MODDER_2_HELP</Tag>
 		<English>The city screen uses the new import / export window (filters, presets, preset protection, market automatic). Switched off, the original import / export popup is used.</English>
 		<German>Der Stadtbildschirm nutzt das neue Import-/Export-Fenster (Filter, Presets, Preset-Schutz, Marktautomatik). Ausgeschaltet wird das ursprüngliche Import-/Export-Popup verwendet.</German>
 		<French>L'écran de la colonie utilise la nouvelle fenêtre d'import / export (filtres, préréglages, protection des préréglages, automatisme du marché). Désactivée, la fenêtre d'origine est utilisée.</French>
@@ -121,24 +134,6 @@
 		<Portuguese>O ecrã da colónia usa a nova janela de importação / exportação (filtros, predefinições, proteção das predefinições, automatismo do mercado). Desativada, é usada a janela original.</Portuguese>
 		<Russian>Экран поселения использует новое окно импорта / экспорта (фильтры, пресеты, защита пресетов, автоматика рынка). Если выключено, используется прежнее окно.</Russian>
 		<Hungarian>A település képernyő az új import / export ablakot használja (szűrők, előbeállítások, védelem, piaci automatika). Kikapcsolva az eredeti ablak jelenik meg.</Hungarian>
-	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_PLAYEROPTION_MODDER_2</Tag>
-		<English>ModPlayerOption2</English>
-		<Portuguese>ModPlayerOption2</Portuguese>
-		<French>Mod Option du joueur 2</French>
-		<German>Mod-Spieleroption2</German>
-		<Italian>ModPlayerOption2</Italian>
-		<Spanish>ModPlayerOption2</Spanish>
-	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_PLAYEROPTION_MODDER_2_HELP</Tag>
-		<English>Player Option for Modding use 2.</English>
-		<Portuguese>Opção do jogador para uso de modding 2.</Portuguese>
-		<French>Option joueur pour le mod 2.</French>
-		<German>Mod-Spieleroption 2.</German>
-		<Italian>Opzioni giocatore modding 2.</Italian>
-		<Spanish>Opción del jugador para uso "modding" 2.</Spanish>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PLAYEROPTION_MODDER_3</Tag>
