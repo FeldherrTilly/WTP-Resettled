@@ -8105,7 +8105,13 @@ void CvCity::doYields()
 		}
 		if (iTotalCutAtStart > 0)
 		{
-			gDLL->logMsg("WTP_ProjectProtect.log", CvString::format("%s: overflow would cost %d material(s) of the project, %d moved to other goods", CvString(getName()).c_str(), iTotalCutAtStart, iTotalCutAtStart - iTotalCut).c_str());
+			// (written into the mod folder like the other WTP logs)
+			FILE* const pLog = fopen((std::string(gDLL->getModName()) + "WTP_ProjectProtect.log").c_str(), "a");
+			if (pLog != NULL)
+			{
+				fprintf(pLog, "%s: overflow would cost %d material(s) of the project, %d moved to other goods\n", CvString(getName()).c_str(), iTotalCutAtStart, iTotalCutAtStart - iTotalCut);
+				fclose(pLog);
+			}
 		}
 	}
 
