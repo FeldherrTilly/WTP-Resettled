@@ -25,6 +25,14 @@
 //   ##### WTP timing session | session=.. | started=.. | version=.. | built=.. | build flags:.. | logical cpus=.. | timing format=2 #####
 //       one line per start of the game: session id (unique per game start), start time, mod revision (git hash or release version),
 //       compile date, compiler flags (e.g. FINAL_RELEASE), number of logical CPUs of the machine.
+//   install: game=Colonization.exe version=.. | mod folder=.. | mod release version (changelog.txt)=.. | mod DLL: size, modified
+//   files: <folder> <n> files, <bytes>, hash .., last change <time> (<file>)    (Assets\XML, Assets\Python, Assets\Art, PrivateMaps)
+//       the game version (file version of the exe, which tells Steam / GOG / patch level apart), the name of the mod folder, the
+//       release version of the mod and which DLL is installed, and per folder the number of files, the total size, a hash over
+//       (path, size) of all files and the file changed last. The same mod revision with untouched files gives the same numbers,
+//       so a different number (or a recent "last change") means the player changed, added or removed files, which can matter for
+//       the results (modified XML / Python). Compiled .pyc files are ignored. Not covered: the CustomAssets folder in the user's
+//       documents (it can override mod files), other mods, the contents of the files (only name and size are compared).
 //   === Turn change at game turn N | PathfinderParallel=.. | format 2 | session=.. | time=.. | version=.. ===
 //       one block per turn change. The header repeats session, wall clock time and version, so a block is attributable even if the
 //       file was cut or several files were pasted together. Lines starting with "=== Turn change" start a block, "---" lines start
@@ -678,6 +686,242 @@ namespace WtpTiming
 	inline void noteGame(const char*, const char*, const char*, const char*, const char*, bool) {}
 #endif
 
+#ifdef WTP_TIMING
+	// ---- installation info for the session line (once per start of the game; plain Win32, no extra libraries) ----
+
+	struct FolderScan
+	{
+		int iFiles;
+		__int64 iBytes;
+		unsigned int iHash;
+		FILETIME kNewest;
+		std::string szNewest;
+	};
+
+	inline unsigned int hashText(unsigned int iHash, const std::string& szText)
+	{
+		for (size_t i = 0; i < szText.size(); i++)
+		{
+			char c = szText[i];
+			if (c >= 'A' && c <= 'Z')
+			{
+				c = (char)(c - 'A' + 'a');
+			}
+			if (c == '/')
+			{
+				c = '\\';
+			}
+			iHash ^= (unsigned int)(unsigned char)c;
+			iHash *= 16777619u;
+		}
+		return iHash;
+	}
+
+	// counts the files of a folder (recursive): number, bytes, a hash of (relative path, size) summed over all files (so the order of the
+	// directory does not matter) and the file that was changed last. Compiled python files (.pyc/.pyo) are left out, the game writes them.
+	inline void scanFolder(const std::string& szRoot, const std::string& szRel, FolderScan& kScan, int iDepth)
+	{
+		if (iDepth > 16)
+		{
+			return;
+		}
+		WIN32_FIND_DATAA kFind;
+		HANDLE hFind = FindFirstFileA((szRoot + szRel + "*").c_str(), &kFind);
+		if (hFind == INVALID_HANDLE_VALUE)
+		{
+			return;
+		}
+		do
+		{
+			const std::string szName = kFind.cFileName;
+			if (szName == "." || szName == "..")
+			{
+				continue;
+			}
+			if (kFind.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				scanFolder(szRoot, szRel + szName + "\\", kScan, iDepth + 1);
+				continue;
+			}
+			if (szName.size() > 4)
+			{
+				const std::string szEnd = szName.substr(szName.size() - 4);
+				if (szEnd == ".pyc" || szEnd == ".pyo" || szEnd == ".PYC")
+				{
+					continue;
+				}
+			}
+			kScan.iFiles++;
+			kScan.iBytes += ((__int64)kFind.nFileSizeHigh << 32) | (__int64)kFind.nFileSizeLow;
+			unsigned int iFileHash = hashText(2166136261u, szRel + szName);
+			iFileHash ^= (unsigned int)kFind.nFileSizeLow;
+			iFileHash *= 16777619u;
+			iFileHash ^= (unsigned int)kFind.nFileSizeHigh;
+			iFileHash *= 16777619u;
+			kScan.iHash += iFileHash;
+			if (CompareFileTime(&kFind.ftLastWriteTime, &kScan.kNewest) > 0)
+			{
+				kScan.kNewest = kFind.ftLastWriteTime;
+				kScan.szNewest = szRel + szName;
+			}
+		} while (FindNextFileA(hFind, &kFind));
+		FindClose(hFind);
+	}
+
+	inline std::string fileTimeText(const FILETIME& kTime)
+	{
+		char szText[40];
+		szText[0] = 0;
+		FILETIME kLocal;
+		SYSTEMTIME kSystemTime;
+		if (FileTimeToLocalFileTime(&kTime, &kLocal) && FileTimeToSystemTime(&kLocal, &kSystemTime))
+		{
+			_snprintf(szText, sizeof(szText) - 1, "%04d-%02d-%02d %02d:%02d:%02d", (int)kSystemTime.wYear, (int)kSystemTime.wMonth,
+				(int)kSystemTime.wDay, (int)kSystemTime.wHour, (int)kSystemTime.wMinute, (int)kSystemTime.wSecond);
+			szText[sizeof(szText) - 1] = 0;
+		}
+		return szText;
+	}
+
+	// size and last write time of a file, "missing" when it is not there
+	inline std::string fileInfoText(const std::string& szFile)
+	{
+		WIN32_FILE_ATTRIBUTE_DATA kData;
+		memset(&kData, 0, sizeof(kData));
+		if (!GetFileAttributesExA(szFile.c_str(), GetFileExInfoStandard, &kData))
+		{
+			return "missing";
+		}
+		char szText[128];
+		_snprintf(szText, sizeof(szText) - 1, "%lu bytes, modified %s", (unsigned long)kData.nFileSizeLow, fileTimeText(kData.ftLastWriteTime).c_str());
+		szText[sizeof(szText) - 1] = 0;
+		return szText;
+	}
+
+	// file version of an exe / dll (the game version of Colonization.exe), read with version.dll loaded on demand
+	inline std::string fileVersionText(const char* szFile)
+	{
+		struct FixedInfo
+		{
+			DWORD dwSignature;
+			DWORD dwStrucVersion;
+			DWORD dwFileVersionMS;
+			DWORD dwFileVersionLS;
+			DWORD dwProductVersionMS;
+			DWORD dwProductVersionLS;
+		};
+		typedef DWORD (WINAPI *SizeFn)(const char*, DWORD*);
+		typedef BOOL (WINAPI *InfoFn)(const char*, DWORD, DWORD, void*);
+		typedef BOOL (WINAPI *QueryFn)(const void*, const char*, void**, unsigned int*);
+
+		std::string szResult = "unknown";
+		HMODULE hVersion = LoadLibraryA("version.dll");
+		if (hVersion == NULL)
+		{
+			return szResult;
+		}
+		SizeFn pSize = (SizeFn)GetProcAddress(hVersion, "GetFileVersionInfoSizeA");
+		InfoFn pInfo = (InfoFn)GetProcAddress(hVersion, "GetFileVersionInfoA");
+		QueryFn pQuery = (QueryFn)GetProcAddress(hVersion, "VerQueryValueA");
+		if (pSize != NULL && pInfo != NULL && pQuery != NULL)
+		{
+			DWORD iHandle = 0;
+			const DWORD iSize = pSize(szFile, &iHandle);
+			if (iSize > 0 && iSize < 1000000)
+			{
+				std::vector<char> aBuffer(iSize);
+				if (pInfo(szFile, 0, iSize, &aBuffer[0]))
+				{
+					void* pValue = NULL;
+					unsigned int iLength = 0;
+					if (pQuery(&aBuffer[0], "\\", &pValue, &iLength) && pValue != NULL && iLength >= sizeof(FixedInfo))
+					{
+						const FixedInfo* pFixed = (const FixedInfo*)pValue;
+						char szText[96];
+						_snprintf(szText, sizeof(szText) - 1, "%u.%u.%u.%u (product %u.%u.%u.%u)",
+							(unsigned int)(pFixed->dwFileVersionMS >> 16), (unsigned int)(pFixed->dwFileVersionMS & 0xFFFF),
+							(unsigned int)(pFixed->dwFileVersionLS >> 16), (unsigned int)(pFixed->dwFileVersionLS & 0xFFFF),
+							(unsigned int)(pFixed->dwProductVersionMS >> 16), (unsigned int)(pFixed->dwProductVersionMS & 0xFFFF),
+							(unsigned int)(pFixed->dwProductVersionLS >> 16), (unsigned int)(pFixed->dwProductVersionLS & 0xFFFF));
+						szText[sizeof(szText) - 1] = 0;
+						szResult = szText;
+					}
+				}
+			}
+		}
+		FreeLibrary(hVersion);
+		return szResult;
+	}
+
+	// the first line "Version ..." of changelog.txt of the mod folder (the release version of the mod)
+	inline std::string changelogVersion(const std::string& szBase)
+	{
+		std::string szVersion = "unknown";
+		FILE* f = fopen((szBase + "changelog.txt").c_str(), "r");
+		if (f != NULL)
+		{
+			char szLine[256];
+			while (fgets(szLine, sizeof(szLine), f) != NULL)
+			{
+				if (strncmp(szLine, "Version ", 8) == 0)
+				{
+					szVersion = szLine + 8;
+					while (!szVersion.empty() && (szVersion[szVersion.size() - 1] == '\n' || szVersion[szVersion.size() - 1] == '\r' || szVersion[szVersion.size() - 1] == ' '))
+					{
+						szVersion.erase(szVersion.size() - 1);
+					}
+					break;
+				}
+			}
+			fclose(f);
+		}
+		return szVersion;
+	}
+
+	// the lines "install:" and "files:" after the session line: game version, mod folder, mod release version, DLL, and the
+	// files of the mod (to see whether the player changed anything: same revision + untouched install = same numbers)
+	inline void writeInstallInfo(FILE* f, const std::string& szBase)
+	{
+		char szExe[MAX_PATH + 1];
+		szExe[0] = 0;
+		GetModuleFileNameA(NULL, szExe, MAX_PATH);
+		szExe[MAX_PATH] = 0;
+		const char* szExeName = strrchr(szExe, '\\');
+		szExeName = (szExeName != NULL) ? szExeName + 1 : szExe;
+
+		std::string szFolder = szBase;
+		while (!szFolder.empty() && (szFolder[szFolder.size() - 1] == '\\' || szFolder[szFolder.size() - 1] == '/'))
+		{
+			szFolder.erase(szFolder.size() - 1);
+		}
+		const size_t iSlash = szFolder.find_last_of("\\/");
+		const std::string szFolderName = (iSlash == std::string::npos) ? szFolder : szFolder.substr(iSlash + 1);
+
+		fprintf(f, "install: game=%s version=%s, %s | mod folder=%s | mod release version (changelog.txt)=%s | mod DLL: %s\n",
+			szExeName, fileVersionText(szExe).c_str(), fileInfoText(szExe).c_str(), szFolderName.c_str(),
+			changelogVersion(szBase).c_str(), fileInfoText(szBase + "Assets\\CvGameCoreDLL.dll").c_str());
+
+		static const char* const aszFolders[] = { "Assets\\XML\\", "Assets\\Python\\", "Assets\\Art\\", "PrivateMaps\\" };
+		for (int i = 0; i < 4; i++)
+		{
+			FolderScan kScan;
+			kScan.iFiles = 0;
+			kScan.iBytes = 0;
+			kScan.iHash = 0;
+			kScan.kNewest.dwLowDateTime = 0;
+			kScan.kNewest.dwHighDateTime = 0;
+			scanFolder(szBase, aszFolders[i], kScan, 0);
+			if (kScan.iFiles == 0)
+			{
+				fprintf(f, "files: %s none\n", aszFolders[i]);
+				continue;
+			}
+			fprintf(f, "files: %s %d files, %I64d bytes, hash %08x, last change %s (%s)\n", aszFolders[i], kScan.iFiles, kScan.iBytes,
+				kScan.iHash, fileTimeText(kScan.kNewest).c_str(), kScan.szNewest.c_str());
+		}
+	}
+#endif
+
 	inline void readSettings(const char* szFile)
 	{
 		Data& kData = data();
@@ -777,6 +1021,7 @@ namespace WtpTiming
 					fprintf(f, "##### WTP timing session | session=%s | started=%s | version=%s | built=%s %s | build flags:%s | logical cpus=%lu | timing format=2 #####\n",
 						kData.szSession, szTime, (szGitVersion != NULL) ? szGitVersion : "?", __DATE__, __TIME__,
 						szBuild.empty() ? " (none)" : szBuild.c_str(), (unsigned long)kSystem.dwNumberOfProcessors);
+					writeInstallInfo(f, szBase);
 				}
 				fprintf(f, "=== Turn change at game turn %d | PathfinderParallel=%d PathfinderMinChildren=%d | format 2 | session=%s | time=%s | version=%s ===\n",
 					iGameTurn, kData.iPathfinderParallel, kData.iPathfinderMinChildren, kData.szSession, szTime,
