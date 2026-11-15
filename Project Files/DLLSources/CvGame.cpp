@@ -5453,6 +5453,18 @@ void CvGame::addShipName(const CvWString& szName)
 
 void CvGame::doTurn()
 {
+	// WTP: the data of the timing report (map, players: type, civilization, cities, units)
+	WtpTiming::noteMap(GC.getMapINLINE().getGridWidthINLINE(), GC.getMapINLINE().getGridHeightINLINE());
+	for (int iWtpPlayer = 0; iWtpPlayer < MAX_PLAYERS; ++iWtpPlayer)
+	{
+		const CvPlayer& kWtpPlayer = GET_PLAYER((PlayerTypes)iWtpPlayer);
+		if (kWtpPlayer.isAlive())
+		{
+			const char cWtpType = kWtpPlayer.isHuman() ? 'H' : (kWtpPlayer.isNative() ? 'N' : (kWtpPlayer.isEurope() ? 'K' : 'A'));
+			const char* szWtpCiv = (kWtpPlayer.getCivilizationType() != NO_CIVILIZATION) ? GC.getCivilizationInfo(kWtpPlayer.getCivilizationType()).getType() : "";
+			WtpTiming::notePlayer(iWtpPlayer, cWtpType, kWtpPlayer.getNumCities(), kWtpPlayer.getNumUnits(), szWtpCiv);
+		}
+	}
 	WtpTiming::flush(getGameTurn());
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_DOTURN);
 	MOD_PROFILE("CvGame::doTurn");
