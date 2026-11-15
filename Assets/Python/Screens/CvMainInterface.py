@@ -4219,6 +4219,20 @@ class CvMainInterface:
 						else:
 							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOOD", ())
 						szLabel = u"<color=255,0,0,255>" + szLabel + u"</color>"
+					# the goods of the list: exported ones golden yellow, imported ones in the color of the imports in the production line
+					aSeg = szPara.split(u", ")
+					for k in range(len(aSeg)):
+						szColor = None
+						for iYield in range(YieldTypes.NUM_YIELD_TYPES):
+							if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
+								if pCity.isImport(iYield):
+									szColor = u"255,200,110,255"
+								elif pCity.isExport(iYield):
+									szColor = u"255,215,0,255"
+								break
+						if szColor is not None:
+							aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
+					szPara = u", ".join(aSeg)
 					aOut.append([szLabel, szPara])
 					continue
 				if len(szProducing) > 3 and szNorm.find(szProducing) == 0:
