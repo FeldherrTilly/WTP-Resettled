@@ -3509,9 +3509,14 @@
 		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Strg und Umschalt gedrückt halten und W, A, S, D drücken (zwei Tasten: diagonal).[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_ON</Tag>
-		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
-		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_LAND</Tag>
+		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]land[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]Land[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_SEA</Tag>
+		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]sea[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]See[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_OFF</Tag>

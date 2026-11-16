@@ -355,6 +355,7 @@ class CvMainInterface:
 	tMsgPanelRect = None
 	tMsgAutoRect = None # the auto expand label at the top right of the panel (for its help window)
 	bMsgWpView = False # the message panel shows the list of the waypoints
+	bMsgWpSea = False # ... of the ships (otherwise of the land units); the toggle: off, land, sea, off ...
 	iMsgWpPage = 0
 	aMsgWpEntries = [] # the waypoints of the list: (sea, number, x, y, name, text of the line)
 	aMsgWpRects = [] # (x, y, width, height, index, column) of the waypoints of the page that is shown
@@ -8200,7 +8201,15 @@ class CvMainInterface:
 					self.iMessagePage += 1 # (the panel starts again with the newest messages after the last page)
 				self.updateMessagePanel()
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_WPS):
-				self.bMsgWpView = not self.bMsgWpView
+				# (the toggle: the first click lists the waypoints of the land units, the second one those of the ships, the third one switches off)
+				if not self.bMsgWpView:
+					self.bMsgWpView = True
+					self.bMsgWpSea = False
+				elif not self.bMsgWpSea:
+					self.bMsgWpSea = True
+				else:
+					self.bMsgWpView = False
+					self.bMsgWpSea = False
 				self.iMsgWpPage = 0
 				# (the list starts collapsed; it goes back to the standard view when the cursor stays away from the panel, see updateMessageScroll)
 				self.bMessagePanelExpanded = False
@@ -8669,7 +8678,7 @@ class CvMainInterface:
 			if self.bMsgWpView:
 				aWpEntries = self.getMsgWaypointEntries()
 				tWpKey = (self.iMsgWpPage, tuple([t[5] for t in aWpEntries]))
-			tKey = (iNumCurrent, iNumPrevious, iNumPriority, bPrevious, self.iMessagePage, self.bMessagePanelExpanded, self.getMessageAutoExpand(), self.iMsgMoveX, self.iMsgMoveY, xRes, yRes, self.bMsgWpView, tWpKey)
+			tKey = (iNumCurrent, iNumPrevious, iNumPriority, bPrevious, self.iMessagePage, self.bMessagePanelExpanded, self.getMessageAutoExpand(), self.iMsgMoveX, self.iMsgMoveY, xRes, yRes, self.bMsgWpView, self.bMsgWpSea, tWpKey)
 			if tKey == self.tMessagePanelKey:
 				return
 			self.tMessagePanelKey = tKey
@@ -8881,22 +8890,23 @@ class CvMainInterface:
 
 	# the toggle "List WPs" at the top left corner of the message panel
 	def drawMsgWpToggle( self, screen, iX, iY, iPad ):
-		if self.bMsgWpView:
-			szWps = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_ON", ())
+		if self.bMsgWpView and self.bMsgWpSea:
+			szWps = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_SEA", ())
+		elif self.bMsgWpView:
+			szWps = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_LAND", ())
 		else:
 			szWps = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_OFF", ())
 		screen.setText("HudMsgWps", "Background", self.setFontSize(szWps, -1), CvUtil.FONT_LEFT_JUSTIFY, iX + iPad, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_WPS, -1)
 		screen.show("HudMsgWps")
 		screen.moveToFront("HudMsgWps")
 
-	# all waypoints for the list of the message panel: the ones of the land units, then the ones of the ships, each in the order of the lists of the
-	# tooltips (colonies first, then the others numbered): (sea, number, x, y, name, text of the line)
+	# the waypoints for the list of the message panel: the ones of the land units or of the ships, in the order of the lists of the tooltips
+	# (colonies first, then the others numbered): (sea, number, x, y, name, text of the line)
 	def getMsgWaypointEntries( self ):
 		aEntries = []
 		try:
-			for bSea in (False, True):
-				for tEntry in self.getWaypointView(bSea):
-					aEntries.append((bSea, tEntry[0], tEntry[1], tEntry[2], tEntry[3], tEntry[4]))
+			for tEntry in self.getWaypointView(self.bMsgWpSea):
+				aEntries.append((self.bMsgWpSea, tEntry[0], tEntry[1], tEntry[2], tEntry[3], tEntry[4]))
 		except:
 			pass
 		return aEntries
@@ -9148,6 +9158,7 @@ class CvMainInterface:
 					self.fMsgWpSeen = fNow
 				elif not self.bMsgWpRename and fNow - self.fMsgWpSeen > 4.0:
 					self.bMsgWpView = False
+					self.bMsgWpSea = False
 					self.bMessagePanelExpanded = False
 					self.bMessagePanelPrevious = False
 					self.iMessagePage = 0
