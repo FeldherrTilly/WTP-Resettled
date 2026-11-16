@@ -3741,17 +3741,17 @@
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_FOLD</Tag>
 		<English>Producing...</English>
-		<German>Produktion...</German>
+		<German>Produziert...</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_MISSING</Tag>
 		<English>Producing...missing</English>
-		<German>Produktion...missing</German>
+		<German>Produziert...missing</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT</Tag>
 		<English>Producing...need imp.</English>
-		<German>Produktion...bent. Imp.</German>
+		<German>Produziert...bent. Imp.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_WOOD</Tag>
@@ -3771,7 +3771,7 @@
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET</Tag>
 		<English>Producing...imp. set</English>
-		<German>Produktion...Imp. ges.</German>
+		<German>Produziert...Imp. ges.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_COLORS</Tag>
