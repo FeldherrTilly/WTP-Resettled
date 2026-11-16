@@ -4973,7 +4973,7 @@ class CvMainInterface:
 
 	# the new name from the window to rename a waypoint: "2. name" puts it at the place 2 of the list (the others move, the numbers stay continuous),
 	# a name without a number keeps its place
-	# the window to rename a waypoint was closed (OK or Esc): the time out of the list of the message panel runs again
+	# the window to rename a waypoint was closed: the time out of the list of the message panel runs again
 	def onWaypointRenameClosed( self ):
 		self.bMsgWpRename = False
 		self.fMsgWpSeen = (self.getTipNow() / 1000.0)
@@ -8966,10 +8966,8 @@ class CvMainInterface:
 			iCellX = iX + iCol * iCell
 			iCellY = iTextY + int(iRow * iLine)
 			szText = aEntries[aShow[i]][5]
-			# (the names can have color tags of the terrains: the length counts the visible letters, a long name is cut without the tags)
-			szPlain = re.sub(u"<[^>]*>", u"", szText)
-			if len(szPlain) > iChars:
-				szText = szPlain[:iChars - 2] + u".."
+			# (the names can have color / font tags of the terrains: a long name is cut by its visible letters, the tags stay)
+			szText = self.cutTaggedText(szText, iChars)
 			szName = "HudMsgLine%d" % i
 			screen.setText(szName, "Background", self.setFontSize(szText, -1), CvUtil.FONT_LEFT_JUSTIFY, iCellX + iPad, iCellY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_WP, aShow[i])
 			screen.show(szName)
@@ -9003,6 +9001,37 @@ class CvMainInterface:
 		screen.show("HudMsgAuto")
 		screen.moveToFront("HudMsgAuto")
 		self.drawMsgWpToggle(screen, iX, iY, iPad)
+
+	# a text with tags (<color=...>, <font=...>) cut to at most iMax visible letters ("..", the tags that are open are closed)
+	def cutTaggedText( self, szText, iMax ):
+		if len(re.sub(u"<[^>]*>", u"", szText)) <= iMax:
+			return szText
+		aOpen = []
+		szResult = u""
+		iVisible = 0
+		for szPart in re.split(u"(<[^>]*>)", szText):
+			if len(szPart) == 0:
+				continue
+			if szPart[0] == u"<" and szPart[-1] == u">":
+				szResult += szPart
+				if szPart[1:2] == u"/":
+					if len(aOpen) > 0:
+						aOpen.pop()
+				else:
+					mTag = re.match(u"<([a-zA-Z]+)", szPart)
+					if mTag is not None:
+						aOpen.append(mTag.group(1))
+				continue
+			iRoom = (iMax - 2) - iVisible
+			if len(szPart) > iRoom:
+				szResult += szPart[:max(0, iRoom)]
+				break
+			szResult += szPart
+			iVisible += len(szPart)
+		szResult += u".."
+		while len(aOpen) > 0:
+			szResult += u"</" + aOpen.pop() + u">"
+		return szResult
 
 	# a click on a waypoint of the list: left shows its place on the map, right renames it, Shift + right deletes it
 	def clickMsgWaypoint( self, iIndex, bRight, bShift ):
@@ -9112,8 +9141,6 @@ class CvMainInterface:
 				iCY = gc.getGame().getCursorClientY()
 				if iCX >= iPX - 4 and iCX < iPX + iPW + 4 and iCY >= iPY - 4 and iCY < iPY + iPH + 4:
 					self.fMsgWpSeen = fNow
-					# (the cursor is back on the panel: the window to rename has been closed, also without a name, e.g. with Esc)
-					self.bMsgWpRename = False
 				elif not self.bMsgWpRename and fNow - self.fMsgWpSeen > 4.0:
 					self.bMsgWpView = False
 					self.bMessagePanelExpanded = False
