@@ -66,6 +66,12 @@ HILITE_LAYERS = 1
 # color of the exports) when one of the export is on; both: the upper half in the import color, the lower half in the export color
 FRAME_IMP_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameImp.dds"
 FRAME_EXP_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameExp.dds"
+# the outer frame of a raw material that restricts the production of the city (the colors of the line "Producing..." of the city tooltip): red the
+# output is reduced, orange the raw material is scarce (import needed), light orange (as the import frame) the import is set; a dark ring
+# separates it from the frame of the import / export
+FRAME_RED_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameRed.dds"
+FRAME_ORANGE_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameOrange.dds"
+FRAME_DARK_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameDark.dds"
 HOVER_LAYERS = 1
 MARGIN_X = 2
 MARGIN_Y = 3
@@ -356,6 +362,7 @@ class CvTradeRouteScreen:
 		self.CHECK_W = 124
 		self.BLOCK_SPIN_W = 116
 		self.iCity = -1
+		self.dRawState = {} # good -> how it restricts the production of the city (getRawState)
 		self.bTempFilter = False # the filter view of this opening comes from a tooltip (it is not saved)
 		self.bCondensed = False
 		self.bFinished = True
@@ -1431,8 +1438,56 @@ class CvTradeRouteScreen:
 	def drawCheck(self, szName, szText, bOn, iX, iY, iCode):
 		self.addButton(szName, szText, bOn, iX, iY, self.CHECK_W, self.CHECK_H, iCode)
 
+	# how a good restricts the production of the city as a raw material: 0 not, 1 scarce (orange: the city consumes more than it produces), 2 the
+	# output of a good made of it is reduced (red), 3 scarce, but the import is set (light orange); the same rules as the colors of the line
+	# "Producing..." in the tooltip of the city
+	def getRawState(self, pCity, iYield):
+		if self.dRawState.has_key(iYield):
+			return self.dRawState[iYield]
+		iState = 0
+		try:
+			if iYield != YieldTypes.YIELD_FOOD and pCity.getRawYieldConsumed(iYield) > pCity.getBaseRawYieldProduced(iYield):
+				iState = 1
+				if pCity.isImport(iYield):
+					iState = 3
+				for iProfession in range(gc.getNumProfessionInfos()):
+					pProf = gc.getProfessionInfo(iProfession)
+					bUses = False
+					for k in range(pProf.getNumYieldsConsumed()):
+						if pProf.getYieldsConsumed(k) == iYield:
+							bUses = True
+					if bUses:
+						iOut = pProf.getYieldsProduced(0)
+						if iOut >= 0 and pCity.calculateActualYieldProduced(iOut) < pCity.getBaseRawYieldProduced(iOut):
+							iState = 2
+		except:
+			iState = 0
+		self.dRawState[iYield] = iState
+		return iState
+
+	def drawOuterFrame(self, iSlot, iX, iY, iState):
+		screen = self.pHost
+		aRects = []
+		if iState > 0:
+			szArt = FRAME_ORANGE_ART
+			if iState == 2:
+				szArt = FRAME_RED_ART
+			elif iState == 3:
+				szArt = FRAME_IMP_ART
+			iOuter = 8
+			iInner = 6
+			aRects = [(iX - iOuter, iY - iOuter, 32 + 2 * iOuter, 32 + 2 * iOuter, szArt), (iX - iInner, iY - iInner, 32 + 2 * iInner, 32 + 2 * iInner, FRAME_DARK_ART)]
+		for i in range(2):
+			szName = "TRSfo" + str(iSlot) + "_" + str(i)
+			self.drop(szName)
+			if i < len(aRects):
+				(x, y, w, h, szArt) = aRects[i]
+				screen.setImageButton(szName, szArt, x, y, w, h, WidgetTypes.WIDGET_GENERAL, -1, -1)
+
 	def drawRows(self):
 		screen = self.pHost
+		self.dRawState = {}
+		pRawCity = self.getCity()
 		self.updatePresetState() # (the highlight of the button under the mouse stays: removeButton takes it away when a button is drawn again)
 		szImport = localText.getText("TXT_KEY_POPUP_IMPORT_IMPORT", ())
 		szFeeder = localText.getText("TXT_KEY_POPUP_IMPORT_FEEDER", ())
@@ -1453,6 +1508,10 @@ class CvTradeRouteScreen:
 			iBase = BTN_ROW + iSlot * 16
 			szIcon = "TRSIcon" + str(iSlot)
 			# (the frame is made before the picture: the picture lies on top of it)
+			iRawState = 0
+			if pRawCity != None and not pRawCity.isNone():
+				iRawState = self.getRawState(pRawCity, iYield)
+			self.drawOuterFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, iRawState)
 			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
 			self.drop(szIcon)
 			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - 32) / 2, 32, 32, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
@@ -1521,6 +1580,8 @@ class CvTradeRouteScreen:
 		self.drop("TRSIcon" + str(iSlot))
 		for i in range(6):
 			self.drop("TRSfr" + str(iSlot) + "_" + str(i))
+		for i in range(2):
+			self.drop("TRSfo" + str(iSlot) + "_" + str(i))
 		for iBlock in range(2):
 			self.removeButton("TRSm" + str(iSlot) + "_" + str(iBlock))
 			self.removeButton("TRSp" + str(iSlot) + "_" + str(iBlock))
