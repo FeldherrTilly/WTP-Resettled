@@ -409,6 +409,9 @@ class CvMainInterface:
 	szExplainPrefix = "HudTipE1"
 	tExplainLayout = None # its layout, to freeze it together with the window of the list of goods
 	aszExplainParas = []
+	tExplainKind = None # (class, kind) of the explanation window: ("explain", 0 = stored, 1 = produced), see getStackSpot
+	tPreviewKind = None # the same for the child window shown now: ("list", kind) goods of the city, ("filter", kind) their marked goods
+	dFrozenKind = {} # frozen windows of the goods of a city: prefix -> (class, kind); stored goods are stacked above produced goods
 	dWpWin = {} # frozen windows with lines of waypoints: prefix -> {"unit": (owner, id), "paras": {paragraph: "row" | "new" | number of a waypoint}, "cmd": paragraph of the line Commands or -1}
 	tPreviewWp = None # the same for the window of the line that is shown beside a frozen window now (becomes dWpWin[prefix] when it is frozen)
 	tPreviewDetails = None # the folded lines of the window beside a frozen window (a line with a child window), for freezing
@@ -5932,6 +5935,9 @@ class CvMainInterface:
 			self.tPreviewUnit = None
 			self.tPreviewDetails = None
 			self.addFrozenWindow(screen, tLayout, self.aszPreviewParas, aiIndent, dict(dPreviewDetails), None, iParent)
+			if self.tPreviewKind is not None:
+				self.dFrozenKind[self.aFrozen[-1][0]] = self.tPreviewKind
+			self.tPreviewKind = None
 			if iParent >= 0:
 				self.dFrozenPrefDY[self.aFrozen[-1][0]] = self.iPreviewPrefDY
 				# (the frozen window of a line: the cursor stays on that line, no second window appears there)
@@ -5977,6 +5983,8 @@ class CvMainInterface:
 					aiEIndent = [0] * len(tE[4])
 				self.addFrozenWindow(screen, tELayout, self.aszExplainParas, aiEIndent, {}, None, iParent, True)
 				self.dFrozenCompanion[self.aFrozen[-1][0]] = True
+				if self.tExplainKind is not None:
+					self.dFrozenKind[self.aFrozen[-1][0]] = self.tExplainKind
 			self.bSecondTipShown = False
 			self.iSecondTipLines = 0
 			self.tSecondTipKey = None
@@ -6002,6 +6010,7 @@ class CvMainInterface:
 
 	def hideSecondTip( self, screen ):
 		self.hideFoldExplain(screen)
+		self.tPreviewKind = None
 		self.tPreviewWp = None
 		self.tPreviewUnit = None
 		self.tPreviewDetails = None
@@ -6055,7 +6064,7 @@ class CvMainInterface:
 				iBest = iOver
 		return tBest
 
-	def showSecondTip( self, screen, szText, iCursorY, tAnchor, iParent = -1, aUnits = None, szHint = None, szTail = None ):
+	def showSecondTip( self, screen, szText, iCursorY, tAnchor, iParent = -1, aUnits = None, szHint = None, szTail = None, tKind = None ):
 		try:
 			(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iPad, iLine) = tAnchor
 			xRes = screen.getXResolution()
@@ -6071,6 +6080,13 @@ class CvMainInterface:
 				iHintLines = len(self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT_CHILD", ()), iCharsPerLine))
 				(szText, tUnitWin) = self.getUnitListText(aUnits, iCharsPerLine, max(3, len(aszFLines) - iHintLines))
 			aszParas = self.carryColors(szText.split(u"\n"))
+			# the window of the stored or produced goods of a city (or of their marked goods): stacked with the other one, stored on top
+			if tKind is None:
+				if self.isStoredGoodsWindow(aszParas):
+					tKind = ("list", 0)
+				elif self.isStoredGoodsWindow(aszParas, "TXT_KEY_CITY_BAR_PRODUCING"):
+					tKind = ("list", 1)
+			self.tPreviewKind = tKind
 			if tUnitWin is not None:
 				if len(self.dUnitWin) > 200:
 					self.dUnitWin = {}
@@ -6111,7 +6127,13 @@ class CvMainInterface:
 			iLeft = iFX - 12 - iWidth
 			# (the place that the window would like to have: its distance below the top of its parent window)
 			self.iPreviewPrefDY = iY - iFY
-			(iX, iY) = self.pickFreeSpot([(iX, iY), (iRight, iY), (iLeft, iY), (iRight, iFY), (iLeft, iFY), (iRight, iFY + iFH - iHeight), (iLeft, iFY + iFH - iHeight), (iFX, iFY + iFH + 12), (iFX, iFY - 12 - iHeight)], iWidth, iHeight, xRes, yRes)
+			tStack = None
+			if tKind is not None:
+				tStack = self.getStackSpot(screen, tKind, iParent, iWidth, iHeight, tKind[0] == "filter")
+			if tStack is not None:
+				(iX, iY) = tStack
+			else:
+				(iX, iY) = self.pickFreeSpot([(iX, iY), (iRight, iY), (iLeft, iY), (iRight, iFY), (iLeft, iFY), (iRight, iFY + iFH - iHeight), (iLeft, iFY + iFH - iHeight), (iFX, iFY + iFH + 12), (iFX, iFY - 12 - iHeight)], iWidth, iHeight, xRes, yRes)
 			self.tPreviewLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
 			self.iPreviewParent = iParent
 			self.aszPreviewParas = aszParas
@@ -6158,9 +6180,10 @@ class CvMainInterface:
 
 	# the window with the explanation of a folded line: above the parent window, flush with its right edge (when there is room), otherwise
 	# beside or below the parent window where nothing is covered
-	def showFoldExplain( self, screen, szText, tAnchor, bFreezeHint = True ):
+	def showFoldExplain( self, screen, szText, tAnchor, bFreezeHint = True, tKind = None ):
 		try:
 			self.bExplainFreezeHint = bFreezeHint
+			self.tExplainKind = tKind
 			(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iPad, iLine) = tAnchor
 			xRes = screen.getXResolution()
 			yRes = screen.getYResolution()
@@ -6195,7 +6218,16 @@ class CvMainInterface:
 			else:
 				aCands += [(iRight, iY0), (iRight, iFY), (iRight, iFY + iFH - iHeight)]
 				aCands += [(iFX + iFW - iWidth, iFY + iFH + 12), (iLeft, iFY), (iLeft, iFY + iFH - iHeight)]
-			(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, aExtra)
+			tStack = None
+			if tKind is not None:
+				iExplainParent = -1
+				if self.bSecondTipShown:
+					iExplainParent = self.iPreviewParent
+				tStack = self.getStackSpot(screen, tKind, iExplainParent, iWidth, iHeight, False, aExtra)
+			if tStack is not None:
+				(iX, iY) = tStack
+			else:
+				(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, aExtra)
 			tLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
 			self.iExplainLines = len(aszLines)
 			self.tExplainLayout = tLayout
@@ -6462,17 +6494,21 @@ class CvMainInterface:
 				# the folded line "Stored..." / "Produced..." in a color: its explanation, in a second window beside the parent
 				szLegend = self.getFoldLegend(aszTopParas[iPara])
 				if len(szLegend) > 0:
-					self.showFoldExplain(screen, szLegend, tTop)
+					self.showFoldExplain(screen, szLegend, tTop, True, ("explain", self.getFoldKind(aszTopParas[iPara])))
 		elif iPara >= 0 and self.isCommandLine(iFz, aszTopParas, iPara):
 			# the command lines of a city tooltip: no Colopedia, a right click runs the command
 			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_RUN_COMMAND", ()), iCY, tTop, iFz)
 		elif ((iPara >= 0 and iSel < 0) or (iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx))) and self.isStoredGoodsWindow(aszTopParas):
 			# the window with the goods of a city: what the colors of the goods mean, on the lines of the goods and on the last line
 			# (the hint "Frozen - Esc or hold X: close"; there the highlight that the game draws under a line does not hide the colors)
-			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ()), iCY, tTop, iFz)
+			szFilter = self.getGoodsFilterText(aszTopParas, 0)
+			if len(szFilter) > 0:
+				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, None, None, ("filter", 0))
 		elif ((iPara >= 0 and iSel < 0) or (iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx))) and self.isStoredGoodsWindow(aszTopParas, "TXT_KEY_CITY_BAR_PRODUCING"):
 			# the window with the goods that a city produces: the same
-			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_PRODUCED_COLORS", ()), iCY, tTop, iFz)
+			szFilter = self.getGoodsFilterText(aszTopParas, 1)
+			if len(szFilter) > 0:
+				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, None, None, ("filter", 1))
 		elif iPara >= 0 and iSel < 0 and self.showAloneUnitTip(screen, iFz, aszTopParas, iPara, iCY, tTop):
 			# a line of a unit of a stack: the tooltip of the unit as if it stood alone on the plot
 			pass
@@ -6505,6 +6541,122 @@ class CvMainInterface:
 			return len(szStored) > 3 and szFirst.find(szStored) == 0
 		except:
 			return False
+
+	# which of the two folded lines "Stored..." (0) and "Produced..." (1) a label belongs to (-1: none)
+	def getFoldKind( self, szLabel ):
+		try:
+			szNorm = self.normTipText(szLabel)
+			aGroups = self.getFoldGroups()
+			for iGroup in range(len(aGroups)):
+				for tState in aGroups[iGroup]:
+					if self.normTipText(localText.getText(tState[0], ())) == szNorm:
+						return iGroup
+		except:
+			pass
+		return -1
+
+	# is a window of this size at this place on the screen and without contact to a frozen window (except iExclude) or one of the extra rectangles?
+	def isSpotFree( self, iX, iY, iWidth, iHeight, xRes, yRes, iExclude = -1, aExtra = None, iGap = 4 ):
+		if iX < 4 or iY < 4 or iX + iWidth > xRes - 4 or iY + iHeight > yRes - 4:
+			return False
+		aRects = []
+		if aExtra is not None:
+			aRects += list(aExtra)
+		for i in range(len(self.aFrozen)):
+			if i != iExclude:
+				aRects.append(self.aFrozen[i][1][:4])
+		for (iRX, iRY, iRW, iRH) in aRects:
+			if iX < iRX + iRW + iGap and iX + iWidth > iRX - iGap and iY < iRY + iRH + iGap and iY + iHeight > iRY - iGap:
+				return False
+		return True
+
+	# The windows of the stored goods and of the produced goods of a city (and their help windows) lie one below the other, the stored goods on
+	# top, whether the other one is frozen or not. tKind = (class, kind): kind 0 stored, 1 produced. The place of the new window (None: there is
+	# no window of the other kind, the usual places apply). When the new window does not fit above / below the other one, the other one makes room.
+	def getStackSpot( self, screen, tKind, iParent, iWidth, iHeight, bAnyParent = False, aExtra = None ):
+		try:
+			iSib = -1
+			for i in range(len(self.aFrozen)):
+				tK = self.dFrozenKind.get(self.aFrozen[i][0])
+				if tK is not None and tK[0] == tKind[0] and tK[1] != tKind[1] and (bAnyParent or self.aFrozen[i][6] == iParent):
+					iSib = i
+			if iSib < 0:
+				return None
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			iGap = 8
+			(iSX, iSY, iSW, iSH) = self.aFrozen[iSib][1][:4]
+			iNX = iSX
+			if tKind[1] == 0:
+				# stored: above the produced goods
+				if self.isSpotFree(iNX, iSY - iHeight - iGap, iWidth, iHeight, xRes, yRes, -1, aExtra):
+					return (iNX, iSY - iHeight - iGap)
+				# otherwise the produced goods go down and this window takes their place
+				if self.isSpotFree(iNX, iSY + iHeight + iGap, iSW, iSH, xRes, yRes, iSib, aExtra) and self.isSpotFree(iNX, iSY, iWidth, iHeight, xRes, yRes, iSib, aExtra):
+					self.moveStackSibling(screen, iSib, iNX, iSY + iHeight + iGap)
+					return (iNX, iSY)
+			else:
+				# produced: below the stored goods
+				if self.isSpotFree(iNX, iSY + iSH + iGap, iWidth, iHeight, xRes, yRes, -1, aExtra):
+					return (iNX, iSY + iSH + iGap)
+				# otherwise the stored goods go up and this window takes their place
+				if self.isSpotFree(iNX, iSY - iSH - iGap, iSW, iSH, xRes, yRes, iSib, aExtra) and self.isSpotFree(iNX, iSY, iWidth, iHeight, xRes, yRes, iSib, aExtra):
+					self.moveStackSibling(screen, iSib, iNX, iSY - iSH - iGap)
+					return (iNX, iSY)
+		except:
+			pass
+		return None
+
+	# a frozen window goes to another place; a child window keeps that place to its parent
+	def moveStackSibling( self, screen, iSib, iNX, iNY ):
+		self.moveFrozenWindow(screen, iSib, iNX, iNY)
+		iParent = self.aFrozen[iSib][6]
+		if iParent >= 0 and iParent < len(self.aFrozen):
+			self.aFrozen[iSib][7] = (self.aFrozen[iSib][1][0] - self.aFrozen[iParent][1][0], self.aFrozen[iSib][1][1] - self.aFrozen[iParent][1][1])
+
+	# the window that lists the marked goods of the window of the stored goods (kind 0) or the produced goods (kind 1) of a city, sorted by the
+	# colors of the marks (one line for each good, the explanation of the color as the heading); empty when no good is marked
+	def getGoodsFilterText( self, aszParas, iKind ):
+		try:
+			if iKind == 0:
+				szLegend = localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ())
+				aColors = [u"255,240,0,255", u"255,200,110,255"]
+			else:
+				szLegend = localText.getText("TXT_KEY_WTP_TIP_PRODUCED_COLORS", ())
+				aColors = [u"255,0,0,255", u"255,140,0,255", u"255,200,110,255"]
+			aLegend = szLegend.split(u"\n")
+			aGoods = []
+			for i in range(len(aColors)):
+				aGoods.append([])
+			aSeg = aszParas[0].split(u", ")
+			for k in range(len(aSeg)):
+				szSeg = aSeg[k]
+				if k == 0:
+					# (the first part starts with the name of the line: "Stored : ")
+					szSeg = re.sub(u"^((?:<color=[^>]*>)?)[^:<>]*:\\s*", u"\\1", szSeg)
+				mColor = re.search(u"<color=(\\d+,\\d+,\\d+,\\d+)>", szSeg)
+				if mColor is None or not (mColor.group(1) in aColors):
+					continue
+				szName = u""
+				for iYield in range(YieldTypes.NUM_YIELD_TYPES):
+					if szSeg.find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
+						szName = re.sub(u"<[^>]*>", u"", gc.getYieldInfo(iYield).getDescription() or u"")
+						break
+				if len(szName) > 0:
+					if szSeg.endswith(u"</color>"):
+						szSeg = szSeg[:-len(u"</color>")] + u" " + szName + u"</color>"
+					else:
+						szSeg = szSeg + u" " + szName
+				aGoods[aColors.index(mColor.group(1))].append(szSeg)
+			aLines = []
+			for i in range(len(aColors)):
+				if len(aGoods[i]) > 0:
+					if i < len(aLegend):
+						aLines.append(aLegend[i])
+					aLines += aGoods[i]
+			return u"\n".join(aLines)
+		except:
+			return u""
 
 	# the promotions named by the pictures of a line (<img=button path size=16>): their names and what they do
 	def getPromotionTipText( self, szLine ):
