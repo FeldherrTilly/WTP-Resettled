@@ -3824,6 +3824,31 @@
 		<German>Produziert: %s1_Reason</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_1</Tag>
+		<English>Unsaved changes</English>
+		<German>Nicht gespeicherte Änderungen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_2</Tag>
+		<English>There are changes that are not saved yet. They only take effect when the window is closed with OK.</English>
+		<German>Es gibt Änderungen, die noch nicht gespeichert sind. Sie gelten nur, wenn das Fenster mit OK geschlossen wird.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_OK_HELP</Tag>
+		<English>Apply the changes and close the window</English>
+		<German>Änderungen übernehmen und das Fenster schließen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE</Tag>
+		<English>Close</English>
+		<German>Schließen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE_HELP</Tag>
+		<English>The changes are discarded</English>
+		<German>Die Änderungen werden verworfen</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_COLORS</Tag>
 		<English>[COLOR:255:0:0:255]Red[COLOR_REVERT]: raw materials missing, output reduced[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: raw materials scarce, import needed[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: raw material import set</English>
 		<German>[COLOR:255:0:0:255]Rot[COLOR_REVERT]: Rohstoffe fehlen, Ausstoß gedrosselt[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: Rohstoffe knapp, Import nötig[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: Rohstoff-Import gesetzt</German>

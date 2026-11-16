@@ -25,6 +25,8 @@ BTN_CLEAR_SEARCH = 41301
 BTN_MOVE = 41310 # +0 left, +1 right, +2 up, +3 down
 BTN_WARN_RESET = 41330 # the notice in the middle of the window: reset the good to the setting of market automatic
 BTN_WARN_OK = 41331 # the notice: ignore / OK
+BTN_WARN_SAVE = 41332 # the notice of unsaved changes: apply them (OK)
+BTN_WARN_DISCARD = 41333 # the same: close the window and discard them
 MOVE_STEP = 60
 MOVE_DELAY = 18 # frames until the key repeats
 MOVE_REPEAT = 3 # frames between the steps
@@ -416,10 +418,13 @@ class CvTradeRouteScreen:
 	# what the window shows (not what was changed in it): the view, the goods of the filter, the search text, the page; the window of the same
 	# city is opened again with it in the city screen (see CvMainInterface)
 	def getState(self):
-		return {"city": self.iCity, "condensed": self.bCondensed, "view": self.iView, "confirmed": list(self.aConfirmed), "query": self.szQuery, "temp": self.bTempFilter, "first": self.iFirst}
+		return {"city": self.iCity, "condensed": self.bCondensed, "view": self.iView, "confirmed": list(self.aConfirmed), "query": self.szQuery, "temp": self.bTempFilter, "first": self.iFirst, "data": dict([(k, dict(v)) for (k, v) in self.dData.items()])}
 
 	def restoreState(self, tState):
 		try:
+			# (the changes that were not confirmed yet stay in the window)
+			for iYield in tState["data"].keys():
+				self.dData[iYield] = dict(tState["data"][iYield])
 			self.bTempFilter = tState["temp"]
 			self.aConfirmed = list(tState["confirmed"])
 			self.szQuery = tState["query"]
@@ -1161,7 +1166,10 @@ class CvTradeRouteScreen:
 			szLine = "TRSWarnText2_" + str(iLine)
 			screen.setText(szLine, "", u"<font=3b><color=255,255,255>" + aLines[iLine] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 50 + iLine * 24, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
 			self.aWarnDrawn.append(szLine)
-		if self.tWarn[2] >= 0 or len(self.tWarn[3]) > 0:
+		if self.tWarn[4] == "unsaved":
+			self.addButton("TRSWarnReset", localText.getText("TXT_KEY_MAIN_MENU_OK", ()), False, iX + iW / 2 - 165, iY + iH - 42, 160, 28, BTN_WARN_SAVE)
+			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE", ()), False, iX + iW / 2 + 5, iY + iH - 42, 160, 28, BTN_WARN_DISCARD)
+		elif self.tWarn[2] >= 0 or len(self.tWarn[3]) > 0:
 			self.addButton("TRSWarnReset", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_RESET", ()), False, iX + iW / 2 - 165, iY + iH - 42, 160, 28, BTN_WARN_RESET)
 			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE", ()), False, iX + iW / 2 + 5, iY + iH - 42, 160, 28, BTN_WARN_OK)
 		else:
@@ -1739,6 +1747,30 @@ class CvTradeRouteScreen:
 		self.checkMarketChange(self.aYields[iIndex], dOld) # (before the redraw: a notice keeps the preset on until it is answered)
 		self.drawRows()
 
+	# are there changes in the window that are not applied to the city yet (what apply sends)?
+	def hasChanges(self):
+		pCity = self.getCity()
+		if pCity == None or pCity.isNone():
+			return False
+		for iYield in self.dData.keys():
+			d = self.dData[iYield]
+			if (d["imp"] != pCity.isImport(iYield) or d["exp"] != pCity.isExport(iYield) or d["feeder"] != pCity.isImportFeeder(iYield)
+				or d["auto"] != pCity.isAutoExport(iYield) or d["impDom"] != pCity.getImportDomains(iYield)
+				or d["expDom"] != pCity.getExportDomains(iYield) or d["maintain"] != pCity.getMaintainLevel(iYield)
+				or d["impLimit"] != pCity.getImportsLimit(iYield)):
+				return True
+		return False
+
+	# Esc and Cancel: with unsaved changes the notice asks first (OK applies them, Close discards them)
+	def requestClose(self):
+		if self.tWarn != None and self.tWarn[4] == "unsaved":
+			self.hideWarn() # (Esc again: back to the window)
+			return
+		if self.hasChanges():
+			self.showWarn(localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_1", ()), localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_2", ()), -1, [], False, "unsaved")
+			return
+		self.finish(False, -1)
+
 	def apply(self):
 		pCity = self.getCity()
 		if pCity == None or pCity.isNone():
@@ -1763,6 +1795,10 @@ class CvTradeRouteScreen:
 
 	# the tooltip of a widget of the window (CvScreensInterface.getWidgetHelp); empty text: none
 	def getHelp(self, iCode):
+		if iCode == BTN_WARN_SAVE:
+			return localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_OK_HELP", ())
+		if iCode == BTN_WARN_DISCARD:
+			return localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE_HELP", ())
 		if iCode == BTN_VIEW:
 			return localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_HELP", ())
 		if iCode == BTN_SEARCH:
@@ -2017,7 +2053,7 @@ class CvTradeRouteScreen:
 			# Alt+Tab (switching out of the game) must not count as Tab (accept the suggestion) or as typing
 			return
 		if iKey == self.iKeyEsc:
-			self.finish(False, -1)
+			self.requestClose()
 		elif bCtrl and bShift and iKey == self.getKeyId("KB_Q"):
 			self.resetPosition()
 		elif iKey in self.aKeyArrows:
@@ -2128,6 +2164,10 @@ class CvTradeRouteScreen:
 		if iData == BTN_OK:
 			self.finish(True, -1)
 		elif iData == BTN_CANCEL:
+			self.requestClose()
+		elif iData == BTN_WARN_SAVE:
+			self.finish(True, -1)
+		elif iData == BTN_WARN_DISCARD:
 			self.finish(False, -1)
 		elif iData >= BTN_MOVE and iData < BTN_MOVE + 4:
 			if self.bRepeatDone:
