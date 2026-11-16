@@ -725,6 +725,25 @@ int CyGame::takeWheelNotches() const
 	return iNotches;
 }
 
+int CyGame::getMiddleClickX() const
+{
+	return m_pGame ? m_pGame->getMiddleClickX() : -1;
+}
+
+int CyGame::getMiddleClickY() const
+{
+	return m_pGame ? m_pGame->getMiddleClickY() : -1;
+}
+
+bool CyGame::takeMiddleClick()
+{
+	if (m_pGame)
+	{
+		return pointer(CREATE_ASSERT_DATA)->takeMiddleClick();
+	}
+	return false;
+}
+
 bool CyGame::isCtrlKeyPressed() const
 {
 	return (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
@@ -733,6 +752,24 @@ bool CyGame::isCtrlKeyPressed() const
 bool CyGame::isShiftKeyPressed() const
 {
 	return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+}
+
+// WTP: the cursor goes to a place of the game window (the nested tooltips take the cursor along when their windows jump to a waypoint)
+void CyGame::setCursorClient(int iX, int iY) const
+{
+	HWND hWnd = GetForegroundWindow();
+	DWORD iProcess = 0;
+	if (hWnd == NULL || GetWindowThreadProcessId(hWnd, &iProcess) == 0 || iProcess != GetCurrentProcessId())
+	{
+		return;
+	}
+	POINT pt;
+	pt.x = iX;
+	pt.y = iY;
+	if (ClientToScreen(hWnd, &pt))
+	{
+		SetCursorPos(pt.x, pt.y);
+	}
 }
 
 static bool wtpGetCursor(POINT& pt)

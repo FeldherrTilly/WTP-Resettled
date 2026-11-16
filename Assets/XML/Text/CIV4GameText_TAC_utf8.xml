@@ -3494,6 +3494,61 @@
 		<German>Ertrag aus dem Verkauf: +%d1 Gold</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_SET</Tag>
+		<English>[COLOR:140:255:40:255]Set waypoint...[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Wegpunkt setzen...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_NEW</Tag>
+		<English>[COLOR_SELECTED_TEXT]New waypoint[COLOR_REVERT]</English>
+		<German>[COLOR_SELECTED_TEXT]Neuer Wegpunkt[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_NEW_HELP</Tag>
+		<English>Right click: the unit is selected, then right click the target on the map. The unit starts to go there and the place is saved as a waypoint.</English>
+		<German>Rechtsklick: die Einheit wird ausgewählt, dann per Rechtsklick das Ziel auf der Karte wählen. Die Einheit macht sich auf den Weg und der Ort wird als Wegpunkt gespeichert.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_OPTIONS</Tag>
+		<English>Right click: start (the unit goes there)[NEWLINE]Ctrl + right click: delete waypoint[NEWLINE]Shift + right click: rename</English>
+		<German>Rechtsklick: Start (die Einheit geht dorthin)[NEWLINE]Strg + Rechtsklick: Wegpunkt löschen[NEWLINE]Umschalt + Rechtsklick: umbenennen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_WHEEL</Tag>
+		<English>[COLOR:140:255:40:255]Shift + mouse wheel: choose, right click: run[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Umschalt + Mausrad: auswählen, Rechtsklick: ausführen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_KEYS</Tag>
+		<English>[COLOR:140:255:40:255]Ctrl + right click: delete waypoint[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + right click: rename[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + mouse wheel click or left click: look at the waypoint[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Strg + Rechtsklick: Wegpunkt löschen[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Umschalt + Rechtsklick: umbenennen[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Umschalt + Mausradklick oder Linksklick: zum Wegpunkt springen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_HINT</Tag>
+		<English>[COLOR:140:255:40:255]Ctrl + right click: Set waypoint[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Strg + Rechtsklick: Wegpunkt setzen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_WAYPOINT_MODE</Tag>
+		<English>Right click the target of %s1 on the map (it is saved as a waypoint)</English>
+		<German>Rechtsklick auf das Ziel von %s1 auf der Karte (es wird als Wegpunkt gespeichert)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_WAYPOINT_SAVED</Tag>
+		<English>Waypoint saved: %s1</English>
+		<German>Wegpunkt gespeichert: %s1</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_WAYPOINT_NAME_COLONY</Tag>
+		<English>"%s1" is the name of a colony and cannot be used for a waypoint.</English>
+		<German>"%s1" ist der Name einer Kolonie und kann nicht für einen Wegpunkt verwendet werden.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_WAYPOINT_RENAME</Tag>
+		<English>Name of the waypoint. A number and a dot in front (2. name) puts it at that place of the list.</English>
+		<German>Name des Wegpunkts. Mit Zahl und Punkt davor (2. Name) wird er an diese Stelle der Liste gesetzt.</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_BUILDINGS</Tag>
 		<English>[COLOR_SELECTED_TEXT]Buildings...[COLOR_REVERT]</English>
 		<German>[COLOR_SELECTED_TEXT]Gebäude...[COLOR_REVERT]</German>
@@ -3577,6 +3632,16 @@
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_COLORS</Tag>
 		<English>[COLOR:255:0:0:255]Red[COLOR_REVERT]: raw materials missing, output reduced[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: raw materials scarce, import needed[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: raw material import set</English>
 		<German>[COLOR:255:0:0:255]Rot[COLOR_REVERT]: Rohstoffe fehlen, Ausstoß gedrosselt[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: Rohstoffe knapp, Import nötig[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: Rohstoff-Import gesetzt</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT_CHILD</Tag>
+		<English>[COLOR:140:255:40:255]X or left click: freeze this tooltip[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]X oder Linksklick: Tooltip einfrieren[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FROZEN_HINT_CHILD</Tag>
+		<English>[COLOR:140:255:40:255]Frozen - left click on its line, Esc or hold X: close[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Eingefroren - Linksklick auf die Zeile, Esc oder X halten: schließen[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT</Tag>

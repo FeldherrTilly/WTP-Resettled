@@ -157,6 +157,7 @@ class CvEventManager:
 			CvUtil.EventCreateTradeRoute: ('CreateTradeRoute', self.__eventCreateTradeRouteApply, self.__eventCreateTradeRouteBegin),
 			CvUtil.EventEditTradeRoute: ('EditTradeRoute', self.__eventEditTradeRouteApply, self.__eventEditTradeRouteBegin),
 			CvUtil.EventDiploYieldAmount: ('DiploYieldAmount', self.__eventDiploYieldAmountApply, self.__eventDiploYieldAmountBegin),
+			CvUtil.EventRenameWaypoint: ('RenameWaypoint', self.__eventRenameWaypointApply, self.__eventRenameWaypointBegin),
 
 # Dale - AoD: AoDCheatMenu START
 			CvUtil.EventAoDCheatMenu: ('AoDCheatMenu', self.AoDCheatMenuApply, self.AoDCheatMenuBegin),
@@ -632,6 +633,12 @@ class CvEventManager:
 		eMission = argsList[1]
 		iNumUnits = argsList[2]
 		listUnitIds = argsList[3]
+
+		try:
+			# the target of an order to move can become a waypoint of the unit (tooltips of units, "Set waypoint...")
+			CvScreensInterface.mainInterface.onWaypointMission(eOwner, eMission)
+		except:
+			pass
 
 		if (not self.__LOG_PUSH_MISSION):
 			return
@@ -1179,6 +1186,21 @@ class CvEventManager:
 		'Wonder Movie Apply'
 		if (getChtLvl() > 0):
 			CvDebugTools.CvDebugTools().applyWonderMovie( (popupReturn) )
+
+	# the small window to rename a waypoint of the tooltips of units (argsList: (number of the waypoint, its name with the number in front))
+	def __eventRenameWaypointBegin(self, argsList):
+		popup = CyPopup(CvUtil.EventRenameWaypoint, EventContextTypes.EVENTCONTEXT_ALL, True)
+		popup.setUserData((argsList[0],))
+		popup.setBodyString(localText.getText("TXT_KEY_WTP_WAYPOINT_RENAME", ()), CvUtil.FONT_CENTER_JUSTIFY)
+		popup.createEditBox(argsList[1], 0)
+		popup.setEditBoxMaxCharCount(30, 30, 0)
+		popup.launch(True, PopupStates.POPUPSTATE_IMMEDIATE)
+
+	def __eventRenameWaypointApply(self, playerID, userData, popupReturn):
+		try:
+			CvScreensInterface.mainInterface.applyWaypointRename(playerID, userData[0], popupReturn.getEditBoxString(0))
+		except:
+			pass
 
 	def __eventEditUnitNameBegin(self, argsList):
 		pUnit = argsList

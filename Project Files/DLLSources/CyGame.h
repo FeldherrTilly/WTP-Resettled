@@ -169,6 +169,10 @@ public:
 	void setWheelCapture(bool bOn) const; // WTP: the mouse wheel is collected for the amount dialog (python) instead of zooming the map
 	int takeWheelNotches() const; // WTP: the notches of the wheel since the last call (positive: away from the user)
 	bool isCtrlKeyPressed() const;
+	void setCursorClient(int iX, int iY) const; // WTP: puts the cursor on a place of the game window
+	int getMiddleClickX() const; // WTP: where the cursor was at the last wheel click
+	int getMiddleClickY() const;
+	bool takeMiddleClick(); // WTP: was the mouse wheel clicked (frozen tooltip: jump to the waypoint)?
 	bool isShiftKeyPressed() const; // WTP: is the shift key down (frozen tooltip: shift + mouse wheel)
 	std::wstring getWidgetHelpText() const; // WTP: the last help text the game asked for (widget under the cursor)
 	int getWidgetHelpCount() const; // WTP: counts the help requests (a change means a new request)
