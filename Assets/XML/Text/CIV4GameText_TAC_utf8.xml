@@ -3560,17 +3560,17 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_FOLD</Tag>
-		<English>Produced...</English>
+		<English>Producing...</English>
 		<German>Produziert...</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_MISSING</Tag>
-		<English>Produced...missing</English>
+		<English>Producing...missing</English>
 		<German>Produziert...missing</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT</Tag>
-		<English>Produced...need imp.</English>
+		<English>Producing...need imp.</English>
 		<German>Produziert...bent. Imp.</German>
 	</TEXT>
 	<TEXT>
@@ -3590,7 +3590,7 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET</Tag>
-		<English>Produced...imp. set</English>
+		<English>Producing...imp. set</English>
 		<German>Produziert...Imp. ges.</German>
 	</TEXT>
 	<TEXT>
@@ -3627,6 +3627,16 @@
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET</Tag>
 		<English>raw material import set</English>
 		<German>Rohstoff-Import gesetzt</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_GOODS_TRADE_HINT</Tag>
+		<English>Right click on the list: import / export window of the city, showing these goods</English>
+		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit diesen Waren öffnen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_GOODS_TRADE_HINT_RAW</Tag>
+		<English>Right click on the list: import / export window of the city, showing the raw materials of these goods</English>
+		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit den Rohstoffen dieser Waren öffnen</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_COLORS</Tag>
