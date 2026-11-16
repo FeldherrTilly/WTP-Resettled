@@ -6503,6 +6503,11 @@ class CvMainInterface:
 					self.tPreviewWp = {"unit": tWp["unit"], "sea": tWp["sea"], "paras": {0: "row"}, "cmd": -1, "marked": iMarkCmd, "markedText": szMarkOrig}
 				# the folded line "Stored..." / "Produced..." in a color: its explanation, in a second window beside the parent
 				szLegend = self.getFoldLegend(aszTopParas[iPara])
+				# (the line "Stored...": the legend of the marks of its goods always, after the explanation of a red state)
+				if self.getFoldKind(aszTopParas[iPara]) == 0:
+					if len(szLegend) > 0:
+						szLegend += u"\n"
+					szLegend += localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ())
 				if len(szLegend) > 0:
 					self.showFoldExplain(screen, szLegend, tTop, True, ("explain", self.getFoldKind(aszTopParas[iPara])))
 		elif iPara >= 0 and self.isCommandLine(iFz, aszTopParas, iPara):
@@ -6556,6 +6561,11 @@ class CvMainInterface:
 	def getFoldKind( self, szLabel ):
 		try:
 			szNorm = self.normTipText(szLabel)
+			# (the plain lines without a state)
+			if szNorm == self.normTipText(localText.getText("TXT_KEY_WTP_TIP_STORED_FOLD", ())):
+				return 0
+			if szNorm == self.normTipText(localText.getText("TXT_KEY_WTP_TIP_PRODUCED_FOLD", ())):
+				return 1
 			aGroups = self.getFoldGroups()
 			for iGroup in range(len(aGroups)):
 				for tState in aGroups[iGroup]:
