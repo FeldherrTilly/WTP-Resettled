@@ -680,9 +680,12 @@ int CyGame::getHudMessageY(int i) const
 }
 void CyGame::addHudMessage(std::wstring szText, bool bPriority) const
 {
-	WtpHudMessages::setPriority(bPriority);
+	if (bPriority)
+	{
+		WtpHudMessages::addTop(CvWString(szText));
+		return;
+	}
 	WtpHudMessages::add(CvWString(szText), -1, -1);
-	WtpHudMessages::setPriority(false);
 }
 
 int CyGame::getNumHudPriority() const

@@ -429,6 +429,7 @@ public:
 namespace WtpHudMessages
 {
 	void add(const CvWString& szText, int iX, int iY);
+	void addTop(const CvWString& szText); // a message of the mod: always at the very top of the panel (before the other priority messages)
 	void setPriority(bool bPriority); // the messages that are added while it is set are shown at the top of the panel
 	int getNumPriority();
 	int getNumPriorityPrevious();

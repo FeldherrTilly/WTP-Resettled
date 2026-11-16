@@ -56,6 +56,15 @@ namespace WtpHudMessages
 			entries().push_back(kEntry);
 		}
 	}
+	void addTop(const CvWString& szText)
+	{
+		Entry kEntry;
+		kEntry.szText = szText;
+		kEntry.iX = -1;
+		kEntry.iY = -1;
+		entries().insert(entries().begin(), kEntry);
+		s_iNumPriority++;
+	}
 	// the messages of the turn before (shown on demand by the panel)
 	static std::vector<Entry>& previousEntries()
 	{
