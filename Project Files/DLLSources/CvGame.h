@@ -51,6 +51,9 @@ public:
 
 	DllExport void update();
 	void doCloseCityScreenOnMiddleMouse();
+	int getMiddleClickX() const; // WTP: where the cursor was at the last wheel click (game window)
+	int getMiddleClickY() const;
+	bool takeMiddleClick(); // WTP: was the mouse wheel clicked (a short time ago, and not asked for since)?
 	void updateScore(bool bForce = false);
 	// <advc.003y>
 	int getScoreComponent(int iRawScore, int iInitial, int iMax, int iMultiplier,
@@ -61,6 +64,8 @@ public:
 	void updateCitySight(bool bIncrement);
 
 	DllExport void updateSelectionList();
+	// WTP: a transport that was just automated (R menu / full automation) stays selected for the rest of the turn
+	void keepSelectedAutomated(int iUnitId);
 	DllExport void updateTestEndTurn();
 
 	DllExport void testExtendedGame();
@@ -83,6 +88,7 @@ public:
 	DllExport bool canHandleAction(int iAction, CvPlot* pPlot = NULL, bool bTestVisible = false, bool bUseCache = false);
 	DllExport void setupActionCache();
 	DllExport void handleAction(int iAction);
+	void handleActionEx(int iAction, bool bClicked); // WTP: bClicked: a click on the action button (the game calls handleAction for the hotkeys)
 
 	bool canDoControl(ControlTypes eControl);
 	DllExport void doControl(ControlTypes eControl);

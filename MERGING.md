@@ -1,0 +1,48 @@
+# Merging the feature branches
+
+This repository keeps every change in its own feature branch (all of them start at the same fork point). If you fork it and want several features, you have two ways.
+
+## Easiest: take `test/development`
+
+`test/development` contains all feature branches already merged, with all merge conflicts resolved. If you want "everything", merge or check out this one branch and you are done.
+
+    git fetch origin
+    git merge origin/test/development
+
+Note: it is built from simulation and syntax checks only. It was not compiled or tested in the game yet.
+
+## Single features: use the script
+
+If you only want some features, merge their branches yourself. The order below matters, the conflicts were solved in exactly this order, so Git can reuse the solutions.
+
+1. `feature/trade-route-logic`
+2. `feature/trade-route-manager` (needs 1)
+3. `feature/qol-specialty-and-buy-materials`
+4. `feature/game-options-multipliers` (needs 3: game options for the storage / upkeep multipliers)
+5. `feature/hud-message-panel`
+6. `feature/nested-tooltip`
+7. `feature/transfer-amount-window`
+8. `feature/building-upgrade-clean`
+9. `feature/import-export-window` (the option takes player option slot 2, the message panel uses slot 1)
+10. `feature/spelling-fixes`
+
+Leave out the ones you do not want, the order of the others stays.
+
+The script `Tools/merge-features.cmd` (Windows) or `Tools/merge-features.sh` (Linux/macOS) does it for you:
+
+1. Put your own branch checked out (a clean one, without uncommitted changes), best a new one: `git switch -c my-mod`
+2. Make sure the branches are in your remote. If you forked, add the original repository: `git remote add upstream <url of the original>` and `git fetch upstream`
+3. Run the script. It sets `rerere` (see below), then merges one branch after the other and skips what is already merged.
+4. On a conflict it stops and tells you the file. Fix the conflict, `git add` the file, `git commit`, and run the script again. It continues with the next branch.
+
+Optionally, pass the remote name and the branches to leave out:
+
+    Tools/merge-features.sh upstream feature/spelling-fixes
+
+## What is `rerere`?
+
+"Reuse recorded resolution": Git remembers how you solved a conflict and solves the same conflict by itself next time. The script switches it on (`git config rerere.enabled true`). It helps when you merge the same branches again, for example after a new version of a branch or into a second copy. The solutions are stored only on your computer (`.git/rr-cache`), the ones from this repository are **not** shared. The first time you merge, you have to solve the conflicts once.
+
+## After the merge
+
+Most branches change the DLL (C++). After merging, the DLL has to be built again, the Python and XML changes alone are not enough.

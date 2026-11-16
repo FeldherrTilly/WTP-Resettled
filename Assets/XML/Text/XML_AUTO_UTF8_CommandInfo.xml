@@ -74,10 +74,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_COMMAND_CHOOSE_TRADE_ROUTES_HELP</Tag>
-		<English>Automate this transport by selecting the transport routes it should follow.</English>
+		<English>Automate this transport by selecting the transport routes it should follow.[NEWLINE][NEWLINE]Trade Route Manager: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</English>
 		<Portuguese>Automatizar esse transporte selecionando as rotas de transporte que ele deverá seguir.</Portuguese>
 		<French>Automatiser ce transport en sélectionnant les routes commerciales qu'il devrait suivre.</French>
-		<German>Routenverwaltung aufrufen, um Transportrouten einzurichten und zuzuweisen.</German>
+		<German>Routenverwaltung aufrufen, um Transportrouten einzurichten und zuzuweisen.[NEWLINE][NEWLINE]Handelsrouten-Manager: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</German>
 		<Italian>Automatizza questo trasporto scegliendo le rotte commerciali che dovrebbe seguire.</Italian>
 		<Spanish>Automatizar este transporte seleccionando las rutas comerciales que debe seguir.</Spanish>
 		<Russian>Автоматизируйте этот транспорт, выбрав транспортные маршруты, по которым он должен следовать</Russian>
@@ -529,10 +529,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_COMMAND_UNLOAD_ALL_HELP</Tag>
-		<English>This will unload all transported units.</English>
+		<English>This will unload all transported units.[NEWLINE]Shift + click or Ctrl+Shift+U: unloads all transports of the same kind (land or sea) on this plot.</English>
 		<Portuguese>Isso descarregará todas as unidades transportadas.</Portuguese>
 		<French>Décharger toutes les unités transportées.</French>
-		<German>Entladen Sie alle transportierten Einheiten.</German>
+		<German>Entlädt alle transportierten Einheiten.[NEWLINE]Umschalt + Klick oder Strg+Umschalt+U: entlädt alle Transporter der gleichen Art (Land oder See) auf diesem Feld.</German>
 		<Italian>Per scaricare tutte le unità a bordo del trasporto.</Italian>
 		<Spanish>Con esto desembarcarán todas las unidades transportadas.</Spanish>
 		<Russian>Позволяет выгрузить сразу всею юниты, находящиеся в транспорте</Russian>

@@ -74,6 +74,7 @@ public:
 	int getFirstBuildingOrder(int /*BuildingTypes*/ eBuilding);
 	int getProduction();
 	int getProductionNeeded(int /*YieldTypes*/ eYield);
+	int getBuildingYieldProductionNeeded(int /*BuildingTypes*/ eBuilding, int /*YieldTypes*/ eYield); // WTP: cost of a building for this city
 	int getProductionTurnsLeft();
 	int getUnitProductionTurnsLeft(int /*UnitTypes*/ iUnit, int iNum);
 	int getBuildingProductionTurnsLeft(int /*BuildingTypes*/ iBuilding, int iNum);								
@@ -208,6 +209,7 @@ public:
 	int getYieldRushed(int /*YieldTypes*/ eYield) const;
 	int calculateNetYield(int /*YieldTypes*/ eYield) const;
 	python::list calculateNetYieldList() const;
+	python::list getStorageOverflowForecast() const; // WTP: NUM_YIELD_TYPES pieces lost / sold per good, then NUM_YIELD_TYPES gold
 	int calculateActualYieldProduced(int /*YieldTypes*/ eYield) const;
 	int calculateActualYieldConsumed(int /*YieldTypes*/ eYield) const;
 
@@ -381,6 +383,15 @@ public:
 	int getImportsLimit(int /*YieldTypes*/ eYield) const;	// R&R mod, vetiarvind, max yield import limit
 	// transport feeder - start - Nightinggale
 	bool isImportFeeder(int /*YieldTypes*/ eYield) const;
+	// WTP: for the trade route screen (python)
+	bool isAutoExport(int /*YieldTypes*/ eYield) const;
+	int getImportDomains(int /*YieldTypes*/ eYield) const;
+	int getExportDomains(int /*YieldTypes*/ eYield) const;
+	bool isAutoMarketImport() const;
+	bool isMarketDemandYield(int /*YieldTypes*/ eYield) const;
+	int getMarketImportMaintain(int /*YieldTypes*/ eYield) const; // WTP: the level the automatic market import keeps in the colony (-1: the market does not ask for the good)
+	int getMarketImportLimit(int /*YieldTypes*/ eYield) const; // WTP: the import limit the automatic market import sets (-1: same)
+	bool isYieldInTradeRouteCondensedList(int /*YieldTypes*/ eYield) const;
 	bool isAutoImportStopped(int /*YieldTypes*/ eYield) const;
 	int getAutoMaintainThreshold(int /*YieldTypes*/ eYield) const;
 	// transport feeder - end - Nightinggale

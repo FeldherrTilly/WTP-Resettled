@@ -67,6 +67,33 @@ def handleLanguagesDropdownBoxInput ( argsList ):
 
 	return 1
 
+def handleTipModeDropdownInput ( argsList ):
+	"WTP: tooltip mode (0 hover tooltip, 1 own window at the original position, 2 game tooltip)"
+	iValue, szName = argsList
+	try:
+		CvScreensInterface.mainInterface.setHoverTipMode(iValue, False)
+	except:
+		pass
+	return 1
+
+def handleTipDelayDropdownInput ( argsList ):
+	"WTP: tooltip delay (index of the list in CvMainInterface.setTipDelay)"
+	iValue, szName = argsList
+	try:
+		CvScreensInterface.mainInterface.setTipDelay(iValue)
+	except:
+		pass
+	return 1
+
+def handleTipQuickClicked ( argsList ):
+	"WTP: the next tooltip appears without delay while a tooltip is shown"
+	bValue, szName = argsList
+	try:
+		CvScreensInterface.mainInterface.setTipQuick(bValue)
+	except:
+		pass
+	return 1
+
 def handleGameReset ( argsList ):
 	"Resets these options"
 	szName = argsList
@@ -456,4 +483,40 @@ def handleExitButtonInput ( argsList ):
 	saveProfile()
 	getTabControl().destroy()
 
+	return 1
+
+
+######################################## WTP: STORAGE / UPKEEP MULTIPLIER ########################################
+
+def wtpOptionWarning ( szKey ):
+	"Warning window with OK only: the change comes at the start of the next turn or after loading"
+	popup = CyPopup(-1,EventContextTypes.NO_EVENTCONTEXT, True)
+	popup.setHeaderString("", CvUtil.FONT_CENTER_JUSTIFY)
+	popup.setBodyString(localText.getText(szKey, ()), CvUtil.FONT_LEFT_JUSTIFY)
+	popup.launch(true, PopupStates.POPUPSTATE_IMMEDIATE)
+
+def handleWtpStorageDropdownInput ( argsList ):
+	"WTP: storage multiplier (index of WtpGameOptions.STORAGE_PERCENTS)"
+	iValue, szName = argsList
+	import WtpGameOptions
+	if WtpGameOptions.load()[0] != iValue:
+		WtpGameOptions.setStorage(iValue)
+		wtpOptionWarning("TXT_KEY_WTP_OPT_STORAGE_WARN")
+	return 1
+
+def handleWtpUpkeepDropdownInput ( argsList ):
+	"WTP: military upkeep multiplier (index of WtpGameOptions.UPKEEP_PERCENTS)"
+	iValue, szName = argsList
+	import WtpGameOptions
+	if WtpGameOptions.load()[1] != iValue:
+		WtpGameOptions.setUpkeep(iValue)
+		wtpOptionWarning("TXT_KEY_WTP_OPT_UPKEEP_WARN")
+	return 1
+
+def handleWtpUpkeepSpeedClicked ( argsList ):
+	"WTP: military upkeep depends on the game speed (on / off)"
+	bValue, szName = argsList
+	import WtpGameOptions
+	WtpGameOptions.setSpeedDependence(bValue)
+	wtpOptionWarning("TXT_KEY_WTP_OPT_UPKEEP_SPEED_WARN")
 	return 1

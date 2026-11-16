@@ -274,10 +274,8 @@ class CvOptionsScreen:
 
 			bContinue = true
 
-			if iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_1:
-				if GlobalDefines.USE_MODDERS_PLAYEROPTION_1 == 0:
-					bContinue = false
-			elif iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_2:
+			# WTP: PLAYEROPTION_MODDER_1 is the option "New message panel" (always shown), PLAYEROPTION_MODDER_2 the new import / export window
+			if iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_2:
 				if GlobalDefines.USE_MODDERS_PLAYEROPTION_2 == 0:
 					bContinue = false
 			elif iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_3:
@@ -299,6 +297,47 @@ class CvOptionsScreen:
 				tab.setToolTip(szWidgetName, szHelp)
 				i += 1
 
+
+		tab.attachSpacer("GamePanelCenter")
+
+		# WTP: tooltip mode (hover tooltip at the cursor / own window at the original position / game tooltip), Ctrl + Shift + T
+		tab.attachHBox("GamePanelCenter", "TipHBox")
+		tab.attachLabel("TipHBox", "TipLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE", ()))
+		tab.setToolTip("TipLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP", ()))
+		tab.attachSpacer("TipHBox")
+		aszTipModes = (localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_0", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_1", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_2", ()))
+		iTipMode = 0
+		try:
+			import CvScreensInterface
+			iTipMode = CvScreensInterface.mainInterface.iTipMode
+		except:
+			pass
+		tab.attachDropDown("TipHBox", "TipModeDropdownBox", "TipModeDropdownBox", aszTipModes, self.callbackIFace, "handleTipModeDropdownInput", "TipModeDropdownBox", iTipMode)
+		tab.setLayoutFlag("TipModeDropdownBox", "LAYOUT_LEFT")
+		tab.setToolTip("TipModeDropdownBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP", ()))
+
+		tab.attachHBox("GamePanelCenter", "TipDelayHBox")
+		tab.attachLabel("TipDelayHBox", "TipDelayLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY", ()))
+		tab.setToolTip("TipDelayLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP", ()))
+		tab.attachSpacer("TipDelayHBox")
+		aszTipDelays = (localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_0", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_1", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_2", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_3", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_4", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_5", ()), localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_6", ()))
+		iTipDelay = 0
+		try:
+			import CvScreensInterface
+			iTipDelay = CvScreensInterface.mainInterface.iTipDelayIndex
+		except:
+			pass
+		tab.attachDropDown("TipDelayHBox", "TipDelayDropdownBox", "TipDelayDropdownBox", aszTipDelays, self.callbackIFace, "handleTipDelayDropdownInput", "TipDelayDropdownBox", iTipDelay)
+		tab.setLayoutFlag("TipDelayDropdownBox", "LAYOUT_LEFT")
+		tab.setToolTip("TipDelayDropdownBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP", ()))
+
+		bTipQuick = False
+		try:
+			bTipQuick = CvScreensInterface.mainInterface.bTipQuick
+		except:
+			pass
+		tab.attachCheckBox("GamePanelCenter", "TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK", ()), self.callbackIFace, "handleTipQuickClicked", "TipQuickCheckBox", bTipQuick)
+		tab.setToolTip("TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK_HELP", ()))
 
 		tab.attachSpacer("GamePanelCenter")
 
@@ -326,6 +365,36 @@ class CvOptionsScreen:
 		iInitialSelection = CyGame().getCurrentLanguage()
 		tab.attachDropDown("LangHBox", szWidgetName, szDropdownDesc, aszDropdownElements, self.callbackIFace, szCallbackFunction, szWidgetName, iInitialSelection)
 		tab.setLayoutFlag(szWidgetName, "LAYOUT_LEFT")
+
+		# WTP: storage multiplier, military upkeep multiplier and its game speed dependence (applied from the next turn or after loading)
+		import WtpGameOptions
+		aiWtpValues = WtpGameOptions.load()
+		tab.attachSpacer("GamePanelCenter")
+		tab.attachHBox("GamePanelCenter", "WtpStorageHBox")
+		tab.attachLabel("WtpStorageHBox", "WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE", ()))
+		tab.setToolTip("WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
+		tab.attachSpacer("WtpStorageHBox")
+		aszWtpStorage = ()
+		for iWtpPercent in WtpGameOptions.STORAGE_PERCENTS:
+			aszWtpStorage = aszWtpStorage + ("%d%%" % iWtpPercent,)
+		tab.attachDropDown("WtpStorageHBox", "WtpStorageDropdownBox", "WtpStorageDropdownBox", aszWtpStorage, self.callbackIFace, "handleWtpStorageDropdownInput", "WtpStorageDropdownBox", aiWtpValues[0])
+		tab.setLayoutFlag("WtpStorageDropdownBox", "LAYOUT_LEFT")
+		tab.setToolTip("WtpStorageDropdownBox", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
+
+		tab.attachHBox("GamePanelCenter", "WtpUpkeepHBox")
+		tab.attachLabel("WtpUpkeepHBox", "WtpUpkeepLabel", localText.getText("TXT_KEY_WTP_OPT_UPKEEP", ()))
+		tab.setToolTip("WtpUpkeepLabel", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_HELP", ()))
+		tab.attachSpacer("WtpUpkeepHBox")
+		aszWtpUpkeep = ()
+		for iWtpPercent in WtpGameOptions.UPKEEP_PERCENTS:
+			aszWtpUpkeep = aszWtpUpkeep + ("%d%%" % iWtpPercent,)
+		tab.attachDropDown("WtpUpkeepHBox", "WtpUpkeepDropdownBox", "WtpUpkeepDropdownBox", aszWtpUpkeep, self.callbackIFace, "handleWtpUpkeepDropdownInput", "WtpUpkeepDropdownBox", aiWtpValues[1])
+		tab.setLayoutFlag("WtpUpkeepDropdownBox", "LAYOUT_LEFT")
+		tab.setToolTip("WtpUpkeepDropdownBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_HELP", ()))
+
+		bWtpSpeed = (aiWtpValues[2] == 1)
+		tab.attachCheckBox("GamePanelCenter", "WtpUpkeepSpeedCheckBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_SPEED", ()), self.callbackIFace, "handleWtpUpkeepSpeedClicked", "WtpUpkeepSpeedCheckBox", bWtpSpeed)
+		tab.setToolTip("WtpUpkeepSpeedCheckBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_SPEED_HELP", ()))
 
 		########## Lower Panel
 

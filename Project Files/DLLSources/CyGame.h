@@ -167,7 +167,36 @@ public:
 	int getReplayMessagePlayer(int i) const;
 	ColorTypes getReplayMessageColor(int i) const;
 	std::wstring getReplayMessageText(int i) const;
+	void setWheelCapture(bool bOn) const; // WTP: the mouse wheel is collected for the amount dialog (python) instead of zooming the map
+	int takeWheelNotches() const; // WTP: the notches of the wheel since the last call (positive: away from the user)
+	bool isCtrlKeyPressed() const;
+	void setCursorClient(int iX, int iY) const; // WTP: puts the cursor on a place of the game window
+	int getMiddleClickX() const; // WTP: where the cursor was at the last wheel click
+	int getMiddleClickY() const;
+	bool takeMiddleClick(); // WTP: was the mouse wheel clicked (frozen tooltip: jump to the waypoint)?
+	bool isShiftKeyPressed() const; // WTP: is the shift key down (frozen tooltip: shift + mouse wheel)
+	std::wstring getWidgetHelpText() const; // WTP: the last help text the game asked for (widget under the cursor)
+	int getWidgetHelpCount() const; // WTP: counts the help requests (a change means a new request)
+	int getWidgetHelpType() const; // WTP: widget type of the last help request
+	std::wstring getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const; // WTP: the help text of a widget (as parseHelp makes it)
+	bool isDiplomacyUp() const; // WTP: is a diplomacy screen open
+	void setHideGameHelp(bool bNewValue); // WTP: no game help text for HUD elements while the diplomacy screen is open (own tooltip on)
+	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
+	int getCursorClientY() const;
 	uint getNumReplayMessages() const;
+	void openDomesticMarket(int iCityID) const; // WTP: opens the domestic market popup of a city
+	// WTP: the messages of the turn for the message panel of the main interface
+	int getNumHudMessages() const;
+	std::wstring getHudMessageText(int i) const;
+	int getHudMessageX(int i) const;
+	int getHudMessageY(int i) const;
+	int getNumHudMessagesPrevious() const;
+	int getNumHudPriority() const;
+	void addHudMessage(std::wstring szText, bool bPriority) const; // WTP: a message of the Python code for the message panel (priority: at the top)
+	int getNumHudPriorityPrevious() const;
+	std::wstring getHudMessagePreviousText(int i) const;
+	int getHudMessagePreviousX(int i) const;
+	int getHudMessagePreviousY(int i) const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);
@@ -194,6 +223,12 @@ public:
 	void setChurchPlayer(int /*PlayerTypes*/ eNewValue);
 	bool isChurchPlayer(int /*PlayerTypes*/ ePlayer);
 	// R&R, ray, the Church - END
+
+	// WTP: the amount dialog of the transfers (python)
+	bool isArrowKeyPressed(int iDir) const; // 0: left, 1: right, 2: up, 3: down
+	void sendYieldTransfer(int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) const; // the amount dialog sends the transfer of goods
+	void sendDiploYieldAmount(int iYield, int iAmount, int iFromPlayer) const; // the amount dialog sets the amount of goods of a diplomacy deal
+	// WTP: the import / export window (python)
 
 protected:
 	const CvGame* const m_pGame;

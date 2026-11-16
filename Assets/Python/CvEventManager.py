@@ -16,6 +16,7 @@ import sys
 import CvWorldBuilderScreen
 import CvAdvisorUtils
 import CvRandomEventInterface
+import WtpGameOptions
 import CvMarketBoom
 
 gc = CyGlobalContext()
@@ -158,6 +159,8 @@ class CvEventManager:
 			CvUtil.EventCreateTradeRoute: ('CreateTradeRoute', self.__eventCreateTradeRouteApply, self.__eventCreateTradeRouteBegin),
 			CvUtil.EventEditTradeRoute: ('EditTradeRoute', self.__eventEditTradeRouteApply, self.__eventEditTradeRouteBegin),
 			CvUtil.EventDiploYieldAmount: ('DiploYieldAmount', self.__eventDiploYieldAmountApply, self.__eventDiploYieldAmountBegin),
+			CvUtil.EventRenameTransport: ('RenameTransport', self.__eventRenameTransportApply, self.__eventRenameTransportBegin),
+			CvUtil.EventRenameWaypoint: ('RenameWaypoint', self.__eventRenameWaypointApply, self.__eventRenameWaypointBegin),
 
 # Dale - AoD: AoDCheatMenu START
 			CvUtil.EventAoDCheatMenu: ('AoDCheatMenu', self.AoDCheatMenuApply, self.AoDCheatMenuBegin),
@@ -217,14 +220,105 @@ class CvEventManager:
 		eventType,key,mx,my,px,py = argsList
 		game = gc.getGame()
 
+		# WTP: the import / export window of the city screen takes all keys while it is open (Esc closes it)
+		if (CvScreensInterface.tradeRouteScreen.isOpen()):
+			if (eventType == self.EventKeyDown):
+				try:
+					CvScreensInterface.tradeRouteScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
+				except:
+					# (a failed key must not stay unseen: the error goes to the log, the window is drawn again from its data)
+					try:
+						import traceback
+						CvUtil.pyPrint("TradeRouteScreen key: " + traceback.format_exc())
+						CvScreensInterface.tradeRouteScreen.recoverFromError()
+					except:
+						pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.tradeRouteScreen.handleKeyUp(int(key))
+				except:
+					pass
+			return 1
+		# WTP: the amount dialog of the transfers (shift + transfer) takes all keys while it is open
+		if (CvScreensInterface.yieldAmountScreen.isOpen()):
+			if (eventType == self.EventKeyDown):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
+				except:
+					pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.yieldAmountScreen.handleKeyUp(int(key))
+				except:
+					pass
+			return 1
+		# WTP: Ctrl + Shift + W A S D move the message panel (two keys at once: diagonal)
+		aMoveKeys = [int(InputTypes.KB_A), int(InputTypes.KB_D), int(InputTypes.KB_W), int(InputTypes.KB_S)] # left, right, up, down
+		if (eventType == self.EventKeyUp):
+			try:
+				CvScreensInterface.mainInterface.releaseMessageArrow(aMoveKeys.index(int(key)))
+			except:
+				pass
+		elif (eventType == self.EventKeyDown and self.bShift and self.bCtrl and not self.bAlt):
+			try:
+				if int(key) == int(InputTypes.KB_Q) and CvScreensInterface.mainInterface.isMessagePanelShown():
+					CvScreensInterface.mainInterface.resetMessagePanel()
+					return 1
+				if int(key) in aMoveKeys and CvScreensInterface.mainInterface.isMessagePanelShown():
+					CvScreensInterface.mainInterface.pressMessageArrow(aMoveKeys.index(int(key)))
+					return 1
+			except:
+				pass
+
 		if (self.bAllowCheats):
 			# notify debug tools of input to allow it to override the control
 			argsList = (eventType,key,self.bCtrl,self.bShift,self.bAlt,mx,my,px,py,gc.getGame().isNetworkMultiPlayer())
 			if ( CvDebugTools.g_CvDebugTools.notifyInput(argsList) ):
 				return 0
 
+		# WTP: nested tooltips. Esc unfreezes the last frozen tooltip, X (short press) freezes the tooltip that is shown,
+		# X held closes all frozen ones
+		if (eventType == self.EventKeyDown):
+			try:
+				if int(key) == int(InputTypes.KB_ESCAPE) and CvScreensInterface.mainInterface.isTipFrozen():
+					CvScreensInterface.mainInterface.unfreezeCursorTooltip()
+					return 1
+				if int(key) == int(InputTypes.KB_X) and not self.bCtrl and not self.bShift and not self.bAlt:
+					if CvScreensInterface.mainInterface.keyXDown():
+						return 1
+				if int(key) == int(InputTypes.KB_X) and self.bShift and not self.bCtrl and not self.bAlt and CvScreensInterface.mainInterface.isTipFrozen():
+					# Shift + X stacks the frozen tooltips
+					if CvScreensInterface.mainInterface.stackFrozenTips():
+						return 1
+			except:
+				pass
+		elif (eventType == self.EventKeyUp):
+			try:
+				if int(key) == int(InputTypes.KB_X):
+					if CvScreensInterface.mainInterface.keyXUp():
+						return 1
+			except:
+				pass
+
 		if ( eventType == self.EventKeyDown ):
 			theKey=int(key)
+
+			# WTP: Shift+Alt+T opens the Trade Route Manager (the overview of all transports)
+			if (theKey == int(InputTypes.KB_T) and self.bShift and self.bAlt and not self.bCtrl):
+				try:
+					import CvTransportRoutesOverview
+					CvTransportRoutesOverview.g_FromHotkey = True
+					popupInfo = CyPopupInfo()
+					popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+					popupInfo.setText(u"showTransportRoutesOverview")
+					popupInfo.addPopup(gc.getGame().getActivePlayer())
+					return 1
+				except:
+					pass
+			# WTP: Ctrl+Shift+T switches the hover tooltip (own tooltip window at the cursor) on and off
+			if (theKey == int(InputTypes.KB_T) and self.bCtrl and self.bShift and not self.bAlt):
+				CvScreensInterface.mainInterface.toggleHoverTip()
+				return 1
 
 			if (theKey == int(InputTypes.KB_I) and self.bCtrl and not self.bShift and not self.bAlt):
 				CvScreensInterface.mainInterface.toggleTerritorialInfluence()
@@ -441,6 +535,12 @@ class CvEventManager:
 	def onWindowActivation(self, argsList):
 		'Called when the game window activates or deactivates'
 		bActive = argsList[0]
+		# the frozen tooltips are drawn again (their widgets are gone after alt-tab)
+		try:
+			if bActive:
+				CvScreensInterface.mainInterface.windowActivated()
+		except:
+			pass
 
 	def onCityScreenOpen(self, argsList):
 		'Called when the game window activates or deactivates'
@@ -461,10 +561,13 @@ class CvEventManager:
 		return ""
 
 	def onLoadGame(self, argsList):
+		# WTP: storage / upkeep multiplier of the game options
+		WtpGameOptions.applyToGame("LoadGame")
 		return 0
 
 	def onGameStart(self, argsList):
 		'Called at the start of the game'
+		WtpGameOptions.applyToGame("GameStart")
 		if (gc.getGame().getGameTurnYear() == GlobalDefines.START_YEAR and not gc.getGame().isOption(GameOptionTypes.GAMEOPTION_ADVANCED_START)):
 			for iPlayer in range(gc.getMAX_PLAYERS()):
 				player = gc.getPlayer(iPlayer)
@@ -498,6 +601,8 @@ class CvEventManager:
 	def onBeginGameTurn(self, argsList):
 		'Called at the beginning of the end of each turn'
 		iGameTurn = argsList[0]
+		# WTP: storage / upkeep multiplier of the game options
+		WtpGameOptions.applyToGame("BeginGameTurn")
 
 	def onEndGameTurn(self, argsList):
 		'Called at the end of the end of each turn'
@@ -506,6 +611,9 @@ class CvEventManager:
 	def onBeginPlayerTurn(self, argsList):
 		'Called at the beginning of a players turn'
 		iGameTurn, iPlayer = argsList
+		# WTP: storage / upkeep multiplier of the game options (also here: the active player starts his turn)
+		if iPlayer == gc.getGame().getActivePlayer():
+			WtpGameOptions.applyToGame("BeginPlayerTurn")
 		CvRandomEventInterface.checkEuropeanBorderDisputeKingWarDemand(iPlayer)
 		CvRandomEventInterface.checkTradeQuestLeadershipChanges(iPlayer)
 
@@ -648,6 +756,12 @@ class CvEventManager:
 		eMission = argsList[1]
 		iNumUnits = argsList[2]
 		listUnitIds = argsList[3]
+
+		try:
+			# the target of an order to move can become a waypoint of the unit (tooltips of units, "Set waypoint...")
+			CvScreensInterface.mainInterface.onWaypointMission(eOwner, eMission)
+		except:
+			pass
 
 		if (not self.__LOG_PUSH_MISSION):
 			return
@@ -1030,6 +1144,12 @@ class CvEventManager:
 		iMax = argsList[2]
 		if iMax <= 0:
 			return
+		# WTP: the amount dialog with keys and mouse wheel (CvYieldAmountScreen), the popup below if it cannot be opened
+		try:
+			if CvScreensInterface.yieldAmountScreen.open(iYield, -1, iMax, -1, False, iFromPlayer) != 0:
+				return
+		except:
+			pass
 		popup = CyPopup(CvUtil.EventDiploYieldAmount, EventContextTypes.EVENTCONTEXT_ALL, True)
 		popup.setUserData((iFromPlayer, iYield))
 		popup.setBodyString(localText.getText("TXT_KEY_SELECT_YIELD_POPUP", (gc.getYieldInfo(iYield).getTextKey(),)), CvUtil.FONT_LEFT_JUSTIFY)
@@ -1203,6 +1323,38 @@ class CvEventManager:
 		'Wonder Movie Apply'
 		if (getChtLvl() > 0):
 			CvDebugTools.CvDebugTools().applyWonderMovie( (popupReturn) )
+
+	# WTP: the transport overview asks for the name of a transport (the popup is made there)
+	def __eventRenameTransportBegin(self, argsList):
+		return
+
+	def __eventRenameTransportApply(self, playerID, userData, popupReturn):
+		iUnitID = userData[0]
+		unit = gc.getPlayer(playerID).getUnit(iUnitID)
+		if unit is None or unit.isNone():
+			return
+		if popupReturn.getButtonClicked() != 0: # Cancel: the old name stays
+			return
+		newName = popupReturn.getEditBoxString(0).strip()
+		if (len(newName) > 25):
+			newName = newName[:25]
+		if len(newName) > 0 and newName != unit.getNameNoDesc():
+			unit.setName(newName)
+
+	# the small window to rename a waypoint of the tooltips of units (argsList: (number of the waypoint, its name with the number in front))
+	def __eventRenameWaypointBegin(self, argsList):
+		popup = CyPopup(CvUtil.EventRenameWaypoint, EventContextTypes.EVENTCONTEXT_ALL, True)
+		popup.setUserData((argsList[0],))
+		popup.setBodyString(localText.getText("TXT_KEY_WTP_WAYPOINT_RENAME", ()), CvUtil.FONT_CENTER_JUSTIFY)
+		popup.createEditBox(argsList[1], 0)
+		popup.setEditBoxMaxCharCount(30, 30, 0)
+		popup.launch(True, PopupStates.POPUPSTATE_IMMEDIATE)
+
+	def __eventRenameWaypointApply(self, playerID, userData, popupReturn):
+		try:
+			CvScreensInterface.mainInterface.applyWaypointRename(playerID, userData[0], popupReturn.getEditBoxString(0))
+		except:
+			pass
 
 	def __eventEditUnitNameBegin(self, argsList):
 		pUnit = argsList

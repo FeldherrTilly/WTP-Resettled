@@ -235,6 +235,11 @@ int CyCity::getProductionNeeded(int /*YieldTypes*/ eYield)
 	return m_pCity ? m_pCity->getProductionNeeded((YieldTypes) eYield) : -1;
 }
 
+int CyCity::getBuildingYieldProductionNeeded(int /*BuildingTypes*/ eBuilding, int /*YieldTypes*/ eYield)
+{
+	return m_pCity ? m_pCity->getYieldProductionNeeded((BuildingTypes) eBuilding, (YieldTypes) eYield) : -1;
+}
+
 int CyCity::getProductionTurnsLeft()
 {
 	return m_pCity ? m_pCity->getProductionTurnsLeft() : -1;
@@ -886,6 +891,31 @@ boost::python::list CyCity::calculateNetYieldList() const
 	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
 	{
 		result.append(aiYields[i]);
+	}
+
+	return result;
+}
+
+boost::python::list CyCity::getStorageOverflowForecast() const
+{
+	boost::python::list result;
+
+	if (m_pCity == NULL)
+	{
+		return result;
+	}
+
+	int aiLoss[NUM_YIELD_TYPES];
+	int aiGold[NUM_YIELD_TYPES];
+	m_pCity->calculateStorageOverflowForecast(aiLoss, aiGold);
+
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		result.append(aiLoss[i]);
+	}
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		result.append(aiGold[i]);
 	}
 
 	return result;
@@ -1687,6 +1717,71 @@ int CyCity::getImportsLimit(int /*YieldTypes*/ eYield) const
 bool CyCity::isImportFeeder(int /*YieldTypes*/ eYield) const
 {
 	return m_pCity ? m_pCity->getImportsMaintain((YieldTypes) eYield) : false;
+}
+
+bool CyCity::isAutoExport(int /*YieldTypes*/ eYield) const
+{
+	return m_pCity ? m_pCity->isAutoExport((YieldTypes) eYield) : false;
+}
+
+int CyCity::getImportDomains(int /*YieldTypes*/ eYield) const
+{
+	return m_pCity ? m_pCity->getImportDomains((YieldTypes) eYield) : 0;
+}
+
+int CyCity::getExportDomains(int /*YieldTypes*/ eYield) const
+{
+	return m_pCity ? m_pCity->getExportDomains((YieldTypes) eYield) : 0;
+}
+
+bool CyCity::isAutoMarketImport() const
+{
+	return m_pCity ? m_pCity->isAutoMarketImport() : false;
+}
+
+// the domestic market asks for the good (the goods of the preset 'market automatic', see CvCity::updateAutoMarketImport)
+bool CyCity::isMarketDemandYield(int /*YieldTypes*/ eYield) const
+{
+	if (m_pCity == NULL)
+	{
+		return false;
+	}
+	YieldCargoArray<int> aiDemand;
+	m_pCity->getYieldDemands(aiDemand);
+	const InfoArray<YieldTypes>& kYieldArray = GC.getDomesticDemandYieldTypes();
+	for (int i = 0; i < kYieldArray.getLength(); ++i)
+	{
+		if (kYieldArray.get(i) == (YieldTypes) eYield)
+		{
+			return aiDemand.get((YieldTypes) eYield) > 0 && GC.getYieldInfo((YieldTypes) eYield).isCargo();
+		}
+	}
+	return false;
+}
+
+int CyCity::getMarketImportMaintain(int /*YieldTypes*/ eYield) const
+{
+	int iMaintain = 0;
+	int iLimit = 0;
+	return (m_pCity != NULL && m_pCity->getAutoMarketImportLevels((YieldTypes) eYield, iMaintain, iLimit)) ? iMaintain : -1;
+}
+
+int CyCity::getMarketImportLimit(int /*YieldTypes*/ eYield) const
+{
+	int iMaintain = 0;
+	int iLimit = 0;
+	return (m_pCity != NULL && m_pCity->getAutoMarketImportLevels((YieldTypes) eYield, iMaintain, iLimit)) ? iLimit : -1;
+}
+
+// same condition as CvDLLButtonPopup::isYieldSupportedInExportPanelForCity
+bool CyCity::isYieldInTradeRouteCondensedList(int /*YieldTypes*/ eYield) const
+{
+	if (m_pCity == NULL)
+	{
+		return false;
+	}
+	const YieldTypes e = (YieldTypes) eYield;
+	return !(m_pCity->getYieldRate(e) == 0 && !m_pCity->isImport(e) && !m_pCity->getImportsMaintain(e) && !m_pCity->isExport(e));
 }
 
 bool CyCity::isAutoImportStopped(int /*YieldTypes*/ eYield) const

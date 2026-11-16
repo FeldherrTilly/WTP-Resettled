@@ -21,6 +21,7 @@
 #include "CyArgsList.h"
 #include "CvInfos.h"
 #include "CvPopupInfo.h"
+#include "CvDLLButtonPopup.h"
 #include "FProfiler.h"
 #include "CvReplayInfo.h"
 #include "CyPlot.h"
@@ -1242,18 +1243,91 @@ int CvGame::getTeamClosenessScore(int** aaiDistances, int* aiStartingLocs)
 // The EXE mouseEvent enum has no middle button, so Python never sees wheel-click.
 // Bit 0 of GetAsyncKeyState is set if the button went down since the last poll,
 // so a short click is not missed when update() skips frames.
+// WTP: the time of the last wheel click (CyGame.takeMiddleClick: the nested tooltips jump to a waypoint with it)
+static volatile DWORD s_dwMiddleClickTick = 0;
+
+// WTP: ONE thread reads the wheel button (every 2 ms: a click is shorter than a slow frame of the game, and the polls in the frames lost it, two
+// readers counted one click twice); the game (city screen) and Python (takeMiddleClick) only ask what the thread found
+static volatile LONG s_iMiddleClicks = 0;
+// where the cursor was at the click (in the game window): Python is not asked in every frame, a click can wait for it
+static volatile LONG s_iMiddleX = -1;
+static volatile LONG s_iMiddleY = -1;
+
+static DWORD WINAPI middleButtonThread(LPVOID)
+{
+	bool bWasDown = false;
+	for (;;)
+	{
+		Sleep(2);
+		const SHORT iState = GetAsyncKeyState(VK_MBUTTON);
+		const bool bDown = (iState < 0);
+		// (bit 0: the button went down since the last call, a click between two looks is not lost)
+		if ((bDown && !bWasDown) || (!bDown && (iState & 1) != 0))
+		{
+			// (only a click while the game window is active)
+			HWND hWnd = GetForegroundWindow();
+			DWORD iProcess = 0;
+			if (hWnd != NULL && GetWindowThreadProcessId(hWnd, &iProcess) != 0 && iProcess == GetCurrentProcessId())
+			{
+				POINT pt;
+				if (GetCursorPos(&pt) && ScreenToClient(hWnd, &pt))
+				{
+					s_iMiddleX = pt.x;
+					s_iMiddleY = pt.y;
+				}
+				s_dwMiddleClickTick = GetTickCount() | 1;
+				InterlockedIncrement(&s_iMiddleClicks);
+			}
+		}
+		bWasDown = bDown;
+	}
+	return 0;
+}
+
+static void startMiddleButtonThread()
+{
+	static bool bThreadStarted = false;
+	if (!bThreadStarted)
+	{
+		bThreadStarted = true;
+		HANDLE hThread = CreateThread(NULL, 0, middleButtonThread, NULL, 0, NULL);
+		if (hThread != NULL)
+		{
+			CloseHandle(hThread);
+		}
+	}
+}
+
+bool CvGame::takeMiddleClick()
+{
+	startMiddleButtonThread();
+	const DWORD dwTick = s_dwMiddleClickTick;
+	s_dwMiddleClickTick = 0;
+	// (a click that nobody took does not count later; Python is asked only when the interface is redrawn, that can be seconds after a click when
+	// the mouse stands still: Python compares the place of the click with the place of the cursor)
+	return dwTick != 0 && GetTickCount() - dwTick < 10000;
+}
+
+int CvGame::getMiddleClickX() const
+{
+	return (int)s_iMiddleX;
+}
+
+int CvGame::getMiddleClickY() const
+{
+	return (int)s_iMiddleY;
+}
+
 void CvGame::doCloseCityScreenOnMiddleMouse()
 {
-	static bool bWasDown = false;
-	const SHORT iState = GetAsyncKeyState(VK_MBUTTON);
-	const bool bDown = (iState < 0);
-	const bool bPressedSincePoll = (iState & 1) != 0;
-	const bool bClicked = bPressedSincePoll || (bDown && !bWasDown);
-	bWasDown = bDown;
-	if (!bClicked)
+	startMiddleButtonThread();
+	static LONG iSeen = 0;
+	const LONG iClicks = s_iMiddleClicks;
+	if (iClicks == iSeen)
 	{
 		return;
 	}
+	iSeen = iClicks;
 	if (gDLL->isDiplomacy() || gDLL->getInterfaceIFace()->isPopupUp())
 	{
 		return;
@@ -1716,6 +1790,17 @@ void CvGame::updateCitySight(bool bIncrement)
 }
 
 
+// WTP: the transport that was automated by the player while it was selected (unit id, turn): the selection stays on it until the
+// player selects another unit (the game would go on to the next unit that is ready to move as the automated group is not)
+static int g_iKeepSelectedUnit = -1;
+static int g_iKeepSelectedTurn = -1;
+
+void CvGame::keepSelectedAutomated(int iUnitId)
+{
+	g_iKeepSelectedUnit = iUnitId;
+	g_iKeepSelectedTurn = getGameTurn();
+}
+
 void CvGame::updateSelectionList()
 {
 	// WTP: no unit is selected while a map mode of the interface takes the clicks (a right click would move it)
@@ -1730,6 +1815,12 @@ void CvGame::updateSelectionList()
 	}
 
 	CvUnit* pHeadSelectedUnit = gDLL->getInterfaceIFace()->getHeadSelectedUnit();
+
+	if (pHeadSelectedUnit != NULL && pHeadSelectedUnit->getID() == g_iKeepSelectedUnit && g_iKeepSelectedTurn == getGameTurn()
+		&& pHeadSelectedUnit->getOwnerINLINE() == getActivePlayer() && pHeadSelectedUnit->getGroup()->isAutomated())
+	{
+		return;
+	}
 
 	if ((pHeadSelectedUnit == NULL) || !(pHeadSelectedUnit->getGroup()->readyToSelect(true)))
 	{
@@ -1773,6 +1864,16 @@ void CvGame::updateTestEndTurn()
 		{
 			if (!(GET_PLAYER(getActivePlayer()).hasBusyUnit()) && !(GET_PLAYER(getActivePlayer()).hasReadyUnit(bAny)))
 			{
+				// WTP: students whose specialty is to be chosen at the end of the turn: the popups open now, the turn does not end yet
+				if (WtpDeferredEducation::relaunch())
+				{
+					return;
+				}
+				// WTP: the cities whose project is finished next turn with missing materials: the panel to buy them
+				if (WtpBuyMaterialsPanel::relaunch())
+				{
+					return;
+				}
 				if (!(gDLL->getInterfaceIFace()->isForcePopup()))
 				{
 					gDLL->getInterfaceIFace()->setForcePopup(true);
@@ -2713,6 +2814,11 @@ void CvGame::setupActionCache()
 
 void CvGame::handleAction(int iAction)
 {
+	handleActionEx(iAction, false);
+}
+
+void CvGame::handleActionEx(int iAction, bool bClicked)
+{
 	CxDesyncMonitor StartMonitoring;
 
 	CvUnit* pHeadSelectedUnit;
@@ -2795,7 +2901,14 @@ void CvGame::handleAction(int iAction)
 			}
 			else
 			{
-				selectionListGameNetMessage(GAMEMESSAGE_DO_COMMAND, GC.getActionInfo(iAction).getCommandType(), GC.getActionInfo(iAction).getCommandData(), -1, 0, bAlt);
+				int iCommandData = GC.getActionInfo(iAction).getCommandData();
+				// WTP: unload all with Shift + click on the button or with Ctrl + Shift + U (the second hotkey of the command): all transports on
+				// the plot of the selected one are unloaded (iData1 = 1), Shift + U unloads the selected transport only as before
+				if (GC.getActionInfo(iAction).getCommandType() == COMMAND_UNLOAD_ALL && bShift && (bClicked || gDLL->ctrlKey()))
+				{
+					iCommandData = 1;
+				}
+				selectionListGameNetMessage(GAMEMESSAGE_DO_COMMAND, GC.getActionInfo(iAction).getCommandType(), iCommandData, -1, 0, bAlt);
 			}
 		}
 	}
@@ -5487,6 +5600,27 @@ void CvGame::addShipName(const CvWString& szName)
 
 void CvGame::doTurn()
 {
+	// WTP: the data of the timing report (map, players: type, civilization, cities, units)
+	WtpTiming::noteMap(GC.getMap().getGridWidthINLINE(), GC.getMap().getGridHeightINLINE());
+	WtpTiming::noteGame(
+		((int)getGameSpeedType() >= 0) ? GC.getGameSpeedInfo(getGameSpeedType()).getType() : "",
+		((int)getHandicapType() >= 0) ? GC.getHandicapInfo(getHandicapType()).getType() : "",
+		((int)GC.getMap().getWorldSize() >= 0) ? GC.getWorldInfo(GC.getMap().getWorldSize()).getType() : "",
+		((int)GC.getMap().getClimate() >= 0) ? GC.getClimateInfo(GC.getMap().getClimate()).getType() : "",
+		((int)GC.getMap().getSeaLevel() >= 0) ? GC.getSeaLevelInfo(GC.getMap().getSeaLevel()).getType() : "",
+		isGameMultiPlayer());
+	for (int iWtpPlayer = 0; iWtpPlayer < MAX_PLAYERS; ++iWtpPlayer)
+	{
+		const CvPlayer& kWtpPlayer = GET_PLAYER((PlayerTypes)iWtpPlayer);
+		if (kWtpPlayer.isAlive())
+		{
+			const char cWtpType = kWtpPlayer.isHuman() ? 'H' : (kWtpPlayer.isNative() ? 'N' : (kWtpPlayer.isEurope() ? 'K' : 'A'));
+			const char* szWtpCiv = (kWtpPlayer.getCivilizationType() != NO_CIVILIZATION) ? GC.getCivilizationInfo(kWtpPlayer.getCivilizationType()).getType() : "";
+			WtpTiming::notePlayer(iWtpPlayer, cWtpType, kWtpPlayer.getNumCities(), kWtpPlayer.getNumUnits(), szWtpCiv);
+		}
+	}
+	WtpTiming::flush(getGameTurn());
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_DOTURN);
 	MOD_PROFILE("CvGame::doTurn");
 	PROFILE_FUNC();
 
@@ -6061,6 +6195,7 @@ void CvGame::updateWar()
 
 void CvGame::updateMoves()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_UPDATEMOVES);
 	MOD_PROFILE("CvGame::updateMoves");
 
 	CvSelectionGroup* pLoopSelectionGroup;
@@ -6813,8 +6948,8 @@ int CvGame::calculateSyncChecksum(CvString* pLogString) const
 		iValue += getNumCities();
 		iValue += getNumDeals();
 
-		iValue += GC.getMapINLINE().getOwnedPlots();
-		iValue += GC.getMapINLINE().getNumAreas();
+		iValue += GC.getMap().getOwnedPlots();
+		iValue += GC.getMap().getNumAreas();
 		*/
 
 		*pLogString += CvString::format("Map seed = %d\n", getMapRand().getSeed());
@@ -7068,6 +7203,7 @@ uint CvGame::getNumReplayMessages() const
 
 void CvGame::read(FDataStreamBase* pStream)
 {
+	WtpTiming::noteSaveLoaded(); // WTP: timing log: a savegame is loaded, the next report starts new
 	CvSavegameReaderBase readerbase(pStream);
 	CvSavegameReader reader(readerbase);
 
@@ -7689,7 +7825,7 @@ void CvGame::updateOceanDistances()
 	}
 
 	//DannyDaemonic fix
-	//OutputDebugStr(CvString::format("[CvGame::updateOceanDistances] Plots: %i, Visits: %i\n", GC.getMapINLINE().numPlotsINLINE(), iVisits).GetCString());
+	//OutputDebugStr(CvString::format("[CvGame::updateOceanDistances] Plots: %i, Visits: %i\n", GC.getMap().numPlotsINLINE(), iVisits).GetCString());
 	OutputDebugString(CvString::format("[CvGame::updateOceanDistances] Plots: %i, Visits: %i\n", GC.getMap().numPlotsINLINE(), iVisits).GetCString());
 	//end
 }
