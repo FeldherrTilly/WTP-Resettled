@@ -6503,12 +6503,12 @@ class CvMainInterface:
 			# (the hint "Frozen - Esc or hold X: close"; there the highlight that the game draws under a line does not hide the colors)
 			szFilter = self.getGoodsFilterText(aszTopParas, 0)
 			if len(szFilter) > 0:
-				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, None, None, ("filter", 0))
+				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, localText.getText("TXT_KEY_WTP_TIP_GOODS_TRADE_HINT", ()), None, ("filter", 0))
 		elif ((iPara >= 0 and iSel < 0) or (iLineIdx >= 0 and self.isHintLine(aiPara, iLineIdx))) and self.isStoredGoodsWindow(aszTopParas, "TXT_KEY_CITY_BAR_PRODUCING"):
 			# the window with the goods that a city produces: the same
 			szFilter = self.getGoodsFilterText(aszTopParas, 1)
 			if len(szFilter) > 0:
-				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, None, None, ("filter", 1))
+				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, localText.getText("TXT_KEY_WTP_TIP_GOODS_TRADE_HINT", ()), None, ("filter", 1))
 		elif iPara >= 0 and iSel < 0 and self.showAloneUnitTip(screen, iFz, aszTopParas, iPara, iCY, tTop):
 			# a line of a unit of a stack: the tooltip of the unit as if it stood alone on the plot
 			pass
@@ -6657,6 +6657,60 @@ class CvMainInterface:
 			return u"\n".join(aLines)
 		except:
 			return u""
+
+	# the goods (yield types) with a mark of color (stored goods: exported, imported; produced goods: missing, scarce, import set) in the lines of a window
+	def getMarkedGoodTypes( self, aszParas ):
+		aTypes = []
+		try:
+			aMarks = [u"255,240,0,255", u"255,200,110,255", u"255,0,0,255", u"255,140,0,255"]
+			for szPara in aszParas:
+				for szSeg in szPara.split(u", "):
+					mColor = re.search(u"<color=(\\d+,\\d+,\\d+,\\d+)>", szSeg)
+					if mColor is None or not (mColor.group(1) in aMarks):
+						continue
+					for iYield in range(YieldTypes.NUM_YIELD_TYPES):
+						if szSeg.find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
+							szType = gc.getYieldInfo(iYield).getType()
+							if not (szType in aTypes):
+								aTypes.append(szType)
+							break
+		except:
+			pass
+		return aTypes
+
+	# opens the import / export window of the city of a goods window (the city is named in the first line of its top window) with a temporary
+	# filter view of the marked goods of the list (only for this opening)
+	def openGoodsTradeWindow( self, iLevel, aszParas ):
+		try:
+			aTypes = self.getMarkedGoodTypes(aszParas)
+			iTop = iLevel
+			while self.aFrozen[iTop][6] >= 0:
+				iTop = self.aFrozen[iTop][6]
+			szName = self.getPlainCommandText(self.aFrozen[iTop][2][0])
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			pCity = None
+			(loopCity, iter) = pPlayer.firstCity(False)
+			while loopCity:
+				if loopCity.getName() == szName:
+					pCity = loopCity
+					break
+				(loopCity, iter) = pPlayer.nextCity(iter, False)
+			if pCity is None:
+				return False
+			import CvTradeRouteScreen
+			if not CvTradeRouteScreen.isNewWindowEnabled():
+				return False
+			if len(aTypes) > 0:
+				CvTradeRouteScreen.setTempFilter(aTypes)
+			iOpened = CvScreensInterface.tradeRouteScreen.open(pCity.getID(), False)
+			CvTradeRouteScreen.setTempFilter(None)
+			if iOpened == 0:
+				return False
+			self.unfreezeAllTips()
+			return True
+		except:
+			pass
+		return False
 
 	# the promotions named by the pictures of a line (<img=button path size=16>): their names and what they do
 	def getPromotionTipText( self, szLine ):
@@ -7301,6 +7355,11 @@ class CvMainInterface:
 			iLevel = iData / 1000
 			iPara = iData % 1000
 			aszParas = self.getLevelParas(iLevel)
+			# right click on the list of the stored / producing goods of a city: the import / export window of the city with these goods
+			tKindHit = self.dFrozenKind.get(self.aFrozen[iLevel][0])
+			if tKindHit is not None and tKindHit[0] == "list" and iPara >= 0 and iPara < len(aszParas):
+				if self.openGoodsTradeWindow(iLevel, aszParas):
+					return
 			if iPara >= 0 and iPara < len(aszParas):
 				(aszCmd, iCmd) = self.getCommandParas(iLevel, aszParas, iPara)
 				iOption = -1

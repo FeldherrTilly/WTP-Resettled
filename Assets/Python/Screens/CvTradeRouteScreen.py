@@ -104,6 +104,19 @@ FAV_SUFFIX = "]]"
 # the filter (the goods of the searches) is kept like the favorites, in the script data of the player
 FLT_PREFIX = "[[WTPFLT:"
 FLT_SUFFIX = "]]"
+# a filter for the next opening of the window only (set by the tooltips of the stored / producing goods of a city: the goods of the list);
+# it is not saved with the game
+g_aTempFilter = None
+
+def setTempFilter(aTypes):
+	global g_aTempFilter
+	g_aTempFilter = aTypes
+
+def takeTempFilter():
+	global g_aTempFilter
+	aTypes = g_aTempFilter
+	g_aTempFilter = None
+	return aTypes
 
 def loadFilter():
 	aFlt = []
@@ -343,6 +356,7 @@ class CvTradeRouteScreen:
 		self.CHECK_W = 124
 		self.BLOCK_SPIN_W = 116
 		self.iCity = -1
+		self.bTempFilter = False # the filter view of this opening comes from a tooltip (it is not saved)
 		self.bCondensed = False
 		self.bFinished = True
 		self.pHost = None
@@ -496,6 +510,8 @@ class CvTradeRouteScreen:
 
 	# the confirmed goods are saved (as yield types) with the game
 	def syncFilter(self):
+		if self.bTempFilter:
+			return
 		aTypes = []
 		for szName in self.aConfirmed:
 			for iYield in self.dNames.keys():
@@ -1194,10 +1210,23 @@ class CvTradeRouteScreen:
 		for iYield in self.dData.keys():
 			self.dNames[iYield] = gc.getYieldInfo(iYield).getDescription()
 		# the filter of the searches before (names in the order they were confirmed)
-		for szType in loadFilter():
+		aTemp = takeTempFilter()
+		aFilterTypes = loadFilter()
+		self.bTempFilter = False
+		if aTemp is not None:
+			aFilterTypes = aTemp
+			self.bTempFilter = True
+		for szType in aFilterTypes:
 			for iYield in self.dNames.keys():
 				if gc.getYieldInfo(iYield).getType() == szType:
 					self.aConfirmed.append(self.dNames[iYield].lower())
+		if self.bTempFilter:
+			if len(self.aConfirmed) > 0:
+				# the view of the goods of the tooltip (the filter view with these goods) for this opening
+				self.iView = VIEW_FILTER
+				self.buildView()
+			else:
+				self.bTempFilter = False
 		self.dKeys = {}
 		for szKey in SEARCH_KEY_NAMES.keys():
 			iKey = getattr(InputTypes, szKey, None)
