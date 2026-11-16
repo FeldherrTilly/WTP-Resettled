@@ -7631,6 +7631,8 @@ class CvMainInterface:
 				# (log: after a click on a unit the game reports the contact help of the score table although the cursor is on the map)
 				return
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD):
+				szText = self.addRawNote(szText)
 			if szText and len(szText) > 0:
 				self.iWidgetHelpTick = self.iTick
 				self.bHudHover = True
@@ -7648,6 +7650,20 @@ class CvMainInterface:
 			# empty texts are ignored: the game reports them all the time on the map (log: type 24), they must not block the plot help
 		except:
 			pass
+
+	# the picture of a good in the import / export window that has an outer frame (it restricts the production of the city): its help text gets a note
+	def addRawNote( self, szText ):
+		try:
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.isOpen():
+				iYield = tWin.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
+				if iYield >= 0:
+					szNote = tWin.getRawNote(iYield)
+					if len(szNote) > 0:
+						return szText + u"\n" + szNote
+		except:
+			pass
+		return szText
 
 	# the help texts the game itself makes for its HUD elements (the DLL stores the last one, CyGame.getWidgetHelp...)
 	def pollWidgetHelp( self ):

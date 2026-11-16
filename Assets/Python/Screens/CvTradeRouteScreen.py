@@ -1465,6 +1465,46 @@ class CvTradeRouteScreen:
 		self.dRawState[iYield] = iState
 		return iState
 
+	# the good whose picture is at a place of the screen (the picture and its frames), -1 if none
+	def getIconYieldAt(self, iCX, iCY):
+		try:
+			if self.bFinished or self.pHost == None:
+				return -1
+			for iSlot in range(self.iVisible):
+				iIndex = self.iFirst + iSlot
+				if iIndex >= len(self.aYields):
+					break
+				iX = self.OX + 22
+				iY = self.OY + self.LIST_Y + iSlot * self.ROW_H + (self.ROW_H - 32) / 2
+				if iCX >= iX - 8 and iCX < iX + 40 and iCY >= iY - 8 and iCY < iY + 40:
+					return self.aYields[iIndex]
+		except:
+			pass
+		return -1
+
+	# the note for the tooltip of a good with an outer frame (what the frame means, in its color); empty if the good has none
+	def getRawNote(self, iYield):
+		try:
+			pCity = self.getCity()
+			if pCity == None or pCity.isNone():
+				return u""
+			self.dRawState = {}
+			iState = self.getRawState(pCity, iYield)
+			if iState == 2:
+				szColor = u"255,0,0,255"
+				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"
+			elif iState == 1:
+				szColor = u"255,140,0,255"
+				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"
+			elif iState == 3:
+				szColor = u"255,200,110,255"
+				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET"
+			else:
+				return u""
+			return u"<color=" + szColor + u">" + localText.getText("TXT_KEY_WTP_TIP_RAW_NOTE", (localText.getText(szKey, ()),)) + u"</color>"
+		except:
+			return u""
+
 	def drawOuterFrame(self, iSlot, iX, iY, iState):
 		screen = self.pHost
 		aRects = []
