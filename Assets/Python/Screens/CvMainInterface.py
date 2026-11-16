@@ -8908,7 +8908,8 @@ class CvMainInterface:
 		self.atMessageTargets = []
 		self.aMsgWaypoints = []
 		iCell = iWidth / 3
-		iChars = max(8, int((iCell - 2 * iPad) / (iLine * 0.32)))
+		# (a name must not reach into the next column: a safety margin of about a tenth, the widths of the letters are only estimated)
+		iChars = max(8, int(0.9 * (iCell - 2 * iPad) / (iLine * 0.32)))
 		iBottomLimit = int(yRes * 0.80)
 		if self.iMsgMoveY != 0:
 			iBottomLimit = yRes - 10
