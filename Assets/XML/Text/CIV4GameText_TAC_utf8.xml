@@ -3509,6 +3509,46 @@
 		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Strg und Umschalt gedrückt halten und W, A, S, D drücken (zwei Tasten: diagonal).[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_ON</Tag>
+		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]WPs listen: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_OFF</Tag>
+		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]WPs listen: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER</Tag>
+		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_EMPTY</Tag>
+		<English>[COLOR_FONT_CREAM]No waypoints set yet[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Noch keine Wegpunkte gesetzt[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_MORE</Tag>
+		<English>[COLOR_FONT_CREAM]More waypoints: click for the next page (%d1_Num of %d2_Num)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Weitere Wegpunkte: Klick für die nächste Seite (%d1_Num von %d2_Num)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_LAND</Tag>
+		<English>waypoint of the land units</English>
+		<German>Wegpunkt der Landeinheiten</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_SEA</Tag>
+		<English>waypoint of the ships</English>
+		<German>Wegpunkt der Schiffe</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]%s1_Name[COLOR_REVERT] (%s2_Kind)[NEWLINE]Left click: show the place on the map[NEWLINE]Right click: rename[NEWLINE]Shift + right click: delete</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]%s1_Name[COLOR_REVERT] (%s2_Kind)[NEWLINE]Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: umbenennen[NEWLINE]Umschalt + Rechtsklick: löschen</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
 		<English>Left click: show the place on the map[NEWLINE]Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>

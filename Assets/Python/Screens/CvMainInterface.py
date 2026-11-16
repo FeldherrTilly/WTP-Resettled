@@ -340,6 +340,8 @@ class CvMainInterface:
 	BUTTON_MESSAGE_PREVIOUS = 759 # WTP: message panel footer: the messages of the turn before / back
 	BUTTON_MESSAGE_AUTO = 761 # WTP: message panel: auto expand at the start of a turn on / off
 	BUTTON_MESSAGE_LINE = 757 # WTP: a line of a message of the message panel (click: center the map on its place)
+	BUTTON_MESSAGE_WPS = 763 # WTP: message panel: the toggle "List WPs" (the panel shows the waypoints instead of the messages)
+	BUTTON_MESSAGE_WP = 764 # WTP: message panel: a waypoint of the list (iData2 = its index in aMsgWpEntries)
 	BUTTON_TIP_LINE = 762 # WTP: a line of a frozen hover tooltip (right click: Colopedia)
 	dMessagePediaChars = {}
 	aMessageConceptPatterns = []
@@ -352,6 +354,10 @@ class CvMainInterface:
 	dMessageRects = {} # message -> (x, y, width, height) of its rows in the panel
 	tMsgPanelRect = None
 	tMsgAutoRect = None # the auto expand label at the top right of the panel (for its help window)
+	bMsgWpView = False # the message panel shows the list of the waypoints
+	iMsgWpPage = 0
+	aMsgWpEntries = [] # the waypoints of the list: (sea, number, x, y, name, text of the line)
+	aMsgWpRects = [] # (x, y, width, height, index, column) of the waypoints of the page that is shown
 	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
 	iMsgSelIdx = 0
 	bMsgWheel = False
@@ -5145,6 +5151,12 @@ class CvMainInterface:
 	# the frozen lists of waypoints are written again after a waypoint was deleted or renamed (they stay where they are, their size follows)
 	def refreshWaypointLists( self ):
 		try:
+			if self.bMsgWpView:
+				self.tMessagePanelKey = None
+				self.updateMessagePanel()
+		except:
+			pass
+		try:
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			for i in range(len(self.aFrozen)):
 				szPrefix = self.aFrozen[i][0]
@@ -8175,8 +8187,18 @@ class CvMainInterface:
 				self.setMessageAutoExpand(not self.getMessageAutoExpand())
 				self.updateMessagePanel()
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_MORE):
-				self.iMessagePage += 1 # (the panel starts again with the newest messages after the last page)
+				if self.bMsgWpView:
+					self.iMsgWpPage += 1 # (the list starts again with the first page after the last one)
+				else:
+					self.iMessagePage += 1 # (the panel starts again with the newest messages after the last page)
 				self.updateMessagePanel()
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_WPS):
+				self.bMsgWpView = not self.bMsgWpView
+				self.iMsgWpPage = 0
+				self.tMessagePanelKey = None
+				self.updateMessagePanel()
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_WP):
+				self.clickMsgWaypoint(inputClass.getData2(), bool(inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP), inputClass.isShiftKeyDown())
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_PREVIOUS):
 				self.bMessagePanelPrevious = not self.bMessagePanelPrevious
 				self.iMessagePage = 0
@@ -8583,6 +8605,7 @@ class CvMainInterface:
 		screen.deleteWidget("HudMsgPanelBack2")
 		screen.hide("HudMsgHeader")
 		screen.hide("HudMsgAuto")
+		screen.hide("HudMsgWps")
 		screen.hide("HudMsgFooterMore")
 		screen.hide("HudMsgFooterPrevious")
 
@@ -8608,7 +8631,7 @@ class CvMainInterface:
 			else:
 				iNum = iNumCurrent
 			# (MESSAGE_PANEL_ENABLED = 0: the DLL collects no messages, so there is nothing to show)
-			bShow = (iNumCurrent > 0 and self.isMessagePanelOption()
+			bShow = ((iNumCurrent > 0 or self.bMsgWpView) and self.isMessagePanelOption()
 				and CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW and not CyInterface().isCityScreenUp())
 			if iNumCurrent == 0:
 				self.bMessageTurnPending = True
@@ -8629,7 +8652,12 @@ class CvMainInterface:
 			else:
 				iNumPriority = game.getNumHudPriority()
 			self.readMessagePosition()
-			tKey = (iNumCurrent, iNumPrevious, iNumPriority, bPrevious, self.iMessagePage, self.bMessagePanelExpanded, self.getMessageAutoExpand(), self.iMsgMoveX, self.iMsgMoveY, xRes, yRes)
+			aWpEntries = []
+			tWpKey = None
+			if self.bMsgWpView:
+				aWpEntries = self.getMsgWaypointEntries()
+				tWpKey = (self.iMsgWpPage, tuple([t[5] for t in aWpEntries]))
+			tKey = (iNumCurrent, iNumPrevious, iNumPriority, bPrevious, self.iMessagePage, self.bMessagePanelExpanded, self.getMessageAutoExpand(), self.iMsgMoveX, self.iMsgMoveY, xRes, yRes, self.bMsgWpView, tWpKey)
 			if tKey == self.tMessagePanelKey:
 				return
 			self.tMessagePanelKey = tKey
@@ -8654,6 +8682,10 @@ class CvMainInterface:
 			iIndent = int(iLine * 0.95) # the lines after the first one of a message
 			# characters per line (measured: about 6.6 pixels per character at 22 pixels line distance)
 			iCharsPerLine = max(20, int((iWidth - 2 * iPad - iIndent) / (iLine * 0.32)))
+
+			if self.bMsgWpView:
+				self.drawMsgWaypointView(screen, aWpEntries, iX, iY, iWidth, iLine, iPad, iHeaderHeight, iGap, yRes)
+				return
 
 			aszMessages = []
 			aiX = []
@@ -8748,6 +8780,7 @@ class CvMainInterface:
 			self.dMessageCapitals = {}
 			self.dMessageLineIndex = {}
 			self.dMessageRects = {}
+			self.aMsgWpRects = []
 			self.tMsgPanelRect = (iX, iY, iWidth, iHeight)
 
 			# a denser background: the panel style is semi-transparent, several of them on top of each other are better to read
@@ -8826,12 +8859,160 @@ class CvMainInterface:
 			screen.setText("HudMsgAuto", "Background", self.setFontSize(szAuto, -1), CvUtil.FONT_RIGHT_JUSTIFY, iX + iWidth - iPad, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_AUTO, -1)
 			screen.show("HudMsgAuto")
 			screen.moveToFront("HudMsgAuto")
+			self.drawMsgWpToggle(screen, iX, iY, iPad)
 		except:
 			# the panel must never break the main interface
 			self.tMessagePanelKey = None
 			if not getattr(self, "bMessagePanelErrorShown", False):
 				self.bMessagePanelErrorShown = True
 				CvUtil.pyPrint("Message panel failed: " + str(sys.exc_info()[1]))
+
+	# the toggle "List WPs" at the top left corner of the message panel
+	def drawMsgWpToggle( self, screen, iX, iY, iPad ):
+		if self.bMsgWpView:
+			szWps = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_ON", ())
+		else:
+			szWps = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_OFF", ())
+		screen.setText("HudMsgWps", "Background", self.setFontSize(szWps, -1), CvUtil.FONT_LEFT_JUSTIFY, iX + iPad, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_WPS, -1)
+		screen.show("HudMsgWps")
+		screen.moveToFront("HudMsgWps")
+
+	# all waypoints for the list of the message panel: the ones of the land units, then the ones of the ships, each in the order of the lists of the
+	# tooltips (colonies first, then the others numbered): (sea, number, x, y, name, text of the line)
+	def getMsgWaypointEntries( self ):
+		aEntries = []
+		try:
+			for bSea in (False, True):
+				for tEntry in self.getWaypointView(bSea):
+					aEntries.append((bSea, tEntry[0], tEntry[1], tEntry[2], tEntry[3], tEntry[4]))
+		except:
+			pass
+		return aEntries
+
+	# the message panel with the list of the waypoints instead of the messages: in two columns (the entries one after the other from left to
+	# right), a page of the height that the expanded panel has; the footer shows the next page
+	def drawMsgWaypointView( self, screen, aEntries, iX, iY, iWidth, iLine, iPad, iHeaderHeight, iGap, yRes ):
+		self.aszMessageTexts = []
+		self.atMessageTargets = []
+		self.aMsgWaypoints = []
+		iCell = iWidth / 2
+		iChars = max(8, int((iCell - 2 * iPad) / (iLine * 0.32)))
+		iBottomLimit = int(yRes * 0.80)
+		if self.iMsgMoveY != 0:
+			iBottomLimit = yRes - 10
+		iMaxRows = max(4, int((iBottomLimit - iY - iHeaderHeight - iGap - 2 * iPad) / iLine) - 2)
+		iPerPage = iMaxRows * 2
+		iPages = max(1, (len(aEntries) + iPerPage - 1) / iPerPage)
+		if self.iMsgWpPage >= iPages:
+			self.iMsgWpPage = 0
+		self.aMsgWpEntries = aEntries
+		aShow = []
+		for k in range(self.iMsgWpPage * iPerPage, min(len(aEntries), (self.iMsgWpPage + 1) * iPerPage)):
+			aShow.append(k)
+		iRows = max(1, (len(aShow) + 1) / 2)
+		iFooterHeight = 0
+		if iPages > 1:
+			iFooterHeight = iLine + iGap / 2
+		iHeight = iHeaderHeight + iGap + int(iRows * iLine) + iPad / 2 + iFooterHeight + iPad
+
+		for szName in self.aszMessageLines:
+			screen.hide(szName)
+		self.aszMessageLines = []
+		self.dMessageCapitals = {}
+		self.dMessageLineIndex = {}
+		self.dMessageRects = {}
+		self.aMsgWpRects = []
+		self.tMsgPanelRect = (iX, iY, iWidth, iHeight)
+		screen.deleteWidget("HudMsgPanel")
+		screen.deleteWidget("HudMsgPanelBack1")
+		screen.deleteWidget("HudMsgPanelBack2")
+		screen.addPanel("HudMsgPanelBack1", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+		screen.show("HudMsgPanelBack1")
+		screen.moveToFront("HudMsgPanelBack1")
+		screen.addPanel("HudMsgPanelBack2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
+		screen.show("HudMsgPanelBack2")
+		screen.moveToFront("HudMsgPanelBack2")
+		screen.addPanel("HudMsgPanel", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_PANEL, -1)
+		screen.show("HudMsgPanel")
+		screen.moveToFront("HudMsgPanel")
+
+		iTextY = iY + iHeaderHeight + iGap
+		if len(aEntries) == 0:
+			szEmpty = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_EMPTY", ())
+			screen.setText("HudMsgLine0", "Background", self.setFontSize(szEmpty, -1), CvUtil.FONT_LEFT_JUSTIFY, iX + iPad, iTextY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
+			screen.show("HudMsgLine0")
+			screen.moveToFront("HudMsgLine0")
+			self.aszMessageLines.append("HudMsgLine0")
+		for i in range(len(aShow)):
+			iCol = i % 2
+			iRow = i / 2
+			iCellX = iX + iCol * iCell
+			iCellY = iTextY + int(iRow * iLine)
+			szText = aEntries[aShow[i]][5]
+			if len(szText) > iChars:
+				szText = szText[:iChars - 2] + u".."
+			szName = "HudMsgLine%d" % i
+			screen.setText(szName, "Background", self.setFontSize(szText, -1), CvUtil.FONT_LEFT_JUSTIFY, iCellX + iPad, iCellY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_WP, aShow[i])
+			screen.show(szName)
+			screen.moveToFront(szName)
+			self.aszMessageLines.append(szName)
+			self.aMsgWpRects.append((iCellX, iCellY, iCell, int(iLine), aShow[i], iCol))
+
+		screen.hide("HudMsgFooterMore")
+		screen.hide("HudMsgFooterPrevious")
+		if iPages > 1:
+			iFooterY = iTextY + int(iRows * iLine) + iPad / 2 + iGap / 2
+			szMore = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_MORE", (self.iMsgWpPage + 1, iPages))
+			screen.setText("HudMsgFooterMore", "Background", self.setFontSize(szMore, -1), CvUtil.FONT_CENTER_JUSTIFY, iX + iWidth / 2, iFooterY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_MORE, -1)
+			screen.show("HudMsgFooterMore")
+			screen.moveToFront("HudMsgFooterMore")
+
+		szHeader = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER", (len(aEntries),))
+		screen.setText("HudMsgHeader", "Background", self.setFontSize(szHeader, -1), CvUtil.FONT_CENTER_JUSTIFY, iX + iWidth / 2, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_PANEL, -1)
+		screen.show("HudMsgHeader")
+		screen.moveToFront("HudMsgHeader")
+		if self.getMessageAutoExpand():
+			szAuto = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON", ())
+		else:
+			szAuto = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_OFF", ())
+		iAutoWidth = int(len(re.sub(u"<[^>]*>", u"", szAuto)) * iLine * 0.32) + iPad
+		self.tMsgAutoRect = (iX + iWidth - iPad - iAutoWidth, iY, iAutoWidth + iPad, iHeaderHeight + iPad)
+		screen.setText("HudMsgAuto", "Background", self.setFontSize(szAuto, -1), CvUtil.FONT_RIGHT_JUSTIFY, iX + iWidth - iPad, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_AUTO, -1)
+		screen.show("HudMsgAuto")
+		screen.moveToFront("HudMsgAuto")
+		self.drawMsgWpToggle(screen, iX, iY, iPad)
+
+	# a click on a waypoint of the list: left shows its place on the map, right renames it, Shift + right deletes it
+	def clickMsgWaypoint( self, iIndex, bRight, bShift ):
+		try:
+			(bSea, iId, iX, iY, szName, szText) = self.aMsgWpEntries[iIndex]
+			if not bRight:
+				CyCamera().JustLookAtPlot(CyMap().plot(iX, iY))
+			elif bShift:
+				(aWp, iNext) = self.getWaypoints(-1, bSea)
+				for k in range(len(aWp)):
+					if aWp[k][0] == iId:
+						# (the numbers of the others close up)
+						del aWp[k]
+						break
+				self.saveWaypoints(aWp, iNext, -1, bSea)
+				self.refreshWaypointLists()
+			else:
+				CvEventInterface.beginEvent(CvUtil.EventRenameWaypoint, (iId, szText))
+		except:
+			pass
+
+	# the help window of a waypoint of the list
+	def getMsgWaypointHelp( self, iIndex ):
+		try:
+			(bSea, iId, iX, iY, szName, szText) = self.aMsgWpEntries[iIndex]
+			if bSea:
+				szKind = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_SEA", ())
+			else:
+				szKind = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_LAND", ())
+			return localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_HELP", (szText, szKind))
+		except:
+			return u""
 
 	# WTP: shift + mouse wheel on a message line chooses among all the things named in it: a window beside the panel lists them (the chosen one
 	# in yellow), the right click opens the chosen one. The rows of every message are kept when the panel is drawn.
@@ -8858,7 +9039,7 @@ class CvMainInterface:
 		self.bMsgPickShown = False
 		self.iMsgPickLines = 0
 
-	def showMessagePick( self, screen, szText, iCursorY ):
+	def showMessagePick( self, screen, szText, iCursorY, bPreferLeft = False ):
 		try:
 			xRes = screen.getXResolution()
 			yRes = screen.getYResolution()
@@ -8878,7 +9059,9 @@ class CvMainInterface:
 			(iPX, iPY, iPW, iPH) = self.tMsgPanelRect
 			# beside the panel (right of it, left if there is no room) at the height of the cursor
 			iX = iPX + iPW + 12
-			if iX + iWidth > xRes - 4:
+			if bPreferLeft and iPX - 12 - iWidth >= 4:
+				iX = iPX - 12 - iWidth
+			elif iX + iWidth > xRes - 4:
 				iX = iPX - 12 - iWidth
 			iX = max(4, iX)
 			iY = max(4, min(yRes - iHeight - 4, iCursorY - iHeight / 2))
@@ -8898,6 +9081,8 @@ class CvMainInterface:
 	def updateMessageScroll( self ):
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 		iMsg = -1
+		iWp = -1
+		iWpCol = 0
 		bAuto = False
 		if len(self.aszMessageLines) > 0 and self.tMsgPanelRect is not None:
 			iCX = gc.getGame().getCursorClientX()
@@ -8909,6 +9094,12 @@ class CvMainInterface:
 				(iRX, iRY, iRW, iRH) = self.dMessageRects[iIndex]
 				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
 					iMsg = iIndex
+					break
+			# (the list of the waypoints: the cell under the cursor)
+			for (iRX, iRY, iRW, iRH, iIndex, iColumn) in self.aMsgWpRects:
+				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
+					iWp = iIndex
+					iWpCol = iColumn
 					break
 		aAll = []
 		if iMsg >= 0:
@@ -8947,11 +9138,13 @@ class CvMainInterface:
 		if not bShow:
 			if bAuto:
 				szHelp = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP", (self.iMsgX, self.iMsgY))
+			elif iWp >= 0:
+				szHelp = self.getMsgWaypointHelp(iWp)
 			elif iMsg >= 0:
 				szHelp = self.getMessagePediaHelp(iMsg)
-		tKey = (iMsg, iSel, bShow, szHelp)
+		tKey = (iMsg, iSel, bShow, szHelp, iWpCol)
 		if iMsg >= 0:
-			tKey = (self.aszMessageTexts[iMsg], iSel, bShow, szHelp)
+			tKey = (self.aszMessageTexts[iMsg], iSel, bShow, szHelp, iWpCol)
 		if tKey == self.tMsgPickKey:
 			return
 		self.tMsgPickKey = tKey
@@ -8965,7 +9158,8 @@ class CvMainInterface:
 					szText += u"\n  " + aAll[i][0]
 			self.showMessagePick(screen, szText, gc.getGame().getCursorClientY())
 		elif szHelp != u"":
-			self.showMessagePick(screen, szHelp, gc.getGame().getCursorClientY())
+			# (the help of the left column on the left of the panel, the one of the right column on the right, as long as there is room)
+			self.showMessagePick(screen, szHelp, gc.getGame().getCursorClientY(), iWp >= 0 and iWpCol == 0)
 
 	def getMessagePediaTargets(self, iMessage):
 		try:
@@ -9780,7 +9974,7 @@ class CvMainInterface:
 				return localText.getText("TXT_KEY_INTERFACE_ACHIEVE_ADVISOR", ("F10", ""));
 			elif iData1 == self.BUTTON_TERRITORIAL_INFLUENCE:
 				return localText.getText("TXT_KEY_INTERFACE_TERRITORIAL_INFLUENCE", ("Ctrl+I", ""));
-			elif iData1 == self.BUTTON_MESSAGE_LINE or iData1 == self.BUTTON_MESSAGE_AUTO:
+			elif iData1 == self.BUTTON_MESSAGE_LINE or iData1 == self.BUTTON_MESSAGE_AUTO or iData1 == self.BUTTON_MESSAGE_WPS or iData1 == self.BUTTON_MESSAGE_WP:
 				# (the help of the message panel is a window beside the panel, see updateMessageScroll)
 				return u""
 			elif iData1 == self.BUTTON_PIONEER_PLAN:
