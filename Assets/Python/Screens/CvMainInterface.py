@@ -17,6 +17,7 @@ import CvScreensInterface
 import CvEventInterface
 import time
 import re
+import sdToolKit
 import sys
 import math
 
@@ -369,9 +370,29 @@ class CvMainInterface:
 	bSecondTipShown = False # the window with the Colopedia hint of the line under the cursor in the frozen tooltip
 	bExplainShown = False # the window that explains the colored label of a folded line (Stored..., Produced...), on the other side of the parent
 	iExplainLines = 0
+	bExplainFreezeHint = True # the explanation window gets the hint of the freezing (not the one with the hints of the keys)
 	szExplainPrefix = "HudTipE1"
 	tExplainLayout = None # its layout, to freeze it together with the window of the list of goods
 	aszExplainParas = []
+	dWpWin = {} # frozen windows with lines of waypoints: prefix -> {"unit": (owner, id), "paras": {paragraph: "row" | "new" | number of a waypoint}, "cmd": paragraph of the line Commands or -1}
+	tPreviewWp = None # the same for the window of the line that is shown beside a frozen window now (becomes dWpWin[prefix] when it is frozen)
+	tPreviewDetails = None # the folded lines of the window beside a frozen window (a line with a child window), for freezing
+	iPreviewFreezeLines = 0 # of the hint lines under the second window the last ones (the hint of the freezing)
+	fShiftSeen = 0.0 # the time Shift was seen down in the frozen window (the wheel click counts with it for a moment)
+	szModMessageSound = "AS2D_POSITIVE_DINK" # the sound of the messages of the mod (notes, warnings)
+	szModJumpSound = "AS2D_PING" # the sound of the jump to a waypoint
+	tCursorFollow = None # (window, distance of the cursor from its corner, time) after a jump to a waypoint
+	tJump = None # (x, y, time) of the last jump to a waypoint
+	tLeftClick = None # (window, line, time) of a left click on the line of a window with waypoints
+	bLeftJumped = False
+	bWheelNeedsShift = True # the wheel click needs Shift (False: the wheel click alone jumps to the waypoint)
+	dPaintPlain = {}
+	dRowChild = {} # (frozen window, paragraph of its line "Set waypoint...") -> the frozen child window with the list of waypoints
+	dWpMarked = {} # the frozen lists of waypoints with a line in yellow (chosen with the wheel)
+	tTipWp = None # the registration of the line "Set waypoint..." of the tooltip at the cursor (it is in the tooltip already)
+	tPreviewUnit = None # the own unit whose tooltip the window beside a frozen window is (it gets the line "Set waypoint..." when it is frozen)
+	iWpUnit = -1 # the unit whose next order to move is saved as a waypoint (-1: none)
+	fWpStart = 0.0
 	dFrozenDark = {} # frozen windows that are always drawn in the darker variant (the explanation of a folded line)
 	dFrozenCompanion = {} # frozen windows that belong to the frozen window below them (the explanation of a folded line): they close together
 	tSecondTipKey = None
@@ -3623,8 +3644,19 @@ class CvMainInterface:
 			aiIndent = [] # indent of continued rows of icons (pixels)
 			aszRaw = self.carryColors(self.stripCarries(szHelp).split(u"\n"))
 			aszParas = self.foldCityDetails(aszRaw)
+			self.tTipWp = None
 			if aszParas is None:
 				aszParas = self.foldUnitDetails(aszRaw)
+				# the tooltip of an own unit alone: the line "Set waypoint..." is in it already (not if it has the line "Commands": there it is the
+				# first line of the child window)
+				try:
+					tRowWp = self.getHoverWaypointRow(aszParas, self.dTipDetails)
+					if tRowWp is not None:
+						tRowWp["paras"][len(aszParas)] = "row"
+						aszParas = list(aszParas) + [localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())]
+						self.tTipWp = tRowWp
+				except:
+					self.tTipWp = None
 			for iPara in range(len(aszParas)):
 				aszWrapped = self.wrapMessage(aszParas[iPara], iCharsPerLine, True)
 				aszLines += aszWrapped
@@ -4410,6 +4442,766 @@ class CvMainInterface:
 			screen.deleteWidget(szName)
 
 	# a tooltip window; the lines of a frozen one can be clicked (right click: Colopedia), their data is the level of the window and the paragraph
+	# WAYPOINTS OF UNITS. The tooltip of an own unit gets the line "Set waypoint..." when it is frozen (above the hint of the freezing; in the
+	# child window of the line "Commands" as its first line, if there is one). Its child window lists "New waypoint" and the saved waypoints: a right
+	# click on a saved one sends the unit there (Ctrl + right click deletes the waypoint). "New waypoint" selects the unit: the target of its next
+	# order to move (the ordinary right click on the map) is saved as a waypoint (the name of the colony there, otherwise the number and the
+	# terrain) and the unit goes there at once. The waypoints are kept in the savegame (sdToolKit), for each player.
+	# The waypoints of ships are kept apart from those of land units: two lists, each numbered on its own (the numbers of the waypoints are
+	# the same counter, so every waypoint is told apart by its number in both lists)
+	def getAllWaypoints( self, ePlayer = -1 ):
+		# (list of the land units, list of the ships, the number that the next waypoint gets); a waypoint is (number, x, y, name)
+		try:
+			if ePlayer < 0:
+				ePlayer = gc.getGame().getActivePlayer()
+			if sdToolKit.sdEntityExists('WTPWaypoints', ePlayer):
+				aLand = []
+				for tWp in sdToolKit.sdGetVal('WTPWaypoints', ePlayer, 'List'):
+					# (the name without a number in front: "3: Hills" of an older version)
+					aLand.append((tWp[0], tWp[1], tWp[2], re.sub(u"^[0-9]+[:.]\\s*", u"", tWp[3])))
+				aSea = []
+				try:
+					aSea = list(sdToolKit.sdGetVal('WTPWaypoints', ePlayer, 'SeaList'))
+				except:
+					pass
+				return (aLand, aSea, sdToolKit.sdGetVal('WTPWaypoints', ePlayer, 'Next'))
+		except:
+			pass
+		return ([], [], 0)
+
+	def saveAllWaypoints( self, aLand, aSea, iNext, ePlayer = -1 ):
+		try:
+			if ePlayer < 0:
+				ePlayer = gc.getGame().getActivePlayer()
+			sdToolKit.sdEntityInit('WTPWaypoints', ePlayer, {'List': aLand, 'SeaList': aSea, 'Next': iNext})
+		except:
+			pass
+
+	# the waypoints of the land units (bSea False) or of the ships (bSea True): (list, the number of the next waypoint)
+	def getWaypoints( self, ePlayer = -1, bSea = False ):
+		(aLand, aSea, iNext) = self.getAllWaypoints(ePlayer)
+		if bSea:
+			return (aSea, iNext)
+		return (aLand, iNext)
+
+	def saveWaypoints( self, aWp, iNext, ePlayer = -1, bSea = False ):
+		(aLand, aSea, iOld) = self.getAllWaypoints(ePlayer)
+		if bSea:
+			aSea = aWp
+		else:
+			aLand = aWp
+		self.saveAllWaypoints(aLand, aSea, iNext, ePlayer)
+
+	# a message of the mod (a warning, a note of the tooltips): in the message panel (if it is installed and on) as a message at the top, all in the
+	# yellow of the units; otherwise as the game shows its messages
+	def showModMessage( self, szText, szSound = None ):
+		if szSound is None:
+			szSound = self.szModMessageSound
+		szYellow = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szText) + u"</color>"
+		bPanel = False
+		try:
+			if self.isMessagePanelOption():
+				gc.getGame().addHudMessage(szYellow, True)
+				bPanel = True
+		except:
+			pass
+		if not bPanel:
+			try:
+				CyInterface().addImmediateMessage(szYellow, "")
+			except:
+				pass
+		# a short, quiet sound (the same with and without the panel)
+		try:
+			if len(szSound) > 0:
+				CyInterface().playGeneralSound(szSound)
+		except:
+			pass
+
+	def isSeaUnit( self, pUnit ):
+		try:
+			return pUnit.getDomainType() == DomainTypes.DOMAIN_SEA
+		except:
+			return False
+
+	# the own colony (of the active player) on a plot, or None
+	def getOwnColonyAt( self, iX, iY, ePlayer = -1 ):
+		try:
+			if ePlayer < 0:
+				ePlayer = gc.getGame().getActivePlayer()
+			pPlot = CyMap().plot(iX, iY)
+			if pPlot.isCity():
+				pCity = pPlot.getPlotCity()
+				if pCity.getOwner() == ePlayer:
+					return pCity
+		except:
+			pass
+		return None
+
+	# is the text the name of one of the own colonies (not looking at upper and lower case, at numbers and dots in front)?
+	def isColonyName( self, szName, ePlayer = -1 ):
+		try:
+			if ePlayer < 0:
+				ePlayer = gc.getGame().getActivePlayer()
+			szCheck = re.sub(u"^[\\s0-9.:]+", u"", szName).strip().lower()
+			if len(szCheck) == 0:
+				return False
+			pPlayer = gc.getPlayer(ePlayer)
+			(loopCity, iter) = pPlayer.firstCity(False)
+			while loopCity:
+				if re.sub(u"<[^>]*>", u"", loopCity.getName()).strip().lower() == szCheck:
+					return True
+				(loopCity, iter) = pPlayer.nextCity(iter, False)
+		except:
+			pass
+		return False
+
+	# the waypoints as they are listed: first those that lead to an own colony (without a number, the capital first, then in the order the colonies
+	# were founded), then the others, numbered from 1 in the order of the list. Each entry: (number of the waypoint, x, y, name, text of the line)
+	def getWaypointView( self, bSea, ePlayer = -1 ):
+		(aWp, iNext) = self.getWaypoints(ePlayer, bSea)
+		aCol = []
+		aRest = []
+		for tWp in aWp:
+			pCity = self.getOwnColonyAt(tWp[1], tWp[2], ePlayer)
+			if pCity is not None:
+				iCapital = 1
+				if pCity.isCapital():
+					iCapital = 0
+				iFounded = 0
+				try:
+					iFounded = pCity.getGameTurnFounded()
+				except:
+					pass
+				aCol.append(((iCapital, iFounded, pCity.getID()), tWp, pCity.getName()))
+			else:
+				aRest.append(tWp)
+		aCol.sort()
+		aView = []
+		for (tKey, tWp, szName) in aCol:
+			aView.append((tWp[0], tWp[1], tWp[2], szName, szName))
+		for k in range(len(aRest)):
+			aView.append((aRest[k][0], aRest[k][1], aRest[k][2], aRest[k][3], u"%d. %s" % (k + 1, aRest[k][3])))
+		return aView
+
+	# the line of a waypoint (by its number) as it is shown
+	def getWaypointTextById( self, bSea, iId, ePlayer = -1 ):
+		for tEntry in self.getWaypointView(bSea, ePlayer):
+			if tEntry[0] == iId:
+				return tEntry[4]
+		return u""
+
+	# the name that a waypoint gets when it is set: the colony on the plot, otherwise the terrain ("Hills/Forest/Savanna")
+	def getWaypointLabel( self, pPlot ):
+		try:
+			if pPlot.isCity():
+				return pPlot.getPlotCity().getName()
+		except:
+			pass
+		aParts = []
+		try:
+			if pPlot.isPeak():
+				aParts.append(localText.getText("TXT_KEY_PLOT_PEAK", ()))
+			elif pPlot.isHills():
+				aParts.append(localText.getText("TXT_KEY_PLOT_HILLS", ()))
+			if pPlot.getFeatureType() >= 0:
+				aParts.append(gc.getFeatureInfo(pPlot.getFeatureType()).getDescription())
+			if pPlot.getTerrainType() >= 0:
+				szTerrain = gc.getTerrainInfo(pPlot.getTerrainType()).getDescription()
+				bKnown = False
+				for szPart in aParts:
+					if self.normTipText(szPart) == self.normTipText(szTerrain):
+						bKnown = True
+				if not bKnown:
+					aParts.append(szTerrain)
+		except:
+			pass
+		if len(aParts) == 0:
+			return u"(%d, %d)" % (pPlot.getX(), pPlot.getY())
+		return u"/".join(aParts)
+
+	# the new name from the window to rename a waypoint: "2. name" puts it at the place 2 of the list (the others move, the numbers stay continuous),
+	# a name without a number keeps its place
+	def applyWaypointRename( self, ePlayer, iId, szNew ):
+		try:
+			bSea = False
+			(aWp, iNext) = self.getWaypoints(ePlayer, False)
+			iAt = -1
+			for k in range(len(aWp)):
+				if aWp[k][0] == iId:
+					iAt = k
+			if iAt < 0:
+				bSea = True
+				(aWp, iNext) = self.getWaypoints(ePlayer, True)
+				for k in range(len(aWp)):
+					if aWp[k][0] == iId:
+						iAt = k
+			if iAt < 0:
+				return
+			tWp = aWp[iAt]
+			szName = szNew.strip()
+			iPlace = -1
+			tMatch = re.match(u"^([0-9]+)\\s*\\.\\s*(.*)$", szName, re.UNICODE)
+			if tMatch is not None:
+				iPlace = max(0, int(tMatch.group(1)) - 1)
+				szName = tMatch.group(2).strip()
+			if len(szName) == 0:
+				szName = tWp[3]
+			# the names of the colonies are protected: also with a number in front ("3 Plymouth", "3. Plymouth")
+			if self.getOwnColonyAt(tWp[1], tWp[2], ePlayer) is None and self.isColonyName(szName, ePlayer):
+				self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_NAME_COLONY", (szName,)))
+				return
+			del aWp[iAt]
+			iInsert = iAt
+			if iPlace >= 0:
+				# (the number counts the waypoints without a colony: the place among them)
+				aPlain = []
+				for k in range(len(aWp)):
+					if self.getOwnColonyAt(aWp[k][1], aWp[k][2], ePlayer) is None:
+						aPlain.append(k)
+				if iPlace < len(aPlain):
+					iInsert = aPlain[iPlace]
+				else:
+					iInsert = len(aWp)
+			aWp.insert(iInsert, (tWp[0], tWp[1], tWp[2], szName))
+			self.saveWaypoints(aWp, iNext, ePlayer, bSea)
+			self.refreshWaypointLists()
+		except:
+			pass
+
+	# the waypoint that is chosen (the line under the cursor of a list, or the line of the list that the wheel has chosen on the line "Set
+	# waypoint..."): the camera looks at its plot; the unit stays selected; the frozen window of the line goes there as well (it keeps its distance)
+	def jumpToSelectedWaypoint( self, iFz, iPara, iSel, bWpLine, aWpStops, bWpRow, iRowChild, aChildKeys ):
+		tWpJ = self.dWpWin.get(self.aFrozen[iFz][0])
+		if tWpJ is None:
+			return u"the line is no line of waypoints"
+		iId = -1
+		if bWpLine:
+			iP = iPara
+			if iSel >= 0 and iSel < len(aWpStops):
+				iP = aWpStops[iSel][0]
+			kind = tWpJ["paras"].get(iP)
+			if isinstance(kind, int):
+				iId = kind
+		elif bWpRow and iSel > 0:
+			if iRowChild >= 0:
+				if iSel < len(aChildKeys) and self.dWpWin.has_key(self.aFrozen[iRowChild][0]):
+					kind = self.dWpWin[self.aFrozen[iRowChild][0]]["paras"].get(aChildKeys[iSel])
+					if isinstance(kind, int):
+						iId = kind
+			else:
+				aViewJ = self.getWaypointView(tWpJ["sea"])
+				if iSel - 1 < len(aViewJ):
+					iId = aViewJ[iSel - 1][0]
+		if iId < 0:
+			return u"no waypoint is chosen (Shift + mouse wheel chooses one)"
+		for tEntry in self.getWaypointView(tWpJ["sea"]):
+			if tEntry[0] == iId:
+				# the child window of the cursor is frozen for the jump: it goes with its parent window to the new place
+				try:
+					# (not for the list of waypoints: its window beside the line is only the help, every jump would freeze one more of them)
+					if self.bSecondTipShown and not bWpLine:
+						self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
+				except:
+					pass
+				CyCamera().JustLookAtPlot(CyMap().plot(tEntry[1], tEntry[2]))
+				self.tJump = (tEntry[1], tEntry[2], (self.getTipNow() / 1000.0))
+				self.showModMessage(u"Waypoint: " + tEntry[4], self.szModJumpSound)
+
+				# the cursor goes with the window under it (the same place of the same line)
+				try:
+					(iWX, iWY) = self.aFrozen[iFz][1][:2]
+					self.tCursorFollow = [self.aFrozen[iFz][0], gc.getGame().getCursorClientX() - iWX, gc.getGame().getCursorClientY() - iWY, (self.getTipNow() / 1000.0), -1, -1, 0]
+				except:
+					self.tCursorFollow = None
+				iRoot = iFz
+				for k in range(10):
+					if self.aFrozen[iRoot][6] < 0:
+						break
+					iRoot = self.aFrozen[iRoot][6]
+				tA = self.aFrozen[iRoot][5]
+				if tA is not None:
+					self.aFrozen[iRoot][5] = (tEntry[1], tEntry[2], tA[2], tA[3])
+				return u""
+		return u"waypoint not found"
+
+	# left click on the line of a frozen child window: the child window goes again (with the windows that belong to it); the windows after it
+	# keep their places in the list
+	def closeFrozenChild( self, screen, iChild ):
+		try:
+			aRemove = [iChild]
+			if iChild + 1 < len(self.aFrozen) and self.dFrozenCompanion.has_key(self.aFrozen[iChild + 1][0]):
+				aRemove.append(iChild + 1)
+			bMore = True
+			while bMore:
+				bMore = False
+				for i in range(len(self.aFrozen)):
+					if not (i in aRemove) and self.aFrozen[i][6] in aRemove:
+						aRemove.append(i)
+						bMore = True
+			aNew = []
+			dMap = {}
+			aGone = []
+			for i in range(len(self.aFrozen)):
+				if i in aRemove:
+					aGone.append(self.aFrozen[i][0])
+					self.deleteTipWindow(screen, self.aFrozen[i][0], len(self.aFrozen[i][1][4]))
+				else:
+					dMap[i] = len(aNew)
+					aNew.append(self.aFrozen[i])
+			for tFz in aNew:
+				if tFz[6] >= 0:
+					tFz[6] = dMap.get(tFz[6], -1)
+			self.aFrozen[:] = aNew
+			for tKey in self.dRowChild.keys():
+				if self.dRowChild[tKey] in aGone or tKey[0] in aGone:
+					del self.dRowChild[tKey]
+			for szGone in aGone:
+				if self.dFrozenCompanion.has_key(szGone):
+					del self.dFrozenCompanion[szGone]
+			self.tSecondTipKey = None
+			self.iTipSelPara = -1
+			self.bTipFrozen = (len(self.aFrozen) > 0)
+			self.redrawFrozenTips(screen)
+		except:
+			pass
+
+	def onTipLineLeftClick( self, iData ):
+		try:
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			iLevel = iData / 1000
+			iPara = iData % 1000
+			# a window with waypoints: the left click on the line of a waypoint jumps to it (the update of the frozen windows knows which one is chosen);
+			# when it is no waypoint (the line "Set waypoint..."), the click does what it always did
+			if iLevel >= 0 and iLevel < len(self.aFrozen) and self.dWpWin.has_key(self.aFrozen[iLevel][0]):
+				self.tLeftClick = (iLevel, iPara, (self.getTipNow() / 1000.0))
+				self.bLeftJumped = False
+				try:
+					self.updateFrozenTip()
+				except:
+					pass
+				self.tLeftClick = None
+				if self.bLeftJumped:
+					self.bLeftJumped = False
+					return
+			if iLevel >= 0 and iLevel < len(self.aFrozen):
+				szKey = (self.aFrozen[iLevel][0], iPara)
+				szChild = self.dRowChild.get(szKey)
+				if szChild is not None:
+					# (the line has a frozen child window: it goes again)
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == szChild and self.aFrozen[i][6] == iLevel:
+							self.closeFrozenChild(screen, i)
+							return
+					del self.dRowChild[szKey]
+			if self.bSecondTipShown:
+				self.freezePreview(screen)
+		except:
+			pass
+
+	# the frozen lists of waypoints are written again after a waypoint was deleted or renamed (they stay where they are, their size follows)
+	def refreshWaypointLists( self ):
+		try:
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			for i in range(len(self.aFrozen)):
+				szPrefix = self.aFrozen[i][0]
+				tWp = self.dWpWin.get(szPrefix)
+				if tWp is None or not self.isWaypointList(tWp):
+					continue
+				aView = self.getWaypointView(tWp["sea"])
+				iStart = 0
+				if not ("new" in tWp["paras"].values()):
+					# (a later page of the list: it begins with the first waypoint that it has)
+					for iP in tWp["paras"].keys():
+						if not isinstance(tWp["paras"][iP], tuple):
+							for k in range(len(aView)):
+								if aView[k][0] == tWp["paras"][iP] and (iStart == 0 or k < iStart):
+									iStart = k
+				if iStart >= len(aView):
+					iStart = 0
+				aParas = []
+				dParas = {}
+				if iStart == 0:
+					aParas.append(localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_NEW", ()))
+					dParas[0] = "new"
+				iEnd = min(len(aView), iStart + 5)
+				for k in range(iStart, iEnd):
+					dParas[len(aParas)] = aView[k][0]
+					aParas.append(aView[k][4])
+				if iEnd < len(aView):
+					dParas[len(aParas)] = ("more", iEnd)
+					aParas.append(localText.getText("TXT_KEY_WTP_TIP_MORE", ()))
+				(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.aFrozen[i][1]
+				iTail = len(aiPara)
+				while iTail > 0 and aiPara[iTail - 1] < 0:
+					iTail -= 1
+				aszTail = list(aszLines[iTail:])
+				aszNew = self.carryColors(aParas) + aszTail
+				aiNew = range(len(aParas)) + [-1] * len(aszTail)
+				iChar = iLine * 0.32
+				iWidth = self.getTipTextWidth(aszNew, iChar, max(300, int(screen.getXResolution() * 0.2)), iPad)
+				iHeight = len(aszNew) * iLine + 2 * iPad
+				iNX = max(4, min(screen.getXResolution() - iWidth - 4, iX))
+				iNY = max(4, min(screen.getYResolution() - iHeight - 4, iY))
+				tNew = (iNX, iNY, iWidth, iHeight, aszNew, aiNew, iPad, iLine)
+				self.deleteTipWindow(screen, szPrefix, len(aszLines))
+				self.aFrozen[i][1] = tNew
+				self.aFrozen[i][2] = aParas
+				self.aFrozen[i][3] = [0] * len(aszNew)
+				tWp["paras"] = dParas
+				if tWp.has_key("plain"):
+					del tWp["plain"]
+				tWp["marked"] = -1
+				self.drawTipWindow(screen, szPrefix, tNew, True, i, self.aFrozen[i][3], self.dFrozenDark.has_key(szPrefix))
+			self.tSecondTipKey = None
+		except:
+			pass
+
+	# the own unit that a frozen window of a tooltip belongs to: the window of one unit alone (None: a stack, a city, ...)
+	def getWaypointRowUnit( self, iLevel ):
+		try:
+			if iLevel < 0 or iLevel >= len(self.aFrozen) or self.aFrozen[iLevel][6] >= 0:
+				return None
+			aszParas = self.aFrozen[iLevel][2]
+			tAnchor = self.aFrozen[iLevel][5]
+			if tAnchor is not None:
+				pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+			else:
+				pPlot = self.getStackPlot()
+			iPlotStart = self.getPlotStartPara(aszParas, pPlot)
+			iHead = -1
+			iHeaders = 0
+			for k in range(iPlotStart):
+				if self.isUnitHeader(aszParas[k]):
+					iHeaders += 1
+					if iHead < 0:
+						iHead = k
+			if iHeaders == 0:
+				return None
+			if iHeaders >= 2:
+				# a stack: the unit that is selected (the one that the game shows), otherwise the first own unit of the plot
+				eActive = gc.getGame().getActivePlayer()
+				if pPlot is None or pPlot.isNone():
+					return None
+				pHead = CyInterface().getHeadSelectedUnit()
+				if pHead is not None and not pHead.isNone() and pHead.getOwner() == eActive and pHead.getX() == pPlot.getX() and pHead.getY() == pPlot.getY():
+					return pHead
+				for k in range(pPlot.getNumUnits()):
+					if pPlot.getUnit(k).getOwner() == eActive:
+						return pPlot.getUnit(k)
+				return None
+			return self.getHeaderUnit(iLevel, aszParas, iHead)
+		except:
+			pass
+		return None
+
+	# the paragraph of the line "Commands" of a tooltip (that has a child window), -1 if there is none
+	def getCommandsPara( self, aszParas, dDetails ):
+		szCmd = self.normTipText(localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()))
+		for k in range(len(aszParas)):
+			if dDetails.has_key(k) and self.normTipText(re.sub(u"<[^>]*>", u"", aszParas[k])) == szCmd:
+				return k
+		return -1
+
+	# the tooltip at the cursor (not frozen yet) of one own unit without the line "Commands": the registration of its line "Set waypoint..."
+	# (the paragraph is added by the caller), otherwise None
+	def getHoverWaypointRow( self, aszParas, dDetails ):
+		if self.getCommandsPara(aszParas, dDetails) >= 0:
+			return None
+		# (a temporary window: the functions that find the unit of a tooltip look at the frozen windows)
+		self.aFrozen.append([u"", (0, 0, 0, 0, [], [], 0, 0), list(aszParas), [], {}, self.makeAnchor((0, 0)), -1, None])
+		try:
+			pUnit = self.getWaypointRowUnit(len(self.aFrozen) - 1)
+		finally:
+			self.aFrozen.pop()
+		if pUnit is None or pUnit.isNone() or pUnit.getOwner() != gc.getGame().getActivePlayer():
+			return None
+		return {"unit": (pUnit.getOwner(), pUnit.getID()), "sea": self.isSeaUnit(pUnit), "paras": {}, "cmd": -1}
+
+	# the line "Set waypoint..." in the frozen window iLevel (of the tooltip of the unit): a paragraph above the hint at the end, or the first line
+	# of the child window of the line "Commands"
+	def addWaypointRow( self, screen, iLevel, pUnit ):
+		try:
+			if pUnit is None or pUnit.isNone() or pUnit.getOwner() != gc.getGame().getActivePlayer():
+				return
+			szPrefix = self.aFrozen[iLevel][0]
+			tLayout = self.aFrozen[iLevel][1]
+			aszParas = list(self.aFrozen[iLevel][2])
+			aiIndent = list(self.aFrozen[iLevel][3])
+			dDetails = dict(self.aFrozen[iLevel][4])
+			szRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
+			dReg = {"unit": (pUnit.getOwner(), pUnit.getID()), "sea": self.isSeaUnit(pUnit), "paras": {}, "cmd": -1}
+			szCmd = self.normTipText(localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()))
+			iCmd = -1
+			for k in range(len(aszParas)):
+				if dDetails.has_key(k) and self.normTipText(re.sub(u"<[^>]*>", u"", aszParas[k])) == szCmd:
+					iCmd = k
+					break
+			if iCmd >= 0:
+				dDetails[iCmd] = szRow + u"\n" + dDetails[iCmd]
+				dReg["cmd"] = iCmd
+				self.aFrozen[iLevel][4] = dDetails
+			else:
+				iPara = len(aszParas)
+				aszParas.append(szRow)
+				(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
+				iChar = iLine * 0.32
+				aszRow = self.wrapMessage(szRow, max(20, int((iWidth - 2 * iPad) / iChar)))
+				# above the hint lines at the end
+				iAt = len(aiPara)
+				while iAt > 0 and aiPara[iAt - 1] < 0:
+					iAt -= 1
+				aszLines = list(aszLines[:iAt]) + aszRow + list(aszLines[iAt:])
+				aiPara = list(aiPara[:iAt]) + [iPara] * len(aszRow) + list(aiPara[iAt:])
+				aiIndent = list(aiIndent[:iAt]) + [0] * len(aszRow) + list(aiIndent[iAt:])
+				iHeight += iLine * len(aszRow)
+				iWidth = max(iWidth, self.getTipTextWidth(aszRow, iChar, int(iWidth * 1.3), iPad))
+				iNY = max(4, min(screen.getYResolution() - iHeight - 4, iY))
+				iNX = max(4, min(screen.getXResolution() - iWidth - 4, iX))
+				tNew = (iNX, iNY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
+				tAnchor = self.aFrozen[iLevel][5]
+				if tAnchor is not None:
+					tAnchor = (tAnchor[0], tAnchor[1], tAnchor[2] + iNX - iX, tAnchor[3] + iNY - iY)
+				self.deleteTipWindow(screen, szPrefix, len(tLayout[4]))
+				self.aFrozen[iLevel][1] = tNew
+				self.aFrozen[iLevel][2] = aszParas
+				self.aFrozen[iLevel][3] = aiIndent
+				self.aFrozen[iLevel][5] = tAnchor
+				self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, aiIndent, self.dFrozenDark.has_key(szPrefix))
+				dReg["paras"][iPara] = "row"
+			self.dWpWin[szPrefix] = dReg
+		except:
+			pass
+
+	# is the frozen window a list of waypoints (not the line "Set waypoint..." alone)?
+	def isWaypointList( self, tWp ):
+		for k in tWp["paras"].keys():
+			if tWp["paras"][k] == "row":
+				return False
+		return len(tWp["paras"]) > 0
+
+	# the places that shift + mouse wheel stops at in a list of waypoints: (paragraph, choice): -1 for "New waypoint" and "more...", the choices
+	# 0 start, 1 delete, 2 rename for a waypoint
+	def getWaypointStops( self, tWp ):
+		aStops = []
+		aKeys = tWp["paras"].keys()
+		aKeys.sort()
+		for iP in aKeys:
+			kind = tWp["paras"][iP]
+			# (one stop per line: start, delete and rename are chosen with the keys)
+			aStops.append((iP, -1))
+		return aStops
+
+	# the line of the list that the wheel has chosen is yellow (iPara -1: no line, the lines have their colors again)
+	def markWaypointLine( self, screen, iLevel, iPara ):
+		try:
+			# (the window that was marked before: back to its colors)
+			for szOld in self.dWpMarked.keys():
+				if iLevel < 0 or iLevel >= len(self.aFrozen) or self.aFrozen[iLevel][0] != szOld:
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == szOld:
+							self.paintWaypointLines(screen, i, -1)
+					del self.dWpMarked[szOld]
+			if iLevel >= 0 and iLevel < len(self.aFrozen):
+				if self.paintWaypointLines(screen, iLevel, iPara) and iPara >= 0:
+					self.dWpMarked[self.aFrozen[iLevel][0]] = True
+		except:
+			pass
+
+	def paintWaypointLines( self, screen, iLevel, iPara ):
+		try:
+			szPrefix = self.aFrozen[iLevel][0]
+			tWp = self.dWpWin.get(szPrefix)
+			if tWp is None:
+				# (a window without lines of waypoints, e.g. the commands of a unit: its own place to keep the lines as they were)
+				if len(self.dPaintPlain) > 200:
+					self.dPaintPlain = {}
+				tWp = self.dPaintPlain.setdefault(szPrefix, {})
+			(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.aFrozen[iLevel][1]
+			if not tWp.has_key("plain") or len(tWp["plain"]) != len(aszLines):
+				tWp["plain"] = list(aszLines)
+			aNew = []
+			for i in range(len(aszLines)):
+				szLine = tWp["plain"][i]
+				if iPara >= 0 and aiPara[i] == iPara:
+					szLine = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szLine) + u"</color>"
+				aNew.append(szLine)
+			if aNew == list(aszLines):
+				return True
+			tNew = (iX, iY, iW, iH, aNew, aiPara, iPad, iLine)
+			self.deleteTipWindow(screen, szPrefix, len(aszLines))
+			self.aFrozen[iLevel][1] = tNew
+			self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, self.aFrozen[iLevel][3], self.dFrozenDark.has_key(szPrefix))
+			return True
+		except:
+			pass
+		return False
+
+	# a line of a saved waypoint in a frozen window (its choices: start, delete, rename): the number of the waypoint, otherwise -1
+	def getWaypointLineId( self, iLevel, iPara ):
+		try:
+			tWp = self.dWpWin.get(self.aFrozen[iLevel][0])
+			if tWp is not None and tWp["paras"].has_key(iPara):
+				kind = tWp["paras"][iPara]
+				if not isinstance(kind, tuple) and kind != "row" and kind != "new":
+					return kind
+		except:
+			pass
+		return -1
+
+	# the child window of a line of waypoints (hovering): the list of the waypoints (5 on a page, the line "more..." opens the next page), or
+	# what a right click does
+	def showWaypointTip( self, screen, iLevel, tWp, iPara, iCursorY, tAnchor, iSel = -1, iEntry = -1 ):
+		kind = tWp["paras"][iPara]
+		if kind == "row" or isinstance(kind, tuple):
+			aView = self.getWaypointView(tWp["sea"])
+			aLines = []
+			dParas = {}
+			iStart = 0
+			if kind == "row":
+				# (iEntry: the line that the wheel has chosen, 0 "New waypoint", then the waypoints; the page of the list follows it)
+				if iEntry > 0:
+					iStart = ((iEntry - 1) / 5) * 5
+				if iStart == 0:
+					aLines.append(localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_NEW", ()))
+					dParas[0] = "new"
+			else:
+				iStart = kind[1]
+			iEnd = min(len(aView), iStart + 5)
+			for k in range(iStart, iEnd):
+				dParas[len(aLines)] = aView[k][0]
+				aLines.append(aView[k][4])
+			if iEnd < len(aView):
+				dParas[len(aLines)] = ("more", iEnd)
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_MORE", ()))
+			dMarked = -1
+			dMarkedText = u""
+			if kind == "row" and iEntry >= 0:
+				if iEntry == 0:
+					iMarked = 0
+				else:
+					iMarked = iEntry - 1 - iStart
+					if iStart == 0:
+						iMarked += 1
+				if iMarked >= 0 and iMarked < len(aLines):
+					dMarkedText = aLines[iMarked]
+					aLines[iMarked] = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", aLines[iMarked]) + u"</color>"
+					dMarked = iMarked
+			szListHint = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_WHEEL", ())
+			if len(aView) > 0:
+				# (what Ctrl / Shift + right click and the wheel click do with a waypoint)
+				szListHint = szListHint + u"\n" + localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_KEYS", ())
+			self.showSecondTip(screen, u"\n".join(aLines), iCursorY, tAnchor, iLevel)
+			if self.bSecondTipShown:
+				# the hints are in a window of their own beside the parent (as the explanation of the colors of the goods), without the hint of the freezing
+				self.showFoldExplain(screen, szListHint, tAnchor, False)
+				self.tPreviewWp = {"unit": tWp["unit"], "sea": tWp["sea"], "paras": dParas, "cmd": -1, "marked": dMarked, "markedText": dMarkedText}
+		elif kind == "new":
+			self.showSecondTip(screen, localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_NEW_HELP", ()), iCursorY, tAnchor, iLevel)
+		else:
+			# the choices of a saved waypoint: start, delete, rename (then the hint of the wheel); shift + mouse wheel chooses one, a right click runs it
+			aLines = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_OPTIONS", ()).split(u"\n")
+			if iSel >= 0 and iSel < 3 and iSel < len(aLines):
+				aLines[iSel] = u"<color=255,255,0,255>" + aLines[iSel] + u"</color>"
+			self.showSecondTip(screen, u"\n".join(aLines), iCursorY, tAnchor, iLevel)
+
+	# right click (Ctrl: the second choice, Shift: the third) on a line of waypoints of a frozen window: True if the click was for a waypoint
+	def runWaypointClick( self, iLevel, iPara, bSecond, bShift = False, iOption = -1, kindOverride = None ):
+		try:
+			tWp = self.dWpWin.get(self.aFrozen[iLevel][0])
+			if tWp is None or not tWp["paras"].has_key(iPara):
+				return False
+			kind = tWp["paras"][iPara]
+			if kindOverride is not None:
+				# (the line of the list that was chosen with the wheel on the line "Set waypoint...")
+				kind = kindOverride
+			if isinstance(kind, tuple):
+				# (the line "more...": it only opens the next page when the cursor is on it)
+				return True
+			pUnit = gc.getPlayer(tWp["unit"][0]).getUnit(tWp["unit"][1])
+			if pUnit is None or pUnit.isNone():
+				return True
+			if kind == "row" or kind == "new":
+				# (the line "Set waypoint..." itself: a new waypoint at once)
+				self.startWaypointMode(pUnit)
+				return True
+			(aWp, iNext) = self.getWaypoints(-1, tWp["sea"])
+			# the choice: the one chosen with shift + mouse wheel (0 start, 1 delete, 2 rename), otherwise the modifier keys
+			if iOption < 0:
+				if bShift:
+					iOption = 2
+				elif bSecond:
+					iOption = 1
+				else:
+					iOption = 0
+			for k in range(len(aWp)):
+				if aWp[k][0] == kind:
+					if iOption == 2:
+						# rename: the small window (the frozen windows stay, the lists are written again when the name is applied)
+						CvEventInterface.beginEvent(CvUtil.EventRenameWaypoint, (aWp[k][0], self.getWaypointTextById(tWp["sea"], aWp[k][0])))
+					elif iOption == 1:
+						# (delete; the numbers of the others close up)
+						del aWp[k]
+						self.saveWaypoints(aWp, iNext, -1, tWp["sea"])
+						self.refreshWaypointLists()
+					else:
+						# (first choice: start)
+						CyInterface().selectUnit(pUnit, True, False, False)
+						self.unfreezeAllTips()
+						self.sendUnitToPlot(pUnit, aWp[k][1], aWp[k][2])
+					break
+			return True
+		except:
+			pass
+		return False
+
+	def sendUnitToPlot( self, pUnit, iX, iY ):
+		try:
+			CyMessageControl().sendPushMission(pUnit.getID(), MissionTypes.MISSION_MOVE_TO, iX, iY, 0, False)
+		except:
+			try:
+				pPlot = CyMap().plot(iX, iY)
+				pUnit.getGroup().pushMission(MissionTypes.MISSION_MOVE_TO, iX, iY, 0, False, True, MissionAITypes.NO_MISSIONAI, pPlot, pUnit)
+			except:
+				pass
+
+	# "New waypoint": the unit is selected, the target of its next order to move is saved (for one minute)
+	def startWaypointMode( self, pUnit ):
+		CyInterface().selectUnit(pUnit, True, False, False)
+		self.iWpUnit = pUnit.getID()
+		self.fWpStart = (self.getTipNow() / 1000.0)
+		self.unfreezeAllTips()
+		try:
+			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_MODE", (pUnit.getName(),)))
+		except:
+			pass
+
+	# called by the game for every order that the player gives to a group (CvEventManager.onSelectionGroupPushMission)
+	def onWaypointMission( self, eOwner, eMission ):
+		try:
+			if self.iWpUnit < 0:
+				return
+			if eOwner != gc.getGame().getActivePlayer() or (self.getTipNow() / 1000.0) - self.fWpStart > 60:
+				self.iWpUnit = -1
+				return
+			pHead = CyInterface().getHeadSelectedUnit()
+			if pHead is None or pHead.isNone() or pHead.getID() != self.iWpUnit or eMission != MissionTypes.MISSION_MOVE_TO:
+				# another unit or another order: the waypoint mode is over
+				self.iWpUnit = -1
+				return
+			pPlot = pHead.getGroup().lastMissionPlot()
+			if pPlot is None or pPlot.isNone():
+				return
+			self.iWpUnit = -1
+			bSea = self.isSeaUnit(pHead)
+			(aWp, iNext) = self.getWaypoints(-1, bSea)
+			iNext += 1
+			# (the new waypoint is the last of the list of the ships or of the land units: its number follows the existing ones)
+			aWp.append((iNext, pPlot.getX(), pPlot.getY(), self.getWaypointLabel(pPlot)))
+			self.saveWaypoints(aWp, iNext, -1, bSea)
+			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_SAVED", (self.getWaypointTextById(bSea, iNext),)))
+		except:
+			self.iWpUnit = -1
+
 	def getOverflowForecastText( self, pCity ):
 		# the goods that the storage overflow (or the sale threshold of a custom house) takes at the next turn change, and the gold of their sale:
 		# the forecast comes from the DLL, the same calculation as the turn change (None: nothing is lost, or the DLL has no forecast)
@@ -4490,9 +5282,9 @@ class CvMainInterface:
 		return False
 
 	# the hint line at the end of a frozen window (wrapped to the width of the window: the window does not get wider because of it)
-	def addFrozenHint( self, screen, tLayout, aiIndent ):
+	def addFrozenHint( self, screen, tLayout, aiIndent, szKey = "TXT_KEY_WTP_TIP_FROZEN_HINT" ):
 		(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
-		szHint = localText.getText("TXT_KEY_WTP_TIP_FROZEN_HINT", ())
+		szHint = localText.getText(szKey, ())
 		iChar = iLine * 0.32
 		aszHint = self.wrapMessage(szHint, max(20, int((iWidth - 2 * iPad) / iChar)))
 		aszLines = list(aszLines) + aszHint
@@ -4767,6 +5559,17 @@ class CvMainInterface:
 			(tFLayout, aiFIndent) = self.removeFreezeHint(self.tTipLayout, self.aiTipIndent, self.iTipHintLines)
 			(tLayout, aiIndent) = self.addFrozenHint(screen, tFLayout, aiFIndent)
 			self.addFrozenWindow(screen, tLayout, self.aszTipParas, aiIndent, dict(self.dTipDetails), self.makeAnchor(tLayout))
+			try:
+				# the tooltip of an own unit: the line "Set waypoint..."
+				iNew = len(self.aFrozen) - 1
+				if self.tTipWp is not None:
+					# (it is in the tooltip already)
+					self.dWpWin[self.aFrozen[iNew][0]] = self.tTipWp
+					self.tTipWp = None
+				else:
+					self.addWaypointRow(screen, iNew, self.getWaypointRowUnit(iNew))
+			except:
+				pass
 			# the tooltip window of the cursor is free again for the next tooltip
 			self.bCursorTipShown = False
 			self.szCursorTipText = u""
@@ -4785,15 +5588,56 @@ class CvMainInterface:
 
 	def freezePreview( self, screen ):
 		try:
+			tKeyAtFreeze = self.tSecondTipKey
 			self.deleteTipWindow(screen, self.szPreviewPrefix, self.iSecondTipLines)
-			(tFLayout, aiFIndent) = self.removeFreezeHint(self.tPreviewLayout, [0] * len(self.tPreviewLayout[4]), self.iPreviewHintLines)
-			(tLayout, aiIndent) = self.addFrozenHint(screen, tFLayout, aiFIndent)
+			# (the hints of the line (select the unit, talk, wheel, keys) stay in the frozen window, only the hint of the freezing changes)
+			iRemoveLines = self.iPreviewFreezeLines
+			(tFLayout, aiFIndent) = self.removeFreezeHint(self.tPreviewLayout, [0] * len(self.tPreviewLayout[4]), iRemoveLines)
+			(tLayout, aiIndent) = self.addFrozenHint(screen, tFLayout, aiFIndent, "TXT_KEY_WTP_TIP_FROZEN_HINT_CHILD")
 			iParent = self.iPreviewParent
 			if iParent >= len(self.aFrozen):
 				iParent = -1
-			self.addFrozenWindow(screen, tLayout, self.aszPreviewParas, aiIndent, {}, None, iParent)
+			tPreviewWp = self.tPreviewWp
+			tPreviewUnit = self.tPreviewUnit
+			dPreviewDetails = self.tPreviewDetails
+			if dPreviewDetails is None:
+				dPreviewDetails = {}
+			self.tPreviewWp = None
+			self.tPreviewUnit = None
+			self.tPreviewDetails = None
+			self.addFrozenWindow(screen, tLayout, self.aszPreviewParas, aiIndent, dict(dPreviewDetails), None, iParent)
 			if iParent >= 0:
 				self.dFrozenPrefDY[self.aFrozen[-1][0]] = self.iPreviewPrefDY
+				# (the frozen window of a line: the cursor stays on that line, no second window appears there)
+				if tKeyAtFreeze is not None:
+					self.dRowChild[(self.aFrozen[iParent][0], tKeyAtFreeze[1])] = self.aFrozen[-1][0]
+			# a window with lines of waypoints (the list, the commands), or the tooltip of an own unit of a stack (the line "Set waypoint...")
+			if tPreviewWp is not None:
+				self.dWpWin[self.aFrozen[-1][0]] = tPreviewWp
+				# (the line that the wheel had chosen is not yellow in the frozen window: the wheel starts again there)
+				try:
+					iMark = tPreviewWp.get("marked", -1)
+					if iMark >= 0:
+						(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iFPad, iFLine) = self.aFrozen[-1][1]
+						aPlain = []
+						for i in range(len(aszFLines)):
+							szPlain = aszFLines[i]
+							if aiFPara[i] == iMark:
+								if aiFPara.count(iMark) == 1 and len(tPreviewWp.get("markedText", u"")) > 0:
+									# (the line as it was before it was yellow, with its colors)
+									szPlain = tPreviewWp["markedText"]
+								else:
+									szPlain = re.sub(u"<color=[^>]*>|</color>", u"", szPlain)
+							aPlain.append(szPlain)
+						tPreviewWp["plain"] = aPlain
+						self.paintWaypointLines(screen, len(self.aFrozen) - 1, -1)
+				except:
+					pass
+			elif tPreviewUnit is not None:
+				try:
+					self.addWaypointRow(screen, len(self.aFrozen) - 1, gc.getPlayer(tPreviewUnit[0]).getUnit(tPreviewUnit[1]))
+				except:
+					pass
 			# the explanation of the colors of the line (beside the parent window) is frozen with it and closes with it
 			if self.bExplainShown and self.tExplainLayout is not None:
 				self.deleteTipWindow(screen, self.szExplainPrefix, self.iExplainLines)
@@ -4801,7 +5645,10 @@ class CvMainInterface:
 				self.iExplainLines = 0
 				tE = self.tExplainLayout
 				tELayout = (tE[0], tE[1], tE[2], tE[3], list(tE[4]), [-1] * len(tE[4]), tE[6], tE[7])
-				(tELayout, aiEIndent) = self.addFrozenHint(screen, tELayout, [0] * len(tE[4]))
+				if self.bExplainFreezeHint:
+					(tELayout, aiEIndent) = self.addFrozenHint(screen, tELayout, [0] * len(tE[4]))
+				else:
+					aiEIndent = [0] * len(tE[4])
 				self.addFrozenWindow(screen, tELayout, self.aszExplainParas, aiEIndent, {}, None, iParent, True)
 				self.dFrozenCompanion[self.aFrozen[-1][0]] = True
 			self.bSecondTipShown = False
@@ -4829,6 +5676,9 @@ class CvMainInterface:
 
 	def hideSecondTip( self, screen ):
 		self.hideFoldExplain(screen)
+		self.tPreviewWp = None
+		self.tPreviewUnit = None
+		self.tPreviewDetails = None
 		try:
 			if self.bSecondTipShown:
 				for szName in self.getSecondTipNames():
@@ -4879,7 +5729,7 @@ class CvMainInterface:
 				iBest = iOver
 		return tBest
 
-	def showSecondTip( self, screen, szText, iCursorY, tAnchor, iParent = -1, aUnits = None, szHint = None ):
+	def showSecondTip( self, screen, szText, iCursorY, tAnchor, iParent = -1, aUnits = None, szHint = None, szTail = None ):
 		try:
 			(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iPad, iLine) = tAnchor
 			xRes = screen.getXResolution()
@@ -4892,7 +5742,7 @@ class CvMainInterface:
 			tUnitWin = None
 			if aUnits is not None:
 				# (a list of units: not higher than the parent window)
-				iHintLines = len(self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT", ()), iCharsPerLine))
+				iHintLines = len(self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT_CHILD", ()), iCharsPerLine))
 				(szText, tUnitWin) = self.getUnitListText(aUnits, iCharsPerLine, max(3, len(aszFLines) - iHintLines))
 			aszParas = self.carryColors(szText.split(u"\n"))
 			if tUnitWin is not None:
@@ -4908,10 +5758,21 @@ class CvMainInterface:
 			if szHint is not None and len(szHint) > 0:
 				for szHintPart in szHint.split(u"\n"):
 					aszHint += self.wrapMessage(szHintPart, iCharsPerLine)
-			aszHint += self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT", ()), iCharsPerLine)
+			aszFreeze = self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT_CHILD", ()), iCharsPerLine)
 			aszLines += aszHint
 			aiPara += [-1] * len(aszHint)
-			self.iPreviewHintLines = len(aszHint)
+			# (lines of the window after its hints, above the hint of the freezing: they are paragraphs of the window that follow the others)
+			if szTail is not None and len(szTail) > 0:
+				aszTailParas = self.carryColors(szTail.split(u"\n"))
+				for iTail in range(len(aszTailParas)):
+					aszWrapped = self.wrapMessage(aszTailParas[iTail], iCharsPerLine)
+					aszLines += aszWrapped
+					aiPara += [len(aszParas) + iTail] * len(aszWrapped)
+				aszParas = list(aszParas) + aszTailParas
+			aszLines += aszFreeze
+			aiPara += [-1] * len(aszFreeze)
+			self.iPreviewHintLines = len(aszHint) + len(aszFreeze)
+			self.iPreviewFreezeLines = len(aszFreeze)
 			iWidth = self.getTipTextWidth(aszLines, iChar, iMaxWidth, iPad)
 			iHeight = len(aszLines) * iLine + 2 * iPad
 			iX = iFX + iFW + 12
@@ -4971,8 +5832,9 @@ class CvMainInterface:
 
 	# the window with the explanation of a folded line: above the parent window, flush with its right edge (when there is room), otherwise
 	# beside or below the parent window where nothing is covered
-	def showFoldExplain( self, screen, szText, tAnchor ):
+	def showFoldExplain( self, screen, szText, tAnchor, bFreezeHint = True ):
 		try:
+			self.bExplainFreezeHint = bFreezeHint
 			(iFX, iFY, iFW, iFH, aszFLines, aiFPara, iPad, iLine) = tAnchor
 			xRes = screen.getXResolution()
 			yRes = screen.getYResolution()
@@ -5053,8 +5915,49 @@ class CvMainInterface:
 			bShift = gc.getGame().isShiftKeyPressed()
 		except:
 			pass
+		# (the list of waypoints: the wheel goes through its lines, a waypoint has the choices start, delete, rename; no Colopedia on these lines)
+		aWpStops = []
+		bWpLine = False
+		if iFz >= 0 and iPara >= 0:
+			tWpList = self.dWpWin.get(self.aFrozen[iFz][0])
+			if tWpList is not None and tWpList["paras"].has_key(iPara) and self.isWaypointList(tWpList):
+				aWpStops = self.getWaypointStops(tWpList)
+				bWpLine = len(aWpStops) > 0
+		bWpRow = False
+		iWpRowCount = 0
+		iRowChild = -1
+		aChildKeys = []
+		if iFz >= 0 and iPara >= 0:
+			tWpRow = self.dWpWin.get(self.aFrozen[iFz][0])
+			if tWpRow is not None and tWpRow["paras"].get(iPara) == "row":
+				bWpRow = True
+				iWpRowCount = len(self.getWaypointView(tWpRow["sea"])) + 1
+				# (the list of this line is frozen already: the wheel goes through its lines)
+				szChild = self.dRowChild.get((self.aFrozen[iFz][0], iPara))
+				if szChild is not None:
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == szChild and self.aFrozen[i][6] == iFz and self.dWpWin.has_key(szChild):
+							iRowChild = i
+							aChildKeys = [k for k in self.dWpWin[szChild]["paras"].keys() if not isinstance(self.dWpWin[szChild]["paras"][k], tuple)]
+							aChildKeys.sort()
+							iWpRowCount = len(aChildKeys)
+		# (the line "Commands" of a unit: the wheel goes through the lines of its child window)
+		bCmdRow = False
+		if iFz >= 0 and iPara >= 0 and not bWpRow and dDetails.has_key(iPara) and not self.dUnitGroups.has_key(dDetails[iPara]) and iPara == self.getCommandsPara(aszTopParas, dDetails):
+			bCmdRow = True
+			iWpRowCount = len(dDetails[iPara].split(u"\n"))
+			szChild = self.dRowChild.get((self.aFrozen[iFz][0], iPara))
+			if szChild is not None:
+				for i in range(len(self.aFrozen)):
+					if self.aFrozen[i][0] == szChild and self.aFrozen[i][6] == iFz:
+						iRowChild = i
+						aChildKeys = range(len(self.aFrozen[i][2]))
+						iWpRowCount = len(aChildKeys)
+		bWpWindow = (iFz >= 0 and iPara >= 0 and self.dWpWin.has_key(self.aFrozen[iFz][0]) and self.dWpWin[self.aFrozen[iFz][0]]["paras"].has_key(iPara))
 		try:
-			if iPara >= 0 and not bPromoLine and bShift and len(self.getTextPediaAllTargets(aszTopParas[iPara])) > 0 and self.getBlockUnit(iFz, aszTopParas, iPara) is None:
+			if (bWpLine or bWpRow or bCmdRow) and bShift:
+				bWheel = True
+			elif iPara >= 0 and not bWpWindow and not bPromoLine and bShift and len(self.getTextPediaAllTargets(aszTopParas[iPara])) > 0 and self.getBlockUnit(iFz, aszTopParas, iPara) is None:
 				bWheel = True
 		except:
 			pass
@@ -5064,28 +5967,148 @@ class CvMainInterface:
 		if bWheel:
 			iNotches = gc.getGame().takeWheelNotches()
 			if iNotches != 0:
-				aTargets = self.getTextPediaAllTargets(aszTopParas[iPara])
+				if bWpLine:
+					aTargets = aWpStops
+				elif bWpRow or bCmdRow:
+					aTargets = range(iWpRowCount)
+				else:
+					aTargets = self.getTextPediaAllTargets(aszTopParas[iPara])
 				if iPara != self.iTipSelPara or iFz != self.iTipSelLevel:
 					self.iTipSelPara = iPara
 					self.iTipSelLevel = iFz
 					self.iTipSelIdx = 0
+					if bWpLine:
+						# (the first stop of the line under the cursor)
+						for k in range(len(aWpStops)):
+							if aWpStops[k][0] == iPara:
+								self.iTipSelIdx = k
+								break
 				# the wheel towards the user: the next one, away from the user: the one before
 				self.iTipSelIdx = (self.iTipSelIdx - iNotches) % len(aTargets)
 		iSel = -1
 		if iPara >= 0 and iPara == self.iTipSelPara and iFz == self.iTipSelLevel and not bPromoLine:
 			iSel = self.iTipSelIdx
+		# (after a jump to a waypoint the window goes to its new place: the cursor goes with it)
+		if self.tCursorFollow is not None:
+			try:
+				tCF = self.tCursorFollow
+				if (self.getTipNow() / 1000.0) - tCF[3] > 1.2:
+					self.tCursorFollow = None
+					self.tSecondTipKey = None
+				elif tCF[4] >= 0 and (abs(iCX - tCF[4]) > 2 or abs(iCY - tCF[5]) > 2):
+					# (the player moves the mouse: the cursor is free again at once)
+					self.tCursorFollow = None
+					self.tSecondTipKey = None
+				else:
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == tCF[0]:
+							iNewX = self.aFrozen[i][1][0] + tCF[1]
+							iNewY = self.aFrozen[i][1][1] + tCF[2]
+							# (the window stands still for a few frames: the cursor is free again)
+							if iNewX == tCF[4] and iNewY == tCF[5] and (self.getTipNow() / 1000.0) - tCF[3] > 0.25:
+								tCF[6] += 1
+								if tCF[6] >= 3:
+									self.tCursorFollow = None
+									self.tSecondTipKey = None
+									break
+							else:
+								tCF[6] = 0
+							tCF[4] = iNewX
+							tCF[5] = iNewY
+							gc.getGame().setCursorClient(tCF[4], tCF[5])
+			except:
+				self.tCursorFollow = None
+		# (after the jump the game may look at its unit again for a moment: the camera is put on the waypoint again for a short time)
+		if self.tJump is not None:
+			try:
+				if (self.getTipNow() / 1000.0) - self.tJump[2] > 1.0:
+					self.tJump = None
+				elif (self.getTipNow() / 1000.0) - self.tJump[2] > 0.05:
+					CyCamera().JustLookAtPlot(CyMap().plot(self.tJump[0], self.tJump[1]))
+			except:
+				self.tJump = None
+		# a left click on the line of a waypoint (written by onTipLineLeftClick, which asks for this update at once)
+		bLeftClick = False
+		if self.tLeftClick is not None:
+			tLC = self.tLeftClick
+			self.tLeftClick = None
+			if (self.getTipNow() / 1000.0) - tLC[2] < 1.0 and iFz == tLC[0] and iPara == tLC[1]:
+				bLeftClick = True
+		self.bLeftJumped = False
+		# a click of the mouse wheel (with Shift) on a chosen waypoint: the map looks at its place (the windows go there with it)
+		try:
+			if bLeftClick:
+				szWhyL = self.jumpToSelectedWaypoint(iFz, iPara, iSel, bWpLine, aWpStops, bWpRow, iRowChild, aChildKeys)
+				if len(szWhyL) == 0:
+					self.bLeftJumped = True
+			bMiddleClick = gc.getGame().takeMiddleClick()
+			if bMiddleClick:
+				# (the click can be some seconds old when the interface was not drawn: it counts only where the cursor still is)
+				if abs(gc.getGame().getMiddleClickX() - iCX) > 8 or abs(gc.getGame().getMiddleClickY() - iCY) > 8:
+					bMiddleClick = False
+			if bShift:
+				self.fShiftSeen = (self.getTipNow() / 1000.0)
+			if bMiddleClick:
+				# (Shift counts when it was down a moment ago: the click and the key are not read in the same instant)
+				bShiftNow = bShift or ((self.getTipNow() / 1000.0) - self.fShiftSeen < 1.0)
+				# (test phase: the jump needs no Shift; set to True for Shift + wheel click again)
+				if not self.bWheelNeedsShift:
+					bShiftNow = True
+				szWhy = u""
+				if not bShiftNow:
+					szWhy = u"Shift is not pressed"
+				elif iFz < 0 or iPara < 0:
+					szWhy = u"the cursor is not on a line of a frozen window"
+				else:
+					szWhy = self.jumpToSelectedWaypoint(iFz, iPara, iSel, bWpLine, aWpStops, bWpRow, iRowChild, aChildKeys)
+				if len(szWhy) > 0:
+					# (test aid: why nothing happened)
+					self.showModMessage(u"Wheel click: no jump (" + szWhy + u")")
+		except:
+			pass
 		tKey = (iFz, iPara, iSel, iLineIdx, bPromoLine)
 		if tKey == self.tSecondTipKey:
 			return
 		self.tSecondTipKey = tKey
 		self.hideSecondTip(screen)
 		tUnitWin = None
+		tWp = None
 		if iFz >= 0 and iPara >= 0:
 			tUnitWin = self.dUnitWin.get(tuple(aszTopParas))
+			tWp = self.dWpWin.get(self.aFrozen[iFz][0])
+		# the list of waypoints: the line chosen with the wheel is yellow, and it (with its choice) is what the child window shows
+		iWpPara = iPara
+		iWpOption = -1
+		iMark = -1
+		if bWpLine and iSel >= 0 and iSel < len(aWpStops):
+			iWpPara = aWpStops[iSel][0]
+			iWpOption = aWpStops[iSel][1]
+			iMark = iWpPara
+		self.markWaypointLine(screen, iFz, iMark)
+		if iRowChild >= 0:
+			# (no second window: the line chosen with the wheel is yellow in the frozen list)
+			iChildMark = -1
+			if iSel >= 0 and iSel < len(aChildKeys):
+				iChildMark = aChildKeys[iSel]
+			self.markWaypointLine(screen, iRowChild, iChildMark)
+			return
+		if iFz >= 0 and iPara >= 0 and iSel < 0 and not bWpRow:
+			# (the line has a frozen child window already: no second one)
+			szFrozenChild = self.dRowChild.get((self.aFrozen[iFz][0], iPara))
+			if szFrozenChild is not None:
+				for i in range(len(self.aFrozen)):
+					if self.aFrozen[i][0] == szFrozenChild and self.aFrozen[i][6] == iFz:
+						return
 		if bPromoLine:
 			szText = self.getPromotionTipText(aszLines[iLineIdx])
 			if len(szText) > 0:
 				self.showSecondTip(screen, szText, iCY, tTop, iFz)
+		elif tWp is not None and tWp["paras"].has_key(iPara):
+			# a line of waypoints: the list of the waypoints, or the choices of a waypoint (the one chosen with the wheel in yellow)
+			if bWpRow:
+				self.showWaypointTip(screen, iFz, tWp, iWpPara, iCY, tTop, -1, iSel)
+			else:
+				self.showWaypointTip(screen, iFz, tWp, iWpPara, iCY, tTop, iWpOption)
 		elif tUnitWin is not None and iPara == tUnitWin[2]:
 			# the last line of a list of units: the units that did not fit into its window
 			self.showSecondTip(screen, u"", iCY, tTop, iFz, tUnitWin[1])
@@ -5095,7 +6118,21 @@ class CvMainInterface:
 				self.showSecondTip(screen, u"", iCY, tTop, iFz, self.dUnitGroups[dDetails[iPara]])
 			else:
 				# the line "Details" of a military unit: the lines folded into it
-				self.showSecondTip(screen, dDetails[iPara], iCY, tTop, iFz)
+				szDetail = dDetails[iPara]
+				iMarkCmd = -1
+				szMarkOrig = u""
+				if bCmdRow and iSel >= 0:
+					# (the line of the commands that the wheel has chosen is yellow)
+					aDetailLines = szDetail.split(u"\n")
+					if iSel < len(aDetailLines):
+						iMarkCmd = iSel
+						szMarkOrig = aDetailLines[iSel]
+						aDetailLines[iSel] = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szMarkOrig) + u"</color>"
+						szDetail = u"\n".join(aDetailLines)
+				self.showSecondTip(screen, szDetail, iCY, tTop, iFz)
+				if tWp is not None and iPara == tWp["cmd"] and self.bSecondTipShown:
+					# the child window of the line "Commands" of a unit: its first line is "Set waypoint..."
+					self.tPreviewWp = {"unit": tWp["unit"], "sea": tWp["sea"], "paras": {0: "row"}, "cmd": -1, "marked": iMarkCmd, "markedText": szMarkOrig}
 				# the folded line "Stored..." / "Produced..." in a color: its explanation, in a second window beside the parent
 				szLegend = self.getFoldLegend(aszTopParas[iPara])
 				if len(szLegend) > 0:
@@ -5389,17 +6426,58 @@ class CvMainInterface:
 			if len(szInfo) > 0:
 				aLines.append(szInfo)
 			if iPlotStart >= 0:
-				aLines += list(aszParas[iPlotStart:])
+				aPlotLines = list(aszParas[iPlotStart:])
 			else:
-				aLines += self.getRootPlotLines(iLevel)
+				aPlotLines = self.getRootPlotLines(iLevel)
+			# (not the line "Set waypoint..." of the parent window: this window gets its own)
+			szSetRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
+			aPlotLines = [x for x in aPlotLines if x != szSetRow]
+			bOwn = (pUnit.getOwner() == gc.getGame().getActivePlayer())
+			# the line "Commands" of the stack: it goes to the end of this window (with its child window, which begins with "Set waypoint...")
+			szCmdLine = None
+			szCmdDetails = u""
+			if bOwn:
+				try:
+					iRoot = iLevel
+					for k in range(10):
+						if self.aFrozen[iRoot][6] < 0:
+							break
+						iRoot = self.aFrozen[iRoot][6]
+					iCmdRoot = self.getCommandsPara(self.aFrozen[iRoot][2], self.aFrozen[iRoot][4])
+					if iCmdRoot >= 0:
+						szCmdRoot = self.aFrozen[iRoot][2][iCmdRoot]
+						if szCmdRoot in aPlotLines:
+							szCmdLine = szCmdRoot
+							szCmdDetails = self.aFrozen[iRoot][4][iCmdRoot]
+							aPlotLines = [x for x in aPlotLines if x != szCmdRoot]
+				except:
+					szCmdLine = None
+			aLines += aPlotLines
 			szHint = u""
-			if pUnit.getOwner() == gc.getGame().getActivePlayer():
+			szTail = None
+			tRowWp = None
+			dDetails = None
+			iMain = len(u"\n".join(aLines).split(u"\n"))
+			if bOwn:
 				szHint = localText.getText("TXT_KEY_WTP_TIP_SELECT_UNIT", (pUnit.getName(),))
+				tUnit = (pUnit.getOwner(), pUnit.getID())
+				if szCmdLine is not None:
+					# (the line "Commands" below the hint of the unit)
+					szTail = szCmdLine
+					dDetails = {iMain: szSetRow + u"\n" + szCmdDetails}
+					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {}, "cmd": iMain}
+				else:
+					# (the line "Set waypoint..." below the hint of the unit)
+					szTail = szSetRow
+					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {iMain: "row"}, "cmd": -1}
 			elif iHead == 0:
 				eTalk = self.getTalkPlayer(aszParas, 0)
 				if eTalk >= 0:
 					szHint = localText.getText("TXT_KEY_WTP_TIP_TALK", (gc.getPlayer(eTalk).getCivilizationShortDescription(0),))
-			self.showSecondTip(screen, u"\n".join(aLines), iCursorY, tAnchor, iLevel, None, szHint)
+			self.showSecondTip(screen, u"\n".join(aLines), iCursorY, tAnchor, iLevel, None, szHint, szTail)
+			if self.bSecondTipShown and tRowWp is not None:
+				self.tPreviewWp = tRowWp
+				self.tPreviewDetails = dDetails
 			return self.bSecondTipShown
 		except:
 			pass
@@ -5740,13 +6818,59 @@ class CvMainInterface:
 			pass
 		return False
 
-	def openTipPedia( self, iData, bSecond ):
+	def openTipPedia( self, iData, bSecond, bShift = False ):
 		try:
 			iLevel = iData / 1000
 			iPara = iData % 1000
 			aszParas = self.getLevelParas(iLevel)
 			if iPara >= 0 and iPara < len(aszParas):
 				(aszCmd, iCmd) = self.getCommandParas(iLevel, aszParas, iPara)
+				iOption = -1
+				if iPara == self.iTipSelPara and iLevel == self.iTipSelLevel:
+					iOption = self.iTipSelIdx
+				iWpPara = iPara
+				tWpHit = self.dWpWin.get(self.aFrozen[iLevel][0])
+				if iOption >= 0 and tWpHit is not None and self.isWaypointList(tWpHit):
+					# (the line and the choice that shift + mouse wheel has chosen in a list of waypoints)
+					aWpStops = self.getWaypointStops(tWpHit)
+					if iOption < len(aWpStops):
+						iWpPara = aWpStops[iOption][0]
+						iOption = aWpStops[iOption][1]
+				kindWp = None
+				if iOption >= 0 and tWpHit is not None and tWpHit["paras"].get(iPara) == "row":
+					# (the line "Set waypoint..." with a line of the list chosen with the wheel: 0 a new waypoint, then the waypoints)
+					aView = self.getWaypointView(tWpHit["sea"])
+					if iOption == 0 or iOption > len(aView):
+						kindWp = "new"
+					else:
+						kindWp = aView[iOption - 1][0]
+					iOption = -1
+				if iOption >= 0 and self.aFrozen[iLevel][4].has_key(iPara) and iPara == self.getCommandsPara(aszParas, self.aFrozen[iLevel][4]):
+					# (the line "Commands" with a line of its child window chosen with the wheel: that command is run)
+					aChildCmd = self.carryColors(self.aFrozen[iLevel][4][iPara].split(u"\n"))
+					if iOption < len(aChildCmd):
+						if aChildCmd[iOption] == localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ()) and tWpHit is not None:
+							pCmdUnit = gc.getPlayer(tWpHit["unit"][0]).getUnit(tWpHit["unit"][1])
+							if pCmdUnit is not None and not pCmdUnit.isNone():
+								self.startWaypointMode(pCmdUnit)
+								return
+						elif self.runUnitCommand(aChildCmd, iOption) or self.runCityCommand([aszParas[0]] + aChildCmd, iOption + 1):
+							return
+				if kindWp is not None and kindWp != "new" and (bSecond or bShift) and self.bSecondTipShown:
+					# (delete / rename from the line "Set waypoint...": the list is frozen first, the windows stay frozen afterwards)
+					self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
+				if self.runWaypointClick(iLevel, iWpPara, bSecond, bShift, iOption, kindWp):
+					try:
+						screenWp = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+						self.hideSecondTip(screenWp)
+						self.tSecondTipKey = None
+						self.iTipSelPara = -1
+						if self.bTipWheel:
+							self.bTipWheel = False
+							gc.getGame().setWheelCapture(False)
+					except:
+						pass
+					return
 				if self.runCityCommand(aszCmd, iCmd) or self.runUnitCommand(aszParas, iPara):
 					return
 				aTargets = self.getTextPediaTargets(aszParas[iPara])
@@ -5767,7 +6891,11 @@ class CvMainInterface:
 						if eTalk < 0:
 							pSelect = self.getHeaderUnit(iLevel, aszParas, iPara)
 				if pSelect is not None:
-					if bSecond:
+					if bShift and tBlock is not None:
+						# a line of an own unit of a stack: Shift + right click sets a waypoint for it
+						self.startWaypointMode(pSelect)
+						return
+					elif bSecond:
 						if tBlock is None:
 							self.openPediaTargetIndex(aTargets, 0)
 					else:
@@ -5883,7 +7011,7 @@ class CvMainInterface:
 				szKey = "TXT_KEY_WTP_HOVER_TIP_OFF"
 				screen.setHelpTextString("")
 			if bMessage:
-				CyInterface().addImmediateMessage(localText.getText(szKey, ()), "")
+				self.showModMessage(localText.getText(szKey, ()))
 		except:
 			pass
 
@@ -6356,7 +7484,10 @@ class CvMainInterface:
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TIP_LINE):
 				if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
 					# a line of the frozen hover tooltip: right click: Colopedia page of the first named thing of the line (Ctrl: the second)
-					self.openTipPedia(inputClass.getData2(), inputClass.isCtrlKeyDown())
+					self.openTipPedia(inputClass.getData2(), inputClass.isCtrlKeyDown(), inputClass.isShiftKeyDown())
+				elif (inputClass.getFlags() & MouseFlags.MOUSE_LBUTTONUP):
+					# left click on a line with a child window: the child window is frozen (as with X); on the same line again: it goes again
+					self.onTipLineLeftClick(inputClass.getData2())
 		return 0
 
 	def getMessageWidth(self, szText):
