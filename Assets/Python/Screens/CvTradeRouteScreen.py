@@ -363,6 +363,7 @@ class CvTradeRouteScreen:
 		self.BLOCK_SPIN_W = 116
 		self.iCity = -1
 		self.dRawState = {} # good -> how it restricts the production of the city (getRawState)
+		self.bFromMap = False # opened while the city screen was not up (from a tooltip): the city screen closes it
 		self.bTempFilter = False # the filter view of this opening comes from a tooltip (it is not saved)
 		self.bCondensed = False
 		self.bFinished = True
@@ -405,6 +406,9 @@ class CvTradeRouteScreen:
 
 	def isOpen(self):
 		return not self.bFinished
+
+	def isFromMap(self):
+		return self.bFromMap
 
 	def isHostMain(self):
 		return not self.bFinished
@@ -1191,6 +1195,10 @@ class CvTradeRouteScreen:
 		if pCity == None or pCity.isNone():
 			return 0
 		self.bCondensed = bCondensed
+		try:
+			self.bFromMap = not CyInterface().isCityScreenUp()
+		except:
+			self.bFromMap = False
 		self.aYields = []
 		self.dData = {}
 		self.aFav = loadFavorites()

@@ -1527,7 +1527,11 @@ class CvMainInterface:
 		# city screen like the map (minimap, date, money text, dark goods bar appear); the dirty bits stay set and are handled afterwards
 		try:
 			if CvScreensInterface.tradeRouteScreen.isHostMain():
-				return 0
+				if CvScreensInterface.tradeRouteScreen.isFromMap() and CyInterface().isCityScreenUp():
+					# (opened from a tooltip on the map: the city screen closes it, its widgets are made now)
+					CvScreensInterface.tradeRouteScreen.finish(False, -1)
+				else:
+					return 0
 		except:
 			pass
 
