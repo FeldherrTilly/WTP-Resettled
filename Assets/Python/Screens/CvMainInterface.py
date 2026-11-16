@@ -6508,7 +6508,7 @@ class CvMainInterface:
 			# the window with the goods that a city produces: the same
 			szFilter = self.getGoodsFilterText(aszTopParas, 1)
 			if len(szFilter) > 0:
-				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, localText.getText("TXT_KEY_WTP_TIP_GOODS_TRADE_HINT", ()), None, ("filter", 1))
+				self.showSecondTip(screen, szFilter, iCY, tTop, iFz, None, localText.getText("TXT_KEY_WTP_TIP_GOODS_TRADE_HINT_RAW", ()), None, ("filter", 1))
 		elif iPara >= 0 and iSel < 0 and self.showAloneUnitTip(screen, iFz, aszTopParas, iPara, iCY, tTop):
 			# a line of a unit of a stack: the tooltip of the unit as if it stood alone on the plot
 			pass
@@ -6678,11 +6678,32 @@ class CvMainInterface:
 			pass
 		return aTypes
 
+	# the raw materials (yield types) that the professions need to make the goods (yield types)
+	def getRawMaterialTypes( self, aTypes ):
+		aRaw = []
+		try:
+			for szType in aTypes:
+				iOut = gc.getInfoTypeForString(szType)
+				for iProfession in range(gc.getNumProfessionInfos()):
+					pProf = gc.getProfessionInfo(iProfession)
+					if pProf.getYieldsProduced(0) == iOut:
+						iIn = pProf.getYieldsConsumed(0)
+						if iIn >= 0:
+							szIn = gc.getYieldInfo(iIn).getType()
+							if not (szIn in aRaw):
+								aRaw.append(szIn)
+		except:
+			pass
+		return aRaw
+
 	# opens the import / export window of the city of a goods window (the city is named in the first line of its top window) with a temporary
 	# filter view of the marked goods of the list (only for this opening)
-	def openGoodsTradeWindow( self, iLevel, aszParas ):
+	def openGoodsTradeWindow( self, iLevel, aszParas, iKind = 0 ):
 		try:
 			aTypes = self.getMarkedGoodTypes(aszParas)
+			if iKind == 1:
+				# the producing goods: the marked ones are the goods whose raw materials are scarce or missing; the window shows these raw materials
+				aTypes = self.getRawMaterialTypes(aTypes)
 			iTop = iLevel
 			while self.aFrozen[iTop][6] >= 0:
 				iTop = self.aFrozen[iTop][6]
@@ -7358,7 +7379,7 @@ class CvMainInterface:
 			# right click on the list of the stored / producing goods of a city: the import / export window of the city with these goods
 			tKindHit = self.dFrozenKind.get(self.aFrozen[iLevel][0])
 			if tKindHit is not None and tKindHit[0] == "list" and iPara >= 0 and iPara < len(aszParas):
-				if self.openGoodsTradeWindow(iLevel, aszParas):
+				if self.openGoodsTradeWindow(iLevel, aszParas, tKindHit[1]):
 					return
 			if iPara >= 0 and iPara < len(aszParas):
 				(aszCmd, iCmd) = self.getCommandParas(iLevel, aszParas, iPara)

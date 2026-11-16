@@ -3814,6 +3814,11 @@
 		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit diesen Waren öffnen</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_GOODS_TRADE_HINT_RAW</Tag>
+		<English>Right click on the list: import / export window of the city, showing the raw materials of these goods</English>
+		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit den Rohstoffen dieser Waren öffnen</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_COLORS</Tag>
 		<English>[COLOR:255:0:0:255]Red[COLOR_REVERT]: raw materials missing, output reduced[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: raw materials scarce, import needed[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: raw material import set</English>
 		<German>[COLOR:255:0:0:255]Rot[COLOR_REVERT]: Rohstoffe fehlen, Ausstoß gedrosselt[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: Rohstoffe knapp, Import nötig[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: Rohstoff-Import gesetzt</German>
