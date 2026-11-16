@@ -358,6 +358,7 @@ class CvMainInterface:
 	iMsgWpPage = 0
 	aMsgWpEntries = [] # the waypoints of the list: (sea, number, x, y, name, text of the line)
 	aMsgWpRects = [] # (x, y, width, height, index, column) of the waypoints of the page that is shown
+	fMsgWpSeen = 0.0 # the last time (seconds) that the cursor was on the panel while it showed the list of the waypoints
 	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
 	iMsgSelIdx = 0
 	bMsgWheel = False
@@ -8195,6 +8196,11 @@ class CvMainInterface:
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_WPS):
 				self.bMsgWpView = not self.bMsgWpView
 				self.iMsgWpPage = 0
+				# (the list starts collapsed; it goes back to the standard view when the cursor stays away from the panel, see updateMessageScroll)
+				self.bMessagePanelExpanded = False
+				self.bMessagePanelPrevious = False
+				self.iMessagePage = 0
+				self.fMsgWpSeen = (self.getTipNow() / 1000.0)
 				self.tMessagePanelKey = None
 				self.updateMessagePanel()
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_WP):
@@ -8901,8 +8907,13 @@ class CvMainInterface:
 		if self.iMsgMoveY != 0:
 			iBottomLimit = yRes - 10
 		iMaxRows = max(4, int((iBottomLimit - iY - iHeaderHeight - iGap - 2 * iPad) / iLine) - 2)
+		if not self.bMessagePanelExpanded:
+			# (collapsed: the first rows only; a click on the header shows all)
+			iMaxRows = 3
 		iPerPage = iMaxRows * 2
 		iPages = max(1, (len(aEntries) + iPerPage - 1) / iPerPage)
+		if not self.bMessagePanelExpanded:
+			iPages = 1
 		if self.iMsgWpPage >= iPages:
 			self.iMsgWpPage = 0
 		self.aMsgWpEntries = aEntries
@@ -8967,7 +8978,10 @@ class CvMainInterface:
 			screen.show("HudMsgFooterMore")
 			screen.moveToFront("HudMsgFooterMore")
 
-		szHeader = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER", (len(aEntries),))
+		if self.bMessagePanelExpanded:
+			szHeader = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_COLLAPSE", (len(aEntries),))
+		else:
+			szHeader = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_EXPAND", (len(aEntries),))
 		screen.setText("HudMsgHeader", "Background", self.setFontSize(szHeader, -1), CvUtil.FONT_CENTER_JUSTIFY, iX + iWidth / 2, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_PANEL, -1)
 		screen.show("HudMsgHeader")
 		screen.moveToFront("HudMsgHeader")
@@ -9080,6 +9094,25 @@ class CvMainInterface:
 	# every frame: the message line under the cursor, the shift key and the mouse wheel
 	def updateMessageScroll( self ):
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+		# the list of the waypoints goes back to the collapsed standard view when the cursor was away from the panel for more than 4 seconds
+		if self.bMsgWpView and self.tMsgPanelRect is not None:
+			try:
+				fNow = (self.getTipNow() / 1000.0)
+				(iPX, iPY, iPW, iPH) = self.tMsgPanelRect
+				iCX = gc.getGame().getCursorClientX()
+				iCY = gc.getGame().getCursorClientY()
+				if iCX >= iPX - 4 and iCX < iPX + iPW + 4 and iCY >= iPY - 4 and iCY < iPY + iPH + 4:
+					self.fMsgWpSeen = fNow
+				elif fNow - self.fMsgWpSeen > 4.0:
+					self.bMsgWpView = False
+					self.bMessagePanelExpanded = False
+					self.bMessagePanelPrevious = False
+					self.iMessagePage = 0
+					self.iMsgWpPage = 0
+					self.tMessagePanelKey = None
+					self.updateMessagePanel()
+			except:
+				pass
 		iMsg = -1
 		iWp = -1
 		iWpCol = 0

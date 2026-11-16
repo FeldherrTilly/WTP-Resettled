@@ -3511,17 +3511,22 @@
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_ON</Tag>
 		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
-		<German>[COLOR_FONT_CREAM]WPs listen: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
+		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_OFF</Tag>
 		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
-		<German>[COLOR_FONT_CREAM]WPs listen: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER</Tag>
-		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num[COLOR_REVERT]</English>
-		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num[COLOR_REVERT]</German>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_EXPAND</Tag>
+		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num  (click to expand)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num  (Klick zum Ausklappen)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_COLLAPSE</Tag>
+		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num  (click to collapse)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num  (Klick zum Einklappen)[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_EMPTY</Tag>
