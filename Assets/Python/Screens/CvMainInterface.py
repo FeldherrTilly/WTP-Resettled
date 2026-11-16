@@ -6613,6 +6613,15 @@ class CvMainInterface:
 				if self.isSpotFree(iNX, iSY - iSH - iGap, iSW, iSH, xRes, yRes, iSib, aExtra) and self.isSpotFree(iNX, iSY, iWidth, iHeight, xRes, yRes, iSib, aExtra):
 					self.moveStackSibling(screen, iSib, iNX, iSY - iSH - iGap)
 					return (iNX, iSY)
+			# no room above or below (a small screen, the help windows of both next to the tooltip of the city): side by side with the other
+			# one, the stored goods on the left, at the height of the other window
+			if tKind[1] == 0:
+				aSide = [(iSX - iWidth - iGap, iSY), (iSX + iSW + iGap, iSY)]
+			else:
+				aSide = [(iSX + iSW + iGap, iSY), (iSX - iWidth - iGap, iSY)]
+			for (iSideX, iSideY) in aSide:
+				if self.isSpotFree(iSideX, iSideY, iWidth, iHeight, xRes, yRes, -1, aExtra):
+					return (iSideX, iSideY)
 		except:
 			pass
 		return None
