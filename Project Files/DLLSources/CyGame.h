@@ -180,6 +180,7 @@ public:
 	int getHudMessageY(int i) const;
 	int getNumHudMessagesPrevious() const;
 	int getNumHudPriority() const;
+	void addHudMessage(std::wstring szText, bool bPriority) const; // WTP: a message of the Python code for the message panel (priority: at the top)
 	int getNumHudPriorityPrevious() const;
 	std::wstring getHudMessagePreviousText(int i) const;
 	int getHudMessagePreviousX(int i) const;
