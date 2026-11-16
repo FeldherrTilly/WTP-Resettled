@@ -2223,7 +2223,7 @@ class CvTradeRouteScreen:
 			return 0
 		return 1
 
-	# the mouse wheel (collected by the DLL while the window is open): over a number it changes it, elsewhere it scrolls the list
+	# the mouse wheel (collected by the DLL while the window is open): over a number it changes it with Shift, otherwise it scrolls the list
 	def update(self, fDelta):
 		if self.bFinished:
 			return 0
@@ -2250,8 +2250,10 @@ class CvTradeRouteScreen:
 					iBlock = 0
 				elif iX >= self.BLOCK_EXP_X and iX < self.BLOCK_EXP_X + self.BLOCK_SPIN_W:
 					iBlock = 1
+			# (over a number the amount changes only with Shift: scrolling through the pages must not change it by mistake)
+			bShift = CyGame().isShiftKeyPressed()
 			for i in range(abs(iNotches)):
-				if iBlock >= 0:
+				if iBlock >= 0 and bShift:
 					if iNotches > 0:
 						self.changeValue(iSlot, iBlock, iStep)
 					else:
