@@ -4451,7 +4451,11 @@ class CvMainInterface:
 					# the goods made of this raw material
 					bSet = pCity.isImport(iYield)
 					for iProfession in range(gc.getNumProfessionInfos()):
-						if gc.getProfessionInfo(iProfession).getYieldsConsumed(0) == iYield:
+						bConsumes = False
+						for k in range(gc.getProfessionInfo(iProfession).getNumYieldsConsumed()):
+							if gc.getProfessionInfo(iProfession).getYieldsConsumed(k) == iYield:
+								bConsumes = True
+						if bConsumes:
 							iOut = gc.getProfessionInfo(iProfession).getYieldsProduced(0)
 							if iOut < 0:
 								continue
@@ -6679,15 +6683,32 @@ class CvMainInterface:
 		return aTypes
 
 	# the raw materials (yield types) that the professions need to make the goods (yield types)
-	def getRawMaterialTypes( self, aTypes ):
+	# (the professions of the citizens of the city decide what a building makes from what: the professions that make a good and that a citizen of
+	# the city has now give its raw materials, all of the (up to two) goods that they consume; if no citizen has one of them, all professions that
+	# make the good)
+	def getRawMaterialTypes( self, aTypes, pCity ):
 		aRaw = []
 		try:
+			aActive = []
+			for i in range(pCity.getPopulation()):
+				pUnit = pCity.getPopulationUnitByIndex(i)
+				if pUnit is not None and not pUnit.isNone():
+					iProf = pUnit.getProfession()
+					if iProf >= 0 and not (iProf in aActive):
+						aActive.append(iProf)
 			for szType in aTypes:
 				iOut = gc.getInfoTypeForString(szType)
+				aMaking = []
 				for iProfession in range(gc.getNumProfessionInfos()):
+					if gc.getProfessionInfo(iProfession).getYieldsProduced(0) == iOut:
+						aMaking.append(iProfession)
+				aUse = [p for p in aMaking if p in aActive]
+				if len(aUse) == 0:
+					aUse = aMaking
+				for iProfession in aUse:
 					pProf = gc.getProfessionInfo(iProfession)
-					if pProf.getYieldsProduced(0) == iOut:
-						iIn = pProf.getYieldsConsumed(0)
+					for k in range(pProf.getNumYieldsConsumed()):
+						iIn = pProf.getYieldsConsumed(k)
 						if iIn >= 0:
 							szIn = gc.getYieldInfo(iIn).getType()
 							if not (szIn in aRaw):
@@ -6701,9 +6722,6 @@ class CvMainInterface:
 	def openGoodsTradeWindow( self, iLevel, aszParas, iKind = 0 ):
 		try:
 			aTypes = self.getMarkedGoodTypes(aszParas)
-			if iKind == 1:
-				# the producing goods: the marked ones are the goods whose raw materials are scarce or missing; the window shows these raw materials
-				aTypes = self.getRawMaterialTypes(aTypes)
 			iTop = iLevel
 			while self.aFrozen[iTop][6] >= 0:
 				iTop = self.aFrozen[iTop][6]
@@ -6718,6 +6736,9 @@ class CvMainInterface:
 				(loopCity, iter) = pPlayer.nextCity(iter, False)
 			if pCity is None:
 				return False
+			if iKind == 1:
+				# the producing goods: the marked ones are the goods whose raw materials are scarce or missing; the window shows these raw materials
+				aTypes = self.getRawMaterialTypes(aTypes, pCity)
 			import CvTradeRouteScreen
 			if not CvTradeRouteScreen.isNewWindowEnabled():
 				return False
