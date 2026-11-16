@@ -4973,10 +4973,12 @@ class CvMainInterface:
 
 	# the new name from the window to rename a waypoint: "2. name" puts it at the place 2 of the list (the others move, the numbers stay continuous),
 	# a name without a number keeps its place
-	def applyWaypointRename( self, ePlayer, iId, szNew ):
-		# (the window is closed: the time out of the list of the message panel runs again)
+	# the window to rename a waypoint was closed (OK or Esc): the time out of the list of the message panel runs again
+	def onWaypointRenameClosed( self ):
 		self.bMsgWpRename = False
 		self.fMsgWpSeen = (self.getTipNow() / 1000.0)
+
+	def applyWaypointRename( self, ePlayer, iId, szNew ):
 		try:
 			bSea = False
 			(aWp, iNext) = self.getWaypoints(ePlayer, False)
