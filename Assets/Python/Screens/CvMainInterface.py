@@ -392,6 +392,7 @@ class CvMainInterface:
 	dPaintPlain = {}
 	dRowChild = {} # (frozen window, paragraph of its line "Set waypoint...") -> the frozen child window with the list of waypoints
 	dWpMarked = {} # the frozen lists of waypoints with a line in yellow (chosen with the wheel)
+	dModMessagePlot = {} # text of a message of the mod -> (x, y) of its place
 	tTipWp = None # the registration of the line "Set waypoint..." of the tooltip at the cursor (it is in the tooltip already)
 	tPreviewUnit = None # the own unit whose tooltip the window beside a frozen window is (it gets the line "Set waypoint..." when it is frozen)
 	iWpUnit = -1 # the unit whose next order to move is saved as a waypoint (-1: none)
@@ -4501,7 +4502,9 @@ class CvMainInterface:
 
 	# a message of the mod (a warning, a note of the tooltips): in the message panel (if it is installed and on) as a message at the top, all in the
 	# yellow of the units; otherwise as the game shows its messages
-	def showModMessage( self, szText, szSound = None ):
+	# tPlot = (x, y): the place of the message (a click on its line in the message panel shows it on the map; the panel gets no place from the
+	# game for the messages of the mod, so the text is remembered with its place, see getMessageTargets)
+	def showModMessage( self, szText, szSound = None, tPlot = None ):
 		if szSound is None:
 			szSound = self.szModMessageSound
 		szYellow = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szText) + u"</color>"
@@ -4513,6 +4516,8 @@ class CvMainInterface:
 		except:
 			pass
 		if not bPanel:
+		if tPlot is not None:
+			self.dModMessagePlot[re.sub(u"<[^>]*>", u"", szText).strip()] = tPlot
 			try:
 				CyInterface().addImmediateMessage(szYellow, "")
 			except:
@@ -4637,6 +4642,11 @@ class CvMainInterface:
 				if aWp[k][0] == iId:
 					iAt = k
 			if iAt < 0:
+	# the window to rename a waypoint was closed: the time out of the list of the message panel runs again
+	def onWaypointRenameClosed( self ):
+		self.bMsgWpRename = False
+		self.fMsgWpSeen = (self.getTipNow() / 1000.0)
+
 				bSea = True
 				(aWp, iNext) = self.getWaypoints(ePlayer, True)
 				for k in range(len(aWp)):
@@ -4712,7 +4722,7 @@ class CvMainInterface:
 					pass
 				CyCamera().JustLookAtPlot(CyMap().plot(tEntry[1], tEntry[2]))
 				self.tJump = (tEntry[1], tEntry[2], (self.getTipNow() / 1000.0))
-				self.showModMessage(u"Waypoint: " + tEntry[4], self.szModJumpSound)
+				self.showModMessage(u"Waypoint: " + tEntry[4], self.szModJumpSound, (tEntry[1], tEntry[2]))
 
 				# the cursor goes with the window under it (the same place of the same line)
 				try:
@@ -4816,6 +4826,12 @@ class CvMainInterface:
 					continue
 				aView = self.getWaypointView(tWp["sea"])
 				iStart = 0
+		try:
+			if self.bMsgWpView:
+				self.tMessagePanelKey = None
+				self.updateMessagePanel()
+		except:
+			pass
 				if not ("new" in tWp["paras"].values()):
 					# (a later page of the list: it begins with the first waypoint that it has)
 					for iP in tWp["paras"].keys():
@@ -5205,7 +5221,7 @@ class CvMainInterface:
 			# (the new waypoint is the last of the list of the ships or of the land units: its number follows the existing ones)
 			aWp.append((iNext, pPlot.getX(), pPlot.getY(), self.getWaypointLabel(pPlot)))
 			self.saveWaypoints(aWp, iNext, -1, bSea)
-			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_SAVED", (self.getWaypointTextById(bSea, iNext),)))
+			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_SAVED", (self.getWaypointTextById(bSea, iNext),)), None, (pPlot.getX(), pPlot.getY()))
 		except:
 			self.iWpUnit = -1
 

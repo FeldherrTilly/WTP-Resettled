@@ -1198,6 +1198,8 @@ class CvEventManager:
 
 	def __eventRenameWaypointApply(self, playerID, userData, popupReturn):
 		try:
+			# (the window is closed: the time out of the list of waypoints of the message panel runs again)
+			CvScreensInterface.mainInterface.onWaypointRenameClosed()
 			CvScreensInterface.mainInterface.applyWaypointRename(playerID, userData[0], popupReturn.getEditBoxString(0))
 		except:
 			pass
