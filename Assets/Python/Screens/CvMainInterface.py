@@ -1528,7 +1528,9 @@ class CvMainInterface:
 		try:
 			if CvScreensInterface.tradeRouteScreen.isHostMain():
 				if CvScreensInterface.tradeRouteScreen.isFromMap() and CyInterface().isCityScreenUp():
-					# (opened from a tooltip on the map: the city screen closes it, its widgets are made now)
+					# (opened from a tooltip on the map: the city screen closes it, its widgets are made now; the window of that city is opened
+					# again in the city screen with what it showed, see checkReopenTradeWindow)
+					self.tReopenTrade = CvScreensInterface.tradeRouteScreen.getState()
 					CvScreensInterface.tradeRouteScreen.finish(False, -1)
 				else:
 					return 0
@@ -7655,6 +7657,24 @@ class CvMainInterface:
 		except:
 			pass
 
+	tReopenTrade = None # the state of the import / export window that the city screen closed (it is opened again for the same city)
+
+	def checkReopenTradeWindow( self ):
+		if self.tReopenTrade is None:
+			return
+		try:
+			if not CyInterface().isCityScreenUp():
+				return
+			tState = self.tReopenTrade
+			self.tReopenTrade = None
+			pCity = CyInterface().getHeadSelectedCity()
+			if pCity is not None and not pCity.isNone() and pCity.getID() == tState["city"]:
+				tWin = CvScreensInterface.tradeRouteScreen
+				if tWin.open(tState["city"], tState["condensed"]) != 0:
+					tWin.restoreState(tState)
+		except:
+			self.tReopenTrade = None
+
 	# the picture of a good in the import / export window that has an outer frame (it restricts the production of the city): its help text gets a note
 	def addRawNote( self, szText ):
 		try:
@@ -9613,6 +9633,7 @@ class CvMainInterface:
 
 	# Updates the Screen
 	def update( self, fDelta ):
+		self.checkReopenTradeWindow()
 		# WTP: while a map mode takes the clicks, the DLL selects no unit by the automatic unit cycling, and a unit
 		# selected anyway is deselected (a right click would move it)
 		bMapClickMode = self.isMapClickMode()

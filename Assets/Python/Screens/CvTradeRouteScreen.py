@@ -363,6 +363,7 @@ class CvTradeRouteScreen:
 		self.BLOCK_SPIN_W = 116
 		self.iCity = -1
 		self.dRawState = {} # good -> how it restricts the production of the city (getRawState)
+		self.dPos = {} # the place of the window (moved by the player) on the map and in the city screen: context -> (x, y)
 		self.bFromMap = False # opened while the city screen was not up (from a tooltip): the city screen closes it
 		self.bTempFilter = False # the filter view of this opening comes from a tooltip (it is not saved)
 		self.bCondensed = False
@@ -406,6 +407,36 @@ class CvTradeRouteScreen:
 
 	def isOpen(self):
 		return not self.bFinished
+
+	def getContext(self):
+		if self.bFromMap:
+			return "map"
+		return "city"
+
+	# what the window shows (not what was changed in it): the view, the goods of the filter, the search text, the page; the window of the same
+	# city is opened again with it in the city screen (see CvMainInterface)
+	def getState(self):
+		return {"city": self.iCity, "condensed": self.bCondensed, "view": self.iView, "confirmed": list(self.aConfirmed), "query": self.szQuery, "temp": self.bTempFilter, "first": self.iFirst}
+
+	def restoreState(self, tState):
+		try:
+			self.bTempFilter = tState["temp"]
+			self.aConfirmed = list(tState["confirmed"])
+			self.szQuery = tState["query"]
+			self.iView = tState["view"]
+			self.findSuggestion()
+			self.drawSearchText()
+			self.tLayout = (-1, False)
+			self.buildView()
+			self.refreshList()
+			self.iFirst = max(0, min(tState["first"], max(0, len(self.aYields) - 1)))
+			if self.iVisible > 0:
+				self.iFirst = self.iFirst / self.iVisible * self.iVisible
+			self.drawRows()
+			self.drawPage()
+		except:
+			import traceback
+			logTrade(traceback.format_exc())
 
 	def isFromMap(self):
 		return self.bFromMap
@@ -1199,6 +1230,8 @@ class CvTradeRouteScreen:
 			self.bFromMap = not CyInterface().isCityScreenUp()
 		except:
 			self.bFromMap = False
+		# (the window has its own place on the map and in the city screen)
+		(self.iMoveX, self.iMoveY) = self.dPos.get(self.getContext(), (0, 0))
 		self.aYields = []
 		self.dData = {}
 		self.aFav = loadFavorites()
@@ -1968,6 +2001,7 @@ class CvTradeRouteScreen:
 			CyGame().setWheelCapture(False)
 		except:
 			pass
+		self.dPos[self.getContext()] = (self.iMoveX, self.iMoveY)
 		self.teardownLayout()
 		# the interface is redrawn completely afterwards
 		for szBit in ("MiscButtons_DIRTY_BIT", "GameData_DIRTY_BIT", "ResourceTable_DIRTY_BIT", "Minimap_Section_DIRTY_BIT", "Help_DIRTY_BIT", "InfoPane_DIRTY_BIT", "SelectionButtons_DIRTY_BIT", "CityScreen_DIRTY_BIT"):
