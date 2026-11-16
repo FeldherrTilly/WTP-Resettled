@@ -25,6 +25,8 @@ BTN_CLEAR_SEARCH = 41301
 BTN_MOVE = 41310 # +0 left, +1 right, +2 up, +3 down
 BTN_WARN_RESET = 41330 # the notice in the middle of the window: reset the good to the setting of market automatic
 BTN_WARN_OK = 41331 # the notice: ignore / OK
+BTN_WARN_SAVE = 41332 # the notice of unsaved changes: apply them (OK)
+BTN_WARN_DISCARD = 41333 # the same: close the window and discard them
 MOVE_STEP = 60
 MOVE_DELAY = 18 # frames until the key repeats
 MOVE_REPEAT = 3 # frames between the steps
@@ -66,6 +68,12 @@ HILITE_LAYERS = 1
 # color of the exports) when one of the export is on; both: the upper half in the import color, the lower half in the export color
 FRAME_IMP_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameImp.dds"
 FRAME_EXP_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameExp.dds"
+# the outer frame of a raw material that restricts the production of the city (the colors of the line "Producing..." of the city tooltip): red the
+# output is reduced, orange the raw material is scarce (import needed), light orange (as the import frame) the import is set; a dark ring
+# separates it from the frame of the import / export
+FRAME_RED_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameRed.dds"
+FRAME_ORANGE_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameOrange.dds"
+FRAME_DARK_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameDark.dds"
 HOVER_LAYERS = 1
 MARGIN_X = 2
 MARGIN_Y = 3
@@ -104,6 +112,19 @@ FAV_SUFFIX = "]]"
 # the filter (the goods of the searches) is kept like the favorites, in the script data of the player
 FLT_PREFIX = "[[WTPFLT:"
 FLT_SUFFIX = "]]"
+# a filter for the next opening of the window only (set by the tooltips of the stored / producing goods of a city: the goods of the list);
+# it is not saved with the game
+g_aTempFilter = None
+
+def setTempFilter(aTypes):
+	global g_aTempFilter
+	g_aTempFilter = aTypes
+
+def takeTempFilter():
+	global g_aTempFilter
+	aTypes = g_aTempFilter
+	g_aTempFilter = None
+	return aTypes
 
 def loadFilter():
 	aFlt = []
@@ -343,6 +364,10 @@ class CvTradeRouteScreen:
 		self.CHECK_W = 124
 		self.BLOCK_SPIN_W = 116
 		self.iCity = -1
+		self.dRawState = {} # good -> how it restricts the production of the city (getRawState)
+		self.dPos = {} # the place of the window (moved by the player) on the map and in the city screen: context -> (x, y)
+		self.bFromMap = False # opened while the city screen was not up (from a tooltip): the city screen closes it
+		self.bTempFilter = False # the filter view of this opening comes from a tooltip (it is not saved)
 		self.bCondensed = False
 		self.bFinished = True
 		self.pHost = None
@@ -384,6 +409,42 @@ class CvTradeRouteScreen:
 
 	def isOpen(self):
 		return not self.bFinished
+
+	def getContext(self):
+		if self.bFromMap:
+			return "map"
+		return "city"
+
+	# what the window shows (not what was changed in it): the view, the goods of the filter, the search text, the page; the window of the same
+	# city is opened again with it in the city screen (see CvMainInterface)
+	def getState(self):
+		return {"city": self.iCity, "condensed": self.bCondensed, "view": self.iView, "confirmed": list(self.aConfirmed), "query": self.szQuery, "temp": self.bTempFilter, "first": self.iFirst, "data": dict([(k, dict(v)) for (k, v) in self.dData.items()])}
+
+	def restoreState(self, tState):
+		try:
+			# (the changes that were not confirmed yet stay in the window)
+			for iYield in tState["data"].keys():
+				self.dData[iYield] = dict(tState["data"][iYield])
+			self.bTempFilter = tState["temp"]
+			self.aConfirmed = list(tState["confirmed"])
+			self.szQuery = tState["query"]
+			self.iView = tState["view"]
+			self.findSuggestion()
+			self.drawSearchText()
+			self.tLayout = (-1, False)
+			self.buildView()
+			self.refreshList()
+			self.iFirst = max(0, min(tState["first"], max(0, len(self.aYields) - 1)))
+			if self.iVisible > 0:
+				self.iFirst = self.iFirst / self.iVisible * self.iVisible
+			self.drawRows()
+			self.drawPage()
+		except:
+			import traceback
+			logTrade(traceback.format_exc())
+
+	def isFromMap(self):
+		return self.bFromMap
 
 	def isHostMain(self):
 		return not self.bFinished
@@ -496,6 +557,8 @@ class CvTradeRouteScreen:
 
 	# the confirmed goods are saved (as yield types) with the game
 	def syncFilter(self):
+		if self.bTempFilter:
+			return
 		aTypes = []
 		for szName in self.aConfirmed:
 			for iYield in self.dNames.keys():
@@ -1103,7 +1166,10 @@ class CvTradeRouteScreen:
 			szLine = "TRSWarnText2_" + str(iLine)
 			screen.setText(szLine, "", u"<font=3b><color=255,255,255>" + aLines[iLine] + u"</color></font>", CvUtil.FONT_CENTER_JUSTIFY, iX + iW / 2, iY + 50 + iLine * 24, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1)
 			self.aWarnDrawn.append(szLine)
-		if self.tWarn[2] >= 0 or len(self.tWarn[3]) > 0:
+		if self.tWarn[4] == "unsaved":
+			self.addButton("TRSWarnReset", localText.getText("TXT_KEY_MAIN_MENU_OK", ()), False, iX + iW / 2 - 165, iY + iH - 42, 160, 28, BTN_WARN_SAVE)
+			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE", ()), False, iX + iW / 2 + 5, iY + iH - 42, 160, 28, BTN_WARN_DISCARD)
+		elif self.tWarn[2] >= 0 or len(self.tWarn[3]) > 0:
 			self.addButton("TRSWarnReset", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_RESET", ()), False, iX + iW / 2 - 165, iY + iH - 42, 160, 28, BTN_WARN_RESET)
 			self.addButton("TRSWarnOk", localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE", ()), False, iX + iW / 2 + 5, iY + iH - 42, 160, 28, BTN_WARN_OK)
 		else:
@@ -1168,6 +1234,12 @@ class CvTradeRouteScreen:
 		if pCity == None or pCity.isNone():
 			return 0
 		self.bCondensed = bCondensed
+		try:
+			self.bFromMap = not CyInterface().isCityScreenUp()
+		except:
+			self.bFromMap = False
+		# (the window has its own place on the map and in the city screen)
+		(self.iMoveX, self.iMoveY) = self.dPos.get(self.getContext(), (0, 0))
 		self.aYields = []
 		self.dData = {}
 		self.aFav = loadFavorites()
@@ -1194,10 +1266,23 @@ class CvTradeRouteScreen:
 		for iYield in self.dData.keys():
 			self.dNames[iYield] = gc.getYieldInfo(iYield).getDescription()
 		# the filter of the searches before (names in the order they were confirmed)
-		for szType in loadFilter():
+		aTemp = takeTempFilter()
+		aFilterTypes = loadFilter()
+		self.bTempFilter = False
+		if aTemp is not None:
+			aFilterTypes = aTemp
+			self.bTempFilter = True
+		for szType in aFilterTypes:
 			for iYield in self.dNames.keys():
 				if gc.getYieldInfo(iYield).getType() == szType:
 					self.aConfirmed.append(self.dNames[iYield].lower())
+		if self.bTempFilter:
+			if len(self.aConfirmed) > 0:
+				# the view of the goods of the tooltip (the filter view with these goods) for this opening
+				self.iView = VIEW_FILTER
+				self.buildView()
+			else:
+				self.bTempFilter = False
 		self.dKeys = {}
 		for szKey in SEARCH_KEY_NAMES.keys():
 			iKey = getattr(InputTypes, szKey, None)
@@ -1402,8 +1487,96 @@ class CvTradeRouteScreen:
 	def drawCheck(self, szName, szText, bOn, iX, iY, iCode):
 		self.addButton(szName, szText, bOn, iX, iY, self.CHECK_W, self.CHECK_H, iCode)
 
+	# how a good restricts the production of the city as a raw material: 0 not, 1 scarce (orange: the city consumes more than it produces), 2 the
+	# output of a good made of it is reduced (red), 3 scarce, but the import is set (light orange); the same rules as the colors of the line
+	# "Producing..." in the tooltip of the city
+	def getRawState(self, pCity, iYield):
+		if self.dRawState.has_key(iYield):
+			return self.dRawState[iYield]
+		iState = 0
+		try:
+			if iYield != YieldTypes.YIELD_FOOD and pCity.getRawYieldConsumed(iYield) > pCity.getBaseRawYieldProduced(iYield):
+				iState = 1
+				if pCity.isImport(iYield):
+					iState = 3
+				for iProfession in range(gc.getNumProfessionInfos()):
+					pProf = gc.getProfessionInfo(iProfession)
+					bUses = False
+					for k in range(pProf.getNumYieldsConsumed()):
+						if pProf.getYieldsConsumed(k) == iYield:
+							bUses = True
+					if bUses:
+						iOut = pProf.getYieldsProduced(0)
+						if iOut >= 0 and pCity.calculateActualYieldProduced(iOut) < pCity.getBaseRawYieldProduced(iOut):
+							iState = 2
+		except:
+			iState = 0
+		self.dRawState[iYield] = iState
+		return iState
+
+	# the good whose picture is at a place of the screen (the picture and its frames), -1 if none
+	def getIconYieldAt(self, iCX, iCY):
+		try:
+			if self.bFinished or self.pHost == None:
+				return -1
+			for iSlot in range(self.iVisible):
+				iIndex = self.iFirst + iSlot
+				if iIndex >= len(self.aYields):
+					break
+				iX = self.OX + 22
+				iY = self.OY + self.LIST_Y + iSlot * self.ROW_H + (self.ROW_H - 32) / 2
+				if iCX >= iX - 8 and iCX < iX + 40 and iCY >= iY - 8 and iCY < iY + 40:
+					return self.aYields[iIndex]
+		except:
+			pass
+		return -1
+
+	# the note for the tooltip of a good with an outer frame (what the frame means, in its color); empty if the good has none
+	def getRawNote(self, iYield):
+		try:
+			pCity = self.getCity()
+			if pCity == None or pCity.isNone():
+				return u""
+			self.dRawState = {}
+			iState = self.getRawState(pCity, iYield)
+			if iState == 2:
+				szColor = u"255,0,0,255"
+				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"
+			elif iState == 1:
+				szColor = u"255,140,0,255"
+				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"
+			elif iState == 3:
+				szColor = u"255,200,110,255"
+				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET"
+			else:
+				return u""
+			return u"<color=" + szColor + u">" + localText.getText("TXT_KEY_WTP_TIP_RAW_NOTE", (localText.getText(szKey, ()),)) + u"</color>"
+		except:
+			return u""
+
+	def drawOuterFrame(self, iSlot, iX, iY, iState):
+		screen = self.pHost
+		aRects = []
+		if iState > 0:
+			szArt = FRAME_ORANGE_ART
+			if iState == 2:
+				szArt = FRAME_RED_ART
+			elif iState == 3:
+				szArt = FRAME_IMP_ART
+			iOuter = 8
+			iInner = 6
+			aRects = [(iX - iOuter, iY - iOuter, 32 + 2 * iOuter, 32 + 2 * iOuter, szArt), (iX - iInner, iY - iInner, 32 + 2 * iInner, 32 + 2 * iInner, FRAME_DARK_ART)]
+		for i in range(2):
+			szName = "TRSfo" + str(iSlot) + "_" + str(i)
+			self.drop(szName)
+			if i < len(aRects):
+				(x, y, w, h, szArt) = aRects[i]
+				screen.setImageButton(szName, szArt, x, y, w, h, WidgetTypes.WIDGET_GENERAL, -1, -1)
+
 	def drawRows(self):
 		screen = self.pHost
+		self.dRawState = {}
+		pRawCity = self.getCity()
 		self.updatePresetState() # (the highlight of the button under the mouse stays: removeButton takes it away when a button is drawn again)
 		szImport = localText.getText("TXT_KEY_POPUP_IMPORT_IMPORT", ())
 		szFeeder = localText.getText("TXT_KEY_POPUP_IMPORT_FEEDER", ())
@@ -1424,6 +1597,10 @@ class CvTradeRouteScreen:
 			iBase = BTN_ROW + iSlot * 16
 			szIcon = "TRSIcon" + str(iSlot)
 			# (the frame is made before the picture: the picture lies on top of it)
+			iRawState = 0
+			if pRawCity != None and not pRawCity.isNone():
+				iRawState = self.getRawState(pRawCity, iYield)
+			self.drawOuterFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, iRawState)
 			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
 			self.drop(szIcon)
 			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - 32) / 2, 32, 32, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
@@ -1492,6 +1669,8 @@ class CvTradeRouteScreen:
 		self.drop("TRSIcon" + str(iSlot))
 		for i in range(6):
 			self.drop("TRSfr" + str(iSlot) + "_" + str(i))
+		for i in range(2):
+			self.drop("TRSfo" + str(iSlot) + "_" + str(i))
 		for iBlock in range(2):
 			self.removeButton("TRSm" + str(iSlot) + "_" + str(iBlock))
 			self.removeButton("TRSp" + str(iSlot) + "_" + str(iBlock))
@@ -1568,6 +1747,30 @@ class CvTradeRouteScreen:
 		self.checkMarketChange(self.aYields[iIndex], dOld) # (before the redraw: a notice keeps the preset on until it is answered)
 		self.drawRows()
 
+	# are there changes in the window that are not applied to the city yet (what apply sends)?
+	def hasChanges(self):
+		pCity = self.getCity()
+		if pCity == None or pCity.isNone():
+			return False
+		for iYield in self.dData.keys():
+			d = self.dData[iYield]
+			if (d["imp"] != pCity.isImport(iYield) or d["exp"] != pCity.isExport(iYield) or d["feeder"] != pCity.isImportFeeder(iYield)
+				or d["auto"] != pCity.isAutoExport(iYield) or d["impDom"] != pCity.getImportDomains(iYield)
+				or d["expDom"] != pCity.getExportDomains(iYield) or d["maintain"] != pCity.getMaintainLevel(iYield)
+				or d["impLimit"] != pCity.getImportsLimit(iYield)):
+				return True
+		return False
+
+	# Esc and Cancel: with unsaved changes the notice asks first (OK applies them, Close discards them)
+	def requestClose(self):
+		if self.tWarn != None and self.tWarn[4] == "unsaved":
+			self.hideWarn() # (Esc again: back to the window)
+			return
+		if self.hasChanges():
+			self.showWarn(localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_1", ()), localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_2", ()), -1, [], False, "unsaved")
+			return
+		self.finish(False, -1)
+
 	def apply(self):
 		pCity = self.getCity()
 		if pCity == None or pCity.isNone():
@@ -1592,6 +1795,10 @@ class CvTradeRouteScreen:
 
 	# the tooltip of a widget of the window (CvScreensInterface.getWidgetHelp); empty text: none
 	def getHelp(self, iCode):
+		if iCode == BTN_WARN_SAVE:
+			return localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_OK_HELP", ())
+		if iCode == BTN_WARN_DISCARD:
+			return localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE_HELP", ())
 		if iCode == BTN_VIEW:
 			return localText.getText("TXT_KEY_WTP_TRADEROUTE_VIEW_HELP", ())
 		if iCode == BTN_SEARCH:
@@ -1830,6 +2037,7 @@ class CvTradeRouteScreen:
 			CyGame().setWheelCapture(False)
 		except:
 			pass
+		self.dPos[self.getContext()] = (self.iMoveX, self.iMoveY)
 		self.teardownLayout()
 		# the interface is redrawn completely afterwards
 		for szBit in ("MiscButtons_DIRTY_BIT", "GameData_DIRTY_BIT", "ResourceTable_DIRTY_BIT", "Minimap_Section_DIRTY_BIT", "Help_DIRTY_BIT", "InfoPane_DIRTY_BIT", "SelectionButtons_DIRTY_BIT", "CityScreen_DIRTY_BIT"):
@@ -1845,7 +2053,7 @@ class CvTradeRouteScreen:
 			# Alt+Tab (switching out of the game) must not count as Tab (accept the suggestion) or as typing
 			return
 		if iKey == self.iKeyEsc:
-			self.finish(False, -1)
+			self.requestClose()
 		elif bCtrl and bShift and iKey == self.getKeyId("KB_Q"):
 			self.resetPosition()
 		elif iKey in self.aKeyArrows:
@@ -1956,6 +2164,10 @@ class CvTradeRouteScreen:
 		if iData == BTN_OK:
 			self.finish(True, -1)
 		elif iData == BTN_CANCEL:
+			self.requestClose()
+		elif iData == BTN_WARN_SAVE:
+			self.finish(True, -1)
+		elif iData == BTN_WARN_DISCARD:
 			self.finish(False, -1)
 		elif iData >= BTN_MOVE and iData < BTN_MOVE + 4:
 			if self.bRepeatDone:
@@ -2011,7 +2223,7 @@ class CvTradeRouteScreen:
 			return 0
 		return 1
 
-	# the mouse wheel (collected by the DLL while the window is open): over a number it changes it, elsewhere it scrolls the list
+	# the mouse wheel (collected by the DLL while the window is open): over a number it changes it with Shift, otherwise it scrolls the list
 	def update(self, fDelta):
 		if self.bFinished:
 			return 0
@@ -2038,8 +2250,10 @@ class CvTradeRouteScreen:
 					iBlock = 0
 				elif iX >= self.BLOCK_EXP_X and iX < self.BLOCK_EXP_X + self.BLOCK_SPIN_W:
 					iBlock = 1
+			# (over a number the amount changes only with Shift: scrolling through the pages must not change it by mistake)
+			bShift = CyGame().isShiftKeyPressed()
 			for i in range(abs(iNotches)):
-				if iBlock >= 0:
+				if iBlock >= 0 and bShift:
 					if iNotches > 0:
 						self.changeValue(iSlot, iBlock, iStep)
 					else:

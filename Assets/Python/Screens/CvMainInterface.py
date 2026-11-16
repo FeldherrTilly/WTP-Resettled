@@ -1278,7 +1278,13 @@ class CvMainInterface:
 		# city screen like the map (minimap, date, money text, dark goods bar appear); the dirty bits stay set and are handled afterwards
 		try:
 			if CvScreensInterface.tradeRouteScreen.isHostMain():
-				return 0
+				if CvScreensInterface.tradeRouteScreen.isFromMap() and CyInterface().isCityScreenUp():
+					# (opened from a tooltip on the map: the city screen closes it, its widgets are made now; the window of that city is opened
+					# again in the city screen with what it showed, see checkReopenTradeWindow)
+					self.tReopenTrade = CvScreensInterface.tradeRouteScreen.getState()
+					CvScreensInterface.tradeRouteScreen.finish(False, -1)
+				else:
+					return 0
 		except:
 			pass
 
@@ -3801,8 +3807,27 @@ class CvMainInterface:
 							1.0
 						)
 
+	tReopenTrade = None # the state of the import / export window that the city screen closed (it is opened again for the same city)
+
+	def checkReopenTradeWindow( self ):
+		if self.tReopenTrade is None:
+			return
+		try:
+			if not CyInterface().isCityScreenUp():
+				return
+			tState = self.tReopenTrade
+			self.tReopenTrade = None
+			pCity = CyInterface().getHeadSelectedCity()
+			if pCity is not None and not pCity.isNone() and pCity.getID() == tState["city"]:
+				tWin = CvScreensInterface.tradeRouteScreen
+				if tWin.open(tState["city"], tState["condensed"]) != 0:
+					tWin.restoreState(tState)
+		except:
+			self.tReopenTrade = None
+
 	# Updates the Screen
 	def update( self, fDelta ):
+		self.checkReopenTradeWindow()
 		self.updateTerritorialInfluenceEditor()
 		return
 
