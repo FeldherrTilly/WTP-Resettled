@@ -8901,13 +8901,13 @@ class CvMainInterface:
 			pass
 		return aEntries
 
-	# the message panel with the list of the waypoints instead of the messages: in two columns (the entries one after the other from left to
+	# the message panel with the list of the waypoints instead of the messages: in three columns (the entries one after the other from left to
 	# right), a page of the height that the expanded panel has; the footer shows the next page
 	def drawMsgWaypointView( self, screen, aEntries, iX, iY, iWidth, iLine, iPad, iHeaderHeight, iGap, yRes ):
 		self.aszMessageTexts = []
 		self.atMessageTargets = []
 		self.aMsgWaypoints = []
-		iCell = iWidth / 2
+		iCell = iWidth / 3
 		iChars = max(8, int((iCell - 2 * iPad) / (iLine * 0.32)))
 		iBottomLimit = int(yRes * 0.80)
 		if self.iMsgMoveY != 0:
@@ -8916,7 +8916,7 @@ class CvMainInterface:
 		if not self.bMessagePanelExpanded:
 			# (collapsed: the first rows only; a click on the header shows all)
 			iMaxRows = 3
-		iPerPage = iMaxRows * 2
+		iPerPage = iMaxRows * 3
 		iPages = max(1, (len(aEntries) + iPerPage - 1) / iPerPage)
 		if not self.bMessagePanelExpanded:
 			iPages = 1
@@ -8926,7 +8926,7 @@ class CvMainInterface:
 		aShow = []
 		for k in range(self.iMsgWpPage * iPerPage, min(len(aEntries), (self.iMsgWpPage + 1) * iPerPage)):
 			aShow.append(k)
-		iRows = max(1, (len(aShow) + 1) / 2)
+		iRows = max(1, (len(aShow) + 2) / 3)
 		iFooterHeight = 0
 		if iPages > 1:
 			iFooterHeight = iLine + iGap / 2
@@ -8961,13 +8961,15 @@ class CvMainInterface:
 			screen.moveToFront("HudMsgLine0")
 			self.aszMessageLines.append("HudMsgLine0")
 		for i in range(len(aShow)):
-			iCol = i % 2
-			iRow = i / 2
+			iCol = i % 3
+			iRow = i / 3
 			iCellX = iX + iCol * iCell
 			iCellY = iTextY + int(iRow * iLine)
 			szText = aEntries[aShow[i]][5]
-			if len(szText) > iChars:
-				szText = szText[:iChars - 2] + u".."
+			# (the names can have color tags of the terrains: the length counts the visible letters, a long name is cut without the tags)
+			szPlain = re.sub(u"<[^>]*>", u"", szText)
+			if len(szPlain) > iChars:
+				szText = szPlain[:iChars - 2] + u".."
 			szName = "HudMsgLine%d" % i
 			screen.setText(szName, "Background", self.setFontSize(szText, -1), CvUtil.FONT_LEFT_JUSTIFY, iCellX + iPad, iCellY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_WP, aShow[i])
 			screen.show(szName)
