@@ -358,6 +358,7 @@ class CvMainInterface:
 	iMsgWpPage = 0
 	aMsgWpEntries = [] # the waypoints of the list: (sea, number, x, y, name, text of the line)
 	aMsgWpRects = [] # (x, y, width, height, index, column) of the waypoints of the page that is shown
+	bMsgWpRename = False # the window to rename a waypoint of the list is open: the time out of the list stands still
 	fMsgWpSeen = 0.0 # the last time (seconds) that the cursor was on the panel while it showed the list of the waypoints
 	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
 	iMsgSelIdx = 0
@@ -4973,6 +4974,9 @@ class CvMainInterface:
 	# the new name from the window to rename a waypoint: "2. name" puts it at the place 2 of the list (the others move, the numbers stay continuous),
 	# a name without a number keeps its place
 	def applyWaypointRename( self, ePlayer, iId, szNew ):
+		# (the window is closed: the time out of the list of the message panel runs again)
+		self.bMsgWpRename = False
+		self.fMsgWpSeen = (self.getTipNow() / 1000.0)
 		try:
 			bSea = False
 			(aWp, iNext) = self.getWaypoints(ePlayer, False)
@@ -9012,6 +9016,7 @@ class CvMainInterface:
 				self.saveWaypoints(aWp, iNext, -1, bSea)
 				self.refreshWaypointLists()
 			else:
+				self.bMsgWpRename = True
 				CvEventInterface.beginEvent(CvUtil.EventRenameWaypoint, (iId, szText))
 		except:
 			pass
@@ -9103,7 +9108,9 @@ class CvMainInterface:
 				iCY = gc.getGame().getCursorClientY()
 				if iCX >= iPX - 4 and iCX < iPX + iPW + 4 and iCY >= iPY - 4 and iCY < iPY + iPH + 4:
 					self.fMsgWpSeen = fNow
-				elif fNow - self.fMsgWpSeen > 4.0:
+					# (the cursor is back on the panel: the window to rename has been closed, also without a name, e.g. with Esc)
+					self.bMsgWpRename = False
+				elif not self.bMsgWpRename and fNow - self.fMsgWpSeen > 4.0:
 					self.bMsgWpView = False
 					self.bMessagePanelExpanded = False
 					self.bMessagePanelPrevious = False
