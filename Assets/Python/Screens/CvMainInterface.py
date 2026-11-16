@@ -418,6 +418,7 @@ class CvMainInterface:
 	iPreviewFreezeLines = 0 # of the hint lines under the second window the last ones (the hint of the freezing)
 	fShiftSeen = 0.0 # the time Shift was seen down in the frozen window (the wheel click counts with it for a moment)
 	szModMessageSound = "AS2D_POSITIVE_DINK" # the sound of the messages of the mod (notes, warnings)
+	dModMessagePlot = {} # text of a message of the mod -> (x, y) of its place
 	szModJumpSound = "AS2D_PING" # the sound of the jump to a waypoint
 	tCursorFollow = None # (window, distance of the cursor from its corner, time) after a jump to a waypoint
 	tJump = None # (x, y, time) of the last jump to a waypoint
@@ -4833,9 +4834,13 @@ class CvMainInterface:
 
 	# a message of the mod (a warning, a note of the tooltips): in the message panel (if it is installed and on) as a message at the top, all in the
 	# yellow of the units; otherwise as the game shows its messages
-	def showModMessage( self, szText, szSound = None ):
+	# tPlot = (x, y): the place of the message (a click on its line in the message panel shows it on the map; the panel gets no place from the
+	# game for the messages of the mod, so the text is remembered with its place, see getMessageTargets)
+	def showModMessage( self, szText, szSound = None, tPlot = None ):
 		if szSound is None:
 			szSound = self.szModMessageSound
+		if tPlot is not None:
+			self.dModMessagePlot[re.sub(u"<[^>]*>", u"", szText).strip()] = tPlot
 		szYellow = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szText) + u"</color>"
 		bPanel = False
 		try:
@@ -5044,7 +5049,7 @@ class CvMainInterface:
 					pass
 				CyCamera().JustLookAtPlot(CyMap().plot(tEntry[1], tEntry[2]))
 				self.tJump = (tEntry[1], tEntry[2], (self.getTipNow() / 1000.0))
-				self.showModMessage(u"Waypoint: " + tEntry[4], self.szModJumpSound)
+				self.showModMessage(u"Waypoint: " + tEntry[4], self.szModJumpSound, (tEntry[1], tEntry[2]))
 
 				# the cursor goes with the window under it (the same place of the same line)
 				try:
@@ -5537,7 +5542,7 @@ class CvMainInterface:
 			# (the new waypoint is the last of the list of the ships or of the land units: its number follows the existing ones)
 			aWp.append((iNext, pPlot.getX(), pPlot.getY(), self.getWaypointLabel(pPlot)))
 			self.saveWaypoints(aWp, iNext, -1, bSea)
-			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_SAVED", (self.getWaypointTextById(bSea, iNext),)))
+			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_SAVED", (self.getWaypointTextById(bSea, iNext),)), None, (pPlot.getX(), pPlot.getY()))
 		except:
 			self.iWpUnit = -1
 
@@ -8422,6 +8427,11 @@ class CvMainInterface:
 				atTargets.append((iX, iY, ePlace))
 				continue
 			tTarget = None
+			# (a message of the mod with its place, e.g. a waypoint)
+			tModPlot = self.dModMessagePlot.get(szPlain.strip())
+			if tModPlot is not None:
+				atTargets.append((tModPlot[0], tModPlot[1], -1))
+				continue
 			for (szName, ePlayer, iPX, iPY) in aNatives:
 				if szName in szPlain:
 					tTarget = (iPX, iPY, ePlayer)
