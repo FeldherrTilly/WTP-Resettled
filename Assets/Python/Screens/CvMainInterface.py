@@ -9002,9 +9002,10 @@ class CvMainInterface:
 		screen.moveToFront("HudMsgAuto")
 		self.drawMsgWpToggle(screen, iX, iY, iPad)
 
-	# a text with tags (<color=...>, <font=...>) cut to at most iMax visible letters ("..", the tags that are open are closed)
+	# a text with tags (<color=...>, <font=...>) cut to the width of iMax average letters (by the real width of its visible letters, narrow letters
+	# take less room; the tags have no width); a cut text ends with "..", the tags that are open are closed
 	def cutTaggedText( self, szText, iMax ):
-		if len(re.sub(u"<[^>]*>", u"", szText)) <= iMax:
+		if self.getMessageWidth(re.sub(u"<[^>]*>", u"", szText)) <= iMax:
 			return szText
 		aOpen = []
 		szResult = u""
@@ -9022,12 +9023,15 @@ class CvMainInterface:
 					if mTag is not None:
 						aOpen.append(mTag.group(1))
 				continue
-			iRoom = (iMax - 2) - iVisible
-			if len(szPart) > iRoom:
-				szResult += szPart[:max(0, iRoom)]
+			bFull = False
+			for szChar in szPart:
+				iVisible += self.getMessageWidth(szChar)
+				if iVisible > iMax - 1.3:
+					bFull = True
+					break
+				szResult += szChar
+			if bFull:
 				break
-			szResult += szPart
-			iVisible += len(szPart)
 		szResult += u".."
 		while len(aOpen) > 0:
 			szResult += u"</" + aOpen.pop() + u">"
