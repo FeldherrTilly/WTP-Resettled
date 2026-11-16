@@ -6703,6 +6703,18 @@ class CvMainInterface:
 					if gc.getProfessionInfo(iProfession).getYieldsProduced(0) == iOut:
 						aMaking.append(iProfession)
 				aUse = [p for p in aMaking if p in aActive]
+				# (a good made by several professions of the building, e.g. cloth from cotton by one weaver and from wool by another: only the
+				# chains that are restricted count, those with a raw material that the city consumes more of than it produces)
+				aLimited = []
+				for iProfession in aUse:
+					pProf = gc.getProfessionInfo(iProfession)
+					for k in range(pProf.getNumYieldsConsumed()):
+						iIn = pProf.getYieldsConsumed(k)
+						if iIn >= 0 and iIn != YieldTypes.YIELD_FOOD and pCity.getRawYieldConsumed(iIn) > pCity.getBaseRawYieldProduced(iIn):
+							if not (iProfession in aLimited):
+								aLimited.append(iProfession)
+				if len(aLimited) > 0:
+					aUse = aLimited
 				if len(aUse) == 0:
 					aUse = aMaking
 				for iProfession in aUse:
