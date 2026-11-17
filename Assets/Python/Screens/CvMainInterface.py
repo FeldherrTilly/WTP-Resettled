@@ -5541,10 +5541,6 @@ class CvMainInterface:
 		self.iWpUnit = pUnit.getID()
 		self.fWpStart = (self.getTipNow() / 1000.0)
 		self.unfreezeAllTips()
-		try:
-			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_MODE", (pUnit.getName(),)))
-		except:
-			pass
 
 	# called by the game for every order that the player gives to a group (CvEventManager.onSelectionGroupPushMission)
 	def onWaypointMission( self, eOwner, eMission ):
