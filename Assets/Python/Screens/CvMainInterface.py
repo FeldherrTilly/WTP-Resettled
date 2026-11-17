@@ -5744,6 +5744,18 @@ class CvMainInterface:
 	def windowActivated( self ):
 		if len(self.aFrozen) > 0:
 			self.iRedrawFrozen = 6
+		# the import / export window open in the city screen: after alt-tab the city is not drawn again (the redraw is blocked while the
+		# window is on this screen); the window is closed, the city can be drawn and the window is opened again with its state
+		try:
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.isHostMain() and not tWin.isFromMap() and CyInterface().isCityScreenUp():
+				self.tReopenTrade = tWin.getState()
+				self.iReopenWait = 4
+				tWin.finish(False, -1)
+				CyInterface().setDirty(InterfaceDirtyBits.CityScreen_DIRTY_BIT, True)
+				CyInterface().setDirty(InterfaceDirtyBits.Domestic_Advisor_DIRTY_BIT, True)
+		except:
+			pass
 
 	def redrawFrozenTips( self, screen ):
 		try:
@@ -7725,8 +7737,13 @@ class CvMainInterface:
 
 	tReopenTrade = None # the state of the import / export window that the city screen closed (it is opened again for the same city)
 
+	iReopenWait = 0 # frames the city screen gets to draw itself before the window is opened again
+
 	def checkReopenTradeWindow( self ):
 		if self.tReopenTrade is None:
+			return
+		if self.iReopenWait > 0:
+			self.iReopenWait -= 1
 			return
 		try:
 			if not CyInterface().isCityScreenUp():
