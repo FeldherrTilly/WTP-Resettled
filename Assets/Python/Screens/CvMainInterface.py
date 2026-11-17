@@ -361,6 +361,7 @@ class CvMainInterface:
 	aMsgWpRects = [] # (x, y, width, height, index, column) of the waypoints of the page that is shown
 	tMsgWpSel = None # what was selected when the list of the waypoints was switched on (see getMsgSelectionKey): the list closes when that changes
 	tWpRenamePending = None # (number, sea) of a new waypoint: the window for its name opens in the next frame
+	fTipSelectAt = -100.0 # the time (seconds) of the last selection of a unit made in a tooltip
 	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
 	iMsgSelIdx = 0
 	bMsgWheel = False
@@ -5509,6 +5510,7 @@ class CvMainInterface:
 					else:
 						# (first choice: start)
 						CyInterface().selectUnit(pUnit, True, False, False)
+						self.markTipSelection()
 						self.unfreezeAllTips()
 						self.sendUnitToPlot(pUnit, aWp[k][1], aWp[k][2])
 					break
@@ -5527,9 +5529,15 @@ class CvMainInterface:
 			except:
 				pass
 
+	# a unit was selected in a tooltip: for a moment the selection does not count as a change (the list of the waypoints of the message panel
+	# stays open, see updateMessageScroll)
+	def markTipSelection( self ):
+		self.fTipSelectAt = (self.getTipNow() / 1000.0)
+
 	# "New waypoint": the unit is selected, the target of its next order to move is saved (for one minute)
 	def startWaypointMode( self, pUnit ):
 		CyInterface().selectUnit(pUnit, True, False, False)
+		self.markTipSelection()
 		self.iWpUnit = pUnit.getID()
 		self.fWpStart = (self.getTipNow() / 1000.0)
 		self.unfreezeAllTips()
@@ -7442,6 +7450,7 @@ class CvMainInterface:
 			CyInterface().clearSelectionList()
 			for pUnit in aUnits:
 				CyInterface().selectUnit(pUnit, False, False, False)
+			self.markTipSelection()
 			self.unfreezeAllTips()
 			return True
 		except:
@@ -7557,6 +7566,7 @@ class CvMainInterface:
 							self.openPediaTargetIndex(aTargets, 0)
 					else:
 						CyInterface().selectUnit(pSelect, True, False, False)
+						self.markTipSelection()
 						self.unfreezeAllTips()
 						return
 				elif eTalk >= 0:
