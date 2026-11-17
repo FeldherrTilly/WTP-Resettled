@@ -485,6 +485,8 @@ class CvTradeRouteScreen:
 
 	def drawSearchText(self):
 		szCursor = u"<color=255,220,100>|</color>"
+		if not self.bSearchSelected:
+			szCursor = u"<color=110,110,110>|</color>"
 		if len(self.szQuery) == 0:
 			szText = szCursor + u"<color=140,140,140> " + localText.getText("TXT_KEY_WTP_TRADEROUTE_SEARCH_HINT", ()) + u"</color>"
 		elif len(self.szSuggestion) > len(self.szQuery):
@@ -2189,6 +2191,12 @@ class CvTradeRouteScreen:
 		iData = inputClass.getData1()
 		if iData < BTN_OK or iData >= BTN_ROW + 16 * 64:
 			return 0
+		# a click into the search field puts the typing there (X is then a letter), a click anywhere else in the window takes it away
+		# (X then freezes the tooltip, see CvEventManager)
+		bWasSearch = self.bSearchSelected
+		self.bSearchSelected = (iData == BTN_SEARCH)
+		if bWasSearch != self.bSearchSelected:
+			self.drawSearchText()
 		bCtrl = inputClass.isCtrlKeyDown()
 		iStep = STEP
 		if bCtrl:
