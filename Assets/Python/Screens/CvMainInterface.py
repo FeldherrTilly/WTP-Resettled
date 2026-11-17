@@ -7789,6 +7789,12 @@ class CvMainInterface:
 			pass
 		return szText
 
+	def isTradeWindowOpen( self ):
+		try:
+			return CvScreensInterface.tradeRouteScreen.isOpen()
+		except:
+			return False
+
 	def isCursorInTradeWindow( self ):
 		try:
 			t = CvScreensInterface.tradeRouteScreen
@@ -7925,8 +7931,8 @@ class CvMainInterface:
 			self.bXHoldDone = True
 			self.unfreezeAllTips()
 		if self.bTipFrozen:
-			# a frozen window stays until Esc / X, but not into the city screen
-			if CyInterface().isCityScreenUp() or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL:
+			# a frozen window stays until Esc / X, but not into the city screen (except with the import / export window open there)
+			if (CyInterface().isCityScreenUp() and not self.isTradeWindowOpen()) or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL:
 				self.unfreezeAllTips()
 			else:
 				try:
