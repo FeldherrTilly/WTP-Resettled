@@ -359,8 +359,7 @@ class CvMainInterface:
 	iMsgWpPage = 0
 	aMsgWpEntries = [] # the waypoints of the list: (sea, number, x, y, name, text of the line)
 	aMsgWpRects = [] # (x, y, width, height, index, column) of the waypoints of the page that is shown
-	bMsgWpRename = False # the window to rename a waypoint of the list is open: the time out of the list stands still
-	fMsgWpSeen = 0.0 # the last time (seconds) that the cursor was on the panel while it showed the list of the waypoints
+	tMsgWpSel = None # what was selected when the list of the waypoints was switched on (see getMsgSelectionKey): the list closes when that changes
 	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
 	iMsgSelIdx = 0
 	bMsgWheel = False
@@ -4974,11 +4973,6 @@ class CvMainInterface:
 
 	# the new name from the window to rename a waypoint: "2. name" puts it at the place 2 of the list (the others move, the numbers stay continuous),
 	# a name without a number keeps its place
-	# the window to rename a waypoint was closed: the time out of the list of the message panel runs again
-	def onWaypointRenameClosed( self ):
-		self.bMsgWpRename = False
-		self.fMsgWpSeen = (self.getTipNow() / 1000.0)
-
 	def applyWaypointRename( self, ePlayer, iId, szNew ):
 		try:
 			bSea = False
@@ -8215,11 +8209,11 @@ class CvMainInterface:
 					self.bMsgWpView = False
 					self.bMsgWpSea = False
 				self.iMsgWpPage = 0
-				# (the list starts collapsed; it goes back to the standard view when the cursor stays away from the panel, see updateMessageScroll)
+				# (the list starts collapsed; it goes back to the standard view when something else is selected, see updateMessageScroll)
 				self.bMessagePanelExpanded = False
 				self.bMessagePanelPrevious = False
 				self.iMessagePage = 0
-				self.fMsgWpSeen = (self.getTipNow() / 1000.0)
+				self.tMsgWpSel = self.getMsgSelectionKey()
 				self.tMessagePanelKey = None
 				self.updateMessagePanel()
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_WP):
@@ -9069,7 +9063,6 @@ class CvMainInterface:
 				self.saveWaypoints(aWp, iNext, -1, bSea)
 				self.refreshWaypointLists()
 			else:
-				self.bMsgWpRename = True
 				CvEventInterface.beginEvent(CvUtil.EventRenameWaypoint, (iId, szText))
 		except:
 			pass
@@ -9149,19 +9142,27 @@ class CvMainInterface:
 		except:
 			self.bMsgPickShown = False
 
+	# what is selected now: the colony of the city screen or the first selected unit, as (1 colony / 0 unit, owner, number); None: nothing
+	def getMsgSelectionKey( self ):
+		try:
+			pCity = CyInterface().getHeadSelectedCity()
+			if pCity is not None and not pCity.isNone():
+				return (1, pCity.getOwner(), pCity.getID())
+			pUnit = CyInterface().getHeadSelectedUnit()
+			if pUnit is not None and not pUnit.isNone():
+				return (0, pUnit.getOwner(), pUnit.getID())
+		except:
+			pass
+		return None
+
 	# every frame: the message line under the cursor, the shift key and the mouse wheel
 	def updateMessageScroll( self ):
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-		# the list of the waypoints goes back to the collapsed standard view when the cursor was away from the panel for more than 4 seconds
-		if self.bMsgWpView and self.tMsgPanelRect is not None:
+		# the list of the waypoints goes back to the collapsed standard view when something else is selected than when it was switched on (another
+		# unit or colony), or when what was selected is not selected any more
+		if self.bMsgWpView:
 			try:
-				fNow = (self.getTipNow() / 1000.0)
-				(iPX, iPY, iPW, iPH) = self.tMsgPanelRect
-				iCX = gc.getGame().getCursorClientX()
-				iCY = gc.getGame().getCursorClientY()
-				if iCX >= iPX - 4 and iCX < iPX + iPW + 4 and iCY >= iPY - 4 and iCY < iPY + iPH + 4:
-					self.fMsgWpSeen = fNow
-				elif not self.bMsgWpRename and fNow - self.fMsgWpSeen > 4.0:
+				if self.getMsgSelectionKey() != self.tMsgWpSel:
 					self.bMsgWpView = False
 					self.bMsgWpSea = False
 					self.bMessagePanelExpanded = False
