@@ -9177,10 +9177,13 @@ class CvMainInterface:
 	def updateMessageScroll( self ):
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 		# the list of the waypoints goes back to the collapsed standard view when something else is selected than when it was switched on (another
-		# unit or colony), or when what was selected is not selected any more
+		# unit or colony), or when what was selected is not selected any more (a selection made in a tooltip does not count)
 		if self.bMsgWpView:
 			try:
-				if self.getMsgSelectionKey() != self.tMsgWpSel:
+				if (self.getTipNow() / 1000.0) - getattr(self, "fTipSelectAt", -100.0) < 1.5:
+					# (a unit that the player chose in a tooltip, and what follows from it, does not count as another selection)
+					self.tMsgWpSel = self.getMsgSelectionKey()
+				elif self.getMsgSelectionKey() != self.tMsgWpSel:
 					self.bMsgWpView = False
 					self.bMsgWpSea = False
 					self.bMessagePanelExpanded = False
