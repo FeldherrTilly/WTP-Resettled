@@ -360,6 +360,7 @@ class CvMainInterface:
 	aMsgWpEntries = [] # the waypoints of the list: (sea, number, x, y, name, text of the line)
 	aMsgWpRects = [] # (x, y, width, height, index, column) of the waypoints of the page that is shown
 	tMsgWpSel = None # what was selected when the list of the waypoints was switched on (see getMsgSelectionKey): the list closes when that changes
+	tWpRenamePending = None # (number, sea) of a new waypoint: the window for its name opens in the next frame
 	szMsgSelText = u"" # the message with a target chosen by shift + mouse wheel and the index of the target
 	iMsgSelIdx = 0
 	bMsgWheel = False
@@ -5561,8 +5562,25 @@ class CvMainInterface:
 			aWp.append((iNext, pPlot.getX(), pPlot.getY(), self.getWaypointLabel(pPlot)))
 			self.saveWaypoints(aWp, iNext, -1, bSea)
 			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_SAVED", (self.getWaypointTextById(bSea, iNext),)), None, (pPlot.getX(), pPlot.getY()))
+			# the name is always asked for (the window of the rename with the suggested name, only OK); not for an own colony: its name is fixed.
+			# The window opens in the next frame (see updatePendingWpRename), not in the middle of the order of the game
+			if self.getOwnColonyAt(pPlot.getX(), pPlot.getY()) is None:
+				self.tWpRenamePending = (iNext, bSea)
 		except:
 			self.iWpUnit = -1
+
+	# the window to name a new waypoint (the rename window with the suggested name: OK takes it, or the player changes it first)
+	def updatePendingWpRename( self ):
+		if self.tWpRenamePending is None:
+			return
+		(iId, bSea) = self.tWpRenamePending
+		self.tWpRenamePending = None
+		try:
+			szText = self.getWaypointTextById(bSea, iId)
+			if len(szText) > 0:
+				CvEventInterface.beginEvent(CvUtil.EventRenameWaypoint, (iId, szText))
+		except:
+			pass
 
 	def getOverflowForecastText( self, pCity ):
 		# the goods that the storage overflow (or the sale threshold of a custom house) takes at the next turn change, and the gold of their sale:
@@ -9960,6 +9978,7 @@ class CvMainInterface:
 		self.updateTerritorialInfluenceEditor()
 		self.updatePioneerPlanEditor()
 		self.updateAutomatedFollow()
+		self.updatePendingWpRename()
 		self.updateMessageMove()
 		try:
 			self.updateMessageScroll()
