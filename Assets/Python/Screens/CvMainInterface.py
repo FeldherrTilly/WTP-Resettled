@@ -4680,7 +4680,12 @@ class CvMainInterface:
 		tRect = self.getTipAvoidRect(iCursorX, iCursorY)
 		if tRect is not None:
 			iX = tRect[0] + tRect[2] + 12
-			if iX + iWidth > xRes - 4:
+			if self.isTradeIconHover():
+				# the goods of the import / export window: the tooltip opens left of the window (the pictures are at its left edge)
+				iX = tRect[0] - 12 - iWidth
+				if iX < 4:
+					iX = tRect[0] + tRect[2] + 12
+			elif iX + iWidth > xRes - 4:
 				iX = tRect[0] - 12 - iWidth
 		else:
 			iX = iCursorX + iGap
@@ -5748,8 +5753,10 @@ class CvMainInterface:
 		# window is on this screen); the window is closed, the city can be drawn and the window is opened again with its state
 		try:
 			tWin = CvScreensInterface.tradeRouteScreen
-			if tWin.isHostMain() and not tWin.isFromMap() and CyInterface().isCityScreenUp():
+			if tWin.isHostMain() and (CyInterface().isCityScreenUp() and not tWin.isFromMap() or not CyInterface().isCityScreenUp()):
+				# (on the map the window is opened again on the map: the HUD is hidden and the window not drawn after the alt-tab otherwise)
 				self.tReopenTrade = tWin.getState()
+				self.tReopenTrade["map"] = not CyInterface().isCityScreenUp()
 				self.iReopenWait = 4
 				tWin.finish(False, -1)
 				CyInterface().setDirty(InterfaceDirtyBits.CityScreen_DIRTY_BIT, True)
@@ -7746,11 +7753,16 @@ class CvMainInterface:
 			self.iReopenWait -= 1
 			return
 		try:
-			if not CyInterface().isCityScreenUp():
+			bMap = self.tReopenTrade.get("map", False)
+			if bMap == CyInterface().isCityScreenUp():
+				if bMap:
+					self.tReopenTrade = None # (the city screen was opened meanwhile)
 				return
 			tState = self.tReopenTrade
 			self.tReopenTrade = None
 			pCity = CyInterface().getHeadSelectedCity()
+			if bMap:
+				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tState["city"])
 			if pCity is not None and not pCity.isNone() and pCity.getID() == tState["city"]:
 				tWin = CvScreensInterface.tradeRouteScreen
 				if tWin.open(tState["city"], tState["condensed"]) != 0:
@@ -7943,7 +7955,7 @@ class CvMainInterface:
 			iDX = abs(gc.getGame().getCursorClientX() - self.tCursorTipAt[0])
 			iDY = abs(gc.getGame().getCursorClientY() - self.tCursorTipAt[1])
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			if iDX > 100 or iDY > 100 or CyInterface().isCityScreenUp():
+			if iDX > 100 or iDY > 100 or (CyInterface().isCityScreenUp() and not self.isTradeIconHover()):
 				self.hideCursorTooltip(screen)
 			elif self.iTipMode == 0:
 				self.followCursorTip(screen)
