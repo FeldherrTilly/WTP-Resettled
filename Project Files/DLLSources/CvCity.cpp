@@ -14059,8 +14059,9 @@ void CvCity::handleAutoTraderouteSetup(bool bReset, bool bImportAll, bool bAutoE
 				int iMaintainLevel   = getMaintainLevel(eYield);
 				int iImportLimitLevel= getImportsLimit(eYield);
 
-				// UNTESTED: the layout is the one of NetworkDataTradeRouteInts (import limit in the lower, maintain level in the upper 16 bits)
-				// as read by TASK_YIELD_TRADEROUTE. It was the other way round here, which swapped both values for every good.
+				// the layout is the one of NetworkDataTradeRouteInts (import limit in the lower, maintain level in the upper 16 bits)
+				// as read by TASK_YIELD_TRADEROUTE. It was the other way round here (also in the original mod), which swapped both values for
+				// every good. Tested in game (test/auto-traderoute-packing): before 50 / 100 -> after 100 / 50, with this packing it stays 50 / 100.
 				NetworkDataTradeRouteInts buffer;
 				buffer.iImportLimitLevel = (unsigned short)iImportLimitLevel;
 				buffer.iMaintainLevel    = (unsigned short)iMaintainLevel;
