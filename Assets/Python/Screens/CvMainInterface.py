@@ -4464,7 +4464,8 @@ class CvMainInterface:
 			iCellY = iTextY + int(iRow * iLine)
 			szText = aEntries[aShow[i]][5]
 			# (the names can have color / font tags of the terrains: a long name is cut by its visible letters, the tags stay)
-			szText = self.cutTaggedText(szText, iChars)
+			# (yellow like the messages of the mod in the panel: the colors of the names are left out)
+			szText = u"<color=255,255,0,255>" + self.cutTaggedText(re.sub(u"<color=[^>]*>|</color>", u"", szText), iChars) + u"</color>"
 			szName = "HudMsgLine%d" % i
 			screen.setText(szName, "Background", self.setFontSize(szText, -1), CvUtil.FONT_LEFT_JUSTIFY, iCellX + iPad, iCellY, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_WP, aShow[i])
 			screen.show(szName)
