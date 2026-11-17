@@ -1554,6 +1554,38 @@ class CvTradeRouteScreen:
 		except:
 			return u""
 
+	# the note for the tooltip of a good: which colonies export / import it at the moment (their state in the game; the changes of the window
+	# that are not saved yet are not in it)
+	def getTradersNote(self, iYield):
+		try:
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			aExp = []
+			aImp = []
+			(pCity, iIter) = pPlayer.firstCity(False)
+			while pCity:
+				if pCity.isExport(iYield):
+					aExp.append(pCity.getName())
+				if pCity.isImport(iYield):
+					aImp.append(pCity.getName())
+				(pCity, iIter) = pPlayer.nextCity(iIter, False)
+			aLines = []
+			if len(aExp) > 0:
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_TRADERS_EXPORT", (self.joinCityNames(aExp),)))
+			if len(aImp) > 0:
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_TRADERS_IMPORT", (self.joinCityNames(aImp),)))
+			if len(aLines) == 0:
+				return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NONE", ())
+			return u"\n".join(aLines)
+		except:
+			return u""
+
+	# the names of the colonies in one line (the tooltip wraps it); more than 12: the first ones and the number of the others
+	def joinCityNames(self, aNames):
+		szNames = u", ".join(aNames[:12])
+		if len(aNames) > 12:
+			szNames += u" " + localText.getText("TXT_KEY_WTP_TIP_TRADERS_MORE", (len(aNames) - 12,))
+		return szNames
+
 	def drawOuterFrame(self, iSlot, iX, iY, iState):
 		screen = self.pHost
 		aRects = []

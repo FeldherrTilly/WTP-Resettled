@@ -3949,7 +3949,7 @@ class CvMainInterface:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
-			if CyInterface().isCityScreenUp() or len(szHelp) == 0:
+			if (CyInterface().isCityScreenUp() and not (bWidget and self.isTradeIconHover())) or len(szHelp) == 0:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
@@ -7750,10 +7750,22 @@ class CvMainInterface:
 				if iYield >= 0:
 					szNote = tWin.getRawNote(iYield)
 					if len(szNote) > 0:
-						return szText + u"\n" + szNote
+						szText = szText + u"\n" + szNote
+					# the colonies that export / import the good at the moment
+					szTraders = tWin.getTradersNote(iYield)
+					if len(szTraders) > 0:
+						szText = szText + u"\n" + szTraders
 		except:
 			pass
 		return szText
+
+	# the cursor is on the picture of a good in the import / export window (its tooltip is ours also in the city screen)
+	def isTradeIconHover( self ):
+		try:
+			tWin = CvScreensInterface.tradeRouteScreen
+			return tWin.isOpen() and tWin.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0
+		except:
+			return False
 
 	# the help texts the game itself makes for its HUD elements (the DLL stores the last one, CyGame.getWidgetHelp...)
 	def pollWidgetHelp( self ):
