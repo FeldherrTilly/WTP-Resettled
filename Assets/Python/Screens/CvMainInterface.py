@@ -4731,7 +4731,11 @@ class CvMainInterface:
 					pass
 				CyCamera().JustLookAtPlot(CyMap().plot(tEntry[1], tEntry[2]))
 				self.tJump = (tEntry[1], tEntry[2], (self.getTipNow() / 1000.0))
-				self.showModMessage(u"Waypoint: " + tEntry[4], self.szModJumpSound, (tEntry[1], tEntry[2]))
+				# (no message in the panel for a jump, only the sound)
+				try:
+					CyInterface().playGeneralSound(self.szModJumpSound)
+				except:
+					pass
 
 				# the cursor goes with the window under it (the same place of the same line)
 				try:
