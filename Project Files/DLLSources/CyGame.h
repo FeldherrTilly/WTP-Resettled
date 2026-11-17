@@ -180,6 +180,7 @@ public:
 	int getWidgetHelpType() const; // WTP: widget type of the last help request
 	std::wstring getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const; // WTP: the help text of a widget (as parseHelp makes it)
 	bool isDiplomacyUp() const; // WTP: is a diplomacy screen open
+	void setHideYieldHelp(bool bNewValue); // WTP: no game help for the goods pictures of the import / export window in the city screen (own tooltip)
 	void setHideGameHelp(bool bNewValue); // WTP: no game help text for HUD elements while the diplomacy screen is open (own tooltip on)
 	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
 	int getCursorClientY() const;

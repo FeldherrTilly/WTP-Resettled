@@ -3964,7 +3964,8 @@ class CvMainInterface:
 				return
 			# tooltip delay: a tooltip waits until the cursor has rested for the time of the option. Another text (the cursor has gone from one
 			# thing to the next) removes the tooltip that is shown and starts the time again
-			if self.iTipDelay != 0 and not bFromPending and (not self.bCursorTipShown or (szHelp != self.szCursorTipText and not self.bTipQuick)):
+			# (in the import / export window the tooltips come at once, whatever the delay is)
+			if self.iTipDelay != 0 and not bFromPending and not self.isCursorInTradeWindow() and (not self.bCursorTipShown or (szHelp != self.szCursorTipText and not self.bTipQuick)):
 				if self.bCursorTipShown:
 					self.hideCursorTooltip(screen)
 				if self.szPendingHelp is None:
@@ -7788,6 +7789,15 @@ class CvMainInterface:
 			pass
 		return szText
 
+	def isCursorInTradeWindow( self ):
+		try:
+			t = CvScreensInterface.tradeRouteScreen
+			iX = gc.getGame().getCursorClientX()
+			iY = gc.getGame().getCursorClientY()
+			return t.isOpen() and iX >= t.OX and iX < t.OX + t.W and iY >= t.OY and iY < t.OY + t.H
+		except:
+			return False
+
 	# the cursor is on the picture of a good in the import / export window (its tooltip is ours also in the city screen)
 	def isTradeIconHover( self ):
 		try:
@@ -7904,6 +7914,12 @@ class CvMainInterface:
 
 	def updateCursorTooltip( self ):
 		# called every frame: the window goes away when the cursor has left its place (the game does not always say that a tooltip is gone)
+		# the pictures of the goods of the import / export window in the city screen: the game gives no help text of its own there (the DLL
+		# empties it; python cannot clear the help of the city screen)
+		try:
+			gc.getGame().setHideYieldHelp(self.bHoverTip and CyInterface().isCityScreenUp() and self.isTradeIconHover())
+		except:
+			pass
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
 			# X held: all frozen windows are closed
 			self.bXHoldDone = True

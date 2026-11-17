@@ -859,6 +859,7 @@ extern int wtpGetWidgetHelpCount();
 extern int wtpGetWidgetHelpType();
 extern void wtpSetHideGameHelp(bool b);
 extern void wtpSetInternalHelp(bool b);
+extern void wtpSetHideYieldHelp(bool b);
 extern bool wtpIsDiplomacyUp();
 std::wstring CyGame::getWidgetHelpText() const
 {
@@ -896,6 +897,11 @@ bool CyGame::isDiplomacyUp() const
 void CyGame::setHideGameHelp(bool bNewValue)
 {
 	wtpSetHideGameHelp(bNewValue);
+}
+
+void CyGame::setHideYieldHelp(bool bNewValue)
+{
+	wtpSetHideYieldHelp(bNewValue);
 }
 
 int CyGame::getCursorClientX() const
