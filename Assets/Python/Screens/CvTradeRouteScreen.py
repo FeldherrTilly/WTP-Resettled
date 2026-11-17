@@ -7,6 +7,7 @@
 from CvPythonExtensions import *
 import CvUtil
 import CvScreenEnums
+import WtpSearchComplete
 
 gc = CyGlobalContext()
 localText = CyTranslator()
@@ -398,10 +399,7 @@ class CvTradeRouteScreen:
 		self.szQuery = u""
 		self.aConfirmed = [] # the goods confirmed with Enter (lowercase names)
 		self.szSuggestion = u""
-		self.szAlt = u"" # a further good that Tab offers (a word of its name starts with the text, or the next one of several)
-		self.aCandidates = []
-		self.aCycle = [] # the goods Tab went through (the typed text was completed with one of them)
-		self.iCycle = 0
+		self.oSearch = WtpSearchComplete.SearchComplete()
 		self.bSearchSelected = False
 		self.dNames = {}
 		self.dKeys = {}
@@ -471,51 +469,13 @@ class CvTradeRouteScreen:
 				return True
 		return False
 
-	# the completion of the typed text: the first good (alphabetically) that starts with it and is not confirmed yet
-	# Goods whose name has a word that starts with the text come second (wood: Exotic Wood); when the text was completed with one of several
-	# goods, Tab offers the next one (peaux: Peaux de chevres, Peaux de porcs).
+	# the completion of the typed text (WtpSearchComplete): the good that starts with it and is not confirmed yet, and the alternative of Tab
 	def findSuggestion(self):
-		self.szSuggestion = u""
-		self.szAlt = u""
-		self.aCandidates = []
-		szLast = self.szQuery.lstrip().lower()
-		if len(szLast) == 0:
-			self.aCycle = []
-			return
-		if len(self.aCycle) > 0 and szLast == self.aCycle[self.iCycle].lower():
-			self.aCandidates = list(self.aCycle)
-			if len(self.aCycle) > 1:
-				self.szAlt = self.aCycle[(self.iCycle + 1) % len(self.aCycle)]
-			return
-		self.aCycle = []
-		aPrefix = []
-		aWord = []
+		dCand = {}
 		for iYield in self.dNames.keys():
-			szName = self.dNames[iYield]
-			szLower = szName.lower()
-			if szLower in self.aConfirmed or szLower == szLast:
-				continue
-			if szLower[:len(szLast)] == szLast:
-				aPrefix.append((szLower, szName))
-			else:
-				for szWord in szLower.replace(u"-", u" ").replace(u"'", u" ").split():
-					if szWord[:len(szLast)] == szLast:
-						aWord.append((szLower, szName))
-						break
-		aPrefix.sort()
-		aWord.sort()
-		for t in aPrefix:
-			self.aCandidates.append(t[1])
-		for t in aWord:
-			self.aCandidates.append(t[1])
-		if len(aPrefix) > 0:
-			self.szSuggestion = self.szQuery[:len(self.szQuery) - len(self.szQuery.lstrip())] + aPrefix[0][1]
-			if len(aPrefix) > 1:
-				self.szAlt = aPrefix[1][1]
-			elif len(aWord) > 0:
-				self.szAlt = aWord[0][1]
-		elif len(aWord) > 0:
-			self.szAlt = aWord[0][1]
+			dCand[self.dNames[iYield].lower()] = [self.dNames[iYield], 0]
+		self.oSearch.find(self.szQuery, dCand, self.aConfirmed)
+		self.szSuggestion = self.oSearch.szSuggestion
 
 	def drawSearchText(self):
 		szCursor = u"<color=255,220,100>|</color>"
@@ -523,13 +483,8 @@ class CvTradeRouteScreen:
 			szCursor = u"<color=110,110,110>|</color>"
 		if len(self.szQuery) == 0:
 			szText = szCursor + u"<color=140,140,140> " + localText.getText("TXT_KEY_WTP_TRADEROUTE_SEARCH_HINT", ()) + u"</color>"
-		elif len(self.szSuggestion) > len(self.szQuery):
-			szText = u"<color=255,255,255>" + self.szSuggestion[:len(self.szQuery)] + u"</color>" + szCursor + u"<color=130,130,130>" + self.szSuggestion[len(self.szQuery):] + u"</color>"
 		else:
-			szText = u"<color=255,255,255>" + self.szQuery + u"</color>" + szCursor
-		if len(self.szAlt) > 0:
-			# (Tab takes the good that is shown behind the arrow when there is no completion to take first)
-			szText += u"<color=130,130,130>   -> " + self.szAlt + u"</color>"
+			szText = self.oSearch.getText(self.szQuery, szCursor)
 		self.pHost.setTextAt("TRSSearchText", "TRSSearchBG", u"<font=3>" + szText + u"</font>", CvUtil.FONT_LEFT_JUSTIFY, 8, 6, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, BTN_SEARCH, -1)
 		self.pHost.show("TRSSearchText")
 
@@ -557,19 +512,9 @@ class CvTradeRouteScreen:
 				self.szQuery = u""
 				bChanged = True
 		elif iKey in self.aKeyAccept:
-			szTarget = u""
-			if len(self.szSuggestion) > len(self.szQuery):
-				szTarget = self.szSuggestion.strip()
-			elif len(self.szAlt) > 0:
-				szTarget = self.szAlt
-			if len(szTarget) > 0:
-				if not (len(self.aCycle) > 0 and self.szQuery.strip().lower() == self.aCycle[self.iCycle].lower()):
-					self.aCycle = list(self.aCandidates)
-				if szTarget in self.aCycle:
-					self.iCycle = self.aCycle.index(szTarget)
-				else:
-					self.aCycle = []
-				self.szQuery = szTarget
+			szNew = self.oSearch.accept(self.szQuery)
+			if szNew is not None:
+				self.szQuery = szNew
 				bChanged = True
 		if bChanged:
 			self.searchChanged(True)
@@ -1311,10 +1256,7 @@ class CvTradeRouteScreen:
 		self.szQuery = u""
 		self.aConfirmed = []
 		self.szSuggestion = u""
-		self.szAlt = u"" # a further good that Tab offers (a word of its name starts with the text, or the next one of several)
-		self.aCandidates = []
-		self.aCycle = [] # the goods Tab went through (the typed text was completed with one of them)
-		self.iCycle = 0
+		self.oSearch.reset()
 		self.bSearchSelected = False
 		self.dNames = {}
 		for iYield in self.dData.keys():
