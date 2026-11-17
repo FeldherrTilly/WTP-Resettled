@@ -1868,6 +1868,16 @@
 		<German>Auf manuell setzen</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL</Tag>
+		<English>Select all</English>
+		<German>Alle auswählen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL_UNDO</Tag>
+		<English>Undo select all</English>
+		<German>Auswahl rückgängig</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_MANUAL_DONE</Tag>
 		<English>Set to manual</English>
 		<German>Auf manuell gesetzt</German>
