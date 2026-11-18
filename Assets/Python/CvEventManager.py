@@ -892,6 +892,11 @@ class CvEventManager:
 	def onUnitSelected(self, argsList):
 		pUnit = argsList[0]
 		CvAdvisorUtils.unitSelectedFeats(pUnit)
+		try:
+			# a unit is activated: its tooltip is frozen until the unit gets an order
+			CvScreensInterface.mainInterface.onUnitActivated(pUnit)
+		except:
+			pass
 		
 	def onMissionaryConvertedUnit(self, argsList):
 		pUnit = argsList[0]

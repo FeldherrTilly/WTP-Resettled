@@ -446,6 +446,7 @@ class CvMainInterface:
 	dFrozenDark = {} # frozen windows that are always drawn in the darker variant (the explanation of a folded line)
 	dFrozenCompanion = {} # frozen windows that belong to the frozen window below them (the explanation of a folded line): they close together
 	tSecondTipKey = None
+	tAutoFreeze = None # (x, y, time) of the plot of a unit that was activated: its tooltip is frozen as soon as it shows
 	szAutoSelPrefix = u"" # the frozen window of the unit that a right click on a line of a stack selected (it goes when another unit is selected)
 	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
 	iTipSelIdx = 0
@@ -5839,6 +5840,46 @@ class CvMainInterface:
 		self.fWpStart = (self.getTipNow() / 1000.0)
 		self.unfreezeAllTips()
 
+	# a unit of the player is activated (event "unitSelected"): the tooltip of the plot under the cursor is frozen as soon as it shows (stack or
+	# single unit); it goes with the first order of the unit
+	def onUnitActivated( self, pUnit ):
+		try:
+			if not self.bHoverTip or pUnit is None or pUnit.isNone() or pUnit.getOwner() != gc.getGame().getActivePlayer():
+				return
+			if self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
+				# (selected from a frozen window: it keeps its own handling)
+				return
+			pMouse = CyInterface().getMouseOverPlot()
+			if pMouse is None or pMouse.isNone() or pMouse.getX() != pUnit.getX() or pMouse.getY() != pUnit.getY():
+				return
+			if len(self.szAutoSelPrefix) > 0:
+				self.closeAutoSelWindows()
+			self.tAutoFreeze = None
+			if len(self.aFrozen) == 0:
+				self.tAutoFreeze = (pUnit.getX(), pUnit.getY(), self.getTipNow())
+		except:
+			pass
+
+	def updateAutoFreeze( self ):
+		try:
+			tAuto = self.tAutoFreeze
+			if tAuto is None:
+				return
+			if self.getTipNow() - tAuto[2] > 5000:
+				self.tAutoFreeze = None
+				return
+			if len(self.aFrozen) > 0 or self.bHudHover or not self.bCursorTipShown:
+				return
+			pMouse = CyInterface().getMouseOverPlot()
+			if pMouse is None or pMouse.isNone() or pMouse.getX() != tAuto[0] or pMouse.getY() != tAuto[1]:
+				self.tAutoFreeze = None
+				return
+			self.tAutoFreeze = None
+			if self.freezeCursorTooltip() and len(self.aFrozen) > 0:
+				self.szAutoSelPrefix = self.aFrozen[-1][0]
+		except:
+			self.tAutoFreeze = None
+
 	# the frozen tooltip of the unit that a right click selected from a stack, and the stack tooltip that it belongs to
 	def closeAutoSelWindows( self ):
 		try:
@@ -8677,6 +8718,7 @@ class CvMainInterface:
 		except:
 			pass
 		self.updateEscHold()
+		self.updateAutoFreeze()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
 			# X held: all frozen windows are closed
 			self.bXHoldDone = True
