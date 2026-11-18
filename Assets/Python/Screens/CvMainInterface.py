@@ -8125,26 +8125,76 @@ class CvMainInterface:
 			self.tPostJump = None
 
 	# the window of the starting colony is open again: the camera and the selected unit of the map, the frozen tooltip and the cursor as they were
+	def restoreMapView( self, tR ):
+		try:
+			if tR["unit"] is not None:
+				pUnit = gc.getPlayer(tR["unit"][0]).getUnit(tR["unit"][1])
+				if pUnit is not None and not pUnit.isNone():
+					CyInterface().selectUnit(pUnit, True, False, False)
+		except:
+			pass
+		try:
+			if tR["look"] is not None:
+				CyCamera().JustLookAt(tR["look"])
+			else:
+				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
+				CyCamera().JustLookAtPlot(pCity.plot())
+			if tR["zoom"] is not None:
+				CyCamera().SetZoom(tR["zoom"])
+		except:
+			pass
+
+	# Esc held: all stacked windows of the jumps are closed, the view of the first starting colony is back (no window)
+	bEscHeld = False
+	bEscHoldDone = False
+	fEscStart = 0.0
+	def keyEscDown( self ):
+		if not self.bEscHeld:
+			self.bEscHeld = True
+			self.bEscHoldDone = False
+			self.fEscStart = self.getTipNow()
+
+	def updateEscHold( self ):
+		try:
+			if not self.bEscHeld or self.bEscHoldDone:
+				return
+			if self.getTipNow() - self.fEscStart < 600:
+				return
+			if self.isTradeWindowOpen():
+				self.bEscHoldDone = True
+				if len(self.aTradeReturn) > 0:
+					self.closeAllTradeWindows()
+			elif self.tReopenTrade is None:
+				self.bEscHoldDone = True
+		except:
+			self.bEscHoldDone = True
+
+	def closeAllTradeWindows( self ):
+		tR = self.aTradeReturn[0]
+		self.aTradeReturn = []
+		self.tPostJump = None
+		CvScreensInterface.tradeRouteScreen.finish(False, -1, True)
+		self.unfreezeAllTips()
+		if tR["map"]:
+			if CyInterface().isCityScreenUp():
+				try:
+					CyInterface().clearSelectedCities()
+				except:
+					pass
+			self.restoreMapView(tR)
+		else:
+			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
+			if pCity is not None and not pCity.isNone():
+				CyInterface().selectCity(pCity, False)
+		try:
+			CyInterface().playGeneralSound(self.szModJumpSound)
+		except:
+			pass
+
 	def restoreAfterReturn( self, tR ):
 		try:
 			if tR["map"]:
-				try:
-					if tR["unit"] is not None:
-						pUnit = gc.getPlayer(tR["unit"][0]).getUnit(tR["unit"][1])
-						if pUnit is not None and not pUnit.isNone():
-							CyInterface().selectUnit(pUnit, True, False, False)
-				except:
-					pass
-				try:
-					if tR["look"] is not None:
-						CyCamera().JustLookAt(tR["look"])
-					else:
-						pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
-						CyCamera().JustLookAtPlot(pCity.plot())
-					if tR["zoom"] is not None:
-						CyCamera().SetZoom(tR["zoom"])
-				except:
-					pass
+				self.restoreMapView(tR)
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			(tLayout, aszParas, aiIndent, dDetails, tAnchor) = tR["frozen"]
 			self.addFrozenWindow(screen, tLayout, aszParas, aiIndent, dDetails, tAnchor)
@@ -8313,6 +8363,7 @@ class CvMainInterface:
 			gc.getGame().setHideYieldHelp(self.bHoverTip and CyInterface().isCityScreenUp() and self.isTradeWindowOpen())
 		except:
 			pass
+		self.updateEscHold()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
 			# X held: all frozen windows are closed
 			self.bXHoldDone = True
