@@ -5460,7 +5460,7 @@ class CvMainInterface:
 	def refreshWaypointRows( self, screen, pSelect ):
 		try:
 			for iLevel in range(len(self.aFrozen)):
-				if self.aFrozen[iLevel][6] >= 0 or not self.dWpWin.has_key(self.aFrozen[iLevel][0]):
+				if self.aFrozen[iLevel][6] >= 0:
 					continue
 				tAnchor = self.aFrozen[iLevel][5]
 				if tAnchor is None or tAnchor[0] < 0:
@@ -5468,7 +5468,119 @@ class CvMainInterface:
 				pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
 				if pPlot is None or pPlot.isNone() or pPlot.getX() != pSelect.getX() or pPlot.getY() != pSelect.getY():
 					continue
-				self.moveWaypointRow(screen, iLevel, pSelect)
+				if self.dWpWin.has_key(self.aFrozen[iLevel][0]):
+					self.moveWaypointRow(screen, iLevel, pSelect)
+				self.moveUnitToTop(screen, iLevel, pSelect)
+		except:
+			pass
+
+	# the active unit stands at the start of the list of units of a stack tooltip: the block of the selected unit (its name, its promotions, its
+	# lines) goes to the start of the frozen window (the other blocks keep their order, the lines after the units stay)
+	def moveUnitToTop( self, screen, iLevel, pUnit ):
+		try:
+			szPrefix = self.aFrozen[iLevel][0]
+			aszParas = list(self.aFrozen[iLevel][2])
+			dDetails = self.aFrozen[iLevel][4]
+			tAnchor = self.aFrozen[iLevel][5]
+			pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+			iPlotStart = self.getPlotStartPara(aszParas, pPlot)
+			aHeads = []
+			for k in range(iPlotStart):
+				if self.isUnitHeader(aszParas[k]):
+					aHeads.append(k)
+			if len(aHeads) < 2:
+				return
+			# (the region of the units ends at the line "more...units" or "Commands")
+			iCmd = self.getCommandsPara(aszParas, dDetails)
+			iEnd = iPlotStart
+			for k in range(aHeads[0], iPlotStart):
+				if k == iCmd or (dDetails.has_key(k) and dDetails[k].find(u"@WTPUNITS") == 0):
+					iEnd = k
+					break
+			aHeads = [k for k in aHeads if k < iEnd]
+			if len(aHeads) < 2:
+				return
+			iBlock = -1
+			for i in range(len(aHeads)):
+				pHeader = self.getHeaderUnit(iLevel, aszParas, aHeads[i])
+				if pHeader is not None and not pHeader.isNone() and pHeader.getID() == pUnit.getID() and pHeader.getOwner() == pUnit.getOwner():
+					iBlock = i
+					break
+			if iBlock <= 0:
+				return
+			aBounds = []
+			for i in range(len(aHeads)):
+				if i + 1 < len(aHeads):
+					aBounds.append((aHeads[i], aHeads[i + 1]))
+				else:
+					aBounds.append((aHeads[i], iEnd))
+			aOrder = range(aHeads[0])
+			aBlocks = [aBounds[iBlock]] + aBounds[:iBlock] + aBounds[iBlock + 1:]
+			for tB in aBlocks:
+				aOrder += range(tB[0], tB[1])
+			aOrder += range(iEnd, len(aszParas))
+			dMap = {}
+			for i in range(len(aOrder)):
+				dMap[aOrder[i]] = i
+			(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = self.aFrozen[iLevel][1]
+			aiIndent = self.aFrozen[iLevel][3]
+			# the lines of the region must be one piece
+			iFrom = -1
+			iTo = -1
+			for k in range(len(aiPara)):
+				if aiPara[k] >= aHeads[0] and aiPara[k] < iEnd:
+					if iFrom < 0:
+						iFrom = k
+					iTo = k
+			if iFrom < 0:
+				return
+			for k in range(iFrom, iTo + 1):
+				if aiPara[k] < aHeads[0] or aiPara[k] >= iEnd:
+					return
+			dLines = {}
+			for k in range(iFrom, iTo + 1):
+				if not dLines.has_key(aiPara[k]):
+					dLines[aiPara[k]] = []
+				dLines[aiPara[k]].append(k)
+			aNewLines = list(aszLines[:iFrom])
+			aNewPara = list(aiPara[:iFrom])
+			aNewIndent = list(aiIndent[:iFrom])
+			for iOld in aOrder[aHeads[0]:iEnd]:
+				for k in dLines.get(iOld, []):
+					aNewLines.append(aszLines[k])
+					aNewPara.append(dMap[iOld])
+					aNewIndent.append(aiIndent[k])
+			aNewLines += list(aszLines[iTo + 1:])
+			aNewPara += list(aiPara[iTo + 1:])
+			aNewIndent += list(aiIndent[iTo + 1:])
+			dNew = {}
+			for kDet in dDetails.keys():
+				dNew[dMap.get(kDet, kDet)] = dDetails[kDet]
+			aszNew = [aszParas[i] for i in aOrder]
+			tNew = (iX, iY, iWidth, iHeight, aNewLines, aNewPara, iPad, iLine)
+			self.deleteTipWindow(screen, szPrefix, len(aszLines))
+			self.aFrozen[iLevel][1] = tNew
+			self.aFrozen[iLevel][2] = aszNew
+			self.aFrozen[iLevel][3] = aNewIndent
+			self.aFrozen[iLevel][4] = dNew
+			# what refers to the paragraphs of the window
+			dReg = self.dWpWin.get(szPrefix)
+			if dReg is not None:
+				dParas = {}
+				for kReg in dReg["paras"].keys():
+					dParas[dMap.get(kReg, kReg)] = dReg["paras"][kReg]
+				dReg["paras"] = dParas
+				if dReg.get("cmd", -1) >= 0:
+					dReg["cmd"] = dMap.get(dReg["cmd"], dReg["cmd"])
+			for tKey in self.dRowChild.keys():
+				if tKey[0] == szPrefix and dMap.has_key(tKey[1]) and dMap[tKey[1]] != tKey[1]:
+					szChild = self.dRowChild[tKey]
+					del self.dRowChild[tKey]
+					self.dRowChild[(szPrefix, dMap[tKey[1]])] = szChild
+			if self.tSecondTipKey is not None and self.tSecondTipKey[0] == iLevel and dMap.has_key(self.tSecondTipKey[1]):
+				tOldKey = self.tSecondTipKey
+				self.tSecondTipKey = (tOldKey[0], dMap[tOldKey[1]]) + tuple(tOldKey[2:])
+			self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, aNewIndent, self.dFrozenDark.has_key(szPrefix))
 		except:
 			pass
 
