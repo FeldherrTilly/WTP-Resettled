@@ -1282,7 +1282,7 @@ class CvMainInterface:
 					# (opened from a tooltip on the map: the city screen closes it, its widgets are made now; the window of that city is opened
 					# again in the city screen with what it showed, see checkReopenTradeWindow)
 					self.tReopenTrade = CvScreensInterface.tradeRouteScreen.getState()
-					CvScreensInterface.tradeRouteScreen.finish(False, -1)
+					CvScreensInterface.tradeRouteScreen.finish(False, -1, True)
 				else:
 					return 0
 		except:
@@ -3808,20 +3808,47 @@ class CvMainInterface:
 						)
 
 	tReopenTrade = None # the state of the import / export window that the city screen closed (it is opened again for the same city)
+	iReopenTries = 0
+	iReopenWait = 0 # frames the city screen gets to draw itself before the window is opened again
 
 	def checkReopenTradeWindow( self ):
 		if self.tReopenTrade is None:
 			return
+		if self.iReopenWait > 0:
+			self.iReopenWait -= 1
+			return
 		try:
-			if not CyInterface().isCityScreenUp():
-				return
 			tState = self.tReopenTrade
+			bMap = tState.get("map", False)
+			pCity = None
+			if bMap:
+				if not CyInterface().isCityScreenUp():
+					pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tState["city"])
+			elif CyInterface().isCityScreenUp():
+				pCity = CyInterface().getHeadSelectedCity()
+				if pCity is not None and not pCity.isNone() and pCity.getID() != tState["city"]:
+					pCity = None
+			if pCity is None or pCity.isNone():
+				# (the screen is not there yet: the jump to a city and back takes a few frames; the window is not opened for ever)
+				self.iReopenTries += 1
+				if self.iReopenTries > 240:
+					self.tReopenTrade = None
+					self.iReopenTries = 0
+				return
+			self.iReopenTries = 0
 			self.tReopenTrade = None
-			pCity = CyInterface().getHeadSelectedCity()
-			if pCity is not None and not pCity.isNone() and pCity.getID() == tState["city"]:
-				tWin = CvScreensInterface.tradeRouteScreen
-				if tWin.open(tState["city"], tState["condensed"]) != 0:
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.open(tState["city"], tState["condensed"], True) != 0:
+				if tState.has_key("focus"):
+					tWin.showYield(tState["focus"])
+					# the cursor goes onto the picture of the good and its tooltip is frozen (as it was in the colony of the jump)
+					tPos = tWin.getIconCenter(tState["focus"])
+					if tPos is not None:
+						self.tPostJump = {"yield": tState["focus"], "pos": tPos, "wait": 4}
+				else:
 					tWin.restoreState(tState)
+				if tState.has_key("return"):
+					self.restoreAfterReturn(tState["return"])
 		except:
 			self.tReopenTrade = None
 

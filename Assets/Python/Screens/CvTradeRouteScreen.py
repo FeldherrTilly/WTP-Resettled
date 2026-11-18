@@ -7,6 +7,8 @@
 from CvPythonExtensions import *
 import CvUtil
 import CvScreenEnums
+import WtpSearchComplete
+import WtpColors
 
 gc = CyGlobalContext()
 localText = CyTranslator()
@@ -88,7 +90,7 @@ STEP = 50
 STEP_CTRL = 10
 MAX_VALUE = 0xFFFF
 
-# the player option "new import / export window" (options screen, tab Game; it uses the player option slot PLAYEROPTION_MODDER_2; slot 1 is the message panel of its own branch):
+# the player option "new import / export window" (options screen, tab Game; it uses the player option slot PLAYEROPTION_MODDER_2; slot 1 is the message panel):
 # off (the default, the WTP community decides if the new window becomes the standard) = the original popup of the DLL with its original
 # tooltips (the option cannot be read: off)
 def isNewWindowEnabled():
@@ -398,6 +400,7 @@ class CvTradeRouteScreen:
 		self.szQuery = u""
 		self.aConfirmed = [] # the goods confirmed with Enter (lowercase names)
 		self.szSuggestion = u""
+		self.oSearch = WtpSearchComplete.SearchComplete()
 		self.bSearchSelected = False
 		self.dNames = {}
 		self.dKeys = {}
@@ -467,30 +470,22 @@ class CvTradeRouteScreen:
 				return True
 		return False
 
-	# the completion of the typed text: the first good (alphabetically) that starts with it and is not confirmed yet
+	# the completion of the typed text (WtpSearchComplete): the good that starts with it and is not confirmed yet, and the alternative of Tab
 	def findSuggestion(self):
-		self.szSuggestion = u""
-		szLast = self.szQuery.lstrip().lower()
-		if len(szLast) == 0:
-			return
-		aMatches = []
+		dCand = {}
 		for iYield in self.dNames.keys():
-			szName = self.dNames[iYield]
-			szLower = szName.lower()
-			if szLower[:len(szLast)] == szLast and len(szLower) > len(szLast) and not szLower in self.aConfirmed:
-				aMatches.append((szLower, szName))
-		if len(aMatches) > 0:
-			aMatches.sort()
-			self.szSuggestion = self.szQuery[:len(self.szQuery) - len(self.szQuery.lstrip())] + aMatches[0][1]
+			dCand[self.dNames[iYield].lower()] = [self.dNames[iYield], 0]
+		self.oSearch.find(self.szQuery, dCand, self.aConfirmed)
+		self.szSuggestion = self.oSearch.szSuggestion
 
 	def drawSearchText(self):
 		szCursor = u"<color=255,220,100>|</color>"
+		if not self.bSearchSelected:
+			szCursor = u"<color=110,110,110>|</color>"
 		if len(self.szQuery) == 0:
 			szText = szCursor + u"<color=140,140,140> " + localText.getText("TXT_KEY_WTP_TRADEROUTE_SEARCH_HINT", ()) + u"</color>"
-		elif len(self.szSuggestion) > len(self.szQuery):
-			szText = u"<color=255,255,255>" + self.szSuggestion[:len(self.szQuery)] + u"</color>" + szCursor + u"<color=130,130,130>" + self.szSuggestion[len(self.szQuery):] + u"</color>"
 		else:
-			szText = u"<color=255,255,255>" + self.szQuery + u"</color>" + szCursor
+			szText = self.oSearch.getText(self.szQuery, szCursor)
 		self.pHost.setTextAt("TRSSearchText", "TRSSearchBG", u"<font=3>" + szText + u"</font>", CvUtil.FONT_LEFT_JUSTIFY, 8, 6, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, BTN_SEARCH, -1)
 		self.pHost.show("TRSSearchText")
 
@@ -518,8 +513,9 @@ class CvTradeRouteScreen:
 				self.szQuery = u""
 				bChanged = True
 		elif iKey in self.aKeyAccept:
-			if len(self.szSuggestion) > len(self.szQuery):
-				self.szQuery = self.szSuggestion
+			szNew = self.oSearch.accept(self.szQuery)
+			if szNew is not None:
+				self.szQuery = szNew
 				bChanged = True
 		if bChanged:
 			self.searchChanged(True)
@@ -1226,9 +1222,16 @@ class CvTradeRouteScreen:
 		self.addButton("TRSPreset4", localText.getText(szMarket, ()), pCity.isAutoMarketImport(), self.OX + 20, self.OY + 62, self.W - 40, 28, BTN_PRESET + 4)
 
 	# opens the window (1: it is open, 0: the DLL shows its own popup instead)
-	def open(self, iCity, bCondensed):
+	def open(self, iCity, bCondensed, bInternal = False):
 		if not self.bFinished:
 			return 1
+		if not bInternal:
+			# (a window the player opens is no part of a jump)
+			try:
+				import CvScreensInterface
+				CvScreensInterface.mainInterface.aTradeReturn = []
+			except:
+				pass
 		self.iCity = iCity
 		pCity = self.getCity()
 		if pCity == None or pCity.isNone():
@@ -1261,6 +1264,7 @@ class CvTradeRouteScreen:
 		self.szQuery = u""
 		self.aConfirmed = []
 		self.szSuggestion = u""
+		self.oSearch.reset()
 		self.bSearchSelected = False
 		self.dNames = {}
 		for iYield in self.dData.keys():
@@ -1540,19 +1544,60 @@ class CvTradeRouteScreen:
 			self.dRawState = {}
 			iState = self.getRawState(pCity, iYield)
 			if iState == 2:
-				szColor = u"255,0,0,255"
+				szColor = WtpColors.code(WtpColors.RAW_MISSING)
 				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"
 			elif iState == 1:
-				szColor = u"255,140,0,255"
+				szColor = WtpColors.code(WtpColors.RAW_SCARCE)
 				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"
 			elif iState == 3:
-				szColor = u"255,200,110,255"
+				szColor = WtpColors.code(WtpColors.RAW_IMPORT_SET)
 				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET"
 			else:
 				return u""
 			return u"<color=" + szColor + u">" + localText.getText("TXT_KEY_WTP_TIP_RAW_NOTE", (localText.getText(szKey, ()),)) + u"</color>"
 		except:
 			return u""
+
+	# the note for the tooltip of a good: which colonies export / import it at the moment (their state in the game; the changes of the window
+	# that are not saved yet are not in it)
+	# the colonies that import or export a good at the moment: [(id of the city, name, imports, exports)] by name (the tooltip of the good lists them)
+	def getTraders(self, iYield):
+		aTraders = []
+		try:
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			(pCity, iIter) = pPlayer.firstCity(False)
+			while pCity:
+				bImp = pCity.isImport(iYield)
+				bExp = pCity.isExport(iYield)
+				if bImp or bExp:
+					aTraders.append((pCity.getName(), pCity.getID(), bImp, bExp))
+				(pCity, iIter) = pPlayer.nextCity(iIter, False)
+		except:
+			pass
+		aTraders.sort()
+		return [(t[1], t[0], t[2], t[3]) for t in aTraders]
+
+	# where the picture of a good is on the screen now (its center), None if it is not on the page
+	def getIconCenter(self, iYield):
+		try:
+			if iYield in self.aYields:
+				iSlot = self.aYields.index(iYield) - self.iFirst
+				if iSlot >= 0 and iSlot < self.iVisible:
+					return (self.OX + 22 + 16, self.OY + self.LIST_Y + iSlot * self.ROW_H + self.ROW_H / 2)
+		except:
+			pass
+		return None
+
+	# the page with a good (a jump from the tooltip of another colony opens the window of this one on it)
+	def showYield(self, iYield):
+		try:
+			if iYield in self.aYields and self.iVisible > 0:
+				self.iFirst = self.aYields.index(iYield) / self.iVisible * self.iVisible
+				self.drawRows()
+				self.drawPage()
+		except:
+			import traceback
+			logTrade(traceback.format_exc())
 
 	def drawOuterFrame(self, iSlot, iX, iY, iState):
 		screen = self.pHost
@@ -2018,7 +2063,7 @@ class CvTradeRouteScreen:
 		self.teardownLayout()
 		self.buildLayout()
 
-	def finish(self, bOk, iPreset):
+	def finish(self, bOk, iPreset, bInternal = False):
 		if self.bFinished:
 			return
 		if bOk:
@@ -2046,6 +2091,13 @@ class CvTradeRouteScreen:
 			except:
 				pass
 		self.pHost = None
+		if not bInternal:
+			# closed by the player: a window that was opened by a jump from a tooltip takes him back (see CvMainInterface)
+			try:
+				import CvScreensInterface
+				CvScreensInterface.mainInterface.tradeWindowClosed()
+			except:
+				pass
 
 	# a key down event (CvEventManager.onKbdEvent gives them to the window while it is open)
 	def handleKey(self, iKey, bCtrl, bShift = False, bAlt = False):
@@ -2157,6 +2209,12 @@ class CvTradeRouteScreen:
 		iData = inputClass.getData1()
 		if iData < BTN_OK or iData >= BTN_ROW + 16 * 64:
 			return 0
+		# a click into the search field puts the typing there (X is then a letter), a click anywhere else in the window takes it away
+		# (X then freezes the tooltip, see CvEventManager)
+		bWasSearch = self.bSearchSelected
+		self.bSearchSelected = (iData == BTN_SEARCH)
+		if bWasSearch != self.bSearchSelected:
+			self.drawSearchText()
 		bCtrl = inputClass.isCtrlKeyDown()
 		iStep = STEP
 		if bCtrl:

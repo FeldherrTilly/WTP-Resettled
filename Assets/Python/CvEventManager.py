@@ -216,8 +216,38 @@ class CvEventManager:
 		eventType,key,mx,my,px,py = argsList
 		game = gc.getGame()
 
+		# WTP: Esc held with stacked import / export windows (jumps from the tooltips) closes all of them (the key up can come when no window is open)
+		try:
+			if eventType == self.EventKeyUp and int(key) == int(InputTypes.KB_ESCAPE):
+				CvScreensInterface.mainInterface.bEscHeld = False
+		except:
+			pass
+
 		# WTP: the import / export window of the city screen takes all keys while it is open (Esc closes it)
 		if (CvScreensInterface.tradeRouteScreen.isOpen()):
+			# WTP: nested tooltips in the window: X freezes the tooltip (a short press), unless the search field was clicked (then X is a
+			# letter of the search); Esc takes back the last frozen tooltip first, Shift + X stacks them
+			try:
+				tWin = CvScreensInterface.tradeRouteScreen
+				mi = CvScreensInterface.mainInterface
+				if (eventType == self.EventKeyDown):
+					if int(key) == int(InputTypes.KB_ESCAPE) and mi.isTipFrozen():
+						mi.unfreezeCursorTooltip()
+						return 1
+					if int(key) == int(InputTypes.KB_ESCAPE) and len(mi.aTradeReturn) > 0:
+						mi.keyEscDown()
+					if int(key) == int(InputTypes.KB_X) and not tWin.bSearchSelected and not self.bCtrl and not self.bAlt:
+						if not self.bShift:
+							if mi.keyXDown():
+								return 1
+						elif mi.isTipFrozen() and mi.stackFrozenTips():
+							return 1
+				elif (eventType == self.EventKeyUp):
+					if int(key) == int(InputTypes.KB_X) and mi.bXHeld:
+						if mi.keyXUp():
+							return 1
+			except:
+				pass
 			if (eventType == self.EventKeyDown):
 				try:
 					CvScreensInterface.tradeRouteScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
