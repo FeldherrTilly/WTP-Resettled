@@ -606,7 +606,7 @@ sub addVanillaValues
 	addVanillaSingleValue(\%valueContainer, "FIRST_EVENT_DELAY_TURNS", 0);
 	addVanillaSingleValue(\%valueContainer, "CIVILOPEDIA_SHOW_ACTIVE_CIVS_ONLY", 0);
 	addVanillaSingleValue(\%valueContainer, "USE_MODDERS_PLAYEROPTION_1", 0);
-	addVanillaSingleValue(\%valueContainer, "USE_MODDERS_PLAYEROPTION_2", 0);
+	addVanillaSingleValue(\%valueContainer, "USE_MODDERS_PLAYEROPTION_2", 1); # WTP: slot 2 is used for the option of the new import / export window (slot 1: the message panel of its own branch)
 	addVanillaSingleValue(\%valueContainer, "USE_MODDERS_PLAYEROPTION_3", 0);
 	addVanillaSingleValue(\%valueContainer, "CITY_YIELD_CAPACITY", 100);
 	addVanillaSingleValue(\%valueContainer, "CITY_YIELD_DECAY_PERCENT", 10);
