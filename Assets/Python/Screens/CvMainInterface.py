@@ -4714,8 +4714,20 @@ class CvMainInterface:
 			iRightX = tRect[0] + tRect[2] + 12
 			iStep = iHeight + 6
 			aCands = []
+			# the heights that are closest to the wanted one first: right above / below the frozen windows (not a whole window height away)
+			aYs = [iY]
+			for tFz in self.aFrozen:
+				try:
+					aYs.append(tFz[1][1] - iHeight - 6)
+					aYs.append(tFz[1][1] + tFz[1][3] + 6)
+				except:
+					pass
+			aYs = [max(4, min(yRes - iHeight - 4, iOneY)) for iOneY in aYs]
+			aYs.sort(lambda a, b: cmp(abs(a - iY), abs(b - iY)))
 			for iSideX in (iX, iLeftX, iRightX):
-				for iShift in (0, 1, -1, 2, -2):
+				for iOneY in aYs:
+					aCands.append((iSideX, iOneY))
+				for iShift in (1, -1, 2, -2):
 					aCands.append((iSideX, iY + iShift * iStep))
 			(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, [tRect])
 		if len(self.aFrozen) > 0 and tRect is None:
