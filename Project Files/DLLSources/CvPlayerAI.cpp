@@ -225,6 +225,7 @@ void CvPlayerAI::AI_reset()
 
 void CvPlayerAI::AI_doTurnPre()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPRE);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPre (native)" : "CvPlayerAI::AI_doTurnPre");
 #endif
@@ -236,9 +237,15 @@ void CvPlayerAI::AI_doTurnPre()
 
 	AI_invalidateCloseBordersAttitudeCache();
 
-	AI_doCounter();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOCOUNTER);
+		AI_doCounter();
+	}
 
-	AI_doEnemyUnitData();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOENEMYUNITDATA);
+		AI_doEnemyUnitData();
+	}
 
 	if (isHuman())
 	{
@@ -252,31 +259,70 @@ void CvPlayerAI::AI_doTurnPre()
 		pUnit->AI_setMovePriority(0);
 	}
 
-	AI_doEmotions();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOEMOTIONS);
+		AI_doEmotions();
+	}
 
-	AI_doUnitAIWeights();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOUNITAIWEIGHTS);
+		AI_doUnitAIWeights();
+	}
 
-	AI_doMilitary();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOMILITARY);
+		AI_doMilitary();
+	}
 
-	AI_doStrategy();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOSTRATEGY);
+		AI_doStrategy();
+	}
 
-	AI_updateYieldValues();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_UPDATEYIELDVALUES);
+		AI_updateYieldValues();
+	}
 
-	AI_doCitizenRelocation();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOCITIZENRELOCATION);
+		AI_doCitizenRelocation();
+	}
 
-	AI_doPeaceWarships();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOPEACEWARSHIPS);
+		AI_doPeaceWarships();
+	}
 
-	AI_updateFullStorage();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_UPDATEFULLSTORAGE);
+		AI_updateFullStorage();
+	}
 
-	AI_doWorkforcePlan();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOWORKFORCEPLAN);
+		AI_doWorkforcePlan();
+	}
 
-	AI_doReclaimTerritory();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DORECLAIMTERRITORY);
+		AI_doReclaimTerritory();
+	}
 
-	AI_doSurplusPioneers();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DOSURPLUSPIONEERS);
+		AI_doSurplusPioneers();
+	}
 
-	AI_doNativeMercDefense();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_DONATIVEMERCDEFENSE);
+		AI_doNativeMercDefense();
+	}
 
-	AI_logStatusSummary();
+	{
+		WtpTiming::Scope wtpSub(WtpTiming::SLOT_PRE_LOGSTATUSSUMMARY);
+		AI_logStatusSummary();
+	}
 }
 
 // WTP: per turn summary of a colonial AI, to find bad decisions (no expansion, no growth, ...) in BBAI.log
@@ -410,6 +456,7 @@ void CvPlayerAI::AI_logStatusSummary()
 
 void CvPlayerAI::AI_doTurnPost()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPOST);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPost (native)" : "CvPlayerAI::AI_doTurnPost");
 #endif
@@ -627,6 +674,7 @@ void CvPlayerAI::AI_doFleetModernization()
 
 void CvPlayerAI::AI_doTurnUnitsPre()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPRE);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnUnitsPre (native)" : "CvPlayerAI::AI_doTurnUnitsPre");
 #endif
@@ -1297,6 +1345,7 @@ void CvPlayerAI::AI_buySiegePowder(CvCity& kCity, int iAmount)
 
 void CvPlayerAI::AI_doTurnUnitsPost()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNUNITSPOST);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnUnitsPost (native)" : "CvPlayerAI::AI_doTurnUnitsPost");
 #endif
@@ -1889,6 +1938,7 @@ int CvPlayerAI::AI_movementPriority(CvSelectionGroup* pGroup)
 
 void CvPlayerAI::AI_unitUpdate()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_UNITUPDATE);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_unitUpdate (native)" : "CvPlayerAI::AI_unitUpdate");
 #endif
@@ -2300,6 +2350,7 @@ struct ApplyAssignWorkingPlots
 
 void CvPlayerAI::AI_assignWorkingPlots()
 {
+	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_ASSIGN_WORKING_PLOTS);
 	AI_manageEconomy();
 
 	// Collect cities
@@ -25012,10 +25063,10 @@ void CvPlayerAI::AI_humanFindJobs(const CvUnit& kUnit, std::vector<HumanJob>& aJ
 	std::map<std::pair<int, int>, HumanJob> mapJobs;
 	// WTP (user 2026-10-24): the best job of the expert's own trade is always offered, even where food or happiness would
 	// keep it from the list, and even if better paid jobs fill the list
-	HumanJob kBestExpertJob;
+	HumanJob kBestExpertJob = HumanJob(); // WTP: value-initialized (compiler warning C4701)
 	kBestExpertJob.iScore = 0;
 	// WTP (user 2026-10-31): the same in a colony that does not produce the raw material of the job
-	HumanJob kBestUnsuppliedExpertJob;
+	HumanJob kBestUnsuppliedExpertJob = HumanJob();
 	kBestUnsuppliedExpertJob.iScore = 0;
 	// colonies short of food, and whether this worker is offered food jobs there
 	std::set<int> aFoodShortCities;
