@@ -1868,6 +1868,11 @@
 		<German>Auf manuell setzen</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_VALUE_FOLD</Tag>
+		<English>Value...</English>
+		<German>Wert...</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_IMPORTS</Tag>
 		<English>Imports</English>
 		<German>Importiert</German>

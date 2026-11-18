@@ -3991,7 +3991,9 @@ class CvMainInterface:
 			aiPara = [] # the paragraph (text between two line breaks of the help) of every line: right click in the frozen window
 			aiIndent = [] # indent of continued rows of icons (pixels)
 			aszRaw = self.carryColors(self.stripCarries(szHelp).split(u"\n"))
-			aszParas = self.foldCityDetails(aszRaw)
+			aszParas = self.foldYieldDetails(aszRaw)
+			if aszParas is None:
+				aszParas = self.foldCityDetails(aszRaw)
 			self.tTipWp = None
 			if aszParas is None:
 				aszParas = self.foldUnitDetails(aszRaw)
@@ -6214,9 +6216,10 @@ class CvMainInterface:
 			self.iPreviewFreezeLines = len(aszFreeze)
 			iWidth = self.getTipTextWidth(aszLines, iChar, iMaxWidth, iPad)
 			iHeight = len(aszLines) * iLine + 2 * iPad
-			iX = iFX + iFW + 12
-			if iX + iWidth > xRes - 4:
-				iX = iFX - 12 - iWidth
+			# always to the left of the parent as long as there is room, otherwise to the right
+			iX = iFX - 12 - iWidth
+			if iX < 4:
+				iX = iFX + iFW + 12
 			iX = max(4, iX)
 			iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
 			# it does not cover another frozen window: beside the window (right, left), then above and below it
@@ -6230,7 +6233,7 @@ class CvMainInterface:
 			if tStack is not None:
 				(iX, iY) = tStack
 			else:
-				(iX, iY) = self.pickFreeSpot([(iX, iY), (iRight, iY), (iLeft, iY), (iRight, iFY), (iLeft, iFY), (iRight, iFY + iFH - iHeight), (iLeft, iFY + iFH - iHeight), (iFX, iFY + iFH + 12), (iFX, iFY - 12 - iHeight)], iWidth, iHeight, xRes, yRes)
+				(iX, iY) = self.pickFreeSpot([(iX, iY), (iLeft, iY), (iRight, iY), (iLeft, iFY), (iRight, iFY), (iLeft, iFY + iFH - iHeight), (iRight, iFY + iFH - iHeight), (iFX, iFY + iFH + 12), (iFX, iFY - 12 - iHeight)], iWidth, iHeight, xRes, yRes)
 			self.tPreviewLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
 			self.iPreviewParent = iParent
 			self.aszPreviewParas = aszParas
@@ -7830,6 +7833,38 @@ class CvMainInterface:
 					self.restoreAfterReturn(tState["return"])
 		except:
 			self.tReopenTrade = None
+
+	# THE TOOLTIP OF A GOOD: the lines of the ports (Europe, Africa, Port Royal: prices) are one line "Value..." under the name of the good, the
+	# ports are in its child tooltip. Returns the paragraphs (self.dTipDetails set) or None if the text is no tooltip of a good with such lines.
+	def foldYieldDetails( self, aszParas ):
+		try:
+			if len(aszParas) < 3:
+				return None
+			if not hasattr(self, "aszYieldNames"):
+				self.aszYieldNames = {}
+				for iYield in range(YieldTypes.NUM_YIELD_TYPES):
+					self.aszYieldNames[self.normTipText(gc.getYieldInfo(iYield).getDescription())] = True
+			if not self.aszYieldNames.has_key(self.normTipText(aszParas[0])):
+				return None
+			iFirst = -1
+			iLast = -1
+			for i in range(1, len(aszParas)):
+				if re.search(u"(?i)\\t|<tab>", aszParas[i]) is not None and re.sub(u"(?i)<[^>]*>|\\t", u"", aszParas[i]).strip() != u"":
+					if iFirst < 0:
+						iFirst = i
+					iLast = i
+				elif iFirst >= 0:
+					break
+			if iFirst < 0 or iLast - iFirst < 1:
+				return None
+			self.dTipDetails = {}
+			aLines = self.alignTabLines(list(aszParas[iFirst:iLast + 1]))
+			aNew = list(aszParas[:iFirst]) + [localText.getText("TXT_KEY_WTP_TIP_VALUE_FOLD", ())] + list(aszParas[iLast + 1:])
+			self.dTipDetails[iFirst] = u"\n".join(aLines)
+			return aNew
+		except:
+			self.dTipDetails = {}
+			return None
 
 	# TAB STOPS. The text of the game has tab stops (31 pixels for a line of 22, from the start of the line): "Europe", "Africa", "Port Royal" and
 	# then the prices. A long name (Port Royal) takes one stop more than the others, the prices do not stand under each other. The widths are
@@ -10479,6 +10514,9 @@ class CvMainInterface:
 			elif iData1 == self.BUTTON_PIONEER_PLAN:
 				return localText.getText("TXT_KEY_INTERFACE_PIONEER_PLAN", ());
 			elif iData1 == self.BUTTON_TIP_LINE:
+				if CyInterface().isCityScreenUp() and self.isTradeWindowOpen():
+					# (in the city screen with the import / export window the game shows this text in a window of its own, over ours)
+					return u""
 				return self.getTipPediaHelp(iData2)
 			elif iData1 == self.BUTTON_PIONEER_PLAN_BUILD:
 				return gc.getBuildInfo(iData2).getDescription()
