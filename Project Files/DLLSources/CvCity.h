@@ -789,6 +789,9 @@ public:
 	// WTP: the colony takes colonists of the job automation (switch of the city screen, off by default)
 	bool isAutoAssignTarget() const { return m_bAutoAssignTarget; }
 	void setAutoAssignTarget(bool bNewValue) { m_bAutoAssignTarget = bNewValue; }
+	// WTP: trade route presets of the city screen
+	void applyTradeRoutePreset(int iPreset);
+	void setImportFeeder(YieldTypes eYield, int iMaintainLevel, int iImportLimit);
 	int getImportsLimit(YieldTypes eYield) const;
 	// R&R mod, vetiarvind, max yield import limit - End
 	// R&R, ray, finishing Custom House Screen START
