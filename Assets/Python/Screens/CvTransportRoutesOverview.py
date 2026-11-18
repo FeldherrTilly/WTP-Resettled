@@ -4,6 +4,7 @@
 from CvPythonExtensions import *
 import CvUtil
 import CvScreenEnums
+import WtpSearchComplete
 import time
 
 gc = CyGlobalContext()
@@ -24,6 +25,7 @@ BTN_MANUAL = 32000 # + the slot of the column
 g_FromHotkey = False
 
 BTN_UNIT = 33000 # + the slot of the column (the unit icon: show the transport on the map)
+BTN_SELECT_ALL = 34000 # + the slot of the column (all listed routes for this transport; a second click takes it back)
 
 # transports that were asked for a name lately (unit id -> time), and the numbers of the names that are offered but not answered yet
 g_RenameAsked = {}
@@ -101,7 +103,7 @@ class CvTransportRoutesOverview:
 		self.GAP = 8
 		self.MARGIN = 16
 		self.ROW_HEIGHT = 32
-		self.HEADER_HEIGHT = 84
+		self.HEADER_HEIGHT = 112
 		self.iFirst = 0
 		self.Transports = []
 		self.iNumVisible = 1
@@ -117,6 +119,7 @@ class CvTransportRoutesOverview:
 		self.iAssignFilter = 0 # 0 all, 1 only transports with routes, 2 only transports without
 		self.szQuery = u""
 		self.szSuggestion = u""
+		self.oSearch = WtpSearchComplete.SearchComplete()
 
 	def getScreen(self):
 		return CyGInterfaceScreen(self.SCREEN_NAME, CvScreenEnums.TRANSPORT_ROUTES_OVERVIEW)
@@ -160,6 +163,7 @@ class CvTransportRoutesOverview:
 		self.iAssignFilter = 1
 		self.szQuery = u""
 		self.szSuggestion = u""
+		self.oSearch.reset()
 
 		self.XResolution = screen.getXResolution()
 		self.YResolution = screen.getYResolution()
@@ -262,26 +266,16 @@ class CvTransportRoutesOverview:
 				szText = szCursor + u"<color=140,140,140> " + localText.getText("TXT_KEY_WTP_TRANSPORT_OVERVIEW_SEARCH_HINT", ()) + u"</color>"
 		elif self.bSearchSelected:
 			szText = u"<color=255,220,100>" + self.szQuery + u"</color>" + szCursor
-		elif len(self.szSuggestion) > len(self.szQuery):
-			szText = u"<color=255,255,255>" + self.szSuggestion[:len(self.szQuery)] + u"</color>" + szCursor + u"<color=130,130,130>" + self.szSuggestion[len(self.szQuery):] + u"</color>"
 		else:
-			szText = u"<color=255,255,255>" + self.szQuery + u"</color>" + szCursor
+			szText = self.oSearch.getText(self.szQuery, szCursor)
 		screen.setTextAt("TROSearchText", "TROSearchBG", u"<font=3>" + szText + u"</font>", CvUtil.FONT_LEFT_JUSTIFY, 10, 7, 0, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, BTN_SEARCH, -1)
 		screen.show("TROSearchText")
 
-	# the best completion of the typed text: a name that starts with it, the most used one first
+	# the completion of the typed text (WtpSearchComplete): a name that starts with it, the most used one first; Tab also offers the next
+	# one and names that have a word starting with the text
 	def findSuggestion(self):
-		self.szSuggestion = u""
-		szQuery = self.szQuery.lower()
-		if len(szQuery) == 0:
-			return
-		aMatches = []
-		for szLower in self.dCandidates.keys():
-			if szLower[:len(szQuery)] == szQuery and len(szLower) > len(szQuery):
-				aMatches.append((-self.dCandidates[szLower][1], szLower, self.dCandidates[szLower][0]))
-		if len(aMatches) > 0:
-			aMatches.sort()
-			self.szSuggestion = aMatches[0][2]
+		self.oSearch.find(self.szQuery, self.dCandidates)
+		self.szSuggestion = self.oSearch.szSuggestion
 
 	# which transports (and which of their routes) are shown
 	def applyFilters(self):
@@ -400,6 +394,7 @@ class CvTransportRoutesOverview:
 			screen.hide("TROInfo" + str(iSlot))
 			screen.hide("TROManual" + str(iSlot))
 			screen.hide("TROManualDone" + str(iSlot))
+			screen.hide("TROSelectAll" + str(iSlot))
 			screen.hide(self.getTableName(iSlot))
 		self.iUsedSlots = iShown
 
@@ -450,6 +445,16 @@ class CvTransportRoutesOverview:
 		else:
 			screen.hide(szManual)
 			screen.hide(szDone)
+		# below it: all listed routes for this transport (a second click takes the change back, as long as this screen is open)
+		szAll = "TROSelectAll" + str(iSlot)
+		if len(dTransport["routes"]) > 0:
+			szKey = "TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL"
+			if dTransport.get("selectUndo", None) is not None:
+				szKey = "TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL_UNDO"
+			screen.setButtonGFC(szAll, u"<font=2>" + localText.getText(szKey, ()) + u"</font>", "", iX + 56, self.HEAD_Y + 76, 170, 26, WidgetTypes.WIDGET_GENERAL, BTN_SELECT_ALL + iSlot, -1, ButtonStyles.BUTTON_STYLE_STANDARD)
+			screen.show(szAll)
+		else:
+			screen.hide(szAll)
 
 	def drawTable(self, iSlot, dTransport, iX):
 		screen = self.getScreen()
@@ -572,6 +577,9 @@ class CvTransportRoutesOverview:
 				elif iData >= BTN_MANUAL and iData < BTN_MANUAL + 100:
 					self.setManual(iData - BTN_MANUAL)
 					return 0
+				elif iData >= BTN_SELECT_ALL and iData < BTN_SELECT_ALL + 100:
+					self.selectAll(iData - BTN_SELECT_ALL)
+					return 0
 				elif iData >= BTN_UNIT and iData < BTN_UNIT + 100:
 					self.showOnMap(iData - BTN_UNIT)
 					return 0
@@ -604,9 +612,12 @@ class CvTransportRoutesOverview:
 				self.szQuery = self.szQuery[:-1]
 			bChanged = True
 		elif iKey in self.aKeyAccept:
-			if len(self.szSuggestion) > len(self.szQuery) and not self.bSearchSelected:
-				self.szQuery = self.szSuggestion
-				bChanged = True
+			if not self.bSearchSelected:
+				# (Tab goes through the alternatives, Enter and the right arrow only take the completion)
+				szNew = self.oSearch.accept(self.szQuery, iKey == self.getKeyId("KB_TAB"))
+				if szNew is not None:
+					self.szQuery = szNew
+					bChanged = True
 		if bChanged:
 			self.bSearchSelected = False
 			self.refresh()
@@ -629,11 +640,39 @@ class CvTransportRoutesOverview:
 		dTransport["frozenAuto"] = dTransport["auto"]
 		dTransport["frozenAssigned"] = self.getAssignedCount(dTransport)
 		dTransport["manualSet"] = True
+		dTransport["selectUndo"] = None
 		dTransport["auto"] = False
 		for iRoute in dTransport["assigned"].keys():
 			dTransport["assigned"][iRoute] = False
 			dTransport["original"][iRoute] = False
 		self.drawColumns()
+
+	# all routes that are listed in the column are assigned to the transport; a second click puts the routes back to what they were before (it is
+	# remembered only while this screen is open: the data of the transports is read again when it opens)
+	def selectAll(self, iSlot):
+		iIndex = self.iFirst + iSlot
+		if iIndex < 0 or iIndex >= len(self.aVisible):
+			return
+		dTransport = self.Transports[self.aVisible[iIndex]]
+		dUndo = dTransport.get("selectUndo", None)
+		if dUndo is not None:
+			for iRoute in dUndo.keys():
+				dTransport["assigned"][iRoute] = dUndo[iRoute]
+			dTransport["selectUndo"] = None
+		else:
+			dUndo = {}
+			for tRoute in self.aShownRoutes.get(iSlot, []):
+				iRoute = tRoute[4]
+				if dTransport["assigned"].has_key(iRoute) and not dTransport["assigned"][iRoute]:
+					dUndo[iRoute] = False
+					dTransport["assigned"][iRoute] = True
+			if len(dUndo) == 0:
+				return
+			dTransport["selectUndo"] = dUndo
+		dTransport["manualSet"] = False
+		iX = self.aColumnX[iSlot]
+		self.drawInfo(iSlot, dTransport, iX)
+		self.drawTable(iSlot, dTransport, iX)
 
 	# the popup that renames a transport (the same one as for the name suggestion, with the current name)
 	def renameTransport(self, iSlot):
