@@ -3931,6 +3931,11 @@ class CvMainInterface:
 				atTargets.append((iX, iY, ePlace))
 				continue
 			tTarget = None
+			# (a message of the mod with its place, e.g. a waypoint)
+			tModPlot = getattr(self, "dModMessagePlot", {}).get(szPlain.strip())
+			if tModPlot is not None:
+				atTargets.append((tModPlot[0], tModPlot[1], -1))
+				continue
 			for (szName, ePlayer, iPX, iPY) in aNatives:
 				if szName in szPlain:
 					tTarget = (iPX, iPY, ePlayer)
@@ -3947,11 +3952,6 @@ class CvMainInterface:
 
 	# the auto expand option of the message panel, kept in the script data of the player: [[WTPMSG:0]] / [[WTPMSG:1]] (on when nothing is saved)
 	def getMessageAutoExpand(self):
-			# (a message of the mod with its place, e.g. a waypoint)
-			tModPlot = getattr(self, "dModMessagePlot", {}).get(szPlain.strip())
-			if tModPlot is not None:
-				atTargets.append((tModPlot[0], tModPlot[1], -1))
-				continue
 		if self.bMessageAutoExpand is None:
 			self.bMessageAutoExpand = True
 			try:
@@ -4087,6 +4087,7 @@ class CvMainInterface:
 		screen.deleteWidget("HudMsgPanelBack2")
 		screen.hide("HudMsgHeader")
 		screen.hide("HudMsgAuto")
+		screen.hide("HudMsgWps")
 		screen.hide("HudMsgFooterMore")
 		screen.hide("HudMsgFooterPrevious")
 
@@ -4103,7 +4104,6 @@ class CvMainInterface:
 				self.bMessageTurnPending = True
 			if self.bMessageTurnPending and iNumCurrent > 0:
 				self.bMessageTurnPending = False
-		screen.hide("HudMsgWps")
 				self.bMessagePanelExpanded = self.getMessageAutoExpand()
 				self.bMessagePanelPrevious = False
 				self.iMessagePage = 0
@@ -4165,6 +4165,10 @@ class CvMainInterface:
 			# characters per line (measured: about 6.6 pixels per character at 22 pixels line distance)
 			iCharsPerLine = max(20, int((iWidth - 2 * iPad - iIndent) / (iLine * 0.32)))
 
+			if self.bMsgWpView:
+				self.drawMsgWaypointView(screen, aWpEntries, iX, iY, iWidth, iLine, iPad, iHeaderHeight, iGap, yRes)
+				return
+
 			aszMessages = []
 			aiX = []
 			aiY = []
@@ -4181,10 +4185,6 @@ class CvMainInterface:
 			atTargets = self.getMessageTargets(aszMessages, aiX, aiY)
 			self.aszMessageTexts = aszMessages
 			self.atMessageTargets = atTargets
-			if self.bMsgWpView:
-				self.drawMsgWaypointView(screen, aWpEntries, iX, iY, iWidth, iLine, iPad, iHeaderHeight, iGap, yRes)
-				return
-
 
 			# which messages: collapsed the newest ones that fit; expanded pages of the full height of the panel, the newest page
 			# first, a click on the footer shows the next older page (and after the last one the newest again)
@@ -4262,6 +4262,7 @@ class CvMainInterface:
 			self.dMessageCapitals = {}
 			self.dMessageLineIndex = {}
 			self.dMessageRects = {}
+			self.aMsgWpRects = []
 			self.tMsgPanelRect = (iX, iY, iWidth, iHeight)
 
 			# a denser background: the panel style is semi-transparent, several of them on top of each other are better to read
@@ -4278,7 +4279,6 @@ class CvMainInterface:
 				screen.moveToFront("HudMsgPanelBack2")
 			screen.addPanel("HudMsgPanel", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_PANEL, -1)
 			screen.show("HudMsgPanel")
-			self.aMsgWpRects = []
 			screen.moveToFront("HudMsgPanel")
 
 			szBullet = u"%c " % game.getSymbolID(FontSymbols.BULLET_CHAR)
@@ -4341,6 +4341,7 @@ class CvMainInterface:
 			screen.setText("HudMsgAuto", "Background", self.setFontSize(szAuto, -1), CvUtil.FONT_RIGHT_JUSTIFY, iX + iWidth - iPad, iY + iPad / 2, -0.3, FontTypes.SMALL_FONT, WidgetTypes.WIDGET_GENERAL, self.BUTTON_MESSAGE_AUTO, -1)
 			screen.show("HudMsgAuto")
 			screen.moveToFront("HudMsgAuto")
+			self.drawMsgWpToggle(screen, iX, iY, iPad)
 		except:
 			# the panel must never break the main interface
 			self.tMessagePanelKey = None
@@ -4357,7 +4358,6 @@ class CvMainInterface:
 			return False
 
 	def getMessagePickNames( self ):
-			self.drawMsgWpToggle(screen, iX, iY, iPad)
 		aszNames = ["HudMsgPickBack1", "HudMsgPickBack2"]
 		for i in range(self.iMsgPickLines):
 			aszNames.append("HudMsgPickLine%d" % i)
@@ -4365,6 +4365,14 @@ class CvMainInterface:
 
 	def hideMessagePick( self, screen ):
 		try:
+			if self.bMsgPickShown:
+				for szName in self.getMessagePickNames():
+					screen.hide(szName)
+					screen.deleteWidget(szName)
+		except:
+			pass
+		self.bMsgPickShown = False
+		self.iMsgPickLines = 0
 	# the time in seconds for the time out of the list of the waypoints: the clock of the tooltips (getTipNow of port/nested-tooltip; the clock of
 	# the game does not advance); 0 without it, then the list does not go back by itself
 	def getMsgWpNow( self ):
@@ -4566,15 +4574,6 @@ class CvMainInterface:
 		except:
 			return u""
 
-			if self.bMsgPickShown:
-				for szName in self.getMessagePickNames():
-					screen.hide(szName)
-					screen.deleteWidget(szName)
-		except:
-			pass
-		self.bMsgPickShown = False
-		self.iMsgPickLines = 0
-
 	def showMessagePick( self, screen, szText, iCursorY, bPreferLeft = False ):
 		try:
 			xRes = screen.getXResolution()
@@ -4629,22 +4628,6 @@ class CvMainInterface:
 	# every frame: the message line under the cursor, the shift key and the mouse wheel
 	def updateMessageScroll( self ):
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-		iMsg = -1
-		bAuto = False
-		if len(self.aszMessageLines) > 0 and self.tMsgPanelRect is not None:
-			iCX = gc.getGame().getCursorClientX()
-			iCY = gc.getGame().getCursorClientY()
-			if self.tMsgAutoRect is not None:
-				(iAX, iAY, iAW, iAH) = self.tMsgAutoRect
-				bAuto = (iCX >= iAX and iCX < iAX + iAW and iCY >= iAY and iCY < iAY + iAH)
-			for iIndex in self.dMessageRects.keys():
-				(iRX, iRY, iRW, iRH) = self.dMessageRects[iIndex]
-				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
-					iMsg = iIndex
-					break
-		aAll = []
-		if iMsg >= 0:
-			aAll = self.getMessagePediaAllTargets(iMsg)
 		# the list of the waypoints goes back to the collapsed standard view when something else is selected than when it was switched on (another
 		# unit or colony), or when what was selected is not selected any more (a selection made in a tooltip does not count)
 		if self.bMsgWpView:
@@ -4663,9 +4646,31 @@ class CvMainInterface:
 					self.updateMessagePanel()
 			except:
 				pass
-		bShift = False
+		iMsg = -1
 		iWp = -1
 		iWpCol = 0
+		bAuto = False
+		if len(self.aszMessageLines) > 0 and self.tMsgPanelRect is not None:
+			iCX = gc.getGame().getCursorClientX()
+			iCY = gc.getGame().getCursorClientY()
+			if self.tMsgAutoRect is not None:
+				(iAX, iAY, iAW, iAH) = self.tMsgAutoRect
+				bAuto = (iCX >= iAX and iCX < iAX + iAW and iCY >= iAY and iCY < iAY + iAH)
+			for iIndex in self.dMessageRects.keys():
+				(iRX, iRY, iRW, iRH) = self.dMessageRects[iIndex]
+				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
+					iMsg = iIndex
+					break
+			# (the list of the waypoints: the cell under the cursor)
+			for (iRX, iRY, iRW, iRH, iIndex, iColumn) in self.aMsgWpRects:
+				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
+					iWp = iIndex
+					iWpCol = iColumn
+					break
+		aAll = []
+		if iMsg >= 0:
+			aAll = self.getMessagePediaAllTargets(iMsg)
+		bShift = False
 		try:
 			bShift = CyInterface().shiftKey()
 		except:
@@ -4678,12 +4683,6 @@ class CvMainInterface:
 				gc.getGame().setWheelCapture(bWheel)
 			except:
 				pass
-			# (the list of the waypoints: the cell under the cursor)
-			for (iRX, iRY, iRW, iRH, iIndex, iColumn) in self.aMsgWpRects:
-				if iCX >= iRX and iCX < iRX + iRW and iCY >= iRY and iCY < iRY + iRH:
-					iWp = iIndex
-					iWpCol = iColumn
-					break
 		if bWheel:
 			iNotches = gc.getGame().takeWheelNotches()
 			if iNotches != 0:
@@ -4705,6 +4704,8 @@ class CvMainInterface:
 		if not bShow:
 			if bAuto:
 				szHelp = localText.getText("TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP", (self.iMsgX, self.iMsgY))
+			elif iWp >= 0:
+				szHelp = self.getMsgWaypointHelp(iWp)
 			elif iMsg >= 0:
 				szHelp = self.getMessagePediaHelp(iMsg)
 		tKey = (iMsg, iSel, bShow, szHelp, iWpCol)
@@ -4721,8 +4722,6 @@ class CvMainInterface:
 					szText += u"\n  <color=255,255,0,255>" + aAll[i][0] + u"</color>"
 				else:
 					szText += u"\n  " + aAll[i][0]
-			elif iWp >= 0:
-				szHelp = self.getMsgWaypointHelp(iWp)
 			self.showMessagePick(screen, szText, gc.getGame().getCursorClientY())
 		elif szHelp != u"":
 			# (the help of the left column on the left of the panel, the one of the right column on the right, as long as there is room)
