@@ -6429,7 +6429,7 @@ class CvMainInterface:
 		try:
 			if self.isPediaActive():
 				return False
-			if not (self.bTipFrozen or self.bCursorTipShown or self.szPendingHelp is not None):
+			if not (self.bTipFrozen or self.bCursorTipShown or self.szPendingHelp is not None or self.isTradeStackOpen()):
 				return False
 			if not self.bXHeld:
 				self.bXHeld = True
@@ -8945,6 +8945,13 @@ class CvMainInterface:
 		except:
 			self.bEscHoldDone = True
 
+	# an import / export window is open that was opened by a jump (there are windows stacked)
+	def isTradeStackOpen( self ):
+		try:
+			return self.isTradeWindowOpen() and len(self.aTradeReturn) > 0
+		except:
+			return False
+
 	def closeAllTradeWindows( self ):
 		tR = self.aTradeReturn[0]
 		self.aTradeReturn = []
@@ -9186,9 +9193,12 @@ class CvMainInterface:
 		self.updateAutoFreeze()
 		self.updateTradeTipSelect()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
-			# X held: all frozen windows are closed
+			# X held: all frozen windows are closed; with stacked import / export windows (jumps) all of them, like Esc held
 			self.bXHoldDone = True
-			self.unfreezeAllTips()
+			if self.isTradeStackOpen():
+				self.closeAllTradeWindows()
+			else:
+				self.unfreezeAllTips()
 		if self.bTipFrozen:
 			# a frozen window stays until Esc / X, but not into the city screen (except with the import / export window open there)
 			if (CyInterface().isCityScreenUp() and not self.isTradeWindowOpen()) or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL:
