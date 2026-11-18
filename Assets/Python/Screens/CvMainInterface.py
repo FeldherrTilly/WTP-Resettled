@@ -5839,8 +5839,34 @@ class CvMainInterface:
 		self.fWpStart = (self.getTipNow() / 1000.0)
 		self.unfreezeAllTips()
 
+	# the frozen tooltip of the unit that a right click selected from a stack, and the stack tooltip that it belongs to
+	def closeAutoSelWindows( self ):
+		try:
+			iFound = -1
+			for i in range(len(self.aFrozen)):
+				if self.aFrozen[i][0] == self.szAutoSelPrefix:
+					iFound = i
+					break
+			self.szAutoSelPrefix = u""
+			if iFound < 0:
+				return
+			iRoot = iFound
+			for k in range(10):
+				if self.aFrozen[iRoot][6] < 0:
+					break
+				iRoot = self.aFrozen[iRoot][6]
+			self.closeFrozenChild(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE), iRoot)
+		except:
+			pass
+
 	# called by the game for every order that the player gives to a group (CvEventManager.onSelectionGroupPushMission)
 	def onWaypointMission( self, eOwner, eMission ):
+		try:
+			if len(self.szAutoSelPrefix) > 0 and eOwner == gc.getGame().getActivePlayer():
+				# an order for the unit that was selected from a stack tooltip: the frozen tooltips of the stack go
+				self.closeAutoSelWindows()
+		except:
+			pass
 		try:
 			if self.iWpUnit < 0:
 				return
