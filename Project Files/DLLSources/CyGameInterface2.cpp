@@ -68,6 +68,8 @@ void CyGamePythonInterface2(python::class_<CyGame>& x)
 		.def("getReplayMessageColor", &CyGame::getReplayMessageColor)
 		.def("getReplayMessageText", &CyGame::getReplayMessageText)
 		.def("getNumReplayMessages", &CyGame::getNumReplayMessages)
+		.def("getCursorClientX", &CyGame::getCursorClientX, "int () - mouse x in the game window")
+		.def("getCursorClientY", &CyGame::getCursorClientY, "int () - mouse y in the game window")
 		.def("getReplayInfo", &CyGame::getReplayInfo, python::return_value_policy<python::manage_new_object>())
 		;
 }
