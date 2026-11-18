@@ -4181,10 +4181,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_YOU_UNITS_UNDER_ATTACK</Tag>
-		<English>Your forces are under attack by %s1_player!</English>
+		<English>[COLOR_WARNING_TEXT]Your forces are under attack by %s1_player![COLOR_REVERT]</English>
 		<Portuguese>Suas forças estão sob ataque de %s1_player!</Portuguese>
 		<French>Vos forces sont attaquées (%s1_player)!</French>
-		<German>Eure Truppen werden angegriffen (%s1_player)!</German>
+		<German>[COLOR_WARNING_TEXT]Eure Truppen werden angegriffen (%s1_player)![COLOR_REVERT]</German>
 		<Italian>Le tue forze sono sotto attacco (%s1_player)!</Italian>
 		<Spanish>Atacan a vuestras fuerzas (%s1_player).</Spanish>
 		<Russian>Наши войска атакованы %s1_player!</Russian>
@@ -4214,10 +4214,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_IMP_DESTROYED</Tag>
-		<English>A %s1_ImpName has been destroyed by a marauding [COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT] %s2_UnitName!</English>
+		<English>A %s1_ImpName [COLOR_WARNING_TEXT]has been destroyed[COLOR_REVERT] by a marauding [COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT] %s2_UnitName!</English>
 		<Portuguese>Um %s1_ImpName foi destruído por um saqueador [COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT] %s2_UnitName!</Portuguese>
 		<French>Destruction de [NUM1:un:une:des:des] %s1_ImpName - %s2_UnitName ([COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT]) !</French>
-		<German>Eine Modernisierung %s1_ImpName wurde zerstört - %s2_UnitName ([COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT])!</German>
+		<German>Eine Modernisierung %s1_ImpName [COLOR_WARNING_TEXT]wurde zerstört[COLOR_REVERT] - %s2_UnitName ([COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT])!</German>
 		<Italian>[NUM1:Un:Una] %s1_ImpName è [NUM1:stato sabotato:stata sabotata] - %s2_UnitName ([COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT])!</Italian>
 		<Spanish>[NUM1:Un:Una:Unos:Unas] %s1_ImpName [NUM1:ha sido destruido:ha sido destruida:han sido destruidos:han sido destruidas] - %s2_UnitName ([COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT]).</Spanish>
 		<Russian>%s1_ImpName уничтожена [COLOR_HIGHLIGHT_TEXT]%s3_civ_adjective[COLOR_REVERT] %s2_UnitName!</Russian>
@@ -12129,10 +12129,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_EVENT_CITY_IMPROVEMENT_DESTROYED</Tag>
-		<English>Your %s1_improvement has been destroyed</English>
+		<English>Your %s1_improvement [COLOR_WARNING_TEXT]has been destroyed[COLOR_REVERT]</English>
 		<Portuguese>Seu %s1_improvement foi destruído</Portuguese>
 		<French>Votre %s1_improvement a été détruit(e)</French>
-		<German>Eure Modernisierung %s1_improvement wurde zerstört</German>
+		<German>Eure Modernisierung %s1_improvement [COLOR_WARNING_TEXT]wurde zerstört[COLOR_REVERT]</German>
 		<Italian>[NUM1:Il tuo:La tua] %s1_improvement è [NUM1:stato distrutto:stata distrutta]</Italian>
 		<Spanish>[NUM1:Vuestro:Vuestra:Vuestros:Vuestras] %s1_improvement [NUM1:ha quedado destruido:ha quedado destruida:han quedado destruidos:han quedado destruidas]</Spanish>
 		<Russian>Ваше %s1_improvement было уничтожено</Russian>
@@ -12642,10 +12642,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_YOU_UNITS_UNDER_ATTACK_UNKNOWN</Tag>
-		<English>Your forces are under attack!</English>
+		<English>[COLOR_WARNING_TEXT]Your forces are under attack![COLOR_REVERT]</English>
 		<Portuguese>Suas forças estão sob ataque!</Portuguese>
 		<French>Vos troupes sont attaquées !</French>
-		<German>Eure Truppen werden angegriffen!</German>
+		<German>[COLOR_WARNING_TEXT]Eure Truppen werden angegriffen![COLOR_REVERT]</German>
 		<Italian>Le tue forze sono sotto attacco!</Italian>
 		<Spanish>Atacan a vuestras fuerzas.</Spanish>
 		<Russian>Ваши войска атакованы!</Russian>
@@ -13119,55 +13119,55 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_BL_BORN</Tag>
-		<English>The warriors stationed in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] look up to their lieutenant for his courage.</English>
+		<English>The warriors stationed in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] look up to their [COLOR_UNIT_TEXT]Brave Lieutenant[COLOR_REVERT] for his courage.</English>
 		<Portuguese>Os guerreiros estacionados em [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] admiram seu tenente por sua coragem.</Portuguese>
 		<French>Les guerriers en garnison à [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] admirent leur lieutenant pour sa bravoure.</French>
-		<German>Der unerschrockene Leutnant gilt den in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] stationierten Kämpfern als ein Vorbild an Tapferkeit und Manneszucht.</German>
+		<German>Ein [COLOR_UNIT_TEXT]Mutiger Leutnant[COLOR_REVERT] gilt den in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] stationierten Kämpfern als ein Vorbild an Tapferkeit und Manneszucht.</German>
 		<Russian>Воины в [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] уважают своего лейтенанта за его храбрость.</Russian>
 		<Hungarian>[COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] katonái felnéznek Hadnagyukra a bátorsága miatt.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_BL_BORN_SOMEWHERE</Tag>
-		<English>In a distant region, a young soldier is making a name for himself as a brave lieutenant.</English>
+		<English>In a distant region, a young soldier is making a name for himself as a [COLOR_UNIT_TEXT]Brave Lieutenant[COLOR_REVERT].</English>
 		<Portuguese>Em uma região distante, um jovem soldado está se destacando como um valente tenente.</Portuguese>
 		<French>Dans une région lointaine, un jeune soldat se distingue comme un lieutenant courageux. </French>
-		<German>In einer fernen Gegend macht ein junger Soldat als ein mutiger Leutnant von sich reden.</German>
+		<German>In einer fernen Gegend macht ein junger Soldat als [COLOR_UNIT_TEXT]Mutiger Leutnant[COLOR_REVERT] von sich reden.</German>
 		<Russian>В далеком крае молодой солдат стал известным храбрым лейтенантом.</Russian>
 		<Hungarian>Egy távoli vidéken egy fiatal katona bátor Hadnagyként szerez magának hírnevet.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_BL_BORN_FIELD</Tag>
-		<English>In the recent battle a young soldier fell upon his enemies like a wolf among the lambs. He is now known everywhere as a truly brave lieutenant.</English>
+		<English>In the recent battle a young soldier fell upon his enemies like a wolf among the lambs. He is now known everywhere as a truly [COLOR_UNIT_TEXT]Brave Lieutenant[COLOR_REVERT].</English>
 		<Portuguese>Na recente batalha, um jovem soldado caiu sobre seus inimigos como um lobo entre cordeiros. Ele agora é conhecido em todos os lugares como um tenente verdadeiramente corajoso.</Portuguese>
 		<French>Lors des derniers combats un jeune soldat s'est distingué par sa bravoure face à l'ennemi. Il est maintenant reconnu comme un lieutenant courageux. </French>
-		<German>In der jüngsten Schlacht fiel ein junger Soldat über seine Feinde her wie der Wolf über die Lämmer. Er gilt nun allerorten als mutiger Leutnant.</German>
+		<German>In der jüngsten Schlacht fiel ein junger Soldat über seine Feinde her wie der Wolf über die Lämmer. Er gilt nun allerorten als [COLOR_UNIT_TEXT]Mutiger Leutnant[COLOR_REVERT].</German>
 		<Russian>В недавнем сражении молодой воин бросался на своих врагов, как волк на ягнят. Теперь повсюду он известен как поистине храбрый лейтенант.</Russian>
 		<Hungarian>A legutóbbi csatában egy fiatal katona úgy esett neki ellenségeinek, mint farkas a bárányoknak. Most már mindenütt úgy ismerik, mint egy igazán bátor Hadnagyot.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_CC_BORN</Tag>
-		<English>The sailors stationed in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] respect their captain for his leadership and tactics.</English>
+		<English>The sailors stationed in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] respect their [COLOR_UNIT_TEXT]Able Captain[COLOR_REVERT] for his leadership and tactics.</English>
 		<Portuguese>Os marinheiros estacionados em [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] respeitam seu capitão por sua liderança e táticas.</Portuguese>
 		<French>Les marins rattachés à  [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] respectent leur capitaine pour son sens tactique et son commandement.</French>
-		<German>Der fähiger Seemann gilt den in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] stationierten Kämpfern als ein Vorbild an Fähigkeit und Schläue.</German>
+		<German>Ein [COLOR_UNIT_TEXT]Fähiger Kapitän[COLOR_REVERT] gilt den in [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] stationierten Kämpfern als ein Vorbild an Fähigkeit und Schläue.</German>
 		<Russian>Воины в [COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] уважают своего капитана за его умелое руководство и знания тактики.</Russian>
 		<Hungarian>[COLOR_SELECTED_TEXT]%s1_CityName[COLOR_REVERT] tengerészei tisztelik a Kapitányukat a vezetési és taktikái képességeiért.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_CC_BORN_SOMEWHERE</Tag>
-		<English>In a distant region, a young sailor is making a name for himself as a capable captain.</English>
+		<English>In a distant region, a young sailor is making a name for himself as an [COLOR_UNIT_TEXT]Able Captain[COLOR_REVERT].</English>
 		<Portuguese>Numa região distante, um jovem marinheiro está se destacando como um capitão competente.</Portuguese>
 		<French>Dans une région lointaine, un jeune marin se fait un nom comme capitaine capable. </French>
-		<German>In einer fernen Gegend macht ein junger Seeman als ein fähiger Kapitän von sich reden.</German>
+		<German>In einer fernen Gegend macht ein junger Seemann als [COLOR_UNIT_TEXT]Fähiger Kapitän[COLOR_REVERT] von sich reden.</German>
 		<Russian>Люди говорят, где-то далеко молодой моряк смог стать умелым капитаном.</Russian>
 		<Hungarian>Egy távoli vidéken egy fiatal tengerész tehetséges Kapitányként szerez magának hírnevet.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_CC_BORN_FIELD</Tag>
-		<English>In the recent sea battle a young captain cut through the enemy like a shark into a school of tuna. He is now known everywhere as a truly capable commander.</English>
+		<English>In the recent sea battle a young captain cut through the enemy like a shark into a school of tuna. He is now known everywhere as a truly [COLOR_UNIT_TEXT]Able Captain[COLOR_REVERT].</English>
 		<Portuguese>Na recente batalha naval, um jovem capitão liderou sua tripulação contra o inimigo como um tubarão contra um bando de atum. Ele agora é conhecido em todos os lugares como um comandante verdadeiramente capaz.</Portuguese>
 		<French>Lors de la dernière bataille navale un jeune capitaine a mené son équipage contre l'ennemi comme un requin dans un banc de thons. Il est reconnu de tous comme un commandant vraiment capable. </French>
-		<German>In der jüngsten Seeschlacht fiel ein junger Seemann und seine Mannschaft über seine Feinde her wie der Hai über Thunfische. Er gilt nun allerorten als wahrhaft fähiger Kapitän.</German>
+		<German>In der jüngsten Seeschlacht fiel ein junger Seemann und seine Mannschaft über seine Feinde her wie der Hai über Thunfische. Er gilt nun allerorten als [COLOR_UNIT_TEXT]Fähiger Kapitän[COLOR_REVERT].</German>
 		<Russian>В недавнем морском сражении молодой командер, искусно управляя своим кораблём, нанёс противнику серьёзный ушерб. Теперь повсюду его знают как действительно способного капитана.</Russian>
 		<Hungarian>A legutóbbi tengeri csatában egy fiatal kapitány úgy vezette legénységét az ellenség ellen, mint a vad cápa. Most már mindenütt úgy ismerik, mint igazán rátermett Parancsnokot.</Hungarian>
 	</TEXT>
@@ -14170,7 +14170,7 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_YOU_UNIT_WAS_DESTROYED_UNKNOWN</Tag>
-		<English>[COLOR_WARNING_TEXT]Bad news, Milord! [COLOR_REVERT]While defending, your [COLOR_UNIT_TEXT]%s1_UnitName[COLOR_REVERT] was destroyed by an enemy [COLOR_WARNING_TEXT]%s2_EnUName[COLOR_REVERT]!</English>
+		<English>[COLOR_WARNING_TEXT]Bad news, Milord! [COLOR_REVERT]While defending, your [COLOR_UNIT_TEXT]%s1_UnitName[COLOR_REVERT] [COLOR_WARNING_TEXT]was destroyed[COLOR_REVERT] by an enemy [COLOR_WARNING_TEXT]%s2_EnUName[COLOR_REVERT]!</English>
 		<Portuguese>[COLOR_WARNING_TEXT]Más notícias, Milorde! [COLOR_REVERT]Enquanto defendia, seu [COLOR_UNIT_TEXT]%s1_UnitName[COLOR_REVERT] foi destruído por um inimigo [COLOR_WARNING_TEXT]%s2_EnUName[COLOR_REVERT]!</Portuguese>
 		<French>En se défendant, [NUM1:votre:votre:vos:vos] %s1_UnitName a été [NUM1:détruit:détruite:détruits:détruites] par l'unité ennemie : %s2_EnUName !</French>
 		<German>[COLOR_WARNING_TEXT]Schlechte Nachrichten, Milord! [COLOR_REVERT]Eure Einheit [COLOR_UNIT_TEXT]%s1_UnitName[COLOR_REVERT] wurde von einer feindlichen Einheit [COLOR_WARNING_TEXT]%s2_EnUName[COLOR_REVERT] angegriffen und bei der Verteidigung vernichtet!</German>

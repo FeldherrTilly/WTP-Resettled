@@ -2023,4 +2023,14 @@
 		<DefineName>PIRATE_BARBARIAN_MOVES</DefineName>
 		<iDefineIntVal>7</iDefineIntVal>
 	</Define>
+	<!-- WTP: message panel of the turn (top center). 1 = the messages of the turn stay in a panel that is clicked to expand it, 0 = the game's own message area only -->
+	<Define>
+		<DefineName>MESSAGE_PANEL_ENABLED</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<!-- WTP: 1 = the game's own message area (fast, click-through) does not show the messages of the turn while the panel is on (they stay in the message log), 0 = it shows them as before -->
+	<Define>
+		<DefineName>MESSAGE_PANEL_HIDE_ENGINE_DISPLAY</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
 </Civ4Defines>

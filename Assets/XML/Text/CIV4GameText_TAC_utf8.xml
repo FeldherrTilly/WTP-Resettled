@@ -1336,21 +1336,21 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_ALMOST_NO_RAW</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]The stock of %F2_yield_icon is declining. We will soon have a problem with the production of %F3_yield_icon.</English>
+		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]The stock of %F2_yield_icon [COLOR_WARNING_TEXT]is declining[COLOR_REVERT]. We will soon have a problem with the production of %F3_yield_icon.</English>
 		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]O estoque de %F2_yield_icon está diminuindo. Em breve teremos um problema com a produção de %F3_yield_icon.</Portuguese>
 		<French>%s1_city est presque à cours de %F2_yield_icon et ne pourra en conséquence plus produire de %F3_yield_icon.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Es neigt sich der Lagervorrat an %F2_yield_icon. Bei der Herstellung von %F3_yield_icon werden wir bald ein Problem bekommen.</German>
+		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Es [COLOR_WARNING_TEXT]neigt sich[COLOR_REVERT] der Lagervorrat an %F2_yield_icon. Bei der Herstellung von %F3_yield_icon werden wir bald ein Problem bekommen.</German>
 		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Запас %F2_yield_icon снижается. Скоро у нас возникнут проблемы с производством %F3_yield_icon.</Russian>
 		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]%F2_yield_icon készlet csökken. %F3_yield_icon előállításával hamarosan gond lesz.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_NOT_ENOUGH_RAW</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]We could produce more %F3_yield_icon if we had more %F2_yield_icon available there.</English>
-		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Poderíamos produzir mais %F3_yield_icon se tivéssemos mais %F2_yield_icon disponível lá.</Portuguese>
+		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]We could produce more %F3_yield_icon [COLOR_RED]if we had more %F2_yield_icon available there.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Poderíamos produzir mais %F3_yield_icon [COLOR_RED]se tivéssemos mais %F2_yield_icon disponível lá.[COLOR_REVERT]</Portuguese>
 		<French>%s1_city est à cours de %F2_yield_icon et ne peut ainsi plus produire de %F3_yield_icon.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Wir könnten mehr %F3_yield_icon herstellen, stünde uns dort mehr %F2_yield_icon zur Verfügung.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Мы могли бы производить больше %F3_yield_icon, если бы у нас было больше %F2_yield_icon.</Russian>
-		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Több %F3_yield_icon-t tudnánk előállítani, ha több %F2_yield_icon állna rendelkezésre.</Hungarian>
+		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Wir könnten mehr %F3_yield_icon herstellen, [COLOR_RED]stünde uns dort mehr %F2_yield_icon zur Verfügung.[COLOR_REVERT]</German>
+		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Мы могли бы производить больше %F3_yield_icon, [COLOR_RED]если бы у нас было больше %F2_yield_icon.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Több %F3_yield_icon-t tudnánk előállítani, [COLOR_RED]ha több %F2_yield_icon állna rendelkezésre.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TRADE_WORLD_MAP_STRING</Tag>
@@ -1691,75 +1691,85 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_STUDENT_ALMOST_GRADUATED</Tag>
-		<English>%s2_city : A striving citizen will finish his education at the %s3_building in %d1_Num [NUM1:turn:turns].</English>
+		<English>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : A striving citizen will finish his education at the %s3_building in %d1_Num [NUM1:turn:turns].[COLOR_REVERT]</English>
 		<Portuguese>%s2_city: Um cidadão esforçado terminará seus estudos no %s3_building em %d1_Num [NUM1:turno:turnos].</Portuguese>
 		<French>%s2_city : Un étudiant va bientôt achever sa formation dans l'%s3_building : %d1_Num [NUM1:tour:tours].</French>
-		<German>%s2_city : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.</German>
+		<German>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.[COLOR_REVERT]</German>
 		<Russian>[COLOR_SELECTED_TEXT]%s2_city :[COLOR_REVERT] Способный горожанин закончит обучение в [COLOR_FONT_CREAM]%s3_building[COLOR_REVERT] через %d1_Num [NUM1:ход:хода].</Russian>
 		<Hungarian>%s2_city : Egy ügyes lakos %d1_Num [NUM1:kör:kör] múlva befejezi a városi %s3_building falai között a tanulmányait.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_EXPERT</Tag>
-		<English>A free colonist who has worked in his profession for many years now has enough knowledge to be considered an [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT].</English>
-		<Portuguese>Um colono livre que atua em sua profissão há muitos anos agora possui conhecimento suficiente para ser considerado um [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT].</Portuguese>
-		<French>Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour [COLOR_UNIT_TEXT]%s1_expert.[COLOR_REVERT].</French>
-		<German>Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT] zu gelten.</German>
-		<Russian>Свободный колонист, который долгое время работал по своей профессии, теперь получил достаточно знаний, чтобы считаться [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT].</Russian>
-		<Hungarian>Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy [COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT] legyen.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]A free colonist who has worked in his profession for many years now has enough knowledge to be considered an %s1_expert.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre que atua em sua profissão há muitos anos agora possui conhecimento suficiente para ser considerado um %s1_expert.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour %s1_expert.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als %s1_expert zu gelten.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]Свободный колонист, который долгое время работал по своей профессии, теперь получил достаточно знаний, чтобы считаться %s1_expert.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy %s1_expert legyen.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_EXPERT_IN_CITY</Tag>
-		<English>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]A free colonist who has worked in his profession for many years now knows enough to be considered an [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</English>
-		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Um colono livre que trabalhou em sua profissão por muitos anos agora sabe o suficiente para ser considerado um [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</Portuguese>
-		<French>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT] Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</French>
-		<German>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT] zu gelten.</German>
-		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Свободный колонист, долго трудившийся по своей профессии, теперь получил достаточно знаний, чтобы стать [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT].</Russian>
-		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy [COLOR_UNIT_TEXT]%s2_expert[COLOR_REVERT] legyen.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]%s1_city : A free colonist who has worked in his profession for many years now knows enough to be considered an %s2_expert.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : Um colono livre que trabalhou em sua profissão por muitos anos agora sabe o suficiente para ser considerado um %s2_expert.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]%s1_city :  Un colon libre avec de l'expérience dans sa profession a acquis assez de compétences pour être tenu pour %s2_expert.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]%s1_city : Ein Freier Kolonist, der lange in seinem Beruf gearbeitet hat, hat nun genug Wissen erlangt, um als %s2_expert zu gelten.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : Свободный колонист, долго трудившийся по своей профессии, теперь получил достаточно знаний, чтобы стать %s2_expert.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : Egy szabad telepes, aki sokáig dolgozott a szakmájában, már elég tudásra tett szert ahhoz, hogy %s2_expert legyen.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_FREE</Tag>
-		<English>An unfree colonist has earned his [COLOR_POSITIVE_TEXT]freedom[COLOR_REVERT] through hard work.</English>
-		<Portuguese>Um colono não-livre conquistou sua [COLOR_POSITIVE_TEXT]liberdade[COLOR_REVERT] através de trabalho duro.</Portuguese>
-		<French>Un colon sous servitude a gagné sa [COLOR_POSITIVE_TEXT]liberté[COLOR_REVERT] en travaillant dur.</French>
-		<German>Ein Unfreier hat sich durch harte Arbeit seine [COLOR_POSITIVE_TEXT]Freiheit[COLOR_REVERT] verdient.</German>
-		<Russian>Несвободный колонист тяжелым трудом заработал себе [COLOR_POSITIVE_TEXT]свободу[COLOR_REVERT].</Russian>
-		<Hungarian>Egy nem szabad lakos kemény munkával kiérdemelte a [COLOR_POSITIVE_TEXT]szabadságát[COLOR_REVERT].</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]An unfree colonist has earned his freedom through hard work.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono não-livre conquistou sua liberdade através de trabalho duro.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]Un colon sous servitude a gagné sa liberté en travaillant dur.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]Ein Unfreier hat sich durch harte Arbeit seine Freiheit verdient.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]Несвободный колонист тяжелым трудом заработал себе свободу.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]Egy nem szabad lakos kemény munkával kiérdemelte a szabadságát.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_FREE_IN_CITY</Tag>
-		<English>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]An unfree colonist has earned his freedom through hard work.</English>
-		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Um colono não-livre conquistou sua liberdade através do trabalho duro.</Portuguese>
-		<French>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT] Un colon sous servitude a gagné sa liberté en travaiilant dur.</French>
-		<German>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Ein Unfreier hat sich durch harte Arbeit seine Freiheit verdient.</German>
-		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Несвободный колонист добился освобождения своим упорным трудом.</Russian>
-		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]A nem szabad lakos kemény munkával kiérdemelte a szabadságát.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]%s1_city : An unfree colonist has earned his freedom through hard work.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]%s1_city : Um colono não-livre conquistou sua liberdade através do trabalho duro.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]%s1_city :  Un colon sous servitude a gagné sa liberté en travaiilant dur.[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]%s1_city : Ein Unfreier hat sich durch harte Arbeit seine Freiheit verdient.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : Несвободный колонист добился освобождения своим упорным трудом.[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : A nem szabad lakos kemény munkával kiérdemelte a szabadságát.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_ESCAPE</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]An unfree colonist has disappeared. We suspect he's fled into the wilderness.</English>
-		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Um colono não-livre desapareceu. Suspeitamos que ele fugiu para o deserto.</Portuguese>
-		<French>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT] Un captif a disparu. On soupçonne qu'il a fui dans la nature.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Ein Unfreier ist verschwunden. Man vermutet, dass er in die Wildnis geflohen ist.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Несвободный колонист сбежал из колонии! Срочно собрать поисковую партию, он не мог далеко уйти!</Russian>
-		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Eltűnt egy nem szabad telepes. A gyanú szerint a vadonba menekült.</Hungarian>
+		<English>[COLOR_RED]%s1_city : An unfree colonist has disappeared. We suspect he's fled into the wilderness.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_RED]%s1_city : Um colono não-livre desapareceu. Suspeitamos que ele fugiu para o deserto.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_RED]%s1_city :  Un captif a disparu. On soupçonne qu'il a fui dans la nature.[COLOR_REVERT]</French>
+		<German>[COLOR_RED]%s1_city : Ein Unfreier ist verschwunden. Man vermutet, dass er in die Wildnis geflohen ist.[COLOR_REVERT]</German>
+		<Russian>[COLOR_RED]%s1_city : Несвободный колонист сбежал из колонии! Срочно собрать поисковую партию, он не мог далеко уйти![COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_RED]%s1_city : Eltűnt egy nem szabad telepes. A gyanú szerint a vadonba menekült.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_REVOLT</Tag>
-		<English>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]An unfree colonist has revolted. We believe he's fled into the wilderness.</English>
-		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Um colono não-livre se revoltou. Acreditamos que ele fugiu para o deserto.</Portuguese>
-		<French>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT] Un captif s'est soulevé. On soupçonne qu'il a fui dans la nature.</French>
-		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Ein Unfreier hat revoltiert. Man vermutet, dass er in die Wildnis geflohen ist.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Несвободный колонист взбунтовался, где-то раздобыл оружие и сбежал из колонии! Все, кто свободен от работ, к оружию! Убьем негодяя!</Russian>
-		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Egy nem szabad telepes fellázadt. Úgy vélik, hogy a vadonba menekült.</Hungarian>
+		<English>[COLOR_RED]%s1_city : An unfree colonist has revolted. We believe he's fled into the wilderness.[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_RED]%s1_city : Um colono não-livre se revoltou. Acreditamos que ele fugiu para o deserto.[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_RED]%s1_city :  Un captif s'est soulevé. On soupçonne qu'il a fui dans la nature.[COLOR_REVERT]</French>
+		<German>[COLOR_RED]%s1_city : Ein Unfreier hat revoltiert. Man vermutet, dass er in die Wildnis geflohen ist.[COLOR_REVERT]</German>
+		<Russian>[COLOR_RED]%s1_city : Несвободный колонист взбунтовался, где-то раздобыл оружие и сбежал из колонии! Все, кто свободен от работ, к оружию! Убьем негодяя![COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_RED]%s1_city : Egy nem szabad telepes fellázadt. Úgy vélik, hogy a vadonba menekült.[COLOR_REVERT]</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_EXPAND</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to expand)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Aufklappen)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_COLLAPSE</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to collapse)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Zuklappen)[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
-		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</English>
-		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Portuguese>
-		<French>[COLOR_POSITIVE_TEXT]Un colon libre a gagné suffisamment d'expérience pour devenir [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</French>
-		<German>[COLOR_POSITIVE_TEXT]Ein Freier Kolonist hat im Kampf genug Erfahrung gesammelt, um jetzt als [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT][COLOR_POSITIVE_TEXT] zu gelten.[COLOR_REVERT]</German>
-		<Russian>[COLOR_POSITIVE_TEXT]Свободный колонист набрал в боях достаточно опыта, чтобы стать [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Russian>
-		<Hungarian>[COLOR_POSITIVE_TEXT]Egy szabad telepes elég tapasztalatot szerzett a harcok során ahhoz, hogy [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT] legyen.</Hungarian>
+		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a %s1_expert[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um %s1_expert[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_POSITIVE_TEXT]Un colon libre a gagné suffisamment d'expérience pour devenir %s1_expert[COLOR_REVERT]</French>
+		<German>[COLOR_POSITIVE_TEXT]Ein Freier Kolonist hat im Kampf genug Erfahrung gesammelt, um jetzt als %s1_expert zu gelten.[COLOR_REVERT]</German>
+		<Russian>[COLOR_POSITIVE_TEXT]Свободный колонист набрал в боях достаточно опыта, чтобы стать %s1_expert[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_POSITIVE_TEXT]Egy szabad telepes elég tapasztalatot szerzett a harcok során ahhoz, hogy %s1_expert legyen.[COLOR_REVERT]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_FREE_BY_MILITARY_SERVICE</Tag>
@@ -3332,5 +3342,135 @@
 		</Spanish>
 		<Russian>Испанским</Russian>
 		<Hungarian>Spanyol Királyi:Spanyol Királyi</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_SURPLUS_SOLD</Tag>
+		<English>%s1_city : Due to limited storage capacity a surplus was sold: %s2_yields for a total of %d3[ICON_GOLD].</English>
+		<German>%s1_city : Wegen begrenzter Lagerkapazität wurde ein Überschuss verkauft: %s2_yields für insgesamt %d3[ICON_GOLD].</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_SURPLUS_LOST</Tag>
+		<English>[COLOR_RED]%s1_city[COLOR_REVERT] : Lost due to limited storage capacity: %s2_yields</English>
+		<German>[COLOR_RED]%s1_city[COLOR_REVERT] : Wegen begrenzter Lagerkapazität verloren gegangen: %s2_yields</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_NO_RAW_AMOUNT</Tag>
+		<English>[COLOR_RED]%s1_city[COLOR_REVERT] : Production stopped, [COLOR_RED]%d4%F2_yield_icon per turn[COLOR_REVERT] missing to produce %F3_yield_icon</English>
+		<German>[COLOR_RED]%s1_city[COLOR_REVERT] : Produktion steht still, es fehlen [COLOR_RED]%d4%F2_yield_icon pro Runde[COLOR_REVERT] für die Produktion von %F3_yield_icon</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_MORE</Tag>
+		<English>[COLOR_FONT_CREAM]%d1_Num older messages: click to see them (page %d2_Num of %d3_Num)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]%d1_Num ältere Meldungen: Klick zum Anzeigen (Seite %d2_Num von %d3_Num)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS</Tag>
+		<English>[COLOR_FONT_CREAM]Show the messages of the previous turn[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen der vorherigen Runde anzeigen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_CURRENT</Tag>
+		<English>[COLOR_FONT_CREAM]Back to the messages of this turn[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Zurück zu den Meldungen dieser Runde[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS_HEADER</Tag>
+		<English>[COLOR_FONT_CREAM]Messages of the previous turn: %d1_Num[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Meldungen der vorherigen Runde: %d1_Num[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON</Tag>
+		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_OFF</Tag>
+		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Auto expand[COLOR_REVERT][NEWLINE]Click: the message panel opens expanded at the start of every turn (on) or stays collapsed (off).[NEWLINE]Move the panel: hold Ctrl and Shift and press W, A, S, D (two keys: diagonal).[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Strg und Umschalt gedrückt halten und W, A, S, D drücken (zwei Tasten: diagonal).[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_LAND</Tag>
+		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]land[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]Land[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_SEA</Tag>
+		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]sea[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]See[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_OFF</Tag>
+		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_EXPAND</Tag>
+		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num  (click to expand)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num  (Klick zum Ausklappen)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_COLLAPSE</Tag>
+		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num  (click to collapse)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num  (Klick zum Einklappen)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_EMPTY</Tag>
+		<English>[COLOR_FONT_CREAM]No waypoints set yet[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Noch keine Wegpunkte gesetzt[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_MORE</Tag>
+		<English>[COLOR_FONT_CREAM]More waypoints: click for the next page (%d1_Num of %d2_Num)[COLOR_REVERT]</English>
+		<German>[COLOR_FONT_CREAM]Weitere Wegpunkte: Klick für die nächste Seite (%d1_Num von %d2_Num)[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_LAND</Tag>
+		<English>waypoint of the land units</English>
+		<German>Wegpunkt der Landeinheiten</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_SEA</Tag>
+		<English>waypoint of the ships</English>
+		<German>Wegpunkt der Schiffe</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]%s1_Name[COLOR_REVERT] (%s2_Kind)[NEWLINE]Left click: show the place on the map[NEWLINE]Right click: rename[NEWLINE]Shift + right click: delete</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]%s1_Name[COLOR_REVERT] (%s2_Kind)[NEWLINE]Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: umbenennen[NEWLINE]Umschalt + Rechtsklick: löschen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
+		<English>Left click: show the place on the map[NEWLINE]Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_CONTACT_HELP</Tag>
+		<English>Left click: show the place on the map[NEWLINE]Right click: talk to [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: mit [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] sprechen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP2</Tag>
+		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_CONCEPT_WORDS</Tag>
+		<English>happi=CONCEPT_HAPPINESS_UNHAPPINESS;unhappi=CONCEPT_HAPPINESS_UNHAPPINESS;educat=CONCEPT_TRAINING;grow=CONCEPT_FOOD;well-fed=CONCEPT_FOOD;fed=CONCEPT_FOOD;famine=CONCEPT_FOOD;starv=CONCEPT_FOOD;healthy=CONCEPT_HEALTH;sick=CONCEPT_HEALTH;disease=CONCEPT_HEALTH;rebel=CONCEPT_REBEL_SENTIMENT;independence=CONCEPT_INDEPENDENCE_WAR;tax=CONCEPT_TAX_RATE;storm=CONCEPT_WINDS_AND_STORMS;hurricane=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;smuggl=CONCEPT_SMUGGLING;domestic=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;emigrat=CONCEPT_IMMIGRATION;immigrat=CONCEPT_IMMIGRATION;upkeep=CONCEPT_MILITARY_UPKEEP;monaster=CONCEPT_MONASTERIES;livestock=CONCEPT_CATTLE_OR_SHEEP_BREEDING;whal=CONCEPT_WHALING;storage=CONCEPT_NEW_STORAGE;specialist=CONCEPT_SPECIALISTS;founding father=CONCEPT_FATHERS;raid=CONCEPT_NATIVES;forced labo=CONCEPT_SLAVES;slave=CONCEPT_SLAVES;servant=CONCEPT_SLAVES</English>
+		<German>zufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;unzufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;glück=CONCEPT_HAPPINESS_UNHAPPINESS;bildung=CONCEPT_TRAINING;ausbildung=CONCEPT_TRAINING;wachs=CONCEPT_FOOD;wächst=CONCEPT_FOOD;ernährt=CONCEPT_FOOD;hungersnot=CONCEPT_FOOD;verhungert=CONCEPT_FOOD;gesund=CONCEPT_HEALTH;krank=CONCEPT_HEALTH;seuche=CONCEPT_HEALTH;rebell=CONCEPT_REBEL_SENTIMENT;unabhängigkeit=CONCEPT_INDEPENDENCE_WAR;steuer=CONCEPT_TAX_RATE;sturm=CONCEPT_WINDS_AND_STORMS;orkan=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;schmuggel=CONCEPT_SMUGGLING;binnen=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;auswander=CONCEPT_IMMIGRATION;unterhalt=CONCEPT_MILITARY_UPKEEP;kloster=CONCEPT_MONASTERIES;vieh=CONCEPT_CATTLE_OR_SHEEP_BREEDING;walfang=CONCEPT_WHALING;lager=CONCEPT_NEW_STORAGE;spezialist=CONCEPT_SPECIALISTS;gründervater=CONCEPT_FATHERS;überfall=CONCEPT_NATIVES;stoßtrupp=CONCEPT_NATIVES;eindringling=CONCEPT_NATIVES;zwangsarbeit=CONCEPT_SLAVES;sklav=CONCEPT_SLAVES;leibeigen=CONCEPT_SLAVES</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_LIST</Tag>
+		<English>[COLOR:140:255:40:255]All hits (Shift + mouse wheel: choose):[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Alle Treffer (Shift + Mausrad: auswählen):[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP_MORE</Tag>
+		<English>Shift + mouse wheel: choose among the %d1 hits</English>
+		<German>Shift + Mausrad: unter den %d1 Treffern auswählen</German>
 	</TEXT>
 </Civ4GameText>
