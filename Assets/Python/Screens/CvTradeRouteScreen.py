@@ -376,7 +376,6 @@ class CvTradeRouteScreen:
 		self.aYields = []
 		self.dData = {}
 		self.dBase = {} # good -> the settings as they were in the city when read / sent (what the window changed is dData against it)
-		self.bWheelOn = True # the wheel capture as the window set it
 		self.iFirst = 0
 		self.iVisible = 0
 		self.iYRes = 1440
@@ -1357,7 +1356,6 @@ class CvTradeRouteScreen:
 		self.updatePresetState() # (a preset none of whose goods is active any more goes off; drawing alone does not do it)
 		try:
 			CyGame().setWheelCapture(True)
-			self.bWheelOn = True
 		except:
 			pass
 		return 1
@@ -1380,9 +1378,7 @@ class CvTradeRouteScreen:
 		try:
 			if self.bFinished:
 				return
-			bOn = self.isCursorInside()
-			CyGame().setWheelCapture(bOn)
-			self.bWheelOn = bOn
+			CyGame().setWheelCapture(self.isCursorInside())
 		except:
 			pass
 
@@ -2370,10 +2366,9 @@ class CvTradeRouteScreen:
 					self.reloadFromCity()
 			if self.isTipWheel():
 				return 0 # (a tooltip takes the wheel with Shift)
-			bInside = self.isCursorInside()
-			if bInside != self.bWheelOn:
-				self.updateWheelCapture()
-			if not bInside:
+			# (every frame: whatever else switched the capture off meanwhile is corrected)
+			self.updateWheelCapture()
+			if not self.isCursorInside():
 				return 0
 			iNotches = CyGame().takeWheelNotches()
 			if iNotches == 0:

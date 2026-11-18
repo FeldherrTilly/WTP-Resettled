@@ -6047,7 +6047,7 @@ class CvMainInterface:
 
 	# a tooltip takes the wheel just now (the import / export window leaves it alone)
 	def isTipWheelActive( self ):
-		return self.bTipWheel or self.bTradeSel or self.bMsgWheel
+		return self.bTipWheel or self.bTradeSel or getattr(self, "bMsgWheel", False)
 
 	def clearTradeTipSelect( self, screen ):
 		try:
@@ -10537,7 +10537,7 @@ class CvMainInterface:
 		if bWheel != self.bMsgWheel:
 			self.bMsgWheel = bWheel
 			try:
-				self.setWheelCapture(bWheel)
+				gc.getGame().setWheelCapture(bWheel)
 			except:
 				pass
 		if bWheel:
