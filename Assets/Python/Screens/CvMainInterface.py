@@ -9,6 +9,7 @@
 
 from CvPythonExtensions import *
 import CvUtil
+import WtpColors
 import ScreenInput
 import CvScreenEnums
 # Achievements START
@@ -400,6 +401,19 @@ class CvMainInterface:
 	dFrozenDark = {} # frozen windows that are always drawn in the darker variant (the explanation of a folded line)
 	dFrozenCompanion = {} # frozen windows that belong to the frozen window below them (the explanation of a folded line): they close together
 	tSecondTipKey = None
+	tWpRenamePending = None # (number, sea) of a new waypoint: the window for its name opens in the next frame
+	fTipSelectAt = -100.0 # the time (seconds) of the last selection of a unit made in a tooltip
+	aTradeReturn = [] # the views the jumps from the tooltips of the import / export window started from (the last one is the one to go back to)
+	dTraderLines = {} # the lines of the traders in the tooltips: text without colors -> id of the city
+	dTraderWin = {} # frozen windows with such lines: prefix -> the good
+	iTradeTipYield = -1
+	szTradeTipText = u""
+	tPostJump = None # after a jump: the tooltip of the good is shown and frozen once the cursor is on its picture
+	bEscHeld = False
+	bEscHoldDone = False
+	fEscStart = 0.0
+	# the tab stops of the game text: 31 pixels for a line of 22 (see alignTabLines)
+	TAB_STOP = 31.0
 	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
 	iTipSelIdx = 0
 	bTipWheel = False
@@ -3607,7 +3621,7 @@ class CvMainInterface:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
-			if CyInterface().isCityScreenUp() or len(szHelp) == 0:
+			if (CyInterface().isCityScreenUp() and not (bWidget and self.isTradeIconHover())) or len(szHelp) == 0:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
@@ -3622,7 +3636,8 @@ class CvMainInterface:
 				return
 			# tooltip delay: a tooltip waits until the cursor has rested for the time of the option. Another text (the cursor has gone from one
 			# thing to the next) removes the tooltip that is shown and starts the time again
-			if self.iTipDelay != 0 and not bFromPending and (not self.bCursorTipShown or (szHelp != self.szCursorTipText and not self.bTipQuick)):
+			# (in the import / export window the tooltips come at once, whatever the delay is)
+			if self.iTipDelay != 0 and not bFromPending and not self.isCursorInTradeWindow() and (not self.bCursorTipShown or (szHelp != self.szCursorTipText and not self.bTipQuick)):
 				if self.bCursorTipShown:
 					self.hideCursorTooltip(screen)
 				if self.szPendingHelp is None:
@@ -3647,7 +3662,9 @@ class CvMainInterface:
 			aiPara = [] # the paragraph (text between two line breaks of the help) of every line: right click in the frozen window
 			aiIndent = [] # indent of continued rows of icons (pixels)
 			aszRaw = self.carryColors(self.stripCarries(szHelp).split(u"\n"))
-			aszParas = self.foldCityDetails(aszRaw)
+			aszParas = self.foldYieldDetails(aszRaw)
+			if aszParas is None:
+				aszParas = self.foldCityDetails(aszRaw)
 			self.tTipWp = None
 			if aszParas is None:
 				aszParas = self.foldUnitDetails(aszRaw)
@@ -3661,6 +3678,7 @@ class CvMainInterface:
 						self.tTipWp = tRowWp
 				except:
 					self.tTipWp = None
+			aszParas = self.alignTabLines(aszParas)
 			for iPara in range(len(aszParas)):
 				aszWrapped = self.wrapMessage(aszParas[iPara], iCharsPerLine, True)
 				aszLines += aszWrapped
@@ -4254,7 +4272,7 @@ class CvMainInterface:
 							if not gc.getYieldInfo(iYield).isIgnoredForStorageCapacity() and gc.getYieldInfo(iYield).isCargo():
 								iNet += pCity.calculateNetYield(iYield)
 						if iTotal * 10 >= iMax * 9 or iTotal + 5 * iNet >= iMax:
-							szStorage = u"<color=255,140,0,255>" + szStorage + u"</color>"
+							szStorage = u"<color=" + WtpColors.code(WtpColors.RAW_SCARCE) + u">" + szStorage + u"</color>"
 						aOut.append([szStorage, szForecast])
 					# the line of the stock in one line; red: no food or no lumber in the city
 					szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOLD", ())
@@ -4267,7 +4285,7 @@ class CvMainInterface:
 							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_WOOD", ())
 						else:
 							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOOD", ())
-						szLabel = u"<color=255,0,0,255>" + szLabel + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.RAW_MISSING) + u">" + szLabel + u"</color>"
 					# the goods of the list: exported ones golden yellow, imported ones in the color of the imports in the production line
 					aSeg = szPara.split(u", ")
 					for k in range(len(aSeg)):
@@ -4275,9 +4293,9 @@ class CvMainInterface:
 						for iYield in range(YieldTypes.NUM_YIELD_TYPES):
 							if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
 								if pCity.isImport(iYield):
-									szColor = u"255,200,110,255"
+									szColor = WtpColors.code(WtpColors.IMPORT)
 								elif pCity.isExport(iYield):
-									szColor = u"255,240,0,255"
+									szColor = WtpColors.code(WtpColors.EXPORT)
 								break
 						if szColor is not None:
 							aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
@@ -4290,11 +4308,11 @@ class CvMainInterface:
 					szLabel = localText.getText("TXT_KEY_WTP_TIP_PRODUCED_FOLD", ())
 					(iState, aMissing, aNeed, aSet) = self.getCityProductionState(pCity)
 					if iState == 2:
-						szLabel = u"<color=255,0,0,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_MISSING", ()) + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.RAW_MISSING) + u">" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_MISSING", ()) + u"</color>"
 					elif iState == 1:
-						szLabel = u"<color=255,140,0,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", ()) + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.RAW_SCARCE) + u">" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", ()) + u"</color>"
 					elif iState == 3:
-						szLabel = u"<color=255,200,110,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", ()) + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.IMPORT) + u">" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", ()) + u"</color>"
 					if iState > 0:
 						# the affected goods in the list: red (missing) before orange (imports); the same goods: red
 						aSeg = szPara.split(u", ")
@@ -4302,13 +4320,13 @@ class CvMainInterface:
 							szColor = None
 							for iYield in aSet:
 								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
-									szColor = u"255,200,110,255"
+									szColor = WtpColors.code(WtpColors.IMPORT)
 							for iYield in aNeed:
 								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
-									szColor = u"255,140,0,255"
+									szColor = WtpColors.code(WtpColors.RAW_SCARCE)
 							for iYield in aMissing:
 								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
-									szColor = u"255,0,0,255"
+									szColor = WtpColors.code(WtpColors.RAW_MISSING)
 							if szColor is not None:
 								aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
 						szPara = u", ".join(aSeg)
@@ -4338,7 +4356,12 @@ class CvMainInterface:
 		tRect = self.getTipAvoidRect(iCursorX, iCursorY)
 		if tRect is not None:
 			iX = tRect[0] + tRect[2] + 12
-			if iX + iWidth > xRes - 4:
+			if self.isTradeIconHover():
+				# the goods of the import / export window: the tooltip opens left of the window (the pictures are at its left edge)
+				iX = tRect[0] - 12 - iWidth
+				if iX < 4:
+					iX = tRect[0] + tRect[2] + 12
+			elif iX + iWidth > xRes - 4:
 				iX = tRect[0] - 12 - iWidth
 		else:
 			iX = iCursorX + iGap
@@ -4346,6 +4369,38 @@ class CvMainInterface:
 				iX = iCursorX - int(iGap * 0.6) - iWidth
 		iX = max(4, iX)
 		iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
+		if tRect is not None and self.isTradeIconHover():
+			# the picture of a good: the tooltip stands left of it, its middle at the height of the middle of the picture
+			try:
+				tWin = CvScreensInterface.tradeRouteScreen
+				tCenter = tWin.getIconCenter(tWin.getIconYieldAt(iCursorX, iCursorY))
+				if tCenter is not None:
+					iY = max(4, min(yRes - iHeight - 4, tCenter[1] - iHeight / 2))
+			except:
+				pass
+		if len(self.aFrozen) > 0 and tRect is not None:
+			# beside a window of the mod (import / export window): not over a frozen tooltip, not over the window; the other side of the window
+			# and above / below the frozen ones if it is not free
+			iLeftX = tRect[0] - 12 - iWidth
+			iRightX = tRect[0] + tRect[2] + 12
+			iStep = iHeight + 6
+			aCands = []
+			# the heights that are closest to the wanted one first: right above / below the frozen windows (not a whole window height away)
+			aYs = [iY]
+			for tFz in self.aFrozen:
+				try:
+					aYs.append(tFz[1][1] - iHeight - 6)
+					aYs.append(tFz[1][1] + tFz[1][3] + 6)
+				except:
+					pass
+			aYs = [max(4, min(yRes - iHeight - 4, iOneY)) for iOneY in aYs]
+			aYs.sort(lambda a, b: cmp(abs(a - iY), abs(b - iY)))
+			for iSideX in (iX, iLeftX, iRightX):
+				for iOneY in aYs:
+					aCands.append((iSideX, iOneY))
+				for iShift in (1, -1, 2, -2):
+					aCands.append((iSideX, iY + iShift * iStep))
+			(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, [tRect])
 		if len(self.aFrozen) > 0 and tRect is None:
 			# it does not cover a frozen window: the other side of the cursor, then below and above the cursor
 			iRight = iCursorX + iGap
@@ -4507,6 +4562,8 @@ class CvMainInterface:
 	def showModMessage( self, szText, szSound = None, tPlot = None ):
 		if szSound is None:
 			szSound = self.szModMessageSound
+		if tPlot is not None:
+			self.dModMessagePlot[re.sub(u"<[^>]*>", u"", szText).strip()] = tPlot
 		szYellow = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szText) + u"</color>"
 		bPanel = False
 		try:
@@ -4516,8 +4573,6 @@ class CvMainInterface:
 		except:
 			pass
 		if not bPanel:
-		if tPlot is not None:
-			self.dModMessagePlot[re.sub(u"<[^>]*>", u"", szText).strip()] = tPlot
 			try:
 				CyInterface().addImmediateMessage(szYellow, "")
 			except:
@@ -4642,11 +4697,6 @@ class CvMainInterface:
 				if aWp[k][0] == iId:
 					iAt = k
 			if iAt < 0:
-	# the window to rename a waypoint was closed: the time out of the list of the message panel runs again
-	def onWaypointRenameClosed( self ):
-		self.bMsgWpRename = False
-		self.fMsgWpSeen = (self.getTipNow() / 1000.0)
-
 				bSea = True
 				(aWp, iNext) = self.getWaypoints(ePlayer, True)
 				for k in range(len(aWp)):
@@ -4684,7 +4734,6 @@ class CvMainInterface:
 			self.refreshWaypointLists()
 		except:
 			pass
-
 	# the waypoint that is chosen (the line under the cursor of a list, or the line of the list that the wheel has chosen on the line "Set
 	# waypoint..."): the camera looks at its plot; the unit stays selected; the frozen window of the line goes there as well (it keeps its distance)
 	def jumpToSelectedWaypoint( self, iFz, iPara, iSel, bWpLine, aWpStops, bWpRow, iRowChild, aChildKeys ):
@@ -4791,6 +4840,9 @@ class CvMainInterface:
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			iLevel = iData / 1000
 			iPara = iData % 1000
+			# a line of a colony in the tooltip of a good of the import / export window: the jump to it
+			if self.tryTraderJump(iLevel, iPara):
+				return
 			# a window with waypoints: the left click on the line of a waypoint jumps to it (the update of the frozen windows knows which one is chosen);
 			# when it is no waypoint (the line "Set waypoint..."), the click does what it always did
 			if iLevel >= 0 and iLevel < len(self.aFrozen) and self.dWpWin.has_key(self.aFrozen[iLevel][0]):
@@ -4822,6 +4874,12 @@ class CvMainInterface:
 	# the frozen lists of waypoints are written again after a waypoint was deleted or renamed (they stay where they are, their size follows)
 	def refreshWaypointLists( self ):
 		try:
+			if self.bMsgWpView:
+				self.tMessagePanelKey = None
+				self.updateMessagePanel()
+		except:
+			pass
+		try:
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			for i in range(len(self.aFrozen)):
 				szPrefix = self.aFrozen[i][0]
@@ -4830,12 +4888,6 @@ class CvMainInterface:
 					continue
 				aView = self.getWaypointView(tWp["sea"])
 				iStart = 0
-		try:
-			if self.bMsgWpView:
-				self.tMessagePanelKey = None
-				self.updateMessagePanel()
-		except:
-			pass
 				if not ("new" in tWp["paras"].values()):
 					# (a later page of the list: it begins with the first waypoint that it has)
 					for iP in tWp["paras"].keys():
@@ -5173,6 +5225,7 @@ class CvMainInterface:
 					else:
 						# (first choice: start)
 						CyInterface().selectUnit(pUnit, True, False, False)
+						self.markTipSelection()
 						self.unfreezeAllTips()
 						self.sendUnitToPlot(pUnit, aWp[k][1], aWp[k][2])
 					break
@@ -5191,16 +5244,18 @@ class CvMainInterface:
 			except:
 				pass
 
+	# a unit was selected in a tooltip: for a moment the selection does not count as a change (the list of the waypoints of the message panel
+	# stays open, see updateMessageScroll)
+	def markTipSelection( self ):
+		self.fTipSelectAt = (self.getTipNow() / 1000.0)
+
 	# "New waypoint": the unit is selected, the target of its next order to move is saved (for one minute)
 	def startWaypointMode( self, pUnit ):
 		CyInterface().selectUnit(pUnit, True, False, False)
+		self.markTipSelection()
 		self.iWpUnit = pUnit.getID()
 		self.fWpStart = (self.getTipNow() / 1000.0)
 		self.unfreezeAllTips()
-		try:
-			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_MODE", (pUnit.getName(),)))
-		except:
-			pass
 
 	# called by the game for every order that the player gives to a group (CvEventManager.onSelectionGroupPushMission)
 	def onWaypointMission( self, eOwner, eMission ):
@@ -5226,8 +5281,25 @@ class CvMainInterface:
 			aWp.append((iNext, pPlot.getX(), pPlot.getY(), self.getWaypointLabel(pPlot)))
 			self.saveWaypoints(aWp, iNext, -1, bSea)
 			self.showModMessage(localText.getText("TXT_KEY_WTP_WAYPOINT_SAVED", (self.getWaypointTextById(bSea, iNext),)), None, (pPlot.getX(), pPlot.getY()))
+			# the name is always asked for (the window of the rename with the suggested name, only OK); not for an own colony: its name is fixed.
+			# The window opens in the next frame (see updatePendingWpRename), not in the middle of the order of the game
+			if self.getOwnColonyAt(pPlot.getX(), pPlot.getY()) is None:
+				self.tWpRenamePending = (iNext, bSea)
 		except:
 			self.iWpUnit = -1
+
+	# the window to name a new waypoint (the rename window with the suggested name: OK takes it, or the player changes it first)
+	def updatePendingWpRename( self ):
+		if self.tWpRenamePending is None:
+			return
+		(iId, bSea) = self.tWpRenamePending
+		self.tWpRenamePending = None
+		try:
+			szText = self.getWaypointTextById(bSea, iId)
+			if len(szText) > 0:
+				CvEventInterface.beginEvent(CvUtil.EventRenameWaypoint, (iId, szText))
+		except:
+			pass
 
 	def getOverflowForecastText( self, pCity ):
 		# the goods that the storage overflow (or the sale threshold of a custom house) takes at the next turn change, and the gold of their sale:
@@ -5266,6 +5338,9 @@ class CvMainInterface:
 		screen.addPanel(szPrefix + "Back2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		# over an element of the HUD (the panel style is semi-transparent) one more layer, as the expanded message panel has
 		bOverHud = self.isTipOverHud(screen, iX, iY, iWidth, iHeight)
+		if self.isTradeWindowOpen():
+			# (with the import / export window open all tooltips are the darker variant)
+			bDark = True
 		if bDark:
 			# (the darker variant, as over an element of the HUD, wherever the window is)
 			bOverHud = True
@@ -5387,6 +5462,20 @@ class CvMainInterface:
 	def windowActivated( self ):
 		if len(self.aFrozen) > 0:
 			self.iRedrawFrozen = 6
+		# the import / export window open in the city screen: after alt-tab the city is not drawn again (the redraw is blocked while the
+		# window is on this screen); the window is closed, the city can be drawn and the window is opened again with its state
+		try:
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.isHostMain() and (CyInterface().isCityScreenUp() and not tWin.isFromMap() or not CyInterface().isCityScreenUp()):
+				# (on the map the window is opened again on the map: the HUD is hidden and the window not drawn after the alt-tab otherwise)
+				self.tReopenTrade = tWin.getState()
+				self.tReopenTrade["map"] = not CyInterface().isCityScreenUp()
+				self.iReopenWait = 4
+				tWin.finish(False, -1, True)
+				CyInterface().setDirty(InterfaceDirtyBits.CityScreen_DIRTY_BIT, True)
+				CyInterface().setDirty(InterfaceDirtyBits.Domestic_Advisor_DIRTY_BIT, True)
+		except:
+			pass
 
 	def redrawFrozenTips( self, screen ):
 		try:
@@ -5586,6 +5675,9 @@ class CvMainInterface:
 			(tFLayout, aiFIndent) = self.removeFreezeHint(self.tTipLayout, self.aiTipIndent, self.iTipHintLines)
 			(tLayout, aiIndent) = self.addFrozenHint(screen, tFLayout, aiFIndent)
 			self.addFrozenWindow(screen, tLayout, self.aszTipParas, aiIndent, dict(self.dTipDetails), self.makeAnchor(tLayout))
+			if self.iTradeTipYield >= 0 and self.szCursorTipText == self.szTradeTipText:
+				# (the tooltip of a good of the import / export window: its lines of colonies can be clicked)
+				self.dTraderWin[self.aFrozen[-1][0]] = self.iTradeTipYield
 			try:
 				# the tooltip of an own unit: the line "Set waypoint..."
 				iNew = len(self.aFrozen) - 1
@@ -5815,8 +5907,12 @@ class CvMainInterface:
 			self.iPreviewFreezeLines = len(aszFreeze)
 			iWidth = self.getTipTextWidth(aszLines, iChar, iMaxWidth, iPad)
 			iHeight = len(aszLines) * iLine + 2 * iPad
+			# goods tooltips of the import/export window: the child windows always open to the left of the parent as long as there is room
+			bLeft = self.isTradeWindowOpen()
 			iX = iFX + iFW + 12
-			if iX + iWidth > xRes - 4:
+			if bLeft and iFX - 12 - iWidth >= 4:
+				iX = iFX - 12 - iWidth
+			elif iX + iWidth > xRes - 4:
 				iX = iFX - 12 - iWidth
 			iX = max(4, iX)
 			iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
@@ -5831,7 +5927,7 @@ class CvMainInterface:
 			if tStack is not None:
 				(iX, iY) = tStack
 			else:
-				(iX, iY) = self.pickFreeSpot([(iX, iY), (iRight, iY), (iLeft, iY), (iRight, iFY), (iLeft, iFY), (iRight, iFY + iFH - iHeight), (iLeft, iFY + iFH - iHeight), (iFX, iFY + iFH + 12), (iFX, iFY - 12 - iHeight)], iWidth, iHeight, xRes, yRes)
+				(iX, iY) = self.pickFreeSpot([(iX, iY), (iLeft, iY), (iRight, iY), (iLeft, iFY), (iRight, iFY), (iLeft, iFY + iFH - iHeight), (iRight, iFY + iFH - iHeight), (iFX, iFY + iFH + 12), (iFX, iFY - 12 - iHeight)], iWidth, iHeight, xRes, yRes)
 			self.tPreviewLayout = (iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine)
 			self.iPreviewParent = iParent
 			self.aszPreviewParas = aszParas
@@ -5845,12 +5941,12 @@ class CvMainInterface:
 	# (text of the label, color, text that explains it)
 	def getFoldGroups( self ):
 		return [
-			[("TXT_KEY_WTP_TIP_STORED_WOOD", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_WOOD"),
-			("TXT_KEY_WTP_TIP_STORED_FOOD", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_FOOD"),
-			("TXT_KEY_WTP_TIP_STORED_BOTH", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_BOTH")],
-			[("TXT_KEY_WTP_TIP_PRODUCED_MISSING", u"255,0,0,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"),
-			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", u"255,140,0,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"),
-			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", u"255,200,110,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET")]
+			[("TXT_KEY_WTP_TIP_STORED_WOOD", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_STORED_LEGEND_WOOD"),
+			("TXT_KEY_WTP_TIP_STORED_FOOD", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_STORED_LEGEND_FOOD"),
+			("TXT_KEY_WTP_TIP_STORED_BOTH", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_STORED_LEGEND_BOTH")],
+			[("TXT_KEY_WTP_TIP_PRODUCED_MISSING", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"),
+			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", WtpColors.code(WtpColors.RAW_SCARCE), "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"),
+			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", WtpColors.code(WtpColors.IMPORT), "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET")]
 		]
 
 	# the text of the window that explains the colored labels of the folded line "Stored..." or "Produced..." (all colored states of that line,
@@ -6337,10 +6433,10 @@ class CvMainInterface:
 		try:
 			if iKind == 0:
 				szLegend = localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ())
-				aColors = [u"255,240,0,255", u"255,200,110,255"]
+				aColors = [WtpColors.code(WtpColors.EXPORT), WtpColors.code(WtpColors.IMPORT)]
 			else:
 				szLegend = localText.getText("TXT_KEY_WTP_TIP_PRODUCED_COLORS", ())
-				aColors = [u"255,0,0,255", u"255,140,0,255", u"255,200,110,255"]
+				aColors = [WtpColors.code(WtpColors.RAW_MISSING), WtpColors.code(WtpColors.RAW_SCARCE), WtpColors.code(WtpColors.IMPORT)]
 			aLegend = szLegend.split(u"\n")
 			aGoods = []
 			for i in range(len(aColors)):
@@ -6379,7 +6475,7 @@ class CvMainInterface:
 	def getMarkedGoodTypes( self, aszParas ):
 		aTypes = []
 		try:
-			aMarks = [u"255,240,0,255", u"255,200,110,255", u"255,0,0,255", u"255,140,0,255"]
+			aMarks = [WtpColors.code(WtpColors.EXPORT), WtpColors.code(WtpColors.IMPORT), WtpColors.code(WtpColors.RAW_MISSING), WtpColors.code(WtpColors.RAW_SCARCE)]
 			for szPara in aszParas:
 				for szSeg in szPara.split(u", "):
 					mColor = re.search(u"<color=(\\d+,\\d+,\\d+,\\d+)>", szSeg)
@@ -7089,6 +7185,7 @@ class CvMainInterface:
 			CyInterface().clearSelectionList()
 			for pUnit in aUnits:
 				CyInterface().selectUnit(pUnit, False, False, False)
+			self.markTipSelection()
 			self.unfreezeAllTips()
 			return True
 		except:
@@ -7126,6 +7223,16 @@ class CvMainInterface:
 			tKindHit = self.dFrozenKind.get(self.aFrozen[iLevel][0])
 			if tKindHit is not None and tKindHit[0] == "list" and iPara >= 0 and iPara < len(aszParas):
 				if self.openGoodsTradeWindow(iLevel, aszParas, tKindHit[1]):
+					return
+			# the same on the line "Stored..." / "Producing..." of the city tooltip itself (as if the right click was made in its child window)
+			if tKindHit is None and iPara >= 0 and self.aFrozen[iLevel][4].has_key(iPara):
+				aChild = self.carryColors(self.aFrozen[iLevel][4][iPara].split(u"\n"))
+				iChildKind = -1
+				if self.isStoredGoodsWindow(aChild):
+					iChildKind = 0
+				elif self.isStoredGoodsWindow(aChild, "TXT_KEY_CITY_BAR_PRODUCING"):
+					iChildKind = 1
+				if iChildKind >= 0 and self.openGoodsTradeWindow(iLevel, aChild, iChildKind):
 					return
 			if iPara >= 0 and iPara < len(aszParas):
 				(aszCmd, iCmd) = self.getCommandParas(iLevel, aszParas, iPara)
@@ -7204,6 +7311,7 @@ class CvMainInterface:
 							self.openPediaTargetIndex(aTargets, 0)
 					else:
 						CyInterface().selectUnit(pSelect, True, False, False)
+						self.markTipSelection()
 						self.unfreezeAllTips()
 						return
 				elif eTalk >= 0:
@@ -7344,6 +7452,13 @@ class CvMainInterface:
 				# (log: after a click on a unit the game reports the contact help of the score table although the cursor is on the map)
 				return
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD) and self.isTradeWindowOpen():
+				if self.isYieldTipFrozen(CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())):
+					# (the tooltip of this good is frozen: no second one as long as it is; the one of the good before goes away too)
+					screen.setHelpTextString(u"")
+					if self.bCursorTipShown or self.szPendingHelp is not None:
+						self.hideCursorTooltip(screen)
+					return
 			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD):
 				szText = self.addRawNote(szText)
 			if szText and len(szText) > 0:
@@ -7364,19 +7479,392 @@ class CvMainInterface:
 		except:
 			pass
 
+	# is there a frozen tooltip of this good (import / export window)?
+	def isYieldTipFrozen( self, iYield ):
+		if iYield < 0:
+			return False
+		for tFz in self.aFrozen:
+			if self.dTraderWin.get(tFz[0], -1) == iYield:
+				return True
+		return False
+
+	# THE TOOLTIP OF A GOOD: the lines of the ports (Europe, Africa, Port Royal: prices) are one line "Value..." under the name of the good, the
+	# ports are in its child tooltip. Returns the paragraphs (self.dTipDetails set) or None if the text is no tooltip of a good with such lines.
+	def foldYieldDetails( self, aszParas ):
+		try:
+			if len(aszParas) < 3:
+				return None
+			if not hasattr(self, "aszYieldNames"):
+				self.aszYieldNames = {}
+				for iYield in range(YieldTypes.NUM_YIELD_TYPES):
+					self.aszYieldNames[self.normTipText(gc.getYieldInfo(iYield).getDescription())] = True
+			if not self.aszYieldNames.has_key(self.normTipText(aszParas[0])):
+				return None
+			iFirst = -1
+			iLast = -1
+			for i in range(1, len(aszParas)):
+				if self.dTraderLines.has_key(self.normTipText(aszParas[i])):
+					# (the cities that import / export the good are not prices)
+					if iFirst >= 0:
+						break
+					continue
+				if re.search(u"(?i)\\t|<tab>", aszParas[i]) is not None and re.sub(u"(?i)<[^>]*>|\\t", u"", aszParas[i]).strip() != u"":
+					if iFirst < 0:
+						iFirst = i
+					iLast = i
+				elif iFirst >= 0:
+					break
+			if iFirst < 0 or iLast - iFirst < 1:
+				return None
+			self.dTipDetails = {}
+			aLines = self.alignTabLines(list(aszParas[iFirst:iLast + 1]))
+			aNew = list(aszParas[:iFirst]) + [localText.getText("TXT_KEY_WTP_TIP_VALUE_FOLD", ())] + list(aszParas[iLast + 1:])
+			self.dTipDetails[iFirst] = u"\n".join(aLines)
+			return aNew
+		except:
+			self.dTipDetails = {}
+			return None
+
+	# (the blanks to put behind a text of the width fW, the number of tab stops it has passed then)
+	def getTabGuard( self, fW ):
+		fSpace = 3.98
+		iBlanks = 0
+		while iBlanks < 6:
+			fFrac = (fW + iBlanks * fSpace) % self.TAB_STOP
+			if fFrac >= 8.0 and fFrac <= self.TAB_STOP - 8.0:
+				break
+			iBlanks += 1
+		return (iBlanks, int((fW + iBlanks * fSpace) / self.TAB_STOP))
+
+	# lines in a row with a name, tabs and then text: the text of all of them starts at the same stop
+	def alignTabLines( self, aszParas ):
+		try:
+			aRuns = []
+			for szPara in aszParas:
+				mTab = re.match(u"(?is)^(.*?)((?:\\t| |<tab>)*(?:\\t|<tab>)(?:\\t| |<tab>)*)(\\S.*)$", szPara)
+				if mTab is None or mTab.group(1).strip() == u"":
+					aRuns.append(None)
+					continue
+				aRuns.append(mTab)
+			aNew = list(aszParas)
+			i = 0
+			while i < len(aszParas):
+				if aRuns[i] is None:
+					i += 1
+					continue
+				j = i
+				while j < len(aszParas) and aRuns[j] is not None:
+					j += 1
+				if j - i >= 2:
+					aEnds = []
+					aWidths = []
+					for k in range(i, j):
+						fW = self.getTextPixels(re.sub(u"<[^>]*>", u"", aRuns[k].group(1)), 22.0)
+						(iBlanks, iPassed) = self.getTabGuard(fW)
+						aWidths.append((iBlanks, iPassed))
+						aEnds.append(iPassed + len(re.findall(u"(?i)\\t|<tab>", aRuns[k].group(2))))
+					if min(aEnds) != max(aEnds):
+						for k in range(i, j):
+							mTab = aRuns[k]
+							szMark = u"\t"
+							if mTab.group(2).lower().find(u"<tab>") >= 0:
+								szMark = u"<tab>"
+							aNew[k] = mTab.group(1) + u" " * aWidths[k - i][0] + szMark * (max(aEnds) - aWidths[k - i][1]) + mTab.group(3)
+				i = j
+			return aNew
+		except:
+			return aszParas
+
+	# THE CITIES IN THE TOOLTIP OF A GOOD (import / export window). One line for every colony that imports or exports the good: "Imports" in
+	# the color of the import on the left of the name, "Exports" in the export color on the right of it. The names stand under each other
+	# (a line without the left word gets blanks of its width). A left click on the line of a frozen tooltip jumps to the colony with its window
+	# on the page of the good; closing that window takes the player back (same view, the tooltip frozen again, the cursor where it was).
+	def getTradersNote( self, iYield ):
+		try:
+			aTraders = CvScreensInterface.tradeRouteScreen.getTraders(iYield)
+			# the colony the window belongs to is the first line
+			iOwn = CvScreensInterface.tradeRouteScreen.iCity
+			aTraders = [t for t in aTraders if t[0] == iOwn] + [t for t in aTraders if t[0] != iOwn]
+			if len(aTraders) == 0:
+				return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NONE", ())
+			szImp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_IMPORTS", ())
+			szExp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_EXPORTS", ())
+			# the columns are tab stops (as the sell prices of the cargo lines): the names stand under each other exactly, the word "Exports" too
+			aShown = aTraders[:15]
+			(iGuardImp, iPassedImp) = self.getTabGuard(self.getTextPixels(szImp, 22.0))
+			iNameStop = iPassedImp + 1
+			aGuardName = []
+			iEnd = 0
+			for t in aShown:
+				(iGuard, iPassed) = self.getTabGuard(iNameStop * self.TAB_STOP + self.getTextPixels(t[1], 22.0))
+				aGuardName.append((iGuard, iPassed))
+				iEnd = max(iEnd, iPassed + 1)
+			aLines = []
+			for k in range(len(aShown)):
+				(iCity, szName, bImp, bExp) = aShown[k]
+				if bImp:
+					szLine = WtpColors.tag(WtpColors.IMPORT, szImp) + u" " * iGuardImp + u"\t"
+				else:
+					szLine = u"\t" * iNameStop
+				szLine += szName
+				if bExp:
+					szLine += u" " * aGuardName[k][0] + u"\t" * (iEnd - aGuardName[k][1]) + WtpColors.tag(WtpColors.EXPORT, szExp)
+				aLines.append(szLine)
+				self.dTraderLines[self.normTipText(szLine)] = iCity
+			if len(aTraders) > 15:
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_TRADERS_MORE", (len(aTraders) - 15,)))
+			return u"\n".join(aLines)
+		except:
+			return u""
+
+	# a left click on a line of a frozen window: is it the line of a colony of the traders? Then the jump is made (True)
+	def tryTraderJump( self, iLevel, iPara ):
+		try:
+			if iLevel < 0 or iLevel >= len(self.aFrozen) or not self.dTraderWin.has_key(self.aFrozen[iLevel][0]):
+				return False
+			aszParas = self.aFrozen[iLevel][2]
+			if iPara < 0 or iPara >= len(aszParas):
+				return False
+			iCity = self.dTraderLines.get(self.normTipText(aszParas[iPara]))
+			if iCity is None:
+				return False
+			return self.jumpToTradeCity(iLevel, iCity, self.dTraderWin[self.aFrozen[iLevel][0]])
+		except:
+			return False
+
+	def jumpToTradeCity( self, iLevel, iCity, iYield ):
+		tWin = CvScreensInterface.tradeRouteScreen
+		pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+		pCity = pPlayer.getCity(iCity)
+		if pCity is None or pCity.isNone() or not tWin.isOpen():
+			return False
+		if iCity == tWin.iCity:
+			# (the window of this colony is open: only its page goes to the good)
+			tWin.showYield(iYield)
+			return True
+		# what the way back needs: the window with what it shows, the view (city screen or map), the frozen tooltip and where the cursor was
+		tFz = self.aFrozen[iLevel]
+		tR = {"state": tWin.getState(), "city": tWin.iCity, "map": not CyInterface().isCityScreenUp(), "yield": iYield,
+			"frozen": (tFz[1], list(tFz[2]), list(tFz[3]), dict(tFz[4]), tFz[5]),
+			"cursor": (gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()), "look": None, "zoom": None, "unit": None}
+		if tR["map"]:
+			try:
+				tR["look"] = CyCamera().GetLookAt()
+			except:
+				tR["look"] = None
+			try:
+				tR["zoom"] = CyCamera().GetZoom()
+			except:
+				pass
+			try:
+				pUnit = CyInterface().getHeadSelectedUnit()
+				if pUnit is not None and not pUnit.isNone():
+					tR["unit"] = (pUnit.getOwner(), pUnit.getID())
+			except:
+				pass
+		# a colony is in the stack only once: a jump away from a colony that is in it already (the jumps went round in a circle) takes the way
+		# back to the first time, the loop between is dropped
+		iSame = -1
+		for iStack in range(len(self.aTradeReturn)):
+			if self.aTradeReturn[iStack]["city"] == tR["city"]:
+				iSame = iStack
+				break
+		if iSame >= 0:
+			self.aTradeReturn = self.aTradeReturn[:iSame + 1]
+		else:
+			self.aTradeReturn.append(tR)
+		tWin.finish(False, -1, True)
+		self.unfreezeAllTips()
+		if tR["map"]:
+			# the window of the starting colony was open on the map: the jump stays on the map (the camera goes to the colony, its window opens there)
+			try:
+				CyCamera().JustLookAtPlot(pCity.plot())
+			except:
+				CvUtil.pyPrint("WTP trade jump: JustLookAtPlot failed")
+		else:
+			CyInterface().selectCity(pCity, False)
+		self.tReopenTrade = {"city": iCity, "condensed": False, "focus": iYield, "map": tR["map"]}
+		self.iReopenTries = 0
+		self.iReopenWait = 3
+		try:
+			CyInterface().playGeneralSound(self.szModJumpSound)
+		except:
+			pass
+		return True
+
+	# the window that was opened by a jump is closed by the player: back to where the jump started
+	def tradeWindowClosed( self ):
+		try:
+			if len(self.aTradeReturn) == 0:
+				return
+			tR = self.aTradeReturn.pop()
+			# (the tooltip that was frozen in the colony of the jump goes: the one of the starting colony is made again)
+			self.unfreezeAllTips()
+			if tR["map"]:
+				# (back to the map: nothing to leave when the jump stayed on the map)
+				if CyInterface().isCityScreenUp():
+					try:
+						CyInterface().clearSelectedCities()
+					except:
+						CvUtil.pyPrint("WTP trade jump: clearSelectedCities failed")
+			else:
+				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
+				if pCity is not None and not pCity.isNone():
+					CyInterface().selectCity(pCity, False)
+			try:
+				CyInterface().playGeneralSound(self.szModJumpSound)
+			except:
+				pass
+			tState = dict(tR["state"])
+			tState["map"] = tR["map"]
+			tState["return"] = tR
+			self.tReopenTrade = tState
+			self.iReopenTries = 0
+			self.iReopenWait = 3
+		except:
+			self.tReopenTrade = None
+
+	def updatePostJump( self ):
+		t = self.tPostJump
+		if t is None:
+			return
+		try:
+			if not self.isTradeWindowOpen():
+				self.tPostJump = None
+				return
+			gc.getGame().setCursorClient(t["pos"][0], t["pos"][1])
+			if t["wait"] > 0:
+				t["wait"] -= 1
+				return
+			self.tPostJump = None
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			szHelp = gc.getGame().getWidgetHelpFor(int(WidgetTypes.WIDGET_HELP_YIELD), t["yield"], -1, False)
+			if szHelp and len(szHelp) > 0:
+				szHelp = self.addRawNote(szHelp, t["yield"])
+				self.showCursorTooltip(screen, szHelp, True, True)
+				self.freezeCursorTooltip()
+		except:
+			self.tPostJump = None
+
+	# the window of the starting colony is open again: the camera and the selected unit of the map, the frozen tooltip and the cursor as they were
+	def restoreMapView( self, tR ):
+		try:
+			if tR["unit"] is not None:
+				pUnit = gc.getPlayer(tR["unit"][0]).getUnit(tR["unit"][1])
+				if pUnit is not None and not pUnit.isNone():
+					CyInterface().selectUnit(pUnit, True, False, False)
+		except:
+			pass
+		try:
+			if tR["look"] is not None:
+				CyCamera().JustLookAt(tR["look"])
+			else:
+				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
+				CyCamera().JustLookAtPlot(pCity.plot())
+			if tR["zoom"] is not None:
+				CyCamera().SetZoom(tR["zoom"])
+		except:
+			pass
+
+	def keyEscDown( self ):
+		if not self.bEscHeld:
+			self.bEscHeld = True
+			self.bEscHoldDone = False
+			self.fEscStart = self.getTipNow()
+
+	def updateEscHold( self ):
+		try:
+			if not self.bEscHeld or self.bEscHoldDone:
+				return
+			if self.getTipNow() - self.fEscStart < 600:
+				return
+			if self.isTradeWindowOpen():
+				self.bEscHoldDone = True
+				if len(self.aTradeReturn) > 0:
+					self.closeAllTradeWindows()
+			elif self.tReopenTrade is None:
+				self.bEscHoldDone = True
+		except:
+			self.bEscHoldDone = True
+
+	def closeAllTradeWindows( self ):
+		tR = self.aTradeReturn[0]
+		self.aTradeReturn = []
+		self.tPostJump = None
+		CvScreensInterface.tradeRouteScreen.finish(False, -1, True)
+		self.unfreezeAllTips()
+		if tR["map"]:
+			if CyInterface().isCityScreenUp():
+				try:
+					CyInterface().clearSelectedCities()
+				except:
+					pass
+			self.restoreMapView(tR)
+		else:
+			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
+			if pCity is not None and not pCity.isNone():
+				CyInterface().selectCity(pCity, False)
+		try:
+			CyInterface().playGeneralSound(self.szModJumpSound)
+		except:
+			pass
+
+	def restoreAfterReturn( self, tR ):
+		try:
+			if tR["map"]:
+				self.restoreMapView(tR)
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			(tLayout, aszParas, aiIndent, dDetails, tAnchor) = tR["frozen"]
+			self.addFrozenWindow(screen, tLayout, aszParas, aiIndent, dDetails, tAnchor)
+			self.dTraderWin[self.aFrozen[-1][0]] = tR["yield"]
+			gc.getGame().setCursorClient(tR["cursor"][0], tR["cursor"][1])
+		except:
+			pass
+
 	# the picture of a good in the import / export window that has an outer frame (it restricts the production of the city): its help text gets a note
-	def addRawNote( self, szText ):
+	def addRawNote( self, szText, iYieldOver = -1 ):
 		try:
 			tWin = CvScreensInterface.tradeRouteScreen
 			if tWin.isOpen():
-				iYield = tWin.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
+				iYield = iYieldOver
+				if iYield < 0:
+					iYield = tWin.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
 				if iYield >= 0:
 					szNote = tWin.getRawNote(iYield)
 					if len(szNote) > 0:
-						return szText + u"\n" + szNote
+						szText = szText + u"\n" + szNote
+					# the colonies that export / import the good at the moment
+					szTraders = self.getTradersNote(iYield)
+					if len(szTraders) > 0:
+						szText = szText + u"\n" + szTraders
+					self.iTradeTipYield = iYield
+					self.szTradeTipText = szText
 		except:
 			pass
 		return szText
+
+	def isTradeWindowOpen( self ):
+		try:
+			return CvScreensInterface.tradeRouteScreen.isOpen()
+		except:
+			return False
+
+	def isCursorInTradeWindow( self ):
+		try:
+			t = CvScreensInterface.tradeRouteScreen
+			iX = gc.getGame().getCursorClientX()
+			iY = gc.getGame().getCursorClientY()
+			return t.isOpen() and iX >= t.OX and iX < t.OX + t.W and iY >= t.OY and iY < t.OY + t.H
+		except:
+			return False
+
+	# the cursor is on the picture of a good in the import / export window (its tooltip is ours also in the city screen)
+	def isTradeIconHover( self ):
+		try:
+			tWin = CvScreensInterface.tradeRouteScreen
+			return tWin.isOpen() and tWin.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0
+		except:
+			return False
 
 	# the help texts the game itself makes for its HUD elements (the DLL stores the last one, CyGame.getWidgetHelp...)
 	def pollWidgetHelp( self ):
@@ -7486,13 +7974,21 @@ class CvMainInterface:
 
 	def updateCursorTooltip( self ):
 		# called every frame: the window goes away when the cursor has left its place (the game does not always say that a tooltip is gone)
+		# the pictures of the goods of the import / export window in the city screen: the game gives no help text of its own there (the DLL
+		# empties it; python cannot clear the help of the city screen). It is on as long as the window is open: a flag that follows the cursor
+		# comes too late when the cursor moves fast from one picture to the next (the game tooltip showed up for a moment then)
+		try:
+			gc.getGame().setHideYieldHelp(self.bHoverTip and CyInterface().isCityScreenUp() and self.isTradeWindowOpen())
+		except:
+			pass
+		self.updateEscHold()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
 			# X held: all frozen windows are closed
 			self.bXHoldDone = True
 			self.unfreezeAllTips()
 		if self.bTipFrozen:
-			# a frozen window stays until Esc / X, but not into the city screen
-			if CyInterface().isCityScreenUp() or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL:
+			# a frozen window stays until Esc / X, but not into the city screen (except with the import / export window open there)
+			if (CyInterface().isCityScreenUp() and not self.isTradeWindowOpen()) or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL:
 				self.unfreezeAllTips()
 			else:
 				try:
@@ -7537,7 +8033,7 @@ class CvMainInterface:
 			iDX = abs(gc.getGame().getCursorClientX() - self.tCursorTipAt[0])
 			iDY = abs(gc.getGame().getCursorClientY() - self.tCursorTipAt[1])
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			if iDX > 100 or iDY > 100 or CyInterface().isCityScreenUp():
+			if iDX > 100 or iDY > 100 or (CyInterface().isCityScreenUp() and not self.isTradeIconHover()):
 				self.hideCursorTooltip(screen)
 			elif self.iTipMode == 0:
 				self.followCursorTip(screen)
@@ -7803,6 +8299,9 @@ class CvMainInterface:
 
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TIP_LINE):
 				if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
+					# the line of a colony in the tooltip of a good of the import / export window: the jump (left and right click)
+					if self.tryTraderJump(inputClass.getData2() / 1000, inputClass.getData2() % 1000):
+						return 1
 					# a line of the frozen hover tooltip: right click: Colopedia page of the first named thing of the line (Ctrl: the second)
 					self.openTipPedia(inputClass.getData2(), inputClass.isCtrlKeyDown(), inputClass.isShiftKeyDown())
 				elif (inputClass.getFlags() & MouseFlags.MOUSE_LBUTTONUP):
@@ -8332,8 +8831,10 @@ class CvMainInterface:
 	def update( self, fDelta ):
 		self.iTick += 1
 		self.updateTerritorialInfluenceEditor()
+		self.updatePendingWpRename()
 		self.updateCursorTooltip()
 		self.pollWidgetHelp()
+		self.updatePostJump()
 		return
 
 	# Adds Mouse Over Help to General Widgets
@@ -8352,6 +8853,9 @@ class CvMainInterface:
 			elif iData1 == self.BUTTON_TERRITORIAL_INFLUENCE:
 				return localText.getText("TXT_KEY_INTERFACE_TERRITORIAL_INFLUENCE", ("Ctrl+I", ""));
 			elif iData1 == self.BUTTON_TIP_LINE:
+				if CyInterface().isCityScreenUp() and self.isTradeWindowOpen():
+					# (in the city screen with the import / export window the game shows this text in a window of its own, over ours)
+					return u""
 				return self.getTipPediaHelp(iData2)
 			elif iData1 == VET_NEW_CAPACITY:
 				return localText.getText("TXT_KEY_NEW_STORAGE_CITY_SCREEN", ());

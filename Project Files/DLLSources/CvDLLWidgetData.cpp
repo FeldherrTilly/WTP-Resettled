@@ -238,6 +238,10 @@ static bool g_bWtpHideGameHelp = false;
 static bool g_bWtpInternalHelp = false;
 void wtpSetHideGameHelp(bool b) { g_bWtpHideGameHelp = b; }
 void wtpSetInternalHelp(bool b) { g_bWtpInternalHelp = b; }
+// WTP: the import / export window in the city screen: the help of the pictures of the goods (WIDGET_HELP_YIELD) is shown by the own tooltip
+// only (python sets this while the window is open in the city screen), the game gets an empty text
+static bool g_bWtpHideYieldHelp = false;
+void wtpSetHideYieldHelp(bool b) { g_bWtpHideYieldHelp = b; }
 bool wtpIsDiplomacyUp() { return gDLL->isDiplomacy() || gDLL->isMPDiplomacyScreenUp(); }
 
 void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
@@ -247,6 +251,10 @@ void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, const CvWidgetDataStr
 	g_iWtpWidgetHelpType = (int)widgetDataStruct.m_eWidgetType;
 	g_iWtpWidgetHelpCount++;
 	if (g_bWtpHideGameHelp && !g_bWtpInternalHelp && (gDLL->isDiplomacy() || gDLL->isMPDiplomacyScreenUp()))
+	{
+		szBuffer.clear();
+	}
+	else if (g_bWtpHideYieldHelp && !g_bWtpInternalHelp && widgetDataStruct.m_eWidgetType == WIDGET_HELP_YIELD)
 	{
 		szBuffer.clear();
 	}
