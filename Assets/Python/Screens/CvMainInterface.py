@@ -8920,7 +8920,7 @@ class CvMainInterface:
 		except:
 			pass
 
-	# Esc held: all stacked windows of the jumps are closed, the view of the first starting colony is back (no window)
+	# Esc held: all stacked windows of the jumps are closed and the city screen is left (no jump back anywhere)
 	bEscHeld = False
 	bEscHoldDone = False
 	fEscStart = 0.0
@@ -8952,23 +8952,18 @@ class CvMainInterface:
 		except:
 			return False
 
+	# all stacked windows go and the city screen is left (no jump back to the colony the first jump started in); on the map (windows of the
+	# outer view) they just close
 	def closeAllTradeWindows( self ):
-		tR = self.aTradeReturn[0]
 		self.aTradeReturn = []
 		self.tPostJump = None
 		CvScreensInterface.tradeRouteScreen.finish(False, -1, True)
 		self.unfreezeAllTips()
-		if tR["map"]:
-			if CyInterface().isCityScreenUp():
-				try:
-					CyInterface().clearSelectedCities()
-				except:
-					pass
-			self.restoreMapView(tR)
-		else:
-			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
-			if pCity is not None and not pCity.isNone():
-				CyInterface().selectCity(pCity, False)
+		if CyInterface().isCityScreenUp():
+			try:
+				CyInterface().clearSelectedCities()
+			except:
+				pass
 		try:
 			CyInterface().playGeneralSound(self.szModJumpSound)
 		except:
