@@ -5970,8 +5970,51 @@ class CvMainInterface:
 
 	def getTradeTipDetail( self, iTarget, iPara ):
 		if iTarget >= 0:
-			return self.aFrozen[iTarget][4].get(iPara)
-		return self.dTipDetails.get(iPara)
+			szDetail = self.aFrozen[iTarget][4].get(iPara)
+			aszParas = self.aFrozen[iTarget][2]
+			iYield = self.dTraderWin.get(self.aFrozen[iTarget][0], -1)
+		else:
+			szDetail = self.dTipDetails.get(iPara)
+			aszParas = self.aszTipParas
+			iYield = self.iTradeTipYield
+		if szDetail is None and iYield >= 0 and iPara >= 0 and iPara < len(aszParas):
+			# (a line of a colony: its export settings for the good and its stock)
+			iCity = self.dTraderLines.get(self.normTipText(aszParas[iPara]))
+			if iCity is not None:
+				szTrader = self.getTraderChildText(iYield, iCity)
+				if len(szTrader) > 0:
+					return szTrader
+		return szDetail
+
+	# the child tooltip of the line of a colony in the tooltip of a good (import / export window): the name of the colony, its export settings
+	# for the good as the letters E (export), A (auto export), L (land), S (sea) - those that are on in the colony are yellow - and the stock
+	def getTraderChildText( self, iYield, iCity ):
+		try:
+			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(iCity)
+			if pCity is None or pCity.isNone():
+				return u""
+			bExp = pCity.isExport(iYield)
+			bAuto = pCity.isAutoExport(iYield)
+			iDom = pCity.getExportDomains(iYield)
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.isOpen() and tWin.iCity == iCity and tWin.dData.has_key(iYield):
+				# (the colony of the open window: what the window shows is the newer state)
+				d = tWin.dData[iYield]
+				bExp = d["exp"]
+				bAuto = d["auto"]
+				iDom = d["expDom"]
+			aLetters = [(u"E", bExp), (u"A", bAuto), (u"L", (iDom & 1) != 0), (u"S", (iDom & 2) != 0)]
+			aParts = []
+			for tLetter in aLetters:
+				if tLetter[1]:
+					aParts.append(u"<color=255,255,0,255>" + tLetter[0] + u"</color>")
+				else:
+					aParts.append(tLetter[0])
+			szStock = localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			return pCity.getName() + u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS", ()) + u":  " + u"  ".join(aParts) + u"\n" + szStock
+		except:
+			self.tipError("getTraderChildText")
+		return u""
 
 	def clearTradeTipSelect( self, screen ):
 		try:
@@ -7209,6 +7252,11 @@ class CvMainInterface:
 			szText = self.getPromotionTipText(aszLines[iLineIdx])
 			if len(szText) > 0:
 				self.showSecondTip(screen, szText, iCY, tTop, iFz)
+		elif iPara >= 0 and iSel < 0 and self.dTraderWin.has_key(self.aFrozen[iFz][0]) and self.dTraderLines.has_key(self.normTipText(aszTopParas[iPara])):
+			# a line of a colony in the tooltip of a good: the export settings of the colony for that good and its stock
+			szTraderChild = self.getTraderChildText(self.dTraderWin[self.aFrozen[iFz][0]], self.dTraderLines[self.normTipText(aszTopParas[iPara])])
+			if len(szTraderChild) > 0:
+				self.showSecondTip(screen, szTraderChild, iCY, tTop, iFz)
 		elif tWp is not None and tWp["paras"].has_key(iPara):
 			# a line of waypoints: the list of the waypoints, or the choices of a waypoint (the one chosen with the wheel in yellow)
 			if bWpRow:

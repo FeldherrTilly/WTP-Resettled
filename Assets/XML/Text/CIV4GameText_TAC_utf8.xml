@@ -1888,6 +1888,16 @@
 		<German>Keine Kolonie exportiert oder importiert diese Ware im Moment.</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS</Tag>
+		<English>Export settings</English>
+		<German>Exporteinstellung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_STOCK</Tag>
+		<English>In stock: %d1</English>
+		<German>Auf Lager: %d1</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_MORE</Tag>
 		<English>and %d1 more</English>
 		<German>und %d1 weitere</German>
