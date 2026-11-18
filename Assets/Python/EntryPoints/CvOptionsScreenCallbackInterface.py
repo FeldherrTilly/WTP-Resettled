@@ -103,6 +103,15 @@ def handleTipAutoFreezeClicked ( argsList ):
 		pass
 	return 1
 
+def handleTipDebugClicked ( argsList ):
+	"WTP: errors in the code of the tooltips are shown as messages (test phase)"
+	bValue, szName = argsList
+	try:
+		CvScreensInterface.mainInterface.setTipDebug(bValue)
+	except:
+		pass
+	return 1
+
 def handleGameReset ( argsList ):
 	"Resets these options"
 	szName = argsList

@@ -290,7 +290,7 @@ TIP_SETTINGS_FILE = "WTP_TooltipSettings.ini"
 
 def wtpLoadTipSettings():
 	# (mode, delay index, quick): default is the game tooltip (2), the delay "medium" (2) for the case that the hover tooltip is chosen
-	aiValues = [2, 2, 0, 0]
+	aiValues = [2, 2, 0, 0, 0]
 	try:
 		f = open(TIP_SETTINGS_FILE, "r")
 		for szLine in f.readlines():
@@ -305,6 +305,8 @@ def wtpLoadTipSettings():
 						aiValues[2] = max(0, min(1, int(aszPart[1])))
 					elif aszPart[0] == "autofreeze":
 						aiValues[3] = max(0, min(1, int(aszPart[1])))
+					elif aszPart[0] == "debug":
+						aiValues[4] = max(0, min(1, int(aszPart[1])))
 				except:
 					pass
 		f.close()
@@ -421,6 +423,17 @@ class CvMainInterface:
 	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
 	iTipSelIdx = 0
 	bTipWheel = False
+	iTradeSel = -1 # the chosen line: index in the stops of the tooltip, -1: none
+	iTradeMarked = -1 # the paragraph that is yellow in the tooltip now
+	bTradeSel = False # the wheel is taken
+	bTradeChild = False # the child window shown is the one of the chosen line
+	szTradeSelFor = u"" # the text of the tooltip (or the name of the frozen window) that the choice is for
+	szTradeMarkedWin = u"" # the frozen window that has the yellow line of the choice
+	bTipDebug = (aiTipSettings[4] == 1) # options screen: errors in the code of the tooltips are shown as messages (test phase)
+	szLastTipError = u""
+	dHeaderUnits = {} # frozen window (prefix) -> {paragraph of the name of a unit: (owner, id)} as it was when the window was frozen
+	tAutoSelUnit = None # (owner, id) of the unit that the frozen tooltips of szAutoSelPrefix belong to
+	fCursorTipShownAt = 0.0 # when the tooltip of the cursor was built (ms)
 	iSecondTipLines = 0
 	aszTipParas = []
 	bHoverTip = (aiTipSettings[0] != 2) # false: the game tooltip
@@ -3714,6 +3727,7 @@ class CvMainInterface:
 			self.drawCursorTip(screen, False)
 			self.bCursorTipShown = True
 			self.szCursorTipText = szHelp
+			self.fCursorTipShownAt = self.getTipNow()
 			self.tCursorTipAt = (iCursorX, iCursorY)
 		except:
 			self.bCursorTipShown = False
@@ -4503,6 +4517,7 @@ class CvMainInterface:
 		return iWidth
 
 	def drawCursorTip( self, screen, bClickable ):
+		self.iTradeMarked = -1
 		self.iCursorTipLines = len(self.tTipLayout[4])
 		self.drawTipWindow(screen, "HudTip", self.tTipLayout, bClickable, 0, self.aiTipIndent)
 
@@ -5067,14 +5082,17 @@ class CvMainInterface:
 			else:
 				# directly below the promotions of the unit (below its name without them); no unit header: above the hint lines at the end
 				iHead = -1
+				bHeaders = False
 				for k in range(len(aszParas)):
 					if self.isUnitHeader(aszParas[k]):
+						bHeaders = True
 						pHeader = self.getHeaderUnit(iLevel, aszParas, k)
-						if iHead < 0:
-							iHead = k
 						if pHeader is not None and not pHeader.isNone() and pHeader.getID() == pUnit.getID() and pHeader.getOwner() == pUnit.getOwner():
 							iHead = k
 							break
+				if bHeaders and iHead < 0:
+					# (the unit has no name line in this window, e.g. it is in the groups of "more...units": no row, it would be under another unit)
+					return
 				if iHead >= 0:
 					iPara = self.getWaypointSlot(aszParas, iHead)
 				else:
@@ -5100,13 +5118,13 @@ class CvMainInterface:
 						else:
 							aiShift.append(x)
 					aiPara = aiShift
-					dShift = {}
-					for kDet in dDetails.keys():
-						if kDet >= iPara:
-							dShift[kDet + 1] = dDetails[kDet]
+					dMapIns = {}
+					for kOld in range(len(aszParas) - 1):
+						if kOld >= iPara:
+							dMapIns[kOld] = kOld + 1
 						else:
-							dShift[kDet] = dDetails[kDet]
-					self.aFrozen[iLevel][4] = dShift
+							dMapIns[kOld] = kOld
+					self.remapFrozenParas(iLevel, dMapIns)
 				aszLines = list(aszLines[:iAt]) + aszRow + list(aszLines[iAt:])
 				aiPara = list(aiPara[:iAt]) + [iPara] * len(aszRow) + list(aiPara[iAt:])
 				aiIndent = list(aiIndent[:iAt]) + [0] * len(aszRow) + list(aiIndent[iAt:])
@@ -5127,7 +5145,59 @@ class CvMainInterface:
 				dReg["paras"][iPara] = "row"
 			self.dWpWin[szPrefix] = dReg
 		except:
-			pass
+			self.tipError("addWaypointRow")
+
+	# the paragraphs of a frozen window changed (a line was inserted, removed, the units were put in another order): everything that is kept per
+	# paragraph of that window follows. dMap: old paragraph -> new paragraph (-1: the paragraph is gone), for every old paragraph
+	def remapFrozenParas( self, iLevel, dMap ):
+		szPrefix = self.aFrozen[iLevel][0]
+		# the details of the lines (child windows)
+		dDetails = self.aFrozen[iLevel][4]
+		dNew = {}
+		for kDet in dDetails.keys():
+			iNew = dMap.get(kDet, kDet)
+			if iNew >= 0:
+				dNew[iNew] = dDetails[kDet]
+		self.aFrozen[iLevel][4] = dNew
+		# the lines of waypoints
+		dReg = self.dWpWin.get(szPrefix)
+		if dReg is not None:
+			dParas = {}
+			for kReg in dReg["paras"].keys():
+				iNew = dMap.get(kReg, kReg)
+				if iNew >= 0:
+					dParas[iNew] = dReg["paras"][kReg]
+			dReg["paras"] = dParas
+			if dReg.get("cmd", -1) >= 0:
+				dReg["cmd"] = dMap.get(dReg["cmd"], dReg["cmd"])
+			if dReg.get("marked", -1) >= 0:
+				dReg["marked"] = dMap.get(dReg["marked"], dReg["marked"])
+		# the frozen child windows of the lines
+		dChild = {}
+		for tKey in self.dRowChild.keys():
+			if tKey[0] == szPrefix:
+				dChild[tKey] = self.dRowChild[tKey]
+		for tKey in dChild.keys():
+			del self.dRowChild[tKey]
+		for tKey in dChild.keys():
+			iNew = dMap.get(tKey[1], tKey[1])
+			if iNew >= 0:
+				self.dRowChild[(szPrefix, iNew)] = dChild[tKey]
+		# the unit of each name
+		dHeads = self.dHeaderUnits.get(szPrefix)
+		if dHeads is not None:
+			dNewHeads = {}
+			for kHead in dHeads.keys():
+				iNew = dMap.get(kHead, kHead)
+				if iNew >= 0:
+					dNewHeads[iNew] = dHeads[kHead]
+			self.dHeaderUnits[szPrefix] = dNewHeads
+		# the line under the cursor
+		if self.tSecondTipKey is not None and self.tSecondTipKey[0] == iLevel and dMap.has_key(self.tSecondTipKey[1]):
+			tOldKey = self.tSecondTipKey
+			self.tSecondTipKey = (tOldKey[0], dMap[tOldKey[1]]) + tuple(tOldKey[2:])
+		if self.iTipSelLevel == iLevel and self.iTipSelPara >= 0:
+			self.iTipSelPara = dMap.get(self.iTipSelPara, self.iTipSelPara)
 
 	# a unit of a stack was selected: in the frozen windows of that stack the line "Set waypoint..." goes to the selected unit (it stands
 	# below the active unit)
@@ -5146,7 +5216,7 @@ class CvMainInterface:
 					self.moveWaypointRow(screen, iLevel, pSelect)
 				self.moveUnitToTop(screen, iLevel, pSelect)
 		except:
-			pass
+			self.tipError("refreshWaypointRows")
 
 	# the active unit stands at the start of the list of units of a stack tooltip: the block of the selected unit (its name, its promotions, its
 	# lines) goes to the start of the frozen window (the other blocks keep their order, the lines after the units stay)
@@ -5227,36 +5297,16 @@ class CvMainInterface:
 			aNewLines += list(aszLines[iTo + 1:])
 			aNewPara += list(aiPara[iTo + 1:])
 			aNewIndent += list(aiIndent[iTo + 1:])
-			dNew = {}
-			for kDet in dDetails.keys():
-				dNew[dMap.get(kDet, kDet)] = dDetails[kDet]
 			aszNew = [aszParas[i] for i in aOrder]
 			tNew = (iX, iY, iWidth, iHeight, aNewLines, aNewPara, iPad, iLine)
 			self.deleteTipWindow(screen, szPrefix, len(aszLines))
 			self.aFrozen[iLevel][1] = tNew
 			self.aFrozen[iLevel][2] = aszNew
 			self.aFrozen[iLevel][3] = aNewIndent
-			self.aFrozen[iLevel][4] = dNew
-			# what refers to the paragraphs of the window
-			dReg = self.dWpWin.get(szPrefix)
-			if dReg is not None:
-				dParas = {}
-				for kReg in dReg["paras"].keys():
-					dParas[dMap.get(kReg, kReg)] = dReg["paras"][kReg]
-				dReg["paras"] = dParas
-				if dReg.get("cmd", -1) >= 0:
-					dReg["cmd"] = dMap.get(dReg["cmd"], dReg["cmd"])
-			for tKey in self.dRowChild.keys():
-				if tKey[0] == szPrefix and dMap.has_key(tKey[1]) and dMap[tKey[1]] != tKey[1]:
-					szChild = self.dRowChild[tKey]
-					del self.dRowChild[tKey]
-					self.dRowChild[(szPrefix, dMap[tKey[1]])] = szChild
-			if self.tSecondTipKey is not None and self.tSecondTipKey[0] == iLevel and dMap.has_key(self.tSecondTipKey[1]):
-				tOldKey = self.tSecondTipKey
-				self.tSecondTipKey = (tOldKey[0], dMap[tOldKey[1]]) + tuple(tOldKey[2:])
+			self.remapFrozenParas(iLevel, dMap)
 			self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, aNewIndent, self.dFrozenDark.has_key(szPrefix))
 		except:
-			pass
+			self.tipError("moveUnitToTop")
 
 	def moveWaypointRow( self, screen, iLevel, pUnit ):
 		try:
@@ -5290,21 +5340,23 @@ class CvMainInterface:
 				else:
 					aiNewPara.append(aiPara[k])
 				aiNewIndent.append(aiIndent[k])
+			dMapRem = {}
+			for kOld in range(len(aszParas)):
+				if kOld == iOld:
+					dMapRem[kOld] = -1
+				elif kOld > iOld:
+					dMapRem[kOld] = kOld - 1
+				else:
+					dMapRem[kOld] = kOld
 			aszParas.pop(iOld)
-			dNew = {}
-			for kDet in dDetails.keys():
-				if kDet > iOld:
-					dNew[kDet - 1] = dDetails[kDet]
-				elif kDet < iOld:
-					dNew[kDet] = dDetails[kDet]
 			self.aFrozen[iLevel][1] = (iX, iY, iWidth, iHeight, aszNewLines, aiNewPara, iPad, iLine)
 			self.aFrozen[iLevel][2] = aszParas
 			self.aFrozen[iLevel][3] = aiNewIndent
-			self.aFrozen[iLevel][4] = dNew
+			self.remapFrozenParas(iLevel, dMapRem)
 			del self.dWpWin[szPrefix]
 			self.addWaypointRow(screen, iLevel, pUnit)
 		except:
-			pass
+			self.tipError("moveWaypointRow")
 
 	# is the frozen window a list of waypoints (not the line "Set waypoint..." alone)?
 	def isWaypointList( self, tWp ):
@@ -5531,7 +5583,7 @@ class CvMainInterface:
 			self.tPreviewLayout = (iX, iY, iWidth, iHeight - iLine * iHints, aszNew, aiNew, iPad, iLine)
 			self.iPreviewHintLines = self.iPreviewFreezeLines
 		except:
-			pass
+			self.tipError("dropPreviewSelectHint")
 
 	# a unit of the player is activated (event "unitSelected"): the tooltip of the plot under the cursor is frozen as soon as it shows (stack or
 	# single unit); it goes with the first order of the unit
@@ -5549,9 +5601,273 @@ class CvMainInterface:
 				self.closeAutoSelWindows()
 			self.tAutoFreeze = None
 			if len(self.aFrozen) == 0:
-				self.tAutoFreeze = (pUnit.getX(), pUnit.getY(), self.getTipNow())
+				self.tAutoFreeze = (pUnit.getX(), pUnit.getY(), self.getTipNow(), (pUnit.getOwner(), pUnit.getID()))
+		except:
+			self.tipError("onUnitActivated")
+
+	# the window that the choice is for: the tooltip of the cursor (-2), a frozen tooltip of the good under the cursor (its index; after a jump
+	# the tooltip of the good is frozen), -1: none
+	def getTradeTipTarget( self ):
+		try:
+			if not self.isTradeWindowOpen():
+				return -1
+			iCX = gc.getGame().getCursorClientX()
+			iCY = gc.getGame().getCursorClientY()
+			iYield = CvScreensInterface.tradeRouteScreen.getIconYieldAt(iCX, iCY)
+			if iYield < 0 or self.getFrozenAt(iCX, iCY) >= 0:
+				return -1
+			for i in range(len(self.aFrozen)):
+				if self.dTraderWin.get(self.aFrozen[i][0], -1) == iYield:
+					return i
+			if self.bCursorTipShown and self.tTipLayout is not None and self.iTradeTipYield == iYield and self.szCursorTipText == self.szTradeTipText:
+				return -2
 		except:
 			pass
+		return -1
+
+	def getTradeTipStops( self, iTarget ):
+		if iTarget >= 0:
+			aszParas = self.aFrozen[iTarget][2]
+			dDetails = self.aFrozen[iTarget][4]
+		else:
+			aszParas = self.aszTipParas
+			dDetails = self.dTipDetails
+		aStops = []
+		for k in range(len(aszParas)):
+			if dDetails.has_key(k) or self.dTraderLines.has_key(self.normTipText(aszParas[k])):
+				aStops.append(k)
+		return aStops
+
+	def getTradeTipDetail( self, iTarget, iPara ):
+		if iTarget >= 0:
+			szDetail = self.aFrozen[iTarget][4].get(iPara)
+			aszParas = self.aFrozen[iTarget][2]
+			iYield = self.dTraderWin.get(self.aFrozen[iTarget][0], -1)
+		else:
+			szDetail = self.dTipDetails.get(iPara)
+			aszParas = self.aszTipParas
+			iYield = self.iTradeTipYield
+		if szDetail is None and iYield >= 0 and iPara >= 0 and iPara < len(aszParas):
+			# (a line of a colony: its export settings for the good and its stock)
+			iCity = self.dTraderLines.get(self.normTipText(aszParas[iPara]))
+			if iCity is not None:
+				szTrader = self.getTraderChildText(iYield, iCity)
+				if len(szTrader) > 0:
+					return szTrader
+		return szDetail
+
+	# the child tooltip of the line of a colony in the tooltip of a good (import / export window): the name of the colony, its export settings
+	# for the good as the letters E (export), A (auto export), L (land), S (sea), and for an importing colony I (import), F (feeder), L, S - those
+	# that are on in the colony are yellow - and the stock
+	def getTraderChildText( self, iYield, iCity ):
+		try:
+			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(iCity)
+			if pCity is None or pCity.isNone():
+				return u""
+			bExp = pCity.isExport(iYield)
+			bAuto = pCity.isAutoExport(iYield)
+			iDom = pCity.getExportDomains(iYield)
+			bImp = pCity.isImport(iYield)
+			bFeeder = pCity.isImportFeeder(iYield)
+			iImpDom = pCity.getImportDomains(iYield)
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.isOpen() and tWin.iCity == iCity and tWin.dData.has_key(iYield):
+				# (the colony of the open window: what the window shows is the newer state)
+				d = tWin.dData[iYield]
+				bExp = d["exp"]
+				bAuto = d["auto"]
+				iDom = d["expDom"]
+				bImp = d["imp"]
+				bFeeder = d["feeder"]
+				iImpDom = d["impDom"]
+			szLines = pCity.getName()
+			# (the settings of what the colony does with the good: the import row if it imports, the export row if it exports; the letters that are on
+			# are yellow)
+			# (the letters of each language are in the text keys, 4 letters divided by slashes, e.g. I/F/L/S)
+			aRows = []
+			if bImp:
+				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS", ()), localText.getText("TXT_KEY_WTP_TIP_TRADER_IMPORT_LETTERS", ()), [bImp, bFeeder, (iImpDom & 1) != 0, (iImpDom & 2) != 0]))
+			if bExp or not bImp:
+				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS", ()), localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_LETTERS", ()), [bExp, bAuto, (iDom & 1) != 0, (iDom & 2) != 0]))
+			for tRow in aRows:
+				aLetters = tRow[1].split(u"/")
+				aParts = []
+				for i in range(len(aLetters)):
+					if i < len(tRow[2]) and tRow[2][i]:
+						aParts.append(u"<color=255,255,0,255>" + aLetters[i] + u"</color>")
+					else:
+						aParts.append(aLetters[i])
+				szLines += u"\n" + tRow[0] + u": " + u"/".join(aParts)
+			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			return szLines
+		except:
+			self.tipError("getTraderChildText")
+		return u""
+
+	# the mouse wheel capture of the tooltips (Shift + wheel): with the import / export window open it is not simply switched off, the window
+	# decides (it needs the wheel while the cursor is in it)
+	def setWheelCapture( self, bOn ):
+		try:
+			if not bOn and CvScreensInterface.tradeRouteScreen.isOpen():
+				CvScreensInterface.tradeRouteScreen.updateWheelCapture()
+				return
+		except:
+			pass
+		gc.getGame().setWheelCapture(bOn)
+
+	# a tooltip takes the wheel just now (the import / export window leaves it alone)
+	def isTipWheelActive( self ):
+		return self.bTipWheel or self.bTradeSel or getattr(self, "bMsgWheel", False)
+
+	def clearTradeTipSelect( self, screen ):
+		try:
+			if self.bTradeSel:
+				self.bTradeSel = False
+				self.bTipWheel = False
+				self.setWheelCapture(False)
+			if self.bTradeChild:
+				self.bTradeChild = False
+				self.hideSecondTip(screen)
+			if len(self.szTradeMarkedWin) > 0:
+				# (a frozen tooltip: its yellow line goes)
+				for i in range(len(self.aFrozen)):
+					if self.aFrozen[i][0] == self.szTradeMarkedWin:
+						self.markWaypointLine(screen, i, -1)
+				self.szTradeMarkedWin = u""
+			self.iTradeSel = -1
+			self.iTradeMarked = -1
+			self.szTradeSelFor = u""
+		except:
+			self.tipError("clearTradeTipSelect")
+
+	def updateTradeTipSelect( self ):
+		try:
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			iTarget = self.getTradeTipTarget()
+			if iTarget == -1:
+				if self.iTradeSel >= 0 or self.bTradeSel or self.bTradeChild or len(self.szTradeMarkedWin) > 0:
+					self.clearTradeTipSelect(screen)
+				return
+			if iTarget >= 0:
+				szFor = self.aFrozen[iTarget][0]
+			else:
+				szFor = self.szCursorTipText
+			if self.szTradeSelFor != szFor:
+				# (another tooltip: the choice starts again)
+				if self.szTradeSelFor != u"":
+					self.clearTradeTipSelect(screen)
+				self.szTradeSelFor = szFor
+			aStops = self.getTradeTipStops(iTarget)
+			bWheel = gc.getGame().isShiftKeyPressed() and len(aStops) > 0
+			if bWheel != self.bTradeSel:
+				self.bTradeSel = bWheel
+				self.bTipWheel = bWheel
+				self.setWheelCapture(bWheel)
+			if bWheel:
+				iNotches = gc.getGame().takeWheelNotches()
+				if iNotches != 0:
+					if self.iTradeSel < 0 or self.iTradeSel >= len(aStops):
+						self.iTradeSel = 0
+					else:
+						# (the wheel towards the user: the next one, away from the user: the one before)
+						self.iTradeSel = (self.iTradeSel - iNotches) % len(aStops)
+			iMark = -1
+			if self.iTradeSel >= 0 and self.iTradeSel < len(aStops):
+				iMark = aStops[self.iTradeSel]
+			bRedo = (iMark != self.iTradeMarked)
+			if not bRedo and iMark >= 0 and iTarget >= 0:
+				# (the frozen windows are painted again when the cursor goes over their lines: the choice stays yellow)
+				bRedo = not self.dWpMarked.has_key(self.aFrozen[iTarget][0])
+			if bRedo:
+				self.markTradeTipLine(screen, iMark, iTarget)
+			elif self.bTradeChild and not self.bSecondTipShown:
+				self.markTradeTipLine(screen, iMark, iTarget)
+		except:
+			self.tipError("updateTradeTipSelect")
+
+	# the chosen paragraph in yellow (-1: none); its child window beside the tooltip
+	def markTradeTipLine( self, screen, iMark, iTarget ):
+		if iTarget >= 0:
+			(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.aFrozen[iTarget][1]
+			self.markWaypointLine(screen, iTarget, iMark)
+			self.szTradeMarkedWin = self.aFrozen[iTarget][0]
+		else:
+			(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.tTipLayout
+			aNew = []
+			for i in range(len(aszLines)):
+				szLine = aszLines[i]
+				if iMark >= 0 and aiPara[i] == iMark:
+					szLine = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szLine) + u"</color>"
+				aNew.append(szLine)
+			self.deleteTipWindow(screen, "HudTip", len(aszLines))
+			self.drawTipWindow(screen, "HudTip", (iX, iY, iW, iH, aNew, aiPara, iPad, iLine), False, 0, self.aiTipIndent)
+		self.iTradeMarked = iMark
+		if self.bTradeChild or self.bSecondTipShown:
+			self.bTradeChild = False
+			self.hideSecondTip(screen)
+		iFirst = -1
+		for i in range(len(aiPara)):
+			if aiPara[i] == iMark:
+				iFirst = i
+				break
+		szDetail = None
+		if iMark >= 0:
+			szDetail = self.getTradeTipDetail(iTarget, iMark)
+		if szDetail is not None and iFirst >= 0:
+			if iTarget >= 0:
+				# (the child window of this line is frozen already: no second one)
+				szChild = self.dRowChild.get((self.aFrozen[iTarget][0], iMark))
+				if szChild is not None:
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == szChild:
+							return
+				self.showSecondTip(screen, szDetail, iY + iPad + iFirst * iLine, self.aFrozen[iTarget][1], iTarget)
+			else:
+				self.showSecondTip(screen, szDetail, iY + iPad + iFirst * iLine, self.tTipLayout)
+			self.bTradeChild = self.bSecondTipShown
+
+	# right click on the picture of the good: runs the chosen line (True), False: there is none
+	def runTradeTipSelection( self ):
+		try:
+			if self.iTradeSel < 0:
+				return False
+			iTarget = self.getTradeTipTarget()
+			if iTarget == -1:
+				return False
+			aStops = self.getTradeTipStops(iTarget)
+			if self.iTradeSel >= len(aStops):
+				return False
+			iPara = aStops[self.iTradeSel]
+			szDetail = self.getTradeTipDetail(iTarget, iPara)
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			self.clearTradeTipSelect(screen)
+			self.hideSecondTip(screen)
+			if iTarget == -2:
+				# (the tooltip of the cursor is frozen first, as for a click on its line)
+				if not self.freezeCursorTooltip() or len(self.aFrozen) == 0:
+					return False
+				iTarget = len(self.aFrozen) - 1
+			if self.tryTraderJump(iTarget, iPara):
+				return True
+			if szDetail is not None:
+				szChild = self.dRowChild.get((self.aFrozen[iTarget][0], iPara))
+				if szChild is not None:
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == szChild:
+							return True
+				aiFPara = self.aFrozen[iTarget][1][5]
+				iLineIdx = 0
+				if iPara in aiFPara:
+					iLineIdx = aiFPara.index(iPara)
+				iLayY = self.aFrozen[iTarget][1][1] + self.aFrozen[iTarget][1][6] + iLineIdx * self.aFrozen[iTarget][1][7]
+				self.showSecondTip(screen, szDetail, iLayY, self.aFrozen[iTarget][1], iTarget)
+				if self.bSecondTipShown:
+					self.tSecondTipKey = (iTarget, iPara, -1, iLineIdx, False)
+					self.freezePreview(screen)
+			return True
+		except:
+			self.tipError("runTradeTipSelection")
+		return False
 
 	def updateAutoFreeze( self ):
 		try:
@@ -5567,11 +5883,16 @@ class CvMainInterface:
 			if pMouse is None or pMouse.isNone() or pMouse.getX() != tAuto[0] or pMouse.getY() != tAuto[1]:
 				self.tAutoFreeze = None
 				return
+			# (the tooltip must have been built after the activation, or still be the help text of the plot: no old tooltip of something else)
+			if self.fCursorTipShownAt < tAuto[2] and CyInterface().getHelpString() != self.szCursorTipText:
+				return
 			self.tAutoFreeze = None
 			if self.freezeCursorTooltip() and len(self.aFrozen) > 0:
 				self.szAutoSelPrefix = self.aFrozen[-1][0]
+				self.tAutoSelUnit = tAuto[3]
 		except:
 			self.tAutoFreeze = None
+			self.tipError("updateAutoFreeze")
 
 	# the frozen tooltip of the unit that a right click selected from a stack, and the stack tooltip that it belongs to
 	def closeAutoSelWindows( self ):
@@ -5582,6 +5903,7 @@ class CvMainInterface:
 					iFound = i
 					break
 			self.szAutoSelPrefix = u""
+			self.tAutoSelUnit = None
 			if iFound < 0:
 				return
 			iRoot = iFound
@@ -5591,16 +5913,18 @@ class CvMainInterface:
 				iRoot = self.aFrozen[iRoot][6]
 			self.closeFrozenChild(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE), iRoot)
 		except:
-			pass
+			self.tipError("closeAutoSelWindows")
 
 	# called by the game for every order that the player gives to a group (CvEventManager.onSelectionGroupPushMission)
-	def onWaypointMission( self, eOwner, eMission ):
+	def onWaypointMission( self, eOwner, eMission, aUnitIds = None ):
 		try:
 			if len(self.szAutoSelPrefix) > 0 and eOwner == gc.getGame().getActivePlayer():
-				# an order for the unit that was selected from a stack tooltip: the frozen tooltips of the stack go
-				self.closeAutoSelWindows()
+				# an order for the unit that was selected from a stack tooltip: the frozen tooltips of the stack go (an order for other units does
+				# not close them)
+				if aUnitIds is None or self.tAutoSelUnit is None or (self.tAutoSelUnit[1] in aUnitIds):
+					self.closeAutoSelWindows()
 		except:
-			pass
+			self.tipError("onWaypointMission")
 		try:
 			if self.iWpUnit < 0:
 				return
@@ -5799,6 +6123,25 @@ class CvMainInterface:
 			tRel = (tLayout[0] - self.aFrozen[iParent][1][0], tLayout[1] - self.aFrozen[iParent][1][1])
 		self.aFrozen.append([szPrefix, tLayout, aszParas, aiIndent, dDetails, tAnchor, iParent, tRel])
 		self.bTipFrozen = True
+		try:
+			# (the unit of every name: the tooltip lists the units in the order of the moment, a later selection must not change that)
+			if iParent < 0 and tAnchor is not None:
+				dHeads = {}
+				for k in range(len(aszParas)):
+					if self.isUnitHeader(aszParas[k]):
+						pHead = self.getHeaderUnit(iLevel, aszParas, k, True)
+						if pHead is not None and not pHead.isNone():
+							dHeads[k] = (pHead.getOwner(), pHead.getID())
+				if len(self.dHeaderUnits) > 100:
+					dKeep = {}
+					for tFz in self.aFrozen:
+						if self.dHeaderUnits.has_key(tFz[0]):
+							dKeep[tFz[0]] = self.dHeaderUnits[tFz[0]]
+					self.dHeaderUnits = dKeep
+				if len(dHeads) > 0:
+					self.dHeaderUnits[szPrefix] = dHeads
+		except:
+			self.tipError("addFrozenWindow")
 
 	# after the game window was activated again (alt-tab) the widgets of the frozen windows are gone: they are drawn again a few frames later
 	def windowActivated( self ):
@@ -6131,7 +6474,7 @@ class CvMainInterface:
 			self.iTipSelIdx = 0
 			if self.bTipWheel:
 				self.bTipWheel = False
-				gc.getGame().setWheelCapture(False)
+				self.setWheelCapture(False)
 		except:
 			pass
 
@@ -6462,9 +6805,9 @@ class CvMainInterface:
 				bWheel = True
 		except:
 			pass
-		if bWheel != self.bTipWheel:
+		if bWheel != self.bTipWheel and not self.bTradeSel:
 			self.bTipWheel = bWheel
-			gc.getGame().setWheelCapture(bWheel)
+			self.setWheelCapture(bWheel)
 		if bWheel:
 			iNotches = gc.getGame().takeWheelNotches()
 			if iNotches != 0:
@@ -6612,6 +6955,11 @@ class CvMainInterface:
 			szText = self.getPromotionTipText(aszLines[iLineIdx])
 			if len(szText) > 0:
 				self.showSecondTip(screen, szText, iCY, tTop, iFz)
+		elif iPara >= 0 and iSel < 0 and self.dTraderWin.has_key(self.aFrozen[iFz][0]) and self.dTraderLines.has_key(self.normTipText(aszTopParas[iPara])):
+			# a line of a colony in the tooltip of a good: the export settings of the colony for that good and its stock
+			szTraderChild = self.getTraderChildText(self.dTraderWin[self.aFrozen[iFz][0]], self.dTraderLines[self.normTipText(aszTopParas[iPara])])
+			if len(szTraderChild) > 0:
+				self.showSecondTip(screen, szTraderChild, iCY, tTop, iFz)
 		elif tWp is not None and tWp["paras"].has_key(iPara):
 			# a line of waypoints: the list of the waypoints, or the choices of a waypoint (the one chosen with the wheel in yellow)
 			if bWpRow:
@@ -7257,6 +7605,12 @@ class CvMainInterface:
 				return None
 			if self.aFrozen[iLevel][6] >= 0 or not self.isUnitHeader(aszParas[iPara]):
 				return None
+			dHeads = self.dHeaderUnits.get(self.aFrozen[iLevel][0])
+			if dHeads is not None and dHeads.has_key(iPara):
+				pFix = gc.getPlayer(dHeads[iPara][0]).getUnit(dHeads[iPara][1])
+				if pFix is not None and not pFix.isNone() and (bAny or pFix.getOwner() == gc.getGame().getActivePlayer()):
+					return pFix
+				return None
 			szFirst = re.sub(u"<[^>]*>", u"", aszParas[iPara]).split(u",")[0].strip()
 			iNth = 0
 			for k in range(iPara):
@@ -7382,7 +7736,7 @@ class CvMainInterface:
 		if self.bTipWheel:
 			self.bTipWheel = False
 			try:
-				gc.getGame().setWheelCapture(False)
+				self.setWheelCapture(False)
 			except:
 				pass
 		(szPrefix, tLayout, aszParas, aiIndent, dDetails, tAnchor, iParent, tRel) = self.aFrozen.pop()
@@ -7643,7 +7997,7 @@ class CvMainInterface:
 						self.iTipSelPara = -1
 						if self.bTipWheel:
 							self.bTipWheel = False
-							gc.getGame().setWheelCapture(False)
+							self.setWheelCapture(False)
 					except:
 						pass
 					return
@@ -7688,12 +8042,14 @@ class CvMainInterface:
 										break
 								self.tSecondTipKey = tKeySel
 								self.szAutoSelPrefix = u""
+								self.tAutoSelUnit = None
 							self.refreshWaypointRows(screenSel, pSelect)
 						if tBlock is not None and self.bSecondTipShown and self.tPreviewLayout is not None:
 							# a line of a unit of a stack: the tooltip of the unit (beside the line) is frozen at once
 							self.dropPreviewSelectHint()
 							self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
 							self.szAutoSelPrefix = self.aFrozen[-1][0]
+							self.tAutoSelUnit = (pSelect.getOwner(), pSelect.getID())
 						else:
 							self.unfreezeAllTips()
 						return
@@ -7722,7 +8078,7 @@ class CvMainInterface:
 			self.tSecondTipKey = None
 			if self.bTipWheel:
 				self.bTipWheel = False
-				gc.getGame().setWheelCapture(False)
+				self.setWheelCapture(False)
 		except:
 			pass
 
@@ -8299,6 +8655,29 @@ class CvMainInterface:
 		self.szPendingHelp = None
 		self.saveTipSettings()
 
+	def setTipDebug( self, bValue ):
+		self.bTipDebug = bool(bValue)
+		self.saveTipSettings()
+
+	# test phase: an error in the code of the tooltips is shown as a message (once for the same error) instead of being swallowed
+	def tipError( self, szWhere ):
+		if not self.bTipDebug:
+			return
+		try:
+			import sys
+			tInfo = sys.exc_info()
+			iLine = -1
+			tb = tInfo[2]
+			while tb is not None:
+				iLine = tb.tb_lineno
+				tb = tb.tb_next
+			szMsg = u"Tooltip error in %s (line %d): %s" % (szWhere, iLine, str(tInfo[1]))
+			if szMsg != self.szLastTipError:
+				self.szLastTipError = szMsg
+				self.showModMessage(szMsg)
+		except:
+			pass
+
 	def setTipAutoFreeze( self, bValue ):
 		self.bTipAutoFreeze = bool(bValue)
 		if not self.bTipAutoFreeze:
@@ -8322,6 +8701,10 @@ class CvMainInterface:
 				f.write("autofreeze=1\n")
 			else:
 				f.write("autofreeze=0\n")
+			if self.bTipDebug:
+				f.write("debug=1\n")
+			else:
+				f.write("debug=0\n")
 			f.close()
 		except:
 			pass
@@ -8377,6 +8760,7 @@ class CvMainInterface:
 			pass
 		self.updateEscHold()
 		self.updateAutoFreeze()
+		self.updateTradeTipSelect()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
 			# X held: all frozen windows are closed
 			self.bXHoldDone = True
@@ -8658,6 +9042,11 @@ class CvMainInterface:
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
 
 		if (inputClass.getNotifyCode() == NotifyCode.NOTIFY_CLICKED):
+
+			# WTP: right click on the picture of a good of the import / export window with a line of its tooltip chosen (Shift + wheel): it is run
+			if (inputClass.getButtonType() == WidgetTypes.WIDGET_HELP_YIELD and (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP)):
+				if self.runTradeTipSelection():
+					return 1
 
 			if (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == BUILDING_MANAGMENT_TOGGLE):
 				BUILDING_MANAGMENT_PANEL_UP = True
