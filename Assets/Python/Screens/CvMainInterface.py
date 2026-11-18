@@ -6199,6 +6199,33 @@ class CvMainInterface:
 			self.tipError("runTradeTipSelection")
 		return False
 
+	# left click on the picture of a good of the import / export window: the tooltip that is shown for it is frozen (like X), a click on the
+	# picture of a good whose tooltip is frozen releases that tooltip (with the windows that belong to it)
+	def toggleTradeTipFreeze( self ):
+		try:
+			if not self.isTradeWindowOpen():
+				return False
+			iYield = CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
+			if iYield < 0:
+				return False
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			for i in range(len(self.aFrozen)):
+				if self.dTraderWin.get(self.aFrozen[i][0], -1) == iYield:
+					self.clearTradeTipSelect(screen)
+					self.closeFrozenChild(screen, i)
+					return True
+			if self.bCursorTipShown and self.tTipLayout is not None and self.iTradeTipYield == iYield and self.szCursorTipText == self.szTradeTipText:
+				self.clearTradeTipSelect(screen)
+				self.freezeCursorTooltip()
+				return True
+			if self.szPendingHelp is not None and self.iTradeTipYield == iYield:
+				# (the tooltip still waits for its delay: the click shows it frozen at once)
+				self.pressX()
+				return True
+		except:
+			self.tipError("toggleTradeTipFreeze")
+		return False
+
 	def updateAutoFreeze( self ):
 		try:
 			tAuto = self.tAutoFreeze
@@ -9450,6 +9477,10 @@ class CvMainInterface:
 			# WTP: right click on the picture of a good of the import / export window with a line of its tooltip chosen (Shift + wheel): it is run
 			if (inputClass.getButtonType() == WidgetTypes.WIDGET_HELP_YIELD and (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP)):
 				if self.runTradeTipSelection():
+					return 1
+			# WTP: left click on the picture of a good of the import / export window: the tooltip of the good is frozen / released
+			if (inputClass.getButtonType() == WidgetTypes.WIDGET_HELP_YIELD and (inputClass.getFlags() & MouseFlags.MOUSE_LBUTTONUP)):
+				if self.toggleTradeTipFreeze():
 					return 1
 
 			if (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == BUILDING_MANAGMENT_TOGGLE):
