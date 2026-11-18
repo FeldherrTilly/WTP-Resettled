@@ -7554,6 +7554,16 @@ class CvMainInterface:
 			if tKindHit is not None and tKindHit[0] == "list" and iPara >= 0 and iPara < len(aszParas):
 				if self.openGoodsTradeWindow(iLevel, aszParas, tKindHit[1]):
 					return
+			# the same on the line "Stored..." / "Producing..." of the city tooltip itself (as if the right click was made in its child window)
+			if tKindHit is None and iPara >= 0 and self.aFrozen[iLevel][4].has_key(iPara):
+				aChild = self.carryColors(self.aFrozen[iLevel][4][iPara].split(u"\n"))
+				iChildKind = -1
+				if self.isStoredGoodsWindow(aChild):
+					iChildKind = 0
+				elif self.isStoredGoodsWindow(aChild, "TXT_KEY_CITY_BAR_PRODUCING"):
+					iChildKind = 1
+				if iChildKind >= 0 and self.openGoodsTradeWindow(iLevel, aChild, iChildKind):
+					return
 			if iPara >= 0 and iPara < len(aszParas):
 				(aszCmd, iCmd) = self.getCommandParas(iLevel, aszParas, iPara)
 				iOption = -1
