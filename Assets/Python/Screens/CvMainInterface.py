@@ -4598,7 +4598,7 @@ class CvMainInterface:
 							if not gc.getYieldInfo(iYield).isIgnoredForStorageCapacity() and gc.getYieldInfo(iYield).isCargo():
 								iNet += pCity.calculateNetYield(iYield)
 						if iTotal * 10 >= iMax * 9 or iTotal + 5 * iNet >= iMax:
-							szStorage = u"<color=255,140,0,255>" + szStorage + u"</color>"
+							szStorage = u"<color=" + WtpColors.code(WtpColors.RAW_SCARCE) + u">" + szStorage + u"</color>"
 						aOut.append([szStorage, szForecast])
 					# the line of the stock in one line; red: no food or no lumber in the city
 					szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOLD", ())
@@ -4611,7 +4611,7 @@ class CvMainInterface:
 							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_WOOD", ())
 						else:
 							szLabel = localText.getText("TXT_KEY_WTP_TIP_STORED_FOOD", ())
-						szLabel = u"<color=255,0,0,255>" + szLabel + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.RAW_MISSING) + u">" + szLabel + u"</color>"
 					# the goods of the list: exported ones golden yellow, imported ones in the color of the imports in the production line
 					aSeg = szPara.split(u", ")
 					for k in range(len(aSeg)):
@@ -4619,9 +4619,9 @@ class CvMainInterface:
 						for iYield in range(YieldTypes.NUM_YIELD_TYPES):
 							if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
 								if pCity.isImport(iYield):
-									szColor = u"255,200,110,255"
+									szColor = WtpColors.code(WtpColors.IMPORT)
 								elif pCity.isExport(iYield):
-									szColor = u"255,240,0,255"
+									szColor = WtpColors.code(WtpColors.EXPORT)
 								break
 						if szColor is not None:
 							aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
@@ -4634,11 +4634,11 @@ class CvMainInterface:
 					szLabel = localText.getText("TXT_KEY_WTP_TIP_PRODUCED_FOLD", ())
 					(iState, aMissing, aNeed, aSet) = self.getCityProductionState(pCity)
 					if iState == 2:
-						szLabel = u"<color=255,0,0,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_MISSING", ()) + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.RAW_MISSING) + u">" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_MISSING", ()) + u"</color>"
 					elif iState == 1:
-						szLabel = u"<color=255,140,0,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", ()) + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.RAW_SCARCE) + u">" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", ()) + u"</color>"
 					elif iState == 3:
-						szLabel = u"<color=255,200,110,255>" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", ()) + u"</color>"
+						szLabel = u"<color=" + WtpColors.code(WtpColors.IMPORT) + u">" + localText.getText("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", ()) + u"</color>"
 					if iState > 0:
 						# the affected goods in the list: red (missing) before orange (imports); the same goods: red
 						aSeg = szPara.split(u", ")
@@ -4646,13 +4646,13 @@ class CvMainInterface:
 							szColor = None
 							for iYield in aSet:
 								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
-									szColor = u"255,200,110,255"
+									szColor = WtpColors.code(WtpColors.IMPORT)
 							for iYield in aNeed:
 								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
-									szColor = u"255,140,0,255"
+									szColor = WtpColors.code(WtpColors.RAW_SCARCE)
 							for iYield in aMissing:
 								if aSeg[k].find(unichr(gc.getYieldInfo(iYield).getChar())) >= 0:
-									szColor = u"255,0,0,255"
+									szColor = WtpColors.code(WtpColors.RAW_MISSING)
 							if szColor is not None:
 								aSeg[k] = u"<color=" + szColor + u">" + aSeg[k] + u"</color>"
 						szPara = u", ".join(aSeg)
@@ -6243,12 +6243,12 @@ class CvMainInterface:
 	# (text of the label, color, text that explains it)
 	def getFoldGroups( self ):
 		return [
-			[("TXT_KEY_WTP_TIP_STORED_WOOD", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_WOOD"),
-			("TXT_KEY_WTP_TIP_STORED_FOOD", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_FOOD"),
-			("TXT_KEY_WTP_TIP_STORED_BOTH", u"255,0,0,255", "TXT_KEY_WTP_TIP_STORED_LEGEND_BOTH")],
-			[("TXT_KEY_WTP_TIP_PRODUCED_MISSING", u"255,0,0,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"),
-			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", u"255,140,0,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"),
-			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", u"255,200,110,255", "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET")]
+			[("TXT_KEY_WTP_TIP_STORED_WOOD", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_STORED_LEGEND_WOOD"),
+			("TXT_KEY_WTP_TIP_STORED_FOOD", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_STORED_LEGEND_FOOD"),
+			("TXT_KEY_WTP_TIP_STORED_BOTH", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_STORED_LEGEND_BOTH")],
+			[("TXT_KEY_WTP_TIP_PRODUCED_MISSING", WtpColors.code(WtpColors.RAW_MISSING), "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"),
+			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT", WtpColors.code(WtpColors.RAW_SCARCE), "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"),
+			("TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET", WtpColors.code(WtpColors.IMPORT), "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET")]
 		]
 
 	# the text of the window that explains the colored labels of the folded line "Stored..." or "Produced..." (all colored states of that line,
@@ -6735,10 +6735,10 @@ class CvMainInterface:
 		try:
 			if iKind == 0:
 				szLegend = localText.getText("TXT_KEY_WTP_TIP_STORED_COLORS", ())
-				aColors = [u"255,240,0,255", u"255,200,110,255"]
+				aColors = [WtpColors.code(WtpColors.EXPORT), WtpColors.code(WtpColors.IMPORT)]
 			else:
 				szLegend = localText.getText("TXT_KEY_WTP_TIP_PRODUCED_COLORS", ())
-				aColors = [u"255,0,0,255", u"255,140,0,255", u"255,200,110,255"]
+				aColors = [WtpColors.code(WtpColors.RAW_MISSING), WtpColors.code(WtpColors.RAW_SCARCE), WtpColors.code(WtpColors.IMPORT)]
 			aLegend = szLegend.split(u"\n")
 			aGoods = []
 			for i in range(len(aColors)):
@@ -6777,7 +6777,7 @@ class CvMainInterface:
 	def getMarkedGoodTypes( self, aszParas ):
 		aTypes = []
 		try:
-			aMarks = [u"255,240,0,255", u"255,200,110,255", u"255,0,0,255", u"255,140,0,255"]
+			aMarks = [WtpColors.code(WtpColors.EXPORT), WtpColors.code(WtpColors.IMPORT), WtpColors.code(WtpColors.RAW_MISSING), WtpColors.code(WtpColors.RAW_SCARCE)]
 			for szPara in aszParas:
 				for szSeg in szPara.split(u", "):
 					mColor = re.search(u"<color=(\\d+,\\d+,\\d+,\\d+)>", szSeg)
@@ -8480,6 +8480,9 @@ class CvMainInterface:
 
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TIP_LINE):
 				if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
+					# the line of a colony in the tooltip of a good of the import / export window: the jump (left and right click)
+					if self.tryTraderJump(inputClass.getData2() / 1000, inputClass.getData2() % 1000):
+						return 1
 					# a line of the frozen hover tooltip: right click: Colopedia page of the first named thing of the line (Ctrl: the second)
 					self.openTipPedia(inputClass.getData2(), inputClass.isCtrlKeyDown(), inputClass.isShiftKeyDown())
 				elif (inputClass.getFlags() & MouseFlags.MOUSE_LBUTTONUP):
