@@ -5455,6 +5455,71 @@ class CvMainInterface:
 		except:
 			pass
 
+	# a unit of a stack was selected: in the frozen windows of that stack the line "Set waypoint..." goes to the selected unit (it stands
+	# below the active unit)
+	def refreshWaypointRows( self, screen, pSelect ):
+		try:
+			for iLevel in range(len(self.aFrozen)):
+				if self.aFrozen[iLevel][6] >= 0 or not self.dWpWin.has_key(self.aFrozen[iLevel][0]):
+					continue
+				tAnchor = self.aFrozen[iLevel][5]
+				if tAnchor is None or tAnchor[0] < 0:
+					continue
+				pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+				if pPlot is None or pPlot.isNone() or pPlot.getX() != pSelect.getX() or pPlot.getY() != pSelect.getY():
+					continue
+				self.moveWaypointRow(screen, iLevel, pSelect)
+		except:
+			pass
+
+	def moveWaypointRow( self, screen, iLevel, pUnit ):
+		try:
+			szPrefix = self.aFrozen[iLevel][0]
+			dOld = self.dWpWin[szPrefix]
+			tUnit = (pUnit.getOwner(), pUnit.getID())
+			if dOld["unit"] == tUnit:
+				return
+			aRows = [k for k in dOld["paras"].keys() if dOld["paras"][k] == "row"]
+			if dOld["cmd"] >= 0 or len(aRows) != 1:
+				# (the row is the first line of the child window of "Commands": only its unit changes)
+				dOld["unit"] = tUnit
+				dOld["sea"] = self.isSeaUnit(pUnit)
+				return
+			iOld = aRows[0]
+			(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = self.aFrozen[iLevel][1]
+			aiIndent = self.aFrozen[iLevel][3]
+			aszParas = list(self.aFrozen[iLevel][2])
+			dDetails = self.aFrozen[iLevel][4]
+			self.deleteTipWindow(screen, szPrefix, len(aszLines))
+			aszNewLines = []
+			aiNewPara = []
+			aiNewIndent = []
+			for k in range(len(aszLines)):
+				if aiPara[k] == iOld:
+					iHeight -= iLine
+					continue
+				aszNewLines.append(aszLines[k])
+				if aiPara[k] > iOld:
+					aiNewPara.append(aiPara[k] - 1)
+				else:
+					aiNewPara.append(aiPara[k])
+				aiNewIndent.append(aiIndent[k])
+			aszParas.pop(iOld)
+			dNew = {}
+			for kDet in dDetails.keys():
+				if kDet > iOld:
+					dNew[kDet - 1] = dDetails[kDet]
+				elif kDet < iOld:
+					dNew[kDet] = dDetails[kDet]
+			self.aFrozen[iLevel][1] = (iX, iY, iWidth, iHeight, aszNewLines, aiNewPara, iPad, iLine)
+			self.aFrozen[iLevel][2] = aszParas
+			self.aFrozen[iLevel][3] = aiNewIndent
+			self.aFrozen[iLevel][4] = dNew
+			del self.dWpWin[szPrefix]
+			self.addWaypointRow(screen, iLevel, pUnit)
+		except:
+			pass
+
 	# is the frozen window a list of waypoints (not the line "Set waypoint..." alone)?
 	def isWaypointList( self, tWp ):
 		for k in tWp["paras"].keys():
@@ -7724,6 +7789,8 @@ class CvMainInterface:
 					else:
 						CyInterface().selectUnit(pSelect, True, False, False)
 						self.markTipSelection()
+						if tBlock is not None:
+							self.refreshWaypointRows(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE), pSelect)
 						if tBlock is not None and self.bSecondTipShown and self.tPreviewLayout is not None:
 							# a line of a unit of a stack: the tooltip of the unit (beside the line) is frozen at once
 							self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
