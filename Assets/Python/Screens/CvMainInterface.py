@@ -5842,6 +5842,27 @@ class CvMainInterface:
 		self.fWpStart = (self.getTipNow() / 1000.0)
 		self.unfreezeAllTips()
 
+	# the preview window of a line of a unit: its hint "Right click: Select ..." goes (the unit is selected now)
+	def dropPreviewSelectHint( self ):
+		try:
+			(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = self.tPreviewLayout
+			iHints = self.iPreviewHintLines - self.iPreviewFreezeLines
+			if iHints <= 0:
+				return
+			iTo = len(aszLines) - self.iPreviewFreezeLines
+			iFrom = iTo - iHints
+			if iFrom < 0:
+				return
+			for k in range(iFrom, iTo):
+				if aiPara[k] >= 0:
+					return
+			aszNew = list(aszLines[:iFrom]) + list(aszLines[iTo:])
+			aiNew = list(aiPara[:iFrom]) + list(aiPara[iTo:])
+			self.tPreviewLayout = (iX, iY, iWidth, iHeight - iLine * iHints, aszNew, aiNew, iPad, iLine)
+			self.iPreviewHintLines = self.iPreviewFreezeLines
+		except:
+			pass
+
 	# a unit of the player is activated (event "unitSelected"): the tooltip of the plot under the cursor is frozen as soon as it shows (stack or
 	# single unit); it goes with the first order of the unit
 	def onUnitActivated( self, pUnit ):
@@ -7985,6 +8006,7 @@ class CvMainInterface:
 							self.refreshWaypointRows(screenSel, pSelect)
 						if tBlock is not None and self.bSecondTipShown and self.tPreviewLayout is not None:
 							# a line of a unit of a stack: the tooltip of the unit (beside the line) is frozen at once
+							self.dropPreviewSelectHint()
 							self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
 							self.szAutoSelPrefix = self.aFrozen[-1][0]
 						else:
