@@ -96,7 +96,7 @@ Requires *Civilization IV: Colonization* (patched to 1.01f, as for WTP itself). 
 
 ## Contributing
 
-Contributions are welcome. Each feature lives on its own `feature/<name>` branch based on WTP's `develop`, so it can also be offered to WTP itself. `main` combines all features and is what the releases are built from.
+Contributions are welcome. Each feature lives on its own `feature/<name>` branch based on WTP's `develop`, so it can also be offered to WTP itself. `main` combines all features and is what the releases are built from. Which feature is built on which is shown in [docs/BRANCHES.md](docs/BRANCHES.md).
 
 1. Fork the repository and create a `feature/<name>` branch.
 2. Open a pull request against `main` (or against the matching `feature/*` branch).
