@@ -446,6 +446,7 @@ class CvMainInterface:
 	dFrozenDark = {} # frozen windows that are always drawn in the darker variant (the explanation of a folded line)
 	dFrozenCompanion = {} # frozen windows that belong to the frozen window below them (the explanation of a folded line): they close together
 	tSecondTipKey = None
+	szAutoSelPrefix = u"" # the frozen window of the unit that a right click on a line of a stack selected (it goes when another unit is selected)
 	iTipSelPara = -1 # the line of the frozen tooltip with a chosen target (shift + mouse wheel) and the index of the target
 	iTipSelIdx = 0
 	bTipWheel = False
@@ -7902,10 +7903,21 @@ class CvMainInterface:
 						CyInterface().selectUnit(pSelect, True, False, False)
 						self.markTipSelection()
 						if tBlock is not None:
-							self.refreshWaypointRows(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE), pSelect)
+							screenSel = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+							# the frozen tooltip of the unit that was selected before goes
+							if len(self.szAutoSelPrefix) > 0:
+								tKeySel = self.tSecondTipKey
+								for iOldSel in range(len(self.aFrozen)):
+									if self.aFrozen[iOldSel][0] == self.szAutoSelPrefix:
+										self.closeFrozenChild(screenSel, iOldSel)
+										break
+								self.tSecondTipKey = tKeySel
+								self.szAutoSelPrefix = u""
+							self.refreshWaypointRows(screenSel, pSelect)
 						if tBlock is not None and self.bSecondTipShown and self.tPreviewLayout is not None:
 							# a line of a unit of a stack: the tooltip of the unit (beside the line) is frozen at once
 							self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
+							self.szAutoSelPrefix = self.aFrozen[-1][0]
 						else:
 							self.unfreezeAllTips()
 						return
