@@ -2234,6 +2234,7 @@
 		<Hungarian>A szállítás teljes automatizálása</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WIN_PRESET_BUILD_HELP</Tag>
 		<English>Building material: import clay, stone, tools (feeder 100/150), feeder for horses, sailcloth, hardwood, rope</English>
 		<Portuguese>Material de construção: importar argila, pedra, ferramentas (alimentador 100/150), alimentador para cavalos, lona, madeira de lei, cordas</Portuguese>
 		<French>Matériaux : importer argile, pierre, outils (approvisionnement 100/150), approvisionnement pour chevaux, toile, bois dur, cordes</French>
@@ -2244,7 +2245,6 @@
 		<Hungarian>Építőanyag: agyag, kő, szerszám importja (utánpótlás 100/150), utánpótlás lóhoz, vitorlavászonhoz, keményfához, kötélhez</Hungarian>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_WTP_TRADEROUTE_WIN_PRESET_BUILD_HELP</Tag>
 		<Tag>TXT_KEY_ACTION_AUTOMATE_FULL_HELP</Tag>
 		<English>Automate this unit</English>
 		<Portuguese>Automatizar unidade</Portuguese>
