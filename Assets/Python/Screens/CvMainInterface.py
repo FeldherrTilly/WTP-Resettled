@@ -8050,7 +8050,17 @@ class CvMainInterface:
 					tR["unit"] = (pUnit.getOwner(), pUnit.getID())
 			except:
 				pass
-		self.aTradeReturn.append(tR)
+		# a colony is in the stack only once: a jump away from a colony that is in it already (the jumps went round in a circle) takes the way
+		# back to the first time, the loop between is dropped
+		iSame = -1
+		for iStack in range(len(self.aTradeReturn)):
+			if self.aTradeReturn[iStack]["city"] == tR["city"]:
+				iSame = iStack
+				break
+		if iSame >= 0:
+			self.aTradeReturn = self.aTradeReturn[:iSame + 1]
+		else:
+			self.aTradeReturn.append(tR)
 		tWin.finish(False, -1, True)
 		self.unfreezeAllTips()
 		if tR["map"]:
