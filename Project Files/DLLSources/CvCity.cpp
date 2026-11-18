@@ -914,7 +914,15 @@ void CvCity::doTask(TaskTypes eTask, int iData1, int iData2, bool bOption, bool 
 		break;
 
 	case TASK_HURRY:
-		hurry((HurryTypes)iData1);
+		if (iData2 == 1)
+		{
+			// WTP: only the missing materials are bought (popups of the missing materials)
+			buyMissingYields();
+		}
+		else
+		{
+			hurry((HurryTypes)iData1);
+		}
 		break;
 
 	case TASK_CLEAR_ORDERS:
@@ -2747,6 +2755,103 @@ bool CvCity::canHurry(HurryTypes eHurry, bool bTestVisible) const
 #endif
 	}
 	return true;
+}
+
+int CvCity::getBuyMissingYieldsPrice(UnitTypes eUnit, BuildingTypes eBuilding, bool& bPossible, const int* aiExpected) const
+{
+	bPossible = false;
+	if (eUnit == NO_UNIT && eBuilding == NO_BUILDING)
+	{
+		return 0;
+	}
+	const PlayerTypes eParent = GET_PLAYER(getOwnerINLINE()).getParent();
+	const HurryTypes eHurry = (HurryTypes)GC.getInfoTypeForString("HURRY_GOLD");
+	if (eParent == NO_PLAYER || eHurry == NO_HURRY)
+	{
+		return 0;
+	}
+	bPossible = true;
+	int iPrice = 0;
+	bool bMissing = false;
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (GC.getYieldInfo(eYield).isCargo())
+		{
+			const int iNeeded = (eUnit != NO_UNIT) ? getYieldProductionNeeded(eUnit, eYield) : getYieldProductionNeeded(eBuilding, eYield);
+			int iDeficit = iNeeded - getYieldStored(eYield) - getYieldRushed(eYield);
+			if (aiExpected != NULL && aiExpected[eYield] > 0)
+			{
+				iDeficit -= aiExpected[eYield];
+			}
+			if (iDeficit > 0)
+			{
+				if (!GET_PLAYER(getOwnerINLINE()).isYieldEuropeTradable(eYield))
+				{
+					bPossible = false;
+					return 0;
+				}
+				bMissing = true;
+				iPrice += iDeficit * GET_PLAYER(eParent).getYieldSellPrice(eYield) * GC.getHurryInfo(eHurry).getYieldCostEuropePercent() / 100;
+			}
+		}
+	}
+	if (!bMissing)
+	{
+		bPossible = false;
+	}
+	return iPrice;
+}
+
+bool CvCity::buyMissingYields()
+{
+	const UnitTypes eUnit = getProductionUnit();
+	const BuildingTypes eBuilding = getProductionBuilding();
+	bool bPossible = false;
+	const int iPrice = getBuyMissingYieldsPrice(eUnit, eBuilding, bPossible);
+	if (!bPossible || iPrice <= 0 || GET_PLAYER(getOwnerINLINE()).getGold() < iPrice)
+	{
+		return false;
+	}
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (GC.getYieldInfo(eYield).isCargo())
+		{
+			const int iNeeded = (eUnit != NO_UNIT) ? getYieldProductionNeeded(eUnit, eYield) : getYieldProductionNeeded(eBuilding, eYield);
+			const int iDeficit = iNeeded - getYieldStored(eYield) - getYieldRushed(eYield);
+			if (iDeficit > 0)
+			{
+				changeYieldRushed(eYield, iDeficit);
+			}
+		}
+	}
+	OOS_LOG_3("BuyMissingYields", CvString(getName()).c_str(), iPrice);
+	GET_PLAYER(getOwnerINLINE()).changeGold(-iPrice);
+	return true;
+}
+
+// WTP: at the end of the turn: is the project finished next turn while materials will be missing then (and can they be bought)?
+bool CvCity::isBuyMaterialsPanelWanted() const
+{
+	if (!isHuman() || isNative() || isDisorder() || isProductionAutomated() || !isProduction() || getOwnerINLINE() != GC.getGameINLINE().getActivePlayer())
+	{
+		return false;
+	}
+	const UnitTypes eUnit = getProductionUnit();
+	const BuildingTypes eBuilding = getProductionBuilding();
+	if (eUnit == NO_UNIT && eBuilding == NO_BUILDING)
+	{
+		return false;
+	}
+	const int iTurns = (eUnit != NO_UNIT) ? getProductionTurnsLeft(eUnit, 0) : getProductionTurnsLeft(eBuilding, 0);
+	if (iTurns != 1)
+	{
+		return false;
+	}
+	int aiYields[NUM_YIELD_TYPES];
+	calculateNetYields(aiYields, NULL, NULL, false);
+	bool bPossible = false;
+	const int iPrice = getBuyMissingYieldsPrice(eUnit, eBuilding, bPossible, aiYields);
+	return bPossible && iPrice > 0 && GET_PLAYER(getOwnerINLINE()).getGold() >= iPrice;
 }
 
 void CvCity::hurry(HurryTypes eHurry)
@@ -8139,14 +8244,65 @@ void CvCity::doGrowth()
 	}
 }
 
-void CvCity::doYields()
+// WTP: the materials of the project in production are kept (not sold to the domestic market, not lost to a storage overflow) while the project is
+// finished within two turns or materials of it were bought: aiProjectReserve is the amount of every material that is kept.
+// Returns true if the project is protected. aiYields are the net yields of the turn. Used by doYields and by the forecast of the tooltip.
+bool CvCity::calculateProjectReserve(const int aiYields[NUM_YIELD_TYPES], int aiProjectReserve[NUM_YIELD_TYPES]) const
 {
-	OOS_LOG("CvCity::doYields start", getID());
-	int aiYields[NUM_YIELD_TYPES];
-	calculateNetYields(aiYields, NULL, NULL, true);
+	for (int iReserve = 0; iReserve < NUM_YIELD_TYPES; ++iReserve)
+	{
+		aiProjectReserve[iReserve] = 0;
+	}
+	bool bProtectProject = false;
+	if (isHuman() && !isNative() && !isProductionAutomated() && isProduction())
+	{
+		const UnitTypes eProjectUnit = getProductionUnit();
+		const BuildingTypes eProjectBuilding = getProductionBuilding();
+		if (eProjectUnit != NO_UNIT || eProjectBuilding != NO_BUILDING)
+		{
+			bool bBought = false;
+			for (YieldTypes eRushed = FIRST_YIELD; eRushed < NUM_YIELD_TYPES; ++eRushed)
+			{
+				if (GC.getYieldInfo(eRushed).isCargo() && getYieldRushed(eRushed) > 0)
+				{
+					bBought = true;
+					break;
+				}
+			}
+			const int iProjectTurns = (eProjectUnit != NO_UNIT) ? getProductionTurnsLeft(eProjectUnit, 0) : getProductionTurnsLeft(eProjectBuilding, 0);
+			if (bBought || iProjectTurns <= 2)
+			{
+				bProtectProject = true;
+				for (YieldTypes eReserve = FIRST_YIELD; eReserve < NUM_YIELD_TYPES; ++eReserve)
+				{
+					if (GC.getYieldInfo(eReserve).isCargo() && !GC.getYieldInfo(eReserve).isIgnoredForStorageCapacity())
+					{
+						const int iNeeded = (eProjectUnit != NO_UNIT) ? getYieldProductionNeeded(eProjectUnit, eReserve) : getYieldProductionNeeded(eProjectBuilding, eReserve);
+						const int iStoredAfter = std::max(0, getYieldStored(eReserve) + aiYields[eReserve]);
+						aiProjectReserve[eReserve] = std::min(iStoredAfter, std::max(0, iNeeded - getYieldRushed(eReserve)));
+					}
+				}
+			}
+		}
+	}
+	return bProtectProject;
+}
 
-	const int iTotalYields = getTotalYieldStored();
-	const int iMaxCapacity = getMaxYieldCapacity();
+// WTP: what the domestic market buys of the net yields of the turn (aiSold: amount, aiProfit: gold). Nothing is changed in the city.
+// Used by doYields and by the forecast of the tooltip.
+void CvCity::calculateDomesticMarketSales(const int aiYields[NUM_YIELD_TYPES], const int aiProjectReserve[NUM_YIELD_TYPES], int aiSold[NUM_YIELD_TYPES], int aiProfit[NUM_YIELD_TYPES]) const
+{
+	int aiLocal[NUM_YIELD_TYPES];
+	for (int iYield = 0; iYield < NUM_YIELD_TYPES; ++iYield)
+	{
+		aiLocal[iYield] = aiYields[iYield];
+		aiSold[iYield] = 0;
+		aiProfit[iYield] = 0;
+	}
+	if (getMarketModifier() <= 0)
+	{
+		return;
+	}
 
 	// WTP, ray, Happiness - START
 	int iCityHappinessDomesticMarketGoldModifiers = getCityHappiness() - getCityUnHappiness();
@@ -8164,57 +8320,350 @@ void CvCity::doYields()
 	int iDomesticMarketProfitModifierInPercent = GET_PLAYER(getOwnerINLINE()).getTotalPlayerDomesticMarketProfitModifierInPercent();
 	// WTP, ray, Domestic Market Profit Modifier - END
 
-	// R&R, ray, adjustment Domestic Markets
+	YieldCargoArray<int> aYields;
+	getYieldDemands(aYields);
+	const InfoArray<YieldTypes>& kYieldArray = GC.getDomesticDemandYieldTypes();
+	for (int i = 0; i < kYieldArray.getLength(); ++i)
+	{
+		const YieldTypes eYield = kYieldArray.get(i);
 
+		FAssert(validEnumRange(eYield));
+		int iAmount = aYields.get(eYield);
+		if (iAmount > 0 && (getYieldStored(eYield) + aiLocal[eYield]) > std::max(getMaintainLevel(eYield), aiProjectReserve[eYield])) // R&R, ray, improvment from vetiarvind (WTP: the materials of the project are kept)
+		{
+			const int iAmountForSale = getYieldStored(eYield) + aiLocal[eYield] - std::max(getMaintainLevel(eYield), aiProjectReserve[eYield]);
+			if (iAmount > iAmountForSale)
+			{
+				iAmount = iAmountForSale;
+			}
+			scaled rProfit(iAmount* getYieldBuyPrice(eYield));
+
+			if (iCityHappinessDomesticMarketGoldModifiers != 0)
+				rProfit *= per100(100 + iCityHappinessDomesticMarketGoldModifiers);
+
+			if (iCityLawDomesticMarketGoldModifiers != 0)
+				rProfit *= per100(100 + iCityLawDomesticMarketGoldModifiers);
+
+			if (iDomesticMarketProfitModifierInPercent != 0)
+				rProfit *= per100(100 + iDomesticMarketProfitModifierInPercent);
+
+			const int iProfit = rProfit.round();
+			aiLocal[eYield] -= iAmount;
+			aiSold[eYield] += iAmount;
+			aiProfit[eYield] += iProfit;
+		}
+	}
+}
+
+// WTP: the gold of a surplus of iLoss pieces of a good that is sold to the better one of Europe and Africa (Custom House: to the sell percentage
+// of the building). 0 if the surplus is not sold but lost. Used by doYields and by the forecast of the tooltip.
+int CvCity::calculateOverflowSaleProfit(YieldTypes eYield, int iLoss, TradeLocationTypes* peBestPort) const
+{
+	if (peBestPort != NULL)
+	{
+		*peBestPort = TRADE_LOCATION_EUROPE;
+	}
+	if (iLoss <= 0)
+	{
+		return 0;
+	}
+
+	// compare possible profits from selling Europe and Africa, and use the best possible
+	const int iEuropeProfit = GET_PLAYER(getOwnerINLINE()).getSellToEuropeProfit(eYield, iLoss);
+	const int iAfricaProfit = GET_PLAYER(getOwnerINLINE()).getSellToAfricaProfit(eYield, iLoss);
+	int iComparableProfitInEast = std::max(iEuropeProfit, iAfricaProfit);
+	if (peBestPort != NULL)
+	{
+		*peBestPort = iEuropeProfit > iAfricaProfit ? TRADE_LOCATION_EUROPE : TRADE_LOCATION_AFRICA;
+	}
+
+	// R&R, ray , Changes to Custom House - START
+	// Yield is boycotted but you have Custom House
+	if (iComparableProfitInEast == 0 && getIgnoresBoycott())
+	{
+		if (GET_PLAYER(getOwnerINLINE()).getParent() == NO_PLAYER)
+		{
+			iComparableProfitInEast = 0;
+		}
+		else
+		{
+			int briberate = GET_PLAYER(getOwnerINLINE()).getTaxRate();
+			int minPrice = GC.getYieldInfo(eYield).price(FIRST_TRADELOCATION).buyLow;
+			int iAmount = iLoss;
+			iComparableProfitInEast = iAmount * minPrice;
+			iComparableProfitInEast -= (iComparableProfitInEast * briberate) / 100;
+		}
+	}
+
+	return getStorageLossSellPercentage() * iComparableProfitInEast / 100;
+	// R&R, ray , Changes to Custom House - END
+}
+
+// WTP: the storage overflow of the turn change: the number of pieces of every good that is lost (or sold, see calculateOverflowSaleProfit).
+// aiYields are the net yields of the turn after the domestic market. abOverflow tells which goods are hit by the overflow rule at all (also with 0 pieces).
+// Rules: without Custom House the overflow is shared by the goods in proportion to their stock; with a Custom House and free space the goods above their
+// sell threshold are sold; half of the surplus is lost per turn (at least 1). The materials of a protected project are not lost, goods that are worth
+// more are lost in the same number instead (the most valuable first).
+// piCutAtStart / piCutLeft: pieces of the project materials that would be lost / for which no other good was found (for the log).
+// Used by doYields and by the forecast of the tooltip, so that both always show the same.
+void CvCity::calculateStorageOverflow(const int aiYields[NUM_YIELD_TYPES], const int aiProjectReserve[NUM_YIELD_TYPES], bool bProtectProject, int aiLoss[NUM_YIELD_TYPES], bool abOverflow[NUM_YIELD_TYPES], int* piCutAtStart, int* piCutLeft) const
+{
+	const int iTotalYields = getTotalYieldStored();
+	const int iMaxCapacity = getMaxYieldCapacity();
+	const bool bHasUnlockedTradeSettings = getHasUnlockedStorageLossTradeSettings();
+
+	int aiExcess[NUM_YIELD_TYPES];
+	int aiProtectedCut[NUM_YIELD_TYPES];
+	int aiExtraLoss[NUM_YIELD_TYPES];
+	for (int iInit = 0; iInit < NUM_YIELD_TYPES; ++iInit)
+	{
+		aiExcess[iInit] = 0;
+		aiProtectedCut[iInit] = 0;
+		aiExtraLoss[iInit] = 0;
+		aiLoss[iInit] = 0;
+		abOverflow[iInit] = false;
+	}
+	if (piCutAtStart != NULL)
+	{
+		*piCutAtStart = 0;
+	}
+	if (piCutLeft != NULL)
+	{
+		*piCutLeft = 0;
+	}
+
+	// the surplus of every good (the goods of the other cases of the switch in doYields are no storage goods)
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (eYield == YIELD_FOOD || eYield == YIELD_HAMMERS || eYield == YIELD_CROSSES || eYield == YIELD_EDUCATION)
+		{
+			continue;
+		}
+		if (!GC.getYieldInfo(eYield).isCargo() || GC.getYieldInfo(eYield).isIgnoredForStorageCapacity())
+		{
+			continue;
+		}
+		const int iStored = std::max(0, getYieldStored(eYield) + aiYields[eYield]);
+		int iExcess = 0;
+		// Here special sell behaviour for Custom House
+		if (bHasUnlockedTradeSettings && iTotalYields < iMaxCapacity)
+		{
+			int sellThreshold = 0;
+			// R&R, ray, finishing Custom House Screen
+			if (isCustomHouseNeverSell(eYield))
+			{
+				sellThreshold = iMaxCapacity;
+			}
+			else
+			{
+				sellThreshold = getCustomHouseSellThreshold(eYield);
+			}
+			// WTP: the materials of a protected project are not sold by the Custom House either
+			if (bProtectProject)
+			{
+				sellThreshold = std::max(sellThreshold, aiProjectReserve[eYield]);
+			}
+			iExcess = iStored - sellThreshold;
+		}
+		// normal overflow
+		else if (iStored > 0 && iTotalYields > iMaxCapacity)
+		{
+			// R&R, ray, reprogrammed Overflow for New City Storage
+			iExcess = (iTotalYields - iMaxCapacity) * iStored / iTotalYields;
+			if (iExcess == 0)
+			{
+				iExcess = 1;
+			}
+		}
+		aiExcess[eYield] = iExcess;
+	}
+
+	// WTP: the materials of the project are not lost to a storage overflow. Goods that are worth more are lost in the same number instead
+	// (the most valuable first)
+	if (bProtectProject && iTotalYields > iMaxCapacity && !(bHasUnlockedTradeSettings && iTotalYields < iMaxCapacity))
+	{
+		int aiStoredAfter[NUM_YIELD_TYPES];
+		int aiOwnLoss[NUM_YIELD_TYPES];
+		int iTotalCut = 0;
+		for (YieldTypes eProtectYield = FIRST_YIELD; eProtectYield < NUM_YIELD_TYPES; ++eProtectYield)
+		{
+			aiStoredAfter[eProtectYield] = 0;
+			aiOwnLoss[eProtectYield] = 0;
+			if (!GC.getYieldInfo(eProtectYield).isCargo() || GC.getYieldInfo(eProtectYield).isIgnoredForStorageCapacity())
+			{
+				continue;
+			}
+			const int iStoredAfter = std::max(0, getYieldStored(eProtectYield) + aiYields[eProtectYield]);
+			aiStoredAfter[eProtectYield] = iStoredAfter;
+			if (iStoredAfter > 0)
+			{
+				int iExcess = (iTotalYields - iMaxCapacity) * iStoredAfter / iTotalYields;
+				if (iExcess == 0)
+				{
+					iExcess = 1;
+				}
+				int iLoss = std::max(GC.getCITY_YIELD_DECAY_PERCENT() * iExcess / 100, GC.getMIN_CITY_YIELD_DECAY());
+				iLoss = std::min(iLoss, iExcess);
+				const int iCut = std::max(0, iLoss - (iStoredAfter - aiProjectReserve[eProtectYield]));
+				aiProtectedCut[eProtectYield] = iCut;
+				aiOwnLoss[eProtectYield] = iLoss - iCut;
+				iTotalCut += iCut;
+			}
+		}
+		const int iTotalCutAtStart = iTotalCut;
+		while (iTotalCut > 0)
+		{
+			YieldTypes eBest = NO_YIELD;
+			int iBestPrice = -1;
+			int iBestRoom = 0;
+			for (YieldTypes eReplace = FIRST_YIELD; eReplace < NUM_YIELD_TYPES; ++eReplace)
+			{
+				if (!GC.getYieldInfo(eReplace).isCargo() || GC.getYieldInfo(eReplace).isIgnoredForStorageCapacity())
+				{
+					continue;
+				}
+				const int iRoom = aiStoredAfter[eReplace] - aiProjectReserve[eReplace] - aiOwnLoss[eReplace] - aiExtraLoss[eReplace];
+				const int iReplacePrice = GC.getYieldInfo(eReplace).price(FIRST_TRADELOCATION).buyLow;
+				if (iRoom > 0 && iReplacePrice > iBestPrice)
+				{
+					eBest = eReplace;
+					iBestPrice = iReplacePrice;
+					iBestRoom = iRoom;
+				}
+			}
+			if (eBest == NO_YIELD)
+			{
+				break;
+			}
+			const int iTake = std::min(iBestRoom, iTotalCut);
+			aiExtraLoss[eBest] += iTake;
+			iTotalCut -= iTake;
+		}
+		if (piCutAtStart != NULL)
+		{
+			*piCutAtStart = iTotalCutAtStart;
+		}
+		if (piCutLeft != NULL)
+		{
+			*piCutLeft = iTotalCut;
+		}
+	}
+
+	// the loss of every good
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (eYield == YIELD_FOOD || eYield == YIELD_HAMMERS || eYield == YIELD_CROSSES || eYield == YIELD_EDUCATION)
+		{
+			continue;
+		}
+		if (!GC.getYieldInfo(eYield).isCargo() || GC.getYieldInfo(eYield).isIgnoredForStorageCapacity())
+		{
+			continue;
+		}
+		if (aiExcess[eYield] > 0 || aiExtraLoss[eYield] > 0)
+		{
+			abOverflow[eYield] = true;
+			int iLoss = 0;
+			if (aiExcess[eYield] > 0)
+			{
+				iLoss = std::max(GC.getCITY_YIELD_DECAY_PERCENT() * aiExcess[eYield] / 100, GC.getMIN_CITY_YIELD_DECAY());
+				iLoss = std::min(iLoss, aiExcess[eYield]);
+				iLoss -= aiProtectedCut[eYield]; // WTP: not the materials of a project that is finished soon
+			}
+			iLoss += aiExtraLoss[eYield]; // WTP: instead of the protected materials
+			aiLoss[eYield] = std::max(0, std::min(iLoss, std::max(0, getYieldStored(eYield) + aiYields[eYield])));
+		}
+	}
+}
+
+// WTP: forecast of the storage overflow of the next turn change for the tooltip of the city: aiLoss: pieces of every good that are lost or sold,
+// aiGold: the gold that the sale of them brings (0: lost). The same calculation as in doYields. An estimate: the prices at the turn change can differ
+// (other cities sell before this one), the net yields can change until the turn ends.
+void CvCity::calculateStorageOverflowForecast(int aiLoss[NUM_YIELD_TYPES], int aiGold[NUM_YIELD_TYPES]) const
+{
+	int aiYields[NUM_YIELD_TYPES];
+	calculateNetYields(aiYields);
+
+	int aiProjectReserve[NUM_YIELD_TYPES];
+	const bool bProtectProject = calculateProjectReserve(aiYields, aiProjectReserve);
+
+	int aiSold[NUM_YIELD_TYPES];
+	int aiSaleProfit[NUM_YIELD_TYPES];
+	calculateDomesticMarketSales(aiYields, aiProjectReserve, aiSold, aiSaleProfit);
+	for (int iYield = 0; iYield < NUM_YIELD_TYPES; ++iYield)
+	{
+		aiYields[iYield] -= aiSold[iYield];
+	}
+
+	bool abOverflow[NUM_YIELD_TYPES];
+	calculateStorageOverflow(aiYields, aiProjectReserve, bProtectProject, aiLoss, abOverflow, NULL, NULL);
+
+	const PlayerTypes eParent = GET_PLAYER(getOwnerINLINE()).getParent();
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		aiGold[eYield] = 0;
+		if (aiLoss[eYield] > 0 && eParent != NO_PLAYER)
+		{
+			const int iProfit = calculateOverflowSaleProfit(eYield, aiLoss[eYield], NULL);
+			if (iProfit > 0)
+			{
+				aiGold[eYield] = iProfit * GET_PLAYER(getOwnerINLINE()).getExtraTradeMultiplier(eParent) / 100;
+			}
+		}
+	}
+}
+
+void CvCity::doYields()
+{
+	OOS_LOG("CvCity::doYields start", getID());
+	int aiYields[NUM_YIELD_TYPES];
+	calculateNetYields(aiYields, NULL, NULL, true);
+
+	const int iTotalYields = getTotalYieldStored();
+	const int iMaxCapacity = getMaxYieldCapacity();
+
+	// R&R, ray, adjustment Domestic Markets
+	// WTP: the materials of the project in production are kept (see calculateProjectReserve)
+	int aiProjectReserve[NUM_YIELD_TYPES];
+	const bool bProtectProject = calculateProjectReserve(aiYields, aiProjectReserve);
 
 	if (getMarketModifier() > 0)
 	{
-		int iTotalProfitFromDomesticMarket = 0;
-		YieldCargoArray<int> aYields;
-		getYieldDemands(aYields);
-		const InfoArray<YieldTypes>& kYieldArray = GC.getDomesticDemandYieldTypes();
-		for (int i = 0; i < kYieldArray.getLength(); ++i)
+		int aiSold[NUM_YIELD_TYPES];
+		int aiSaleProfit[NUM_YIELD_TYPES];
+		calculateDomesticMarketSales(aiYields, aiProjectReserve, aiSold, aiSaleProfit);
+		for (YieldTypes eSold = FIRST_YIELD; eSold < NUM_YIELD_TYPES; ++eSold)
 		{
-			const YieldTypes eYield = kYieldArray.get(i);
-
-			FAssert(validEnumRange(eYield));
-			int iAmount = aYields.get(eYield);
-			if (iAmount > 0 && (getYieldStored(eYield) + aiYields[eYield]) > getMaintainLevel(eYield)) // R&R, ray, improvment from vetiarvind
+			if (aiSold[eSold] > 0)
 			{
-				const int iAmountForSale = getYieldStored(eYield) + aiYields[eYield] - getMaintainLevel(eYield);
-				if (iAmount > iAmountForSale)
-				{
-					iAmount = iAmountForSale;
-				}
-				scaled rProfit(iAmount* getYieldBuyPrice(eYield));
-				
-				if (iCityHappinessDomesticMarketGoldModifiers != 0)
-					rProfit *= per100(100 + iCityHappinessDomesticMarketGoldModifiers);
-				
-				if (iCityLawDomesticMarketGoldModifiers != 0)
-					rProfit *= per100(100 + iCityLawDomesticMarketGoldModifiers);
-
-				if (iDomesticMarketProfitModifierInPercent != 0)
-					rProfit *= per100(100 + iDomesticMarketProfitModifierInPercent);
-
-				const int iProfit = rProfit.round();
-				aiYields[eYield] -= iAmount;
-				GET_PLAYER(getOwnerINLINE()).changeGold(iProfit);
-				GET_PLAYER(getOwnerINLINE()).changeDomesticMarketIncome(iProfit); // WTP: shown below the gold
-				iTotalProfitFromDomesticMarket = iTotalProfitFromDomesticMarket + iProfit;
+				aiYields[eSold] -= aiSold[eSold];
+				GET_PLAYER(getOwnerINLINE()).changeGold(aiSaleProfit[eSold]);
+				GET_PLAYER(getOwnerINLINE()).changeDomesticMarketIncome(aiSaleProfit[eSold]); // WTP: shown below the gold
 			}
 		}
-		//if (iTotalProfitFromDomesticMarket != 0 && GC.getDOMESTIC_SALES_MESSAGES() == 1)
-		//{
-		//	CvWString szBuffer = gDLL->getText("TXT_KEY_GOODS_DOMESTIC_SOLD", getNameKey(), iTotalProfitFromDomesticMarket);
-		//	gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), NULL, MESSAGE_TYPE_MINOR_EVENT, NULL, COLOR_WHITE, true, true);
-		//}
 	}
 	// R&R, ray, adjustment Domestic Markets, END
 
 	// R&R, ray, adjustment for less Custom House messages
 	int iCustomHouseProfit = 0;
 	bool bPrintOnce = false;
+
+	// WTP: the storage overflow of the turn (the same calculation as the forecast of the tooltip, see calculateStorageOverflow)
+	int aiOverflowLoss[NUM_YIELD_TYPES];
+	bool abOverflow[NUM_YIELD_TYPES];
+	int iTotalCutAtStart = 0;
+	int iTotalCutLeft = 0;
+	calculateStorageOverflow(aiYields, aiProjectReserve, bProtectProject, aiOverflowLoss, abOverflow, &iTotalCutAtStart, &iTotalCutLeft);
+	if (iTotalCutAtStart > 0)
+	{
+		// (written into the mod folder like the other WTP logs)
+		FILE* const pLog = fopen((std::string(gDLL->getModName()) + "WTP_ProjectProtect.log").c_str(), "a");
+		if (pLog != NULL)
+		{
+			fprintf(pLog, "%s: overflow would cost %d material(s) of the project, %d moved to other goods\n", CvString(getName()).c_str(), iTotalCutAtStart, iTotalCutAtStart - iTotalCutLeft);
+			fclose(pLog);
+		}
+	}
 
 	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
 	{
@@ -8272,77 +8721,21 @@ void CvCity::doYields()
 			changeYieldStored(eYield, aiYields[eYield]);
 
 			int iOverflowYieldSellPercent = getStorageLossSellPercentage();
-			bool bIgnoresBoycott = getIgnoresBoycott();
 			bool bHasUnlockedTradeSettings = getHasUnlockedStorageLossTradeSettings();
 
 			// ray, making special storage capacity rules for Yields XML configurable
 			if (GC.getYieldInfo(eYield).isCargo() && !GC.getYieldInfo(eYield).isIgnoredForStorageCapacity())
 			{
-				int iExcess = 0;
-				// Here special sell behaviour for Custom House
-				if (bHasUnlockedTradeSettings && iTotalYields < iMaxCapacity)
+				if (abOverflow[eYield])
 				{
-					int sellThreshold = 0;
-					// R&R, ray, finishing Custom House Screen
-					if (isCustomHouseNeverSell(eYield))
-					{
-						sellThreshold = iMaxCapacity;
-					}
-					else
-					{
-						sellThreshold = getCustomHouseSellThreshold(eYield);
-					}
-
-					//R&R, ray, fixing threshold displayed and internal differently for some gamespeeds e.g. Marathon
-					//sellThreshold = sellThreshold * GC.getGameSpeedInfo(GC.getGameINLINE().getGameSpeedType()).getStoragePercent() / 100;
-					iExcess = getYieldStored(eYield) - sellThreshold;
-				}
-
-				// normal overflow
-				else
-				{
-					// R&R, ray, reprogrammed Overflow for New City Storage
-					if (getYieldStored(eYield) > 0 && iTotalYields > iMaxCapacity)
-					{
-						iExcess = (iTotalYields - iMaxCapacity) * getYieldStored(eYield) / iTotalYields;
-						if (iExcess == 0)
-						{
-							iExcess = 1;
-						}
-					}
-				}
-
-				if (iExcess > 0)
-				{
-					int iLoss = std::max(GC.getCITY_YIELD_DECAY_PERCENT() * iExcess / 100, GC.getMIN_CITY_YIELD_DECAY());
-					iLoss = std::min(iLoss, iExcess);
+					const int iLoss = aiOverflowLoss[eYield];
 					changeYieldStored(eYield, -iLoss);
 					
-					// compare possible profits from selling Europe and Africa, and use the best possible
-					const int iEuropeProfit = GET_PLAYER(getOwnerINLINE()).getSellToEuropeProfit(eYield, iLoss);
-					const int iAfricaProfit = GET_PLAYER(getOwnerINLINE()).getSellToAfricaProfit(eYield, iLoss);
-					int iComparableProfitInEast = std::max(iEuropeProfit, iAfricaProfit);
-
-					// R&R, ray , Changes to Custom House - START
-					// Yield is boycotted but you have Custom House
-					if (iComparableProfitInEast == 0 && bIgnoresBoycott)
+					if (iLoss > 0)
 					{
-						if (GET_PLAYER(getOwnerINLINE()).getParent() == NO_PLAYER)
-						{
-							iComparableProfitInEast = 0;
-						}
-
-						else
-						{
-							int briberate = GET_PLAYER(getOwnerINLINE()).getTaxRate();
-							int minPrice = GC.getYieldInfo(eYield).price(FIRST_TRADELOCATION).buyLow;
-							int iAmount = iLoss;
-							iComparableProfitInEast = iAmount * minPrice;
-							iComparableProfitInEast -= (iComparableProfitInEast * briberate) / 100;
-						}
-					}
-
-					int iProfit = iOverflowYieldSellPercent * iComparableProfitInEast / 100;
+					// the gold of the sale to the better one of Europe and Africa
+					TradeLocationTypes BestPort = TRADE_LOCATION_EUROPE;
+					const int iProfit = calculateOverflowSaleProfit(eYield, iLoss, &BestPort);
 					// R&R, ray , Changes to Custom House - END
 					if (iProfit > 0)
 					{
@@ -8351,7 +8744,6 @@ void CvCity::doYields()
 						GET_PLAYER(getOwnerINLINE()).changeGold(iProfit * GET_PLAYER(getOwnerINLINE()).getExtraTradeMultiplier(kPlayerEurope.getID()) / 100);
 
 						int iDiscountedLoss = iOverflowYieldSellPercent * iLoss / 100;
-						const TradeLocationTypes BestPort = iEuropeProfit > iAfricaProfit ? TRADE_LOCATION_EUROPE : TRADE_LOCATION_AFRICA;
 						kPlayerEurope.changeYieldTradedCounters(BestPort, eYield, iDiscountedLoss);
 
 						// R&R, ray , Changes to Custom House - START
@@ -8384,6 +8776,7 @@ void CvCity::doYields()
 					{
 						CvWString szBuffer = gDLL->getText("TXT_KEY_GOODS_LOST", iLoss, GC.getYieldInfo(eYield).getChar(), getNameKey());
 						gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYield).getButton(), COLOR_RED, true, true);
+					}
 					}
 				}
 				else if (!bPrintOnce && (iMaxCapacity - iTotalYields) > 0 && (iMaxCapacity - iTotalYields) < (iMaxCapacity / 10)) //only do this message once

@@ -548,6 +548,30 @@ class CvMainInterface:
 		else:
 			HELPTEXT_AREA_Y_MARGIN = 0
 
+	# text of the HUD split at its number: (text before, number, text after). The number is found by its digits in the text of any language
+	def splitAtNumber( self, szText, iNumber ):
+		szNumber = u"%d" % iNumber
+		iPos = szText.find(szNumber)
+		if iPos < 0:
+			return (szText, u"", u"")
+		return (szText[:iPos], szNumber, szText[iPos + len(szNumber):])
+
+	# width of a text of the HUD font in pixels (the game measures it; if it cannot, an estimate by the characters)
+	def getHudTextWidth( self, szText ):
+		if len(szText) == 0:
+			return 0
+		try:
+			iWidth = CyInterface().determineWidth(self.setFontSize(szText, 0))
+			if iWidth > 0:
+				return iWidth
+		except:
+			pass
+		return int(len(szText) * 11)
+
+	def hideUpkeepLine( self, screen, szName ):
+		for szPart in ("Text", "Sign", "Amount", "Rest"):
+			screen.hide(szName + szPart)
+
 	# Wraps <Font> tags around text
 	def setFontSize( self, Text, relativeSize ):
 		size = STANDARD_FONT_SIZE + relativeSize
@@ -2503,16 +2527,49 @@ class CvMainInterface:
 			if (gc.getPlayer(ePlayer).isAlive()):
 				szText = CyGameTextMgr().getGoldStr(ePlayer)
 				screen.setLabel("GoldText", "Background", self.setFontSize(szText, 1), CvUtil.FONT_LEFT_JUSTIFY, 17, 17, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, TIMETEXT_ID, -1 )
+				# WTP: the gold pile icon follows the amount: up to 4 digits it keeps its place, from 5 digits every digit moves it 11 pixels to the right (5 = 75, 6 = 86), so the amount only just touches it
+				try:
+					iDigits = len([c for c in unicode(szText) if c.isdigit()])
+					iPileX = 60
+					if iDigits > 4:
+						iPileX = 20 + iDigits * 11
+					screen.moveItem("GoldPile", iPileX, 8, -0.3)
+				except:
+					pass
 				# WTP: below the gold the military upkeep, below that the domestic market income of the last turn
 				pPlayer = gc.getPlayer(ePlayer)
 				iUpkeep = pPlayer.getMilitaryUpkeep()
+				# the two amounts end at the same place (right aligned): every line is split at its number into text, amount and rest
+				iIncome = pPlayer.getDomesticMarketIncome()
+				aLines = []
 				if (iUpkeep > 0):
-					szText = localText.getText("TXT_KEY_MILITARY_UPKEEP_GOLD_STR", (iUpkeep,))
-					screen.setLabel("MilitaryUpkeepText", "Background", self.setFontSize(szText, 0), CvUtil.FONT_LEFT_JUSTIFY, 17, 42, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					aLines.append(("MilitaryUpkeep", 42, self.splitAtNumber(localText.getText("TXT_KEY_MILITARY_UPKEEP_GOLD_STR", (iUpkeep,)), iUpkeep)))
 				else:
-					screen.hide("MilitaryUpkeepText")
-				szText = localText.getText("TXT_KEY_DOMESTIC_MARKET_INCOME_STR", (pPlayer.getDomesticMarketIncome(),))
-				screen.setLabel("DomesticIncomeText", "Background", self.setFontSize(szText, 0), CvUtil.FONT_LEFT_JUSTIFY, 17, 62, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					self.hideUpkeepLine(screen, "MilitaryUpkeep")
+				aLines.append(("DomesticIncome", 62, self.splitAtNumber(localText.getText("TXT_KEY_DOMESTIC_MARKET_INCOME_STR", (iIncome,)), iIncome)))
+				# the sign (+ / -) of a line is its own label, the signs end at the same place, then a gap, then the amounts end at the same place
+				iPrefixW = 0
+				iSignW = 0
+				iAmountW = 0
+				iGap = 6
+				aSplit = []
+				for (szName, iY, aParts) in aLines:
+					szPrefix = aParts[0].rstrip()
+					szSign = u""
+					if len(szPrefix) > 0 and szPrefix[-1] in u"+-":
+						szSign = szPrefix[-1]
+						szPrefix = szPrefix[:-1].rstrip()
+					aSplit.append((szName, iY, szPrefix, szSign, aParts[1], aParts[2]))
+					iPrefixW = max(iPrefixW, self.getHudTextWidth(szPrefix))
+					iSignW = max(iSignW, self.getHudTextWidth(szSign))
+					iAmountW = max(iAmountW, self.getHudTextWidth(aParts[1]))
+				iSignX = 17 + iPrefixW + iGap + iSignW
+				iRightX = iSignX + iGap + iAmountW
+				for (szName, iY, szPrefix, szSign, szAmount, szRest) in aSplit:
+					screen.setLabel(szName + "Text", "Background", self.setFontSize(szPrefix, 0), CvUtil.FONT_LEFT_JUSTIFY, 17, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					screen.setLabel(szName + "Sign", "Background", self.setFontSize(szSign, 0), CvUtil.FONT_RIGHT_JUSTIFY, iSignX, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					screen.setLabel(szName + "Amount", "Background", self.setFontSize(szAmount, 0), CvUtil.FONT_RIGHT_JUSTIFY, iRightX, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					screen.setLabel(szName + "Rest", "Background", self.setFontSize(szRest, 0), CvUtil.FONT_LEFT_JUSTIFY, iRightX, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
 
 		return 0
 
@@ -2947,8 +3004,8 @@ class CvMainInterface:
 
 			screen.hide("TimeText")
 			screen.hide("GoldText")
-			screen.hide("MilitaryUpkeepText")
-			screen.hide("DomesticIncomeText")
+			self.hideUpkeepLine(screen, "MilitaryUpkeep")
+			self.hideUpkeepLine(screen, "DomesticIncome")
 
 		else: # CITY SCREEN IS DOWN
 			self.MINIMAP_SIDE_MARGIN = MINIMAP_HEIGHT * 13 / 100
@@ -3085,8 +3142,8 @@ class CvMainInterface:
 			# GOLD
 			screen.hide("TimeText")
 			screen.hide("GoldText")
-			screen.hide("MilitaryUpkeepText")
-			screen.hide("DomesticIncomeText")
+			self.hideUpkeepLine(screen, "MilitaryUpkeep")
+			self.hideUpkeepLine(screen, "DomesticIncome")
 			screen.registerHideList(ResourceHideList, len(ResourceHideList), RESOURCE_TABLE_HIDE)
 
 		# EMPHISIZE DISPLAY
@@ -3175,8 +3232,8 @@ class CvMainInterface:
 		if (CyEngine().isGlobeviewUp() or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL):
 			screen.hide("TimeText")
 			screen.hide("GoldText")
-			screen.hide("MilitaryUpkeepText")
-			screen.hide("DomesticIncomeText")
+			self.hideUpkeepLine(screen, "MilitaryUpkeep")
+			self.hideUpkeepLine(screen, "DomesticIncome")
 			for iYield in EMPHASIZEYIELDS:
 				screen.hide("MapYieldBox" + str(iYield))
 				screen.hide("MapYieldIcon" + str(iYield))
@@ -3193,7 +3250,8 @@ class CvMainInterface:
 		else:
 			screen.show("TimeText")
 			screen.show("GoldText")
-			screen.show("DomesticIncomeText")
+			for szPart in ("Text", "Sign", "Amount", "Rest"):
+				screen.show("DomesticIncome" + szPart)
 			screen.setTableColumnHeader("CityBuildQueue", 0, u"", QueueWidth - (QueueWidth * 3 / 10))
 			screen.setTableColumnHeader("CityBuildQueue", 1, u"", QueueWidth * 3 / 10)
 
@@ -3393,11 +3451,10 @@ class CvMainInterface:
 				iWidth = int((25 * xResolution) / 100)
 				yCoord = yResolution - SADDLE_HEIGHT * 14/16 - self.SCORE_TEXT_BOTTOM_MARGIN_SMALL
 
-				# Scrollable Scoreboard
-				if (not pHeadSelectedCity):
-					screen.addTableControlGFC("ScoreBackground", 1, xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, yCoord - (iBtnHeight * (iCount - 1)), iWidth, (iBtnHeight * (iCount - 1)), False, False, 0, 0, TableStyles.TABLE_STYLE_STANDARD)
-					screen.enableSelect("ScoreBackground", False)
-					screen.setTableColumnHeader("ScoreBackground", 0, "", iWidth - 10)
+				# Scrollable Scoreboard: the rows are collected first, the table is as wide as the longest entry (created after the loop)
+				aScoreRows = []
+				iTableY = yCoord # the yCoord is changed below
+				iMaxTextWidth = 0
 
 				i = 0
 				while (i < gc.getMAX_CIV_TEAMS()):
@@ -3480,8 +3537,9 @@ class CvMainInterface:
 
 									szBuffer = szBuffer + "</font>"
 
-									if ( CyInterface().determineWidth( szBuffer ) > iWidth ):
-										iWidth = CyInterface().determineWidth( szBuffer )
+									iTextWidth = CyInterface().determineWidth( szBuffer )
+									if ( iTextWidth > iMaxTextWidth ):
+										iMaxTextWidth = iTextWidth
 
 									szName = "ScoreText" + str(ePlayer)
 									if ( CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW or CyInterface().isInAdvancedStart() or pHeadSelectedCity != None):
@@ -3489,9 +3547,7 @@ class CvMainInterface:
 									else:
 										yCoord = yResolution - SADDLE_HEIGHT - self.SCORE_TEXT_BOTTOM_MARGIN_SMALL
 
-									if not pHeadSelectedCity:
-										iRow = screen.appendTableRow("ScoreBackground")
-										screen.setTableText("ScoreBackground", 0, iRow, szBuffer, "", WidgetTypes.WIDGET_CONTACT_CIV, ePlayer, -1, CvUtil.FONT_RIGHT_JUSTIFY)
+									aScoreRows.append((szBuffer, ePlayer))
 
 									CyInterface().checkFlashReset(ePlayer)
 
@@ -3507,6 +3563,14 @@ class CvMainInterface:
 					yCoord = yResolution - SADDLE_HEIGHT - self.SCORE_BACKGROUND_BOTTOM_MARGIN_SMALL
 
 				if not pHeadSelectedCity:
+					# width of the longest entry plus room for the table border and the scroll bar (never wider than before)
+					iWidth = min(iWidth, iMaxTextWidth + 20)
+					screen.addTableControlGFC("ScoreBackground", 1, xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, iTableY + int(yResolution * 0.066) - (iBtnHeight * 7), iWidth, (iBtnHeight * 7), False, False, 0, 0, TableStyles.TABLE_STYLE_STANDARD)
+					screen.enableSelect("ScoreBackground", False)
+					screen.setTableColumnHeader("ScoreBackground", 0, "", iWidth - 10)
+					for (szRowText, ePlayerRow) in aScoreRows:
+						iRow = screen.appendTableRow("ScoreBackground")
+						screen.setTableText("ScoreBackground", 0, iRow, szRowText, "", WidgetTypes.WIDGET_CONTACT_CIV, ePlayerRow, -1, CvUtil.FONT_RIGHT_JUSTIFY)
 					screen.show("ScoreBackground")
 
 	# Will update the help Strings
