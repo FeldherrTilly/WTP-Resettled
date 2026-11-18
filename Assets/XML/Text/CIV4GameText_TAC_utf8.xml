@@ -1340,7 +1340,7 @@
 		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]O estoque de %F2_yield_icon está diminuindo. Em breve teremos um problema com a produção de %F3_yield_icon.</Portuguese>
 		<French>%s1_city est presque à cours de %F2_yield_icon et ne pourra en conséquence plus produire de %F3_yield_icon.</French>
 		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Es [COLOR_WARNING_TEXT]neigt sich[COLOR_REVERT] der Lagervorrat an %F2_yield_icon. Bei der Herstellung von %F3_yield_icon werden wir bald ein Problem bekommen.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Запас %F2_yield_icon снижается. Скоро у нас возникнут проблемы с производством %F3_yield_icon.</Russian>
+		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Запас %F2_yield_icon [COLOR_WARNING_TEXT]снижается[COLOR_REVERT]. Скоро у нас возникнут проблемы с производством %F3_yield_icon.</Russian>
 		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]%F2_yield_icon készlet csökken. %F3_yield_icon előállításával hamarosan gond lesz.</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -1695,7 +1695,7 @@
 		<Portuguese>%s2_city: Um cidadão esforçado terminará seus estudos no %s3_building em %d1_Num [NUM1:turno:turnos].</Portuguese>
 		<French>%s2_city : Un étudiant va bientôt achever sa formation dans l'%s3_building : %d1_Num [NUM1:tour:tours].</French>
 		<German>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.[COLOR_REVERT]</German>
-		<Russian>[COLOR_SELECTED_TEXT]%s2_city :[COLOR_REVERT] Способный горожанин закончит обучение в [COLOR_FONT_CREAM]%s3_building[COLOR_REVERT] через %d1_Num [NUM1:ход:хода].</Russian>
+		<Russian>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : Способный горожанин закончит обучение в %s3_building через %d1_Num [NUM1:ход:хода].[COLOR_REVERT]</Russian>
 		<Hungarian>%s2_city : Egy ügyes lakos %d1_Num [NUM1:kör:kör] múlva befejezi a városi %s3_building falai között a tanulmányait.</Hungarian>
 	</TEXT>
 	<TEXT>

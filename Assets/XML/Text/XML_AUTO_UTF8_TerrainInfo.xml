@@ -29,7 +29,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Пустыня</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Пустыня[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_DESERT_PEDIA</Tag>
@@ -52,7 +52,7 @@
 		<German>[COLOR_CAT_TERRAIN]Grasland[COLOR_REVERT]</German>
 		<Italian>Praterie</Italian>
 		<Spanish>Herbazal</Spanish>
-		<Russian>Луга</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Луга[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_GRASS_PEDIA</Tag>
@@ -92,7 +92,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Холмы</Russian>
+		<Russian>[COLOR_CAT_HILLS]Холмы[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_HILL_PEDIA</Tag>
@@ -111,7 +111,7 @@
 		<German>[COLOR_CAT_TERRAIN]Sumpf[COLOR_REVERT]</German>
 		<Italian>Palude</Italian>
 		<Spanish>Marisma</Spanish>
-		<Russian>Болото</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Болото[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_MARSH_PEDIA</Tag>
@@ -151,7 +151,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Горы</Russian>
+		<Russian>[COLOR_CAT_HILLS]Горы[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_PEAK_PEDIA</Tag>
@@ -191,7 +191,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Равнины</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Равнины[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_PLAINS_PEDIA</Tag>
@@ -214,7 +214,7 @@
 		<German>[COLOR_CAT_TERRAIN]Prärie[COLOR_REVERT]</German>
 		<Italian>Prateria</Italian>
 		<Spanish>Pradera</Spanish>
-		<Russian>Прерии</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Прерии[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_PRAIRIE_PEDIA</Tag>
@@ -233,7 +233,7 @@
 		<German>[COLOR_CAT_TERRAIN]Felssteppe[COLOR_REVERT]</German>
 		<Italian>Steppa rocciosa</Italian>
 		<Spanish>Estepa rocosa</Spanish>
-		<Russian>Каменистые степи</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Каменистые степи[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_ROCK_STEPPES_PEDIA</Tag>
@@ -252,7 +252,7 @@
 		<German>[COLOR_CAT_TERRAIN]Savanne[COLOR_REVERT]</German>
 		<Italian>Savana</Italian>
 		<Spanish>Sabana</Spanish>
-		<Russian>Саванна</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Саванна[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_SAVANNAH_PEDIA</Tag>
@@ -271,7 +271,7 @@
 		<German>[COLOR_CAT_TERRAIN]Buschland[COLOR_REVERT]</German>
 		<Italian>Arbusteto</Italian>
 		<Spanish>Matorral</Spanish>
-		<Russian>Кустарниковая местность</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Кустарниковая местность[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_SHRUBLAND_PEDIA</Tag>
@@ -290,7 +290,7 @@
 		<German>[COLOR_CAT_TERRAIN]Permafrost[COLOR_REVERT]</German>
 		<Italian>Permafrost</Italian>
 		<Spanish>Permafrost</Spanish>
-		<Russian>Вечная мерзлота</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Вечная мерзлота[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_SNOW_PEDIA</Tag>
@@ -330,7 +330,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Тайга</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Тайга[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_TAIGA_PEDIA</Tag>
@@ -370,7 +370,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Тундра</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Тундра[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_TUNDRA_PEDIA</Tag>
@@ -389,7 +389,7 @@
 		<German>[COLOR_CAT_TERRAIN]Moor[COLOR_REVERT]</German>
 		<Italian>Zona umida</Italian>
 		<Spanish>Humedal</Spanish>
-		<Russian>Заболоченная местность</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Заболоченная местность[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_WETLAND_PEDIA</Tag>
@@ -408,7 +408,7 @@
 		<German>[COLOR_CAT_TERRAIN]Großer Strom[COLOR_REVERT]</German>
 		<Italian>Fiume grande</Italian>
 		<Spanish>Gran río</Spanish>
-		<Russian>Большая река</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Большая река[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LARGE_RIVERS_PEDIA</Tag>
@@ -427,7 +427,7 @@
 		<German>[COLOR_CAT_TERRAIN]Süßwassersee[COLOR_REVERT]</German>
 		<Italian>Lago d'acqua dolce</Italian>
 		<Spanish>Lago de agua dulce</Spanish>
-		<Russian>Пресноводное озеро</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Пресноводное озеро[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_LAKE_PEDIA</Tag>
@@ -446,7 +446,7 @@
 		<German>[COLOR_CAT_TERRAIN]Eissee[COLOR_REVERT]</German>
 		<Italian>Lago di ghiaccio</Italian>
 		<Spanish>Lago de hielo</Spanish>
-		<Russian>Заледеневшее озеро</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Заледеневшее озеро[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_ICE_LAKE_PEDIA</Tag>
@@ -486,7 +486,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Побережье</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Побережье[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_COAST_PEDIA</Tag>
@@ -505,7 +505,7 @@
 		<German>[COLOR_CAT_TERRAIN]Seichte Küste[COLOR_REVERT]</German>
 		<Italian>Acque costiere poco profonde</Italian>
 		<Spanish>Aguas costeras poco profundas</Spanish>
-		<Russian>Мелководье</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Мелководье[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_SHALLOW_COAST_PEDIA</Tag>
@@ -545,7 +545,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Океан</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Океан[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_OCEAN_PEDIA</Tag>

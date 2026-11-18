@@ -80,7 +80,7 @@
 		<German>Routenverwaltung aufrufen, um Transportrouten einzurichten und zuzuweisen.[NEWLINE][NEWLINE]Handelsrouten-Manager: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</German>
 		<Italian>Automatizza questo trasporto scegliendo le rotte commerciali che dovrebbe seguire.</Italian>
 		<Spanish>Automatizar este transporte seleccionando las rutas comerciales que debe seguir.</Spanish>
-		<Russian>Автоматизируйте этот транспорт, выбрав транспортные маршруты, по которым он должен следовать</Russian>
+		<Russian>Автоматизируйте этот транспорт, выбрав транспортные маршруты, по которым он должен следовать[NEWLINE][NEWLINE]Менеджер торговых маршрутов: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_COMMAND_CLEAR_SPECIALTY</Tag>
@@ -535,7 +535,7 @@
 		<German>Entlädt alle transportierten Einheiten.[NEWLINE]Umschalt + Klick oder Strg+Umschalt+U: entlädt alle Transporter der gleichen Art (Land oder See) auf diesem Feld.</German>
 		<Italian>Per scaricare tutte le unità a bordo del trasporto.</Italian>
 		<Spanish>Con esto desembarcarán todas las unidades transportadas.</Spanish>
-		<Russian>Позволяет выгрузить сразу всею юниты, находящиеся в транспорте</Russian>
+		<Russian>Позволяет выгрузить сразу всею юниты, находящиеся в транспорте[NEWLINE]Shift + щелчок или Ctrl+Shift+U: выгружает все транспорты того же вида (наземные или морские) на этой клетке.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_COMMAND_UPGRADE</Tag>
