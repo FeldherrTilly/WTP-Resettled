@@ -529,10 +529,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_COMMAND_UNLOAD_ALL_HELP</Tag>
-		<English>This will unload all transported units.</English>
+		<English>This will unload all transported units.[NEWLINE]Shift + click or Ctrl+Shift+U: unloads all transports of the same kind (land or sea) on this plot.</English>
 		<Portuguese>Isso descarregará todas as unidades transportadas.</Portuguese>
 		<French>Décharger toutes les unités transportées.</French>
-		<German>Entladen Sie alle transportierten Einheiten.</German>
+		<German>Entlädt alle transportierten Einheiten.[NEWLINE]Umschalt + Klick oder Strg+Umschalt+U: entlädt alle Transporter der gleichen Art (Land oder See) auf diesem Feld.</German>
 		<Italian>Per scaricare tutte le unità a bordo del trasporto.</Italian>
 		<Spanish>Con esto desembarcarán todas las unidades transportadas.</Spanish>
 		<Russian>Позволяет выгрузить сразу всею юниты, находящиеся в транспорте</Russian>

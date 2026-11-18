@@ -3534,7 +3534,14 @@ void CvUnit::doCommand(CommandTypes eCommand, int iData1, int iData2)
 			break;
 
 		case COMMAND_UNLOAD_ALL:
-			unloadAll();
+			if (iData1 == 1)
+			{
+				unloadAllTransportsOnPlot();
+			}
+			else
+			{
+				unloadAll();
+			}
 			bCycle = true;
 			break;
 
@@ -6408,6 +6415,36 @@ void CvUnit::unloadAll()
 				FAssert(isHuman());
 				pLoopUnit->getGroup()->setActivityType(ACTIVITY_AWAKE);
 			}
+		}
+	}
+}
+
+void CvUnit::unloadAllTransportsOnPlot()
+{
+	CvPlot* pPlot = plot();
+	if (pPlot == NULL)
+	{
+		return;
+	}
+
+	// (only the transports of the domain of this one: land transports with land transports, ships with ships)
+	// (the transports are collected first: unloading changes the list of the units on the plot)
+	std::vector<IDInfo> aTransports;
+	CLLNode<IDInfo>* pUnitNode = pPlot->headUnitNode();
+	while (pUnitNode != NULL)
+	{
+		CvUnit* pLoopUnit = pPlot->getUnitNodeLoop(pUnitNode);
+		if (pLoopUnit != NULL && pLoopUnit->getOwnerINLINE() == getOwnerINLINE() && pLoopUnit->getDomainType() == getDomainType() && pLoopUnit->getCargo() > 0)
+		{
+			aTransports.push_back(pLoopUnit->getIDInfo());
+		}
+	}
+	for (size_t i = 0; i < aTransports.size(); ++i)
+	{
+		CvUnit* pTransport = ::getUnit(aTransports[i]);
+		if (pTransport != NULL)
+		{
+			pTransport->unloadAll(); // (does nothing for a transport that cannot unload)
 		}
 	}
 }
