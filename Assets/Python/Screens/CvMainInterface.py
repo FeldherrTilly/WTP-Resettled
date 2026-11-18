@@ -8087,9 +8087,10 @@ class CvMainInterface:
 	def updateCursorTooltip( self ):
 		# called every frame: the window goes away when the cursor has left its place (the game does not always say that a tooltip is gone)
 		# the pictures of the goods of the import / export window in the city screen: the game gives no help text of its own there (the DLL
-		# empties it; python cannot clear the help of the city screen)
+		# empties it; python cannot clear the help of the city screen). It is on as long as the window is open: a flag that follows the cursor
+		# comes too late when the cursor moves fast from one picture to the next (the game tooltip showed up for a moment then)
 		try:
-			gc.getGame().setHideYieldHelp(self.bHoverTip and CyInterface().isCityScreenUp() and self.isTradeIconHover())
+			gc.getGame().setHideYieldHelp(self.bHoverTip and CyInterface().isCityScreenUp() and self.isTradeWindowOpen())
 		except:
 			pass
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
