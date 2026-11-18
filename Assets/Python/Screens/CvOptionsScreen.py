@@ -260,7 +260,11 @@ class CvOptionsScreen:
 		tab.setLayoutFlag("GamePanel", "LAYOUT_SIZE_HEXPANDING")
 		tab.setLayoutFlag("GamePanel", "LAYOUT_SIZE_VEXPANDING")
 
-		tab.attachHBox("GamePanel", "GameHBox")
+		# WTP: one box in the scroll panel holds all options (the tooltip options and those below scroll with the others)
+		tab.attachVBox("GamePanel", "GameOuterVBox")
+		tab.setLayoutFlag("GameOuterVBox", "LAYOUT_SIZE_HEXPANDING")
+
+		tab.attachHBox("GameOuterVBox", "GameHBox")
 		tab.setLayoutFlag("GameHBox", "LAYOUT_SIZE_HEXPANDING")
 
 		tab.attachVBox("GameHBox", "GameVBox1")
@@ -300,10 +304,10 @@ class CvOptionsScreen:
 				i += 1
 
 
-		tab.attachSpacer("GamePanelCenter")
+		tab.attachSpacer("GameOuterVBox")
 
 		# WTP: tooltip mode (hover tooltip at the cursor / own window at the original position / game tooltip), Ctrl + Shift + T
-		tab.attachHBox("GamePanelCenter", "TipHBox")
+		tab.attachHBox("GameOuterVBox", "TipHBox")
 		tab.attachLabel("TipHBox", "TipLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE", ()))
 		tab.setToolTip("TipLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP", ()))
 		tab.attachSpacer("TipHBox")
@@ -318,7 +322,7 @@ class CvOptionsScreen:
 		tab.setLayoutFlag("TipModeDropdownBox", "LAYOUT_LEFT")
 		tab.setToolTip("TipModeDropdownBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP", ()))
 
-		tab.attachHBox("GamePanelCenter", "TipDelayHBox")
+		tab.attachHBox("GameOuterVBox", "TipDelayHBox")
 		tab.attachLabel("TipDelayHBox", "TipDelayLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY", ()))
 		tab.setToolTip("TipDelayLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP", ()))
 		tab.attachSpacer("TipDelayHBox")
@@ -338,12 +342,20 @@ class CvOptionsScreen:
 			bTipQuick = CvScreensInterface.mainInterface.bTipQuick
 		except:
 			pass
-		tab.attachCheckBox("GamePanelCenter", "TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK", ()), self.callbackIFace, "handleTipQuickClicked", "TipQuickCheckBox", bTipQuick)
+		tab.attachCheckBox("GameOuterVBox", "TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK", ()), self.callbackIFace, "handleTipQuickClicked", "TipQuickCheckBox", bTipQuick)
 		tab.setToolTip("TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK_HELP", ()))
 
-		tab.attachSpacer("GamePanelCenter")
+		bTipAutoFreeze = False
+		try:
+			bTipAutoFreeze = CvScreensInterface.mainInterface.bTipAutoFreeze
+		except:
+			pass
+		tab.attachCheckBox("GameOuterVBox", "TipAutoFreezeCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE", ()), self.callbackIFace, "handleTipAutoFreezeClicked", "TipAutoFreezeCheckBox", bTipAutoFreeze)
+		tab.setToolTip("TipAutoFreezeCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE_HELP", ()))
 
-		tab.attachHBox("GamePanelCenter", "LangHBox")
+		tab.attachSpacer("GameOuterVBox")
+
+		tab.attachHBox("GameOuterVBox", "LangHBox")
 
 		# Languages Dropdown
 		tab.attachLabel("LangHBox", "LangLabel", localText.getText("TXT_KEY_OPTIONS_SCREEN_LANGUAGE", ()))	# Label

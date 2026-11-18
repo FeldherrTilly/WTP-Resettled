@@ -290,7 +290,7 @@ TIP_SETTINGS_FILE = "WTP_TooltipSettings.ini"
 
 def wtpLoadTipSettings():
 	# (mode, delay index, quick): default is the game tooltip (2), the delay "medium" (2) for the case that the hover tooltip is chosen
-	aiValues = [2, 2, 0]
+	aiValues = [2, 2, 0, 0]
 	try:
 		f = open(TIP_SETTINGS_FILE, "r")
 		for szLine in f.readlines():
@@ -303,6 +303,8 @@ def wtpLoadTipSettings():
 						aiValues[1] = max(0, min(len(TIP_DELAYS) - 1, int(aszPart[1])))
 					elif aszPart[0] == "quick":
 						aiValues[2] = max(0, min(1, int(aszPart[1])))
+					elif aszPart[0] == "autofreeze":
+						aiValues[3] = max(0, min(1, int(aszPart[1])))
 				except:
 					pass
 		f.close()
@@ -401,6 +403,8 @@ class CvMainInterface:
 	dFrozenDark = {} # frozen windows that are always drawn in the darker variant (the explanation of a folded line)
 	dFrozenCompanion = {} # frozen windows that belong to the frozen window below them (the explanation of a folded line): they close together
 	tSecondTipKey = None
+	tAutoFreeze = None # (x, y, time) of the plot of a unit that was activated: its tooltip is frozen as soon as it shows
+	szAutoSelPrefix = u"" # the frozen window of the unit that a right click on a line of a stack selected (it goes when another unit is selected)
 	tWpRenamePending = None # (number, sea) of a new waypoint: the window for its name opens in the next frame
 	fTipSelectAt = -100.0 # the time (seconds) of the last selection of a unit made in a tooltip
 	aTradeReturn = [] # the views the jumps from the tooltips of the import / export window started from (the last one is the one to go back to)
@@ -3682,8 +3686,17 @@ class CvMainInterface:
 				try:
 					tRowWp = self.getHoverWaypointRow(aszParas, self.dTipDetails)
 					if tRowWp is not None:
-						tRowWp["paras"][len(aszParas)] = "row"
-						aszParas = list(aszParas) + [localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())]
+						iSlot = self.getWaypointSlot(aszParas)
+						tRowWp["paras"][iSlot] = "row"
+						aszParas = list(aszParas)
+						aszParas.insert(iSlot, localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ()))
+						dShift = {}
+						for kDet in self.dTipDetails.keys():
+							if kDet >= iSlot:
+								dShift[kDet + 1] = self.dTipDetails[kDet]
+							else:
+								dShift[kDet] = self.dTipDetails[kDet]
+						self.dTipDetails = dShift
 						self.tTipWp = tRowWp
 				except:
 					self.tTipWp = None
@@ -4990,6 +5003,37 @@ class CvMainInterface:
 				return k
 		return -1
 
+	# the row of the promotion pictures of a unit, also with its XP (foldUnitDetails puts the XP into that row)
+	def isPromoOrXpRow( self, szText ):
+		if self.isPromotionRow(szText):
+			return True
+		szPlain = re.sub(u"[^,<:()>]{1,10}:\\s*\\(\\s*[0-9]+\\s*/\\s*[0-9]+\\s*\\)", u"", szText)
+		return szPlain != szText and self.isPromotionRow(szPlain)
+
+	# the paragraph where the line "Set waypoint..." of a unit goes: directly below the row of its promotions, without that row directly below
+	# its name (iHead: the paragraph of the name, -1: the first unit of the tooltip)
+	def getWaypointSlot( self, aszParas, iHead = -1 ):
+		if iHead < 0:
+			for k in range(len(aszParas)):
+				if self.isUnitHeader(aszParas[k]):
+					iHead = k
+					break
+		if iHead < 0:
+			return len(aszParas)
+		iSlot = iHead + 1
+		# (the line "commanded by" of a unit with a leader belongs to the lines of the name: the row goes below it)
+		szCommanded = self.normTipText(localText.getText("TXT_KEY_UNIT_HELP_COMMANDED_BY", ()))
+		for k in range(2):
+			if iSlot >= len(aszParas):
+				break
+			if self.isPromoOrXpRow(aszParas[iSlot]):
+				iSlot += 1
+			elif len(szCommanded) > 3 and self.normTipText(aszParas[iSlot]).find(szCommanded) == 0:
+				iSlot += 1
+			else:
+				break
+		return iSlot
+
 	# the tooltip at the cursor (not frozen yet) of one own unit without the line "Commands": the registration of its line "Set waypoint..."
 	# (the paragraph is added by the caller), otherwise None
 	def getHoverWaypointRow( self, aszParas, dDetails ):
@@ -5017,6 +5061,7 @@ class CvMainInterface:
 			aiIndent = list(self.aFrozen[iLevel][3])
 			dDetails = dict(self.aFrozen[iLevel][4])
 			szRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
+			szRowOwn = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ())
 			dReg = {"unit": (pUnit.getOwner(), pUnit.getID()), "sea": self.isSeaUnit(pUnit), "paras": {}, "cmd": -1}
 			szCmd = self.normTipText(localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()))
 			iCmd = -1
@@ -5029,15 +5074,48 @@ class CvMainInterface:
 				dReg["cmd"] = iCmd
 				self.aFrozen[iLevel][4] = dDetails
 			else:
-				iPara = len(aszParas)
-				aszParas.append(szRow)
+				# directly below the promotions of the unit (below its name without them); no unit header: above the hint lines at the end
+				iHead = -1
+				for k in range(len(aszParas)):
+					if self.isUnitHeader(aszParas[k]):
+						pHeader = self.getHeaderUnit(iLevel, aszParas, k)
+						if iHead < 0:
+							iHead = k
+						if pHeader is not None and not pHeader.isNone() and pHeader.getID() == pUnit.getID() and pHeader.getOwner() == pUnit.getOwner():
+							iHead = k
+							break
+				if iHead >= 0:
+					iPara = self.getWaypointSlot(aszParas, iHead)
+				else:
+					iPara = len(aszParas)
+				szRow = szRowOwn
+				aszParas.insert(iPara, szRow)
 				(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
 				iChar = iLine * 0.32
 				aszRow = self.wrapMessage(szRow, max(20, int((iWidth - 2 * iPad) / iChar)))
-				# above the hint lines at the end
 				iAt = len(aiPara)
 				while iAt > 0 and aiPara[iAt - 1] < 0:
 					iAt -= 1
+				if iHead >= 0:
+					iAt = len(aiPara)
+					for k in range(len(aiPara)):
+						if aiPara[k] >= iPara:
+							iAt = k
+							break
+					aiShift = []
+					for x in aiPara:
+						if x >= iPara:
+							aiShift.append(x + 1)
+						else:
+							aiShift.append(x)
+					aiPara = aiShift
+					dShift = {}
+					for kDet in dDetails.keys():
+						if kDet >= iPara:
+							dShift[kDet + 1] = dDetails[kDet]
+						else:
+							dShift[kDet] = dDetails[kDet]
+					self.aFrozen[iLevel][4] = dShift
 				aszLines = list(aszLines[:iAt]) + aszRow + list(aszLines[iAt:])
 				aiPara = list(aiPara[:iAt]) + [iPara] * len(aszRow) + list(aiPara[iAt:])
 				aiIndent = list(aiIndent[:iAt]) + [0] * len(aszRow) + list(aiIndent[iAt:])
@@ -5057,6 +5135,183 @@ class CvMainInterface:
 				self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, aiIndent, self.dFrozenDark.has_key(szPrefix))
 				dReg["paras"][iPara] = "row"
 			self.dWpWin[szPrefix] = dReg
+		except:
+			pass
+
+	# a unit of a stack was selected: in the frozen windows of that stack the line "Set waypoint..." goes to the selected unit (it stands
+	# below the active unit)
+	def refreshWaypointRows( self, screen, pSelect ):
+		try:
+			for iLevel in range(len(self.aFrozen)):
+				if self.aFrozen[iLevel][6] >= 0:
+					continue
+				tAnchor = self.aFrozen[iLevel][5]
+				if tAnchor is None or tAnchor[0] < 0:
+					continue
+				pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+				if pPlot is None or pPlot.isNone() or pPlot.getX() != pSelect.getX() or pPlot.getY() != pSelect.getY():
+					continue
+				if self.dWpWin.has_key(self.aFrozen[iLevel][0]):
+					self.moveWaypointRow(screen, iLevel, pSelect)
+				self.moveUnitToTop(screen, iLevel, pSelect)
+		except:
+			pass
+
+	# the active unit stands at the start of the list of units of a stack tooltip: the block of the selected unit (its name, its promotions, its
+	# lines) goes to the start of the frozen window (the other blocks keep their order, the lines after the units stay)
+	def moveUnitToTop( self, screen, iLevel, pUnit ):
+		try:
+			szPrefix = self.aFrozen[iLevel][0]
+			aszParas = list(self.aFrozen[iLevel][2])
+			dDetails = self.aFrozen[iLevel][4]
+			tAnchor = self.aFrozen[iLevel][5]
+			pPlot = CyMap().plot(tAnchor[0], tAnchor[1])
+			iPlotStart = self.getPlotStartPara(aszParas, pPlot)
+			aHeads = []
+			for k in range(iPlotStart):
+				if self.isUnitHeader(aszParas[k]):
+					aHeads.append(k)
+			if len(aHeads) < 2:
+				return
+			# (the region of the units ends at the line "more...units" or "Commands")
+			iCmd = self.getCommandsPara(aszParas, dDetails)
+			iEnd = iPlotStart
+			for k in range(aHeads[0], iPlotStart):
+				if k == iCmd or (dDetails.has_key(k) and dDetails[k].find(u"@WTPUNITS") == 0):
+					iEnd = k
+					break
+			aHeads = [k for k in aHeads if k < iEnd]
+			if len(aHeads) < 2:
+				return
+			iBlock = -1
+			for i in range(len(aHeads)):
+				pHeader = self.getHeaderUnit(iLevel, aszParas, aHeads[i])
+				if pHeader is not None and not pHeader.isNone() and pHeader.getID() == pUnit.getID() and pHeader.getOwner() == pUnit.getOwner():
+					iBlock = i
+					break
+			if iBlock <= 0:
+				return
+			aBounds = []
+			for i in range(len(aHeads)):
+				if i + 1 < len(aHeads):
+					aBounds.append((aHeads[i], aHeads[i + 1]))
+				else:
+					aBounds.append((aHeads[i], iEnd))
+			aOrder = range(aHeads[0])
+			aBlocks = [aBounds[iBlock]] + aBounds[:iBlock] + aBounds[iBlock + 1:]
+			for tB in aBlocks:
+				aOrder += range(tB[0], tB[1])
+			aOrder += range(iEnd, len(aszParas))
+			dMap = {}
+			for i in range(len(aOrder)):
+				dMap[aOrder[i]] = i
+			(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = self.aFrozen[iLevel][1]
+			aiIndent = self.aFrozen[iLevel][3]
+			# the lines of the region must be one piece
+			iFrom = -1
+			iTo = -1
+			for k in range(len(aiPara)):
+				if aiPara[k] >= aHeads[0] and aiPara[k] < iEnd:
+					if iFrom < 0:
+						iFrom = k
+					iTo = k
+			if iFrom < 0:
+				return
+			for k in range(iFrom, iTo + 1):
+				if aiPara[k] < aHeads[0] or aiPara[k] >= iEnd:
+					return
+			dLines = {}
+			for k in range(iFrom, iTo + 1):
+				if not dLines.has_key(aiPara[k]):
+					dLines[aiPara[k]] = []
+				dLines[aiPara[k]].append(k)
+			aNewLines = list(aszLines[:iFrom])
+			aNewPara = list(aiPara[:iFrom])
+			aNewIndent = list(aiIndent[:iFrom])
+			for iOld in aOrder[aHeads[0]:iEnd]:
+				for k in dLines.get(iOld, []):
+					aNewLines.append(aszLines[k])
+					aNewPara.append(dMap[iOld])
+					aNewIndent.append(aiIndent[k])
+			aNewLines += list(aszLines[iTo + 1:])
+			aNewPara += list(aiPara[iTo + 1:])
+			aNewIndent += list(aiIndent[iTo + 1:])
+			dNew = {}
+			for kDet in dDetails.keys():
+				dNew[dMap.get(kDet, kDet)] = dDetails[kDet]
+			aszNew = [aszParas[i] for i in aOrder]
+			tNew = (iX, iY, iWidth, iHeight, aNewLines, aNewPara, iPad, iLine)
+			self.deleteTipWindow(screen, szPrefix, len(aszLines))
+			self.aFrozen[iLevel][1] = tNew
+			self.aFrozen[iLevel][2] = aszNew
+			self.aFrozen[iLevel][3] = aNewIndent
+			self.aFrozen[iLevel][4] = dNew
+			# what refers to the paragraphs of the window
+			dReg = self.dWpWin.get(szPrefix)
+			if dReg is not None:
+				dParas = {}
+				for kReg in dReg["paras"].keys():
+					dParas[dMap.get(kReg, kReg)] = dReg["paras"][kReg]
+				dReg["paras"] = dParas
+				if dReg.get("cmd", -1) >= 0:
+					dReg["cmd"] = dMap.get(dReg["cmd"], dReg["cmd"])
+			for tKey in self.dRowChild.keys():
+				if tKey[0] == szPrefix and dMap.has_key(tKey[1]) and dMap[tKey[1]] != tKey[1]:
+					szChild = self.dRowChild[tKey]
+					del self.dRowChild[tKey]
+					self.dRowChild[(szPrefix, dMap[tKey[1]])] = szChild
+			if self.tSecondTipKey is not None and self.tSecondTipKey[0] == iLevel and dMap.has_key(self.tSecondTipKey[1]):
+				tOldKey = self.tSecondTipKey
+				self.tSecondTipKey = (tOldKey[0], dMap[tOldKey[1]]) + tuple(tOldKey[2:])
+			self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, aNewIndent, self.dFrozenDark.has_key(szPrefix))
+		except:
+			pass
+
+	def moveWaypointRow( self, screen, iLevel, pUnit ):
+		try:
+			szPrefix = self.aFrozen[iLevel][0]
+			dOld = self.dWpWin[szPrefix]
+			tUnit = (pUnit.getOwner(), pUnit.getID())
+			if dOld["unit"] == tUnit:
+				return
+			aRows = [k for k in dOld["paras"].keys() if dOld["paras"][k] == "row"]
+			if dOld["cmd"] >= 0 or len(aRows) != 1:
+				# (the row is the first line of the child window of "Commands": only its unit changes)
+				dOld["unit"] = tUnit
+				dOld["sea"] = self.isSeaUnit(pUnit)
+				return
+			iOld = aRows[0]
+			(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = self.aFrozen[iLevel][1]
+			aiIndent = self.aFrozen[iLevel][3]
+			aszParas = list(self.aFrozen[iLevel][2])
+			dDetails = self.aFrozen[iLevel][4]
+			self.deleteTipWindow(screen, szPrefix, len(aszLines))
+			aszNewLines = []
+			aiNewPara = []
+			aiNewIndent = []
+			for k in range(len(aszLines)):
+				if aiPara[k] == iOld:
+					iHeight -= iLine
+					continue
+				aszNewLines.append(aszLines[k])
+				if aiPara[k] > iOld:
+					aiNewPara.append(aiPara[k] - 1)
+				else:
+					aiNewPara.append(aiPara[k])
+				aiNewIndent.append(aiIndent[k])
+			aszParas.pop(iOld)
+			dNew = {}
+			for kDet in dDetails.keys():
+				if kDet > iOld:
+					dNew[kDet - 1] = dDetails[kDet]
+				elif kDet < iOld:
+					dNew[kDet] = dDetails[kDet]
+			self.aFrozen[iLevel][1] = (iX, iY, iWidth, iHeight, aszNewLines, aiNewPara, iPad, iLine)
+			self.aFrozen[iLevel][2] = aszParas
+			self.aFrozen[iLevel][3] = aiNewIndent
+			self.aFrozen[iLevel][4] = dNew
+			del self.dWpWin[szPrefix]
+			self.addWaypointRow(screen, iLevel, pUnit)
 		except:
 			pass
 
@@ -5266,8 +5521,95 @@ class CvMainInterface:
 		self.fWpStart = (self.getTipNow() / 1000.0)
 		self.unfreezeAllTips()
 
+	# the preview window of a line of a unit: its hint "Right click: Select ..." goes (the unit is selected now)
+	def dropPreviewSelectHint( self ):
+		try:
+			(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = self.tPreviewLayout
+			iHints = self.iPreviewHintLines - self.iPreviewFreezeLines
+			if iHints <= 0:
+				return
+			iTo = len(aszLines) - self.iPreviewFreezeLines
+			iFrom = iTo - iHints
+			if iFrom < 0:
+				return
+			for k in range(iFrom, iTo):
+				if aiPara[k] >= 0:
+					return
+			aszNew = list(aszLines[:iFrom]) + list(aszLines[iTo:])
+			aiNew = list(aiPara[:iFrom]) + list(aiPara[iTo:])
+			self.tPreviewLayout = (iX, iY, iWidth, iHeight - iLine * iHints, aszNew, aiNew, iPad, iLine)
+			self.iPreviewHintLines = self.iPreviewFreezeLines
+		except:
+			pass
+
+	# a unit of the player is activated (event "unitSelected"): the tooltip of the plot under the cursor is frozen as soon as it shows (stack or
+	# single unit); it goes with the first order of the unit
+	def onUnitActivated( self, pUnit ):
+		try:
+			if not self.bTipAutoFreeze or not self.bHoverTip or pUnit is None or pUnit.isNone() or pUnit.getOwner() != gc.getGame().getActivePlayer():
+				return
+			if self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
+				# (selected from a frozen window: it keeps its own handling)
+				return
+			pMouse = CyInterface().getMouseOverPlot()
+			if pMouse is None or pMouse.isNone() or pMouse.getX() != pUnit.getX() or pMouse.getY() != pUnit.getY():
+				return
+			if len(self.szAutoSelPrefix) > 0:
+				self.closeAutoSelWindows()
+			self.tAutoFreeze = None
+			if len(self.aFrozen) == 0:
+				self.tAutoFreeze = (pUnit.getX(), pUnit.getY(), self.getTipNow())
+		except:
+			pass
+
+	def updateAutoFreeze( self ):
+		try:
+			tAuto = self.tAutoFreeze
+			if tAuto is None:
+				return
+			if self.getTipNow() - tAuto[2] > 5000:
+				self.tAutoFreeze = None
+				return
+			if len(self.aFrozen) > 0 or self.bHudHover or not self.bCursorTipShown:
+				return
+			pMouse = CyInterface().getMouseOverPlot()
+			if pMouse is None or pMouse.isNone() or pMouse.getX() != tAuto[0] or pMouse.getY() != tAuto[1]:
+				self.tAutoFreeze = None
+				return
+			self.tAutoFreeze = None
+			if self.freezeCursorTooltip() and len(self.aFrozen) > 0:
+				self.szAutoSelPrefix = self.aFrozen[-1][0]
+		except:
+			self.tAutoFreeze = None
+
+	# the frozen tooltip of the unit that a right click selected from a stack, and the stack tooltip that it belongs to
+	def closeAutoSelWindows( self ):
+		try:
+			iFound = -1
+			for i in range(len(self.aFrozen)):
+				if self.aFrozen[i][0] == self.szAutoSelPrefix:
+					iFound = i
+					break
+			self.szAutoSelPrefix = u""
+			if iFound < 0:
+				return
+			iRoot = iFound
+			for k in range(10):
+				if self.aFrozen[iRoot][6] < 0:
+					break
+				iRoot = self.aFrozen[iRoot][6]
+			self.closeFrozenChild(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE), iRoot)
+		except:
+			pass
+
 	# called by the game for every order that the player gives to a group (CvEventManager.onSelectionGroupPushMission)
 	def onWaypointMission( self, eOwner, eMission ):
+		try:
+			if len(self.szAutoSelPrefix) > 0 and eOwner == gc.getGame().getActivePlayer():
+				# an order for the unit that was selected from a stack tooltip: the frozen tooltips of the stack go
+				self.closeAutoSelWindows()
+		except:
+			pass
 		try:
 			if self.iWpUnit < 0:
 				return
@@ -5742,6 +6084,13 @@ class CvMainInterface:
 				# (the frozen window of a line: the cursor stays on that line, no second window appears there)
 				if tKeyAtFreeze is not None:
 					self.dRowChild[(self.aFrozen[iParent][0], tKeyAtFreeze[1])] = self.aFrozen[-1][0]
+					try:
+						# (a line of a unit of a stack: all lines of the unit have this child window, it is registered at the name of the unit)
+						tBlockFz = self.getBlockUnit(iParent, self.aFrozen[iParent][2], tKeyAtFreeze[1])
+						if tBlockFz is not None and tBlockFz[1] >= 0:
+							self.dRowChild[(self.aFrozen[iParent][0], tBlockFz[1])] = self.aFrozen[-1][0]
+					except:
+						pass
 			# a window with lines of waypoints (the list, the commands), or the tooltip of an own unit of a stack (the line "Set waypoint...")
 			if tPreviewWp is not None:
 				self.dWpWin[self.aFrozen[-1][0]] = tPreviewWp
@@ -6256,6 +6605,14 @@ class CvMainInterface:
 		if iFz >= 0 and iPara >= 0 and iSel < 0 and not bWpRow:
 			# (the line has a frozen child window already: no second one)
 			szFrozenChild = self.dRowChild.get((self.aFrozen[iFz][0], iPara))
+			if szFrozenChild is None and not bPromoLine and not (tWp is not None and tWp["paras"].has_key(iPara)):
+				try:
+					# (the child window of the unit of the line is frozen already, from another line of the unit)
+					tBlockHover = self.getBlockUnit(iFz, aszTopParas, iPara)
+					if tBlockHover is not None and tBlockHover[1] >= 0:
+						szFrozenChild = self.dRowChild.get((self.aFrozen[iFz][0], tBlockHover[1]))
+				except:
+					szFrozenChild = None
 			if szFrozenChild is not None:
 				for i in range(len(self.aFrozen)):
 					if self.aFrozen[i][0] == szFrozenChild and self.aFrozen[i][6] == iFz:
@@ -6826,6 +7183,14 @@ class CvMainInterface:
 			if len(szUnit) == 0:
 				return False
 			aLines = [szUnit]
+			szSetRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
+			iSetSlot = -1
+			if pUnit.getOwner() == gc.getGame().getActivePlayer():
+				# (the line "Set waypoint..." stands directly below the promotions of the unit, below its name without them)
+				aUnitParas = szUnit.split(u"\n")
+				iSetSlot = self.getWaypointSlot(aUnitParas, 0)
+				if iSetSlot > len(aUnitParas):
+					iSetSlot = len(aUnitParas)
 			szInfo = self.getUnitMoveInfoText(aszParas[iHead])
 			if len(szInfo) > 0:
 				aLines.append(szInfo)
@@ -6834,8 +7199,7 @@ class CvMainInterface:
 			else:
 				aPlotLines = self.getRootPlotLines(iLevel)
 			# (not the line "Set waypoint..." of the parent window: this window gets its own)
-			szSetRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
-			aPlotLines = [x for x in aPlotLines if x != szSetRow]
+			aPlotLines = [x for x in aPlotLines if x != szSetRow and x != localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ())]
 			bOwn = (pUnit.getOwner() == gc.getGame().getActivePlayer())
 			# the line "Commands" of the stack: it goes to the end of this window (with its child window, which begins with "Set waypoint...")
 			szCmdLine = None
@@ -6871,9 +7235,10 @@ class CvMainInterface:
 					dDetails = {iMain: szSetRow + u"\n" + szCmdDetails}
 					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {}, "cmd": iMain}
 				else:
-					# (the line "Set waypoint..." below the hint of the unit)
-					szTail = szSetRow
-					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {iMain: "row"}, "cmd": -1}
+					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {iSetSlot: "row"}, "cmd": -1}
+					aUnitParas = list(aLines[0].split(u"\n"))
+					aUnitParas.insert(iSetSlot, localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ()))
+					aLines[0] = u"\n".join(aUnitParas)
 			elif iHead == 0:
 				eTalk = self.getTalkPlayer(aszParas, 0)
 				if eTalk >= 0:
@@ -7321,7 +7686,25 @@ class CvMainInterface:
 					else:
 						CyInterface().selectUnit(pSelect, True, False, False)
 						self.markTipSelection()
-						self.unfreezeAllTips()
+						if tBlock is not None:
+							screenSel = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+							# the frozen tooltip of the unit that was selected before goes
+							if len(self.szAutoSelPrefix) > 0:
+								tKeySel = self.tSecondTipKey
+								for iOldSel in range(len(self.aFrozen)):
+									if self.aFrozen[iOldSel][0] == self.szAutoSelPrefix:
+										self.closeFrozenChild(screenSel, iOldSel)
+										break
+								self.tSecondTipKey = tKeySel
+								self.szAutoSelPrefix = u""
+							self.refreshWaypointRows(screenSel, pSelect)
+						if tBlock is not None and self.bSecondTipShown and self.tPreviewLayout is not None:
+							# a line of a unit of a stack: the tooltip of the unit (beside the line) is frozen at once
+							self.dropPreviewSelectHint()
+							self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
+							self.szAutoSelPrefix = self.aFrozen[-1][0]
+						else:
+							self.unfreezeAllTips()
 						return
 				elif eTalk >= 0:
 					if bSecond:
@@ -7925,6 +8308,12 @@ class CvMainInterface:
 		self.szPendingHelp = None
 		self.saveTipSettings()
 
+	def setTipAutoFreeze( self, bValue ):
+		self.bTipAutoFreeze = bool(bValue)
+		if not self.bTipAutoFreeze:
+			self.tAutoFreeze = None
+		self.saveTipSettings()
+
 	def setTipQuick( self, bQuick ):
 		self.bTipQuick = bool(bQuick)
 		self.saveTipSettings()
@@ -7938,11 +8327,16 @@ class CvMainInterface:
 				f.write("quick=1\n")
 			else:
 				f.write("quick=0\n")
+			if self.bTipAutoFreeze:
+				f.write("autofreeze=1\n")
+			else:
+				f.write("autofreeze=0\n")
 			f.close()
 		except:
 			pass
 
 	iTipDelayIndex = aiTipSettings[1]
+	bTipAutoFreeze = (aiTipSettings[3] == 1) # options screen: the tooltip of an activated unit is frozen until the unit gets an order (default off)
 	bTipQuick = (aiTipSettings[2] == 1) # options screen: the next tooltip appears without delay while a tooltip is shown
 
 	# the cursor is on a panel of the HUD that is not part of the map (message panel): the plot under it is not interesting, only the
@@ -7991,6 +8385,7 @@ class CvMainInterface:
 		except:
 			pass
 		self.updateEscHold()
+		self.updateAutoFreeze()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
 			# X held: all frozen windows are closed
 			self.bXHoldDone = True
