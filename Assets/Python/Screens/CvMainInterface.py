@@ -6405,6 +6405,13 @@ class CvMainInterface:
 				# (the frozen window of a line: the cursor stays on that line, no second window appears there)
 				if tKeyAtFreeze is not None:
 					self.dRowChild[(self.aFrozen[iParent][0], tKeyAtFreeze[1])] = self.aFrozen[-1][0]
+					try:
+						# (a line of a unit of a stack: all lines of the unit have this child window, it is registered at the name of the unit)
+						tBlockFz = self.getBlockUnit(iParent, self.aFrozen[iParent][2], tKeyAtFreeze[1])
+						if tBlockFz is not None and tBlockFz[1] >= 0:
+							self.dRowChild[(self.aFrozen[iParent][0], tBlockFz[1])] = self.aFrozen[-1][0]
+					except:
+						pass
 			# a window with lines of waypoints (the list, the commands), or the tooltip of an own unit of a stack (the line "Set waypoint...")
 			if tPreviewWp is not None:
 				self.dWpWin[self.aFrozen[-1][0]] = tPreviewWp
@@ -6919,6 +6926,14 @@ class CvMainInterface:
 		if iFz >= 0 and iPara >= 0 and iSel < 0 and not bWpRow:
 			# (the line has a frozen child window already: no second one)
 			szFrozenChild = self.dRowChild.get((self.aFrozen[iFz][0], iPara))
+			if szFrozenChild is None and not bPromoLine and not (tWp is not None and tWp["paras"].has_key(iPara)):
+				try:
+					# (the child window of the unit of the line is frozen already, from another line of the unit)
+					tBlockHover = self.getBlockUnit(iFz, aszTopParas, iPara)
+					if tBlockHover is not None and tBlockHover[1] >= 0:
+						szFrozenChild = self.dRowChild.get((self.aFrozen[iFz][0], tBlockHover[1]))
+				except:
+					szFrozenChild = None
 			if szFrozenChild is not None:
 				for i in range(len(self.aFrozen)):
 					if self.aFrozen[i][0] == szFrozenChild and self.aFrozen[i][6] == iFz:
