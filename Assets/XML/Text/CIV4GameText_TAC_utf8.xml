@@ -1863,6 +1863,16 @@
 		<German>Auf manuell gesetzt</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL</Tag>
+		<English>Select all</English>
+		<German>Alle auswählen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL_UNDO</Tag>
+		<English>Undo select all</English>
+		<German>Auswahl rückgängig</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
 		<English>[COLOR_POSITIVE_TEXT]A free colonist has survived enough combat to now be a [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</English>
 		<Portuguese>[COLOR_POSITIVE_TEXT]Um colono livre sobreviveu a combates suficientes para agora ser um [COLOR_REVERT][COLOR_UNIT_TEXT]%s1_expert[COLOR_REVERT]</Portuguese>
