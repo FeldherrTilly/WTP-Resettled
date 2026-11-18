@@ -4698,6 +4698,15 @@ class CvMainInterface:
 				iX = iCursorX - int(iGap * 0.6) - iWidth
 		iX = max(4, iX)
 		iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
+		if tRect is not None and self.isTradeIconHover():
+			# the picture of a good: the tooltip stands left of it, its middle at the height of the middle of the picture
+			try:
+				tWin = CvScreensInterface.tradeRouteScreen
+				tCenter = tWin.getIconCenter(tWin.getIconYieldAt(iCursorX, iCursorY))
+				if tCenter is not None:
+					iY = max(4, min(yRes - iHeight - 4, tCenter[1] - iHeight / 2))
+			except:
+				pass
 		if len(self.aFrozen) > 0 and tRect is not None:
 			# beside a window of the mod (import / export window): not over a frozen tooltip, not over the window; the other side of the window
 			# and above / below the frozen ones if it is not free
