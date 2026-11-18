@@ -2243,16 +2243,23 @@
 		<Russian>Автоматизировать транспорт для доставки товаров</Russian>
 		<Hungarian>A szállítás teljes automatizálása</Hungarian>
 	</TEXT>
+	<!-- WTP HUD note (read before editing the next two texts): the HUD shows the military upkeep line and the domestic market line one below the other.
+	     GOAL: the signs (+ / -) and the numbers of both lines stand exactly one above the other, in every language.
+	     CvMainInterface.py (splitAtNumber): the line is split at the number %d1; text before it = label, the + or - directly before the number = sign, the number = amount.
+	     Spaces before the sign and between sign and number are stripped there, so the code aligns sign and amount by pixel width itself.
+	     The blanks before the sign in the texts below (padding) are the fallback for builds without that code: there the text is shown as it is and the padding
+	     brings the signs and numbers roughly (the font is proportional) into one column.
+	     RULES: keep %d1 once in each text, the sign directly before it (one space between is fine), do not remove the padding, do not add other digits or +/- signs to the text. -->
 	<TEXT>
 		<Tag>TXT_KEY_MILITARY_UPKEEP_GOLD_STR</Tag>
-		<English>Military upkeep:   -%d1 per turn</English>
-		<Portuguese>Manutenção militar: -%d1 por turno</Portuguese>
-		<French>Entretien militaire : -%d1 par tour</French>
-		<German>Militärunterhalt: -%d1 pro Runde</German>
-		<Italian>Mantenimento militare: -%d1 per turno</Italian>
-		<Spanish>Mantenimiento militar: -%d1 por turno</Spanish>
-		<Russian>Содержание армии: -%d1 за ход</Russian>
-		<Hungarian>Katonai fenntartás: -%d1 körönként</Hungarian>
+		<English>Military upkeep: - %d1 per turn</English>
+		<Portuguese>Manutenção militar: - %d1 por turno</Portuguese>
+		<French>Entretien militaire : - %d1 par tour</French>
+		<German>Militärunterhalt: - %d1 pro Runde</German>
+		<Italian>Mantenimento militare: - %d1 per turno</Italian>
+		<Spanish>Mantenimiento militar: - %d1 por turno</Spanish>
+		<Russian>Содержание армии: - %d1 за ход</Russian>
+		<Hungarian>Katonai fenntartás: - %d1 körönként</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_DOMESTIC_MARKET_INCOME_STR</Tag>
