@@ -5932,22 +5932,46 @@ class CvMainInterface:
 	iTradeMarked = -1 # the paragraph that is yellow in the tooltip now
 	bTradeSel = False # the wheel is taken
 	bTradeChild = False # the child window shown is the one of the chosen line
-	szTradeSelFor = u"" # the text of the tooltip that the choice is for
+	szTradeSelFor = u"" # the text of the tooltip (or the name of the frozen window) that the choice is for
+	szTradeMarkedWin = u"" # the frozen window that has the yellow line of the choice
 
-	def getTradeTipStops( self ):
+	# the window that the choice is for: the tooltip of the cursor (-2), a frozen tooltip of the good under the cursor (its index; after a jump
+	# the tooltip of the good is frozen), -1: none
+	def getTradeTipTarget( self ):
+		try:
+			if not self.isTradeWindowOpen():
+				return -1
+			iCX = gc.getGame().getCursorClientX()
+			iCY = gc.getGame().getCursorClientY()
+			iYield = CvScreensInterface.tradeRouteScreen.getIconYieldAt(iCX, iCY)
+			if iYield < 0 or self.getFrozenAt(iCX, iCY) >= 0:
+				return -1
+			for i in range(len(self.aFrozen)):
+				if self.dTraderWin.get(self.aFrozen[i][0], -1) == iYield:
+					return i
+			if self.bCursorTipShown and self.tTipLayout is not None and self.iTradeTipYield == iYield and self.szCursorTipText == self.szTradeTipText:
+				return -2
+		except:
+			pass
+		return -1
+
+	def getTradeTipStops( self, iTarget ):
+		if iTarget >= 0:
+			aszParas = self.aFrozen[iTarget][2]
+			dDetails = self.aFrozen[iTarget][4]
+		else:
+			aszParas = self.aszTipParas
+			dDetails = self.dTipDetails
 		aStops = []
-		for k in range(len(self.aszTipParas)):
-			if self.dTipDetails.has_key(k) or self.dTraderLines.has_key(self.normTipText(self.aszTipParas[k])):
+		for k in range(len(aszParas)):
+			if dDetails.has_key(k) or self.dTraderLines.has_key(self.normTipText(aszParas[k])):
 				aStops.append(k)
 		return aStops
 
-	def isTradeTipSelectable( self ):
-		try:
-			if not (self.bCursorTipShown and self.tTipLayout is not None and self.iTradeTipYield >= 0 and self.szCursorTipText == self.szTradeTipText and self.isTradeWindowOpen()):
-				return False
-			return CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) == self.iTradeTipYield
-		except:
-			return False
+	def getTradeTipDetail( self, iTarget, iPara ):
+		if iTarget >= 0:
+			return self.aFrozen[iTarget][4].get(iPara)
+		return self.dTipDetails.get(iPara)
 
 	def clearTradeTipSelect( self, screen ):
 		try:
@@ -5958,6 +5982,12 @@ class CvMainInterface:
 			if self.bTradeChild:
 				self.bTradeChild = False
 				self.hideSecondTip(screen)
+			if len(self.szTradeMarkedWin) > 0:
+				# (a frozen tooltip: its yellow line goes)
+				for i in range(len(self.aFrozen)):
+					if self.aFrozen[i][0] == self.szTradeMarkedWin:
+						self.markWaypointLine(screen, i, -1)
+				self.szTradeMarkedWin = u""
 			self.iTradeSel = -1
 			self.iTradeMarked = -1
 			self.szTradeSelFor = u""
@@ -5967,16 +5997,21 @@ class CvMainInterface:
 	def updateTradeTipSelect( self ):
 		try:
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			if not self.isTradeTipSelectable():
-				if self.iTradeSel >= 0 or self.bTradeSel or self.bTradeChild:
+			iTarget = self.getTradeTipTarget()
+			if iTarget == -1:
+				if self.iTradeSel >= 0 or self.bTradeSel or self.bTradeChild or len(self.szTradeMarkedWin) > 0:
 					self.clearTradeTipSelect(screen)
 				return
-			if self.szTradeSelFor != self.szCursorTipText:
+			if iTarget >= 0:
+				szFor = self.aFrozen[iTarget][0]
+			else:
+				szFor = self.szCursorTipText
+			if self.szTradeSelFor != szFor:
 				# (another tooltip: the choice starts again)
-				self.szTradeSelFor = self.szCursorTipText
-				self.iTradeSel = -1
-				self.iTradeMarked = -1
-			aStops = self.getTradeTipStops()
+				if self.szTradeSelFor != u"":
+					self.clearTradeTipSelect(screen)
+				self.szTradeSelFor = szFor
+			aStops = self.getTradeTipStops(iTarget)
 			bWheel = gc.getGame().isShiftKeyPressed() and len(aStops) > 0
 			if bWheel != self.bTradeSel:
 				self.bTradeSel = bWheel
@@ -5993,60 +6028,95 @@ class CvMainInterface:
 			iMark = -1
 			if self.iTradeSel >= 0 and self.iTradeSel < len(aStops):
 				iMark = aStops[self.iTradeSel]
-			if iMark != self.iTradeMarked:
-				self.markTradeTipLine(screen, iMark)
+			bRedo = (iMark != self.iTradeMarked)
+			if not bRedo and iMark >= 0 and iTarget >= 0:
+				# (the frozen windows are painted again when the cursor goes over their lines: the choice stays yellow)
+				bRedo = not self.dWpMarked.has_key(self.aFrozen[iTarget][0])
+			if bRedo:
+				self.markTradeTipLine(screen, iMark, iTarget)
+			elif self.bTradeChild and not self.bSecondTipShown:
+				self.markTradeTipLine(screen, iMark, iTarget)
 		except:
 			self.tipError("updateTradeTipSelect")
 
 	# the chosen paragraph in yellow (-1: none); its child window beside the tooltip
-	def markTradeTipLine( self, screen, iMark ):
-		(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.tTipLayout
-		aNew = []
-		iFirst = -1
-		for i in range(len(aszLines)):
-			szLine = aszLines[i]
-			if iMark >= 0 and aiPara[i] == iMark:
-				if iFirst < 0:
-					iFirst = i
-				szLine = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szLine) + u"</color>"
-			aNew.append(szLine)
-		self.deleteTipWindow(screen, "HudTip", len(aszLines))
-		self.drawTipWindow(screen, "HudTip", (iX, iY, iW, iH, aNew, aiPara, iPad, iLine), False, 0, self.aiTipIndent)
+	def markTradeTipLine( self, screen, iMark, iTarget ):
+		if iTarget >= 0:
+			(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.aFrozen[iTarget][1]
+			self.markWaypointLine(screen, iTarget, iMark)
+			self.szTradeMarkedWin = self.aFrozen[iTarget][0]
+		else:
+			(iX, iY, iW, iH, aszLines, aiPara, iPad, iLine) = self.tTipLayout
+			aNew = []
+			for i in range(len(aszLines)):
+				szLine = aszLines[i]
+				if iMark >= 0 and aiPara[i] == iMark:
+					szLine = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szLine) + u"</color>"
+				aNew.append(szLine)
+			self.deleteTipWindow(screen, "HudTip", len(aszLines))
+			self.drawTipWindow(screen, "HudTip", (iX, iY, iW, iH, aNew, aiPara, iPad, iLine), False, 0, self.aiTipIndent)
 		self.iTradeMarked = iMark
-		if self.bTradeChild:
+		if self.bTradeChild or self.bSecondTipShown:
 			self.bTradeChild = False
 			self.hideSecondTip(screen)
-		if iMark >= 0 and self.dTipDetails.has_key(iMark) and iFirst >= 0:
-			self.showSecondTip(screen, self.dTipDetails[iMark], iY + iPad + iFirst * iLine, self.tTipLayout)
+		iFirst = -1
+		for i in range(len(aiPara)):
+			if aiPara[i] == iMark:
+				iFirst = i
+				break
+		szDetail = None
+		if iMark >= 0:
+			szDetail = self.getTradeTipDetail(iTarget, iMark)
+		if szDetail is not None and iFirst >= 0:
+			if iTarget >= 0:
+				# (the child window of this line is frozen already: no second one)
+				szChild = self.dRowChild.get((self.aFrozen[iTarget][0], iMark))
+				if szChild is not None:
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == szChild:
+							return
+				self.showSecondTip(screen, szDetail, iY + iPad + iFirst * iLine, self.aFrozen[iTarget][1], iTarget)
+			else:
+				self.showSecondTip(screen, szDetail, iY + iPad + iFirst * iLine, self.tTipLayout)
 			self.bTradeChild = self.bSecondTipShown
 
 	# right click on the picture of the good: runs the chosen line (True), False: there is none
 	def runTradeTipSelection( self ):
 		try:
-			if self.iTradeSel < 0 or not self.isTradeTipSelectable():
+			if self.iTradeSel < 0:
 				return False
-			aStops = self.getTradeTipStops()
+			iTarget = self.getTradeTipTarget()
+			if iTarget == -1:
+				return False
+			aStops = self.getTradeTipStops(iTarget)
 			if self.iTradeSel >= len(aStops):
 				return False
 			iPara = aStops[self.iTradeSel]
-			szDetail = self.dTipDetails.get(iPara)
+			szDetail = self.getTradeTipDetail(iTarget, iPara)
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			self.clearTradeTipSelect(screen)
 			self.hideSecondTip(screen)
-			if not self.freezeCursorTooltip() or len(self.aFrozen) == 0:
-				return False
-			iNew = len(self.aFrozen) - 1
-			if self.tryTraderJump(iNew, iPara):
+			if iTarget == -2:
+				# (the tooltip of the cursor is frozen first, as for a click on its line)
+				if not self.freezeCursorTooltip() or len(self.aFrozen) == 0:
+					return False
+				iTarget = len(self.aFrozen) - 1
+			if self.tryTraderJump(iTarget, iPara):
 				return True
 			if szDetail is not None:
-				aiFPara = self.aFrozen[iNew][1][5]
+				szChild = self.dRowChild.get((self.aFrozen[iTarget][0], iPara))
+				if szChild is not None:
+					for i in range(len(self.aFrozen)):
+						if self.aFrozen[i][0] == szChild:
+							return True
+				aiFPara = self.aFrozen[iTarget][1][5]
 				iLineIdx = 0
 				if iPara in aiFPara:
 					iLineIdx = aiFPara.index(iPara)
-				iLayY = self.aFrozen[iNew][1][1] + self.aFrozen[iNew][1][6] + iLineIdx * self.aFrozen[iNew][1][7]
-				self.showSecondTip(screen, szDetail, iLayY, self.aFrozen[iNew][1], iNew)
+				iLayY = self.aFrozen[iTarget][1][1] + self.aFrozen[iTarget][1][6] + iLineIdx * self.aFrozen[iTarget][1][7]
+				self.showSecondTip(screen, szDetail, iLayY, self.aFrozen[iTarget][1], iTarget)
 				if self.bSecondTipShown:
-					self.tSecondTipKey = (iNew, iPara, -1, iLineIdx, False)
+					self.tSecondTipKey = (iTarget, iPara, -1, iLineIdx, False)
 					self.freezePreview(screen)
 			return True
 		except:
