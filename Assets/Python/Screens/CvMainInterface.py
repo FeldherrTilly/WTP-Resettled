@@ -7753,8 +7753,10 @@ class CvMainInterface:
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD) and self.isTradeWindowOpen():
 				if self.isYieldTipFrozen(CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())):
-					# (the tooltip of this good is frozen: no second one as long as it is)
+					# (the tooltip of this good is frozen: no second one as long as it is; the one of the good before goes away too)
 					screen.setHelpTextString(u"")
+					if self.bCursorTipShown or self.szPendingHelp is not None:
+						self.hideCursorTooltip(screen)
 					return
 			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD):
 				szText = self.addRawNote(szText)
@@ -7852,6 +7854,11 @@ class CvMainInterface:
 			iFirst = -1
 			iLast = -1
 			for i in range(1, len(aszParas)):
+				if self.dTraderLines.has_key(self.normTipText(aszParas[i])):
+					# (the cities that import / export the good are not prices)
+					if iFirst >= 0:
+						break
+					continue
 				if re.search(u"(?i)\\t|<tab>", aszParas[i]) is not None and re.sub(u"(?i)<[^>]*>|\\t", u"", aszParas[i]).strip() != u"":
 					if iFirst < 0:
 						iFirst = i
