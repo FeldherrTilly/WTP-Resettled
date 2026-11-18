@@ -17,6 +17,7 @@ import CvScreensInterface
 import CvEventInterface
 import time
 import re
+import WtpColors
 import sdToolKit
 import sys
 import math
@@ -1542,7 +1543,7 @@ class CvMainInterface:
 					# (opened from a tooltip on the map: the city screen closes it, its widgets are made now; the window of that city is opened
 					# again in the city screen with what it showed, see checkReopenTradeWindow)
 					self.tReopenTrade = CvScreensInterface.tradeRouteScreen.getState()
-					CvScreensInterface.tradeRouteScreen.finish(False, -1)
+					CvScreensInterface.tradeRouteScreen.finish(False, -1, True)
 				else:
 					return 0
 		except:
@@ -5134,6 +5135,9 @@ class CvMainInterface:
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			iLevel = iData / 1000
 			iPara = iData % 1000
+			# a line of a colony in the tooltip of a good of the import / export window: the jump to it
+			if self.tryTraderJump(iLevel, iPara):
+				return
 			# a window with waypoints: the left click on the line of a waypoint jumps to it (the update of the frozen windows knows which one is chosen);
 			# when it is no waypoint (the line "Set waypoint..."), the click does what it always did
 			if iLevel >= 0 and iLevel < len(self.aFrozen) and self.dWpWin.has_key(self.aFrozen[iLevel][0]):
@@ -5759,7 +5763,7 @@ class CvMainInterface:
 				self.tReopenTrade = tWin.getState()
 				self.tReopenTrade["map"] = not CyInterface().isCityScreenUp()
 				self.iReopenWait = 4
-				tWin.finish(False, -1)
+				tWin.finish(False, -1, True)
 				CyInterface().setDirty(InterfaceDirtyBits.CityScreen_DIRTY_BIT, True)
 				CyInterface().setDirty(InterfaceDirtyBits.Domestic_Advisor_DIRTY_BIT, True)
 		except:
@@ -5963,6 +5967,9 @@ class CvMainInterface:
 			(tFLayout, aiFIndent) = self.removeFreezeHint(self.tTipLayout, self.aiTipIndent, self.iTipHintLines)
 			(tLayout, aiIndent) = self.addFrozenHint(screen, tFLayout, aiFIndent)
 			self.addFrozenWindow(screen, tLayout, self.aszTipParas, aiIndent, dict(self.dTipDetails), self.makeAnchor(tLayout))
+			if self.iTradeTipYield >= 0 and self.szCursorTipText == self.szTradeTipText:
+				# (the tooltip of a good of the import / export window: its lines of colonies can be clicked)
+				self.dTraderWin[self.aFrozen[-1][0]] = self.iTradeTipYield
 			try:
 				# the tooltip of an own unit: the line "Set waypoint..."
 				iNew = len(self.aFrozen) - 1
@@ -7744,6 +7751,12 @@ class CvMainInterface:
 			pass
 
 	tReopenTrade = None # the state of the import / export window that the city screen closed (it is opened again for the same city)
+	iReopenTries = 0
+	aTradeReturn = [] # the views the jumps from the tooltips of the import / export window started from (the last one is the one to go back to)
+	dTraderLines = {} # the lines of the traders in the tooltips: text without colors -> id of the city
+	dTraderWin = {} # frozen windows with such lines: prefix -> the good
+	iTradeTipYield = -1
+	szTradeTipText = u""
 
 	iReopenWait = 0 # frames the city screen gets to draw itself before the window is opened again
 
@@ -7754,22 +7767,173 @@ class CvMainInterface:
 			self.iReopenWait -= 1
 			return
 		try:
-			bMap = self.tReopenTrade.get("map", False)
-			if bMap == CyInterface().isCityScreenUp():
-				if bMap:
-					self.tReopenTrade = None # (the city screen was opened meanwhile)
-				return
 			tState = self.tReopenTrade
-			self.tReopenTrade = None
-			pCity = CyInterface().getHeadSelectedCity()
+			bMap = tState.get("map", False)
+			pCity = None
 			if bMap:
-				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tState["city"])
-			if pCity is not None and not pCity.isNone() and pCity.getID() == tState["city"]:
-				tWin = CvScreensInterface.tradeRouteScreen
-				if tWin.open(tState["city"], tState["condensed"]) != 0:
+				if not CyInterface().isCityScreenUp():
+					pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tState["city"])
+			elif CyInterface().isCityScreenUp():
+				pCity = CyInterface().getHeadSelectedCity()
+				if pCity is not None and not pCity.isNone() and pCity.getID() != tState["city"]:
+					pCity = None
+			if pCity is None or pCity.isNone():
+				# (the screen is not there yet: the jump to a city and back takes a few frames; the window is not opened for ever)
+				self.iReopenTries += 1
+				if self.iReopenTries > 240:
+					self.tReopenTrade = None
+					self.iReopenTries = 0
+				return
+			self.iReopenTries = 0
+			self.tReopenTrade = None
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.open(tState["city"], tState["condensed"], True) != 0:
+				if tState.has_key("focus"):
+					tWin.showYield(tState["focus"])
+				else:
 					tWin.restoreState(tState)
+				if tState.has_key("return"):
+					self.restoreAfterReturn(tState["return"])
 		except:
 			self.tReopenTrade = None
+
+	# THE CITIES IN THE TOOLTIP OF A GOOD (import / export window). One line for every colony that imports or exports the good: "Imports" in
+	# the color of the import on the left of the name, "Exports" in the export color on the right of it. The names stand under each other
+	# (a line without the left word gets blanks of its width). A left click on the line of a frozen tooltip jumps to the colony with its window
+	# on the page of the good; closing that window takes the player back (same view, the tooltip frozen again, the cursor where it was).
+	def getTradersNote( self, iYield ):
+		try:
+			aTraders = CvScreensInterface.tradeRouteScreen.getTraders(iYield)
+			if len(aTraders) == 0:
+				return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NONE", ())
+			iLine = max(16, int(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution() * 0.0153))
+			szImp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_IMPORTS", ())
+			szExp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_EXPORTS", ())
+			iBlanks = int(self.getTextPixels(szImp, iLine) / max(1.0, self.getTextPixels(u" ", iLine)) + 0.5)
+			aLines = []
+			for (iCity, szName, bImp, bExp) in aTraders[:15]:
+				if bImp:
+					szLine = WtpColors.tag(WtpColors.IMPORT, szImp) + u" "
+				else:
+					szLine = u" " * (iBlanks + 1)
+				szLine += szName
+				if bExp:
+					szLine += u" " + WtpColors.tag(WtpColors.EXPORT, szExp)
+				aLines.append(szLine)
+				self.dTraderLines[self.normTipText(szLine)] = iCity
+			if len(aTraders) > 15:
+				aLines.append(localText.getText("TXT_KEY_WTP_TIP_TRADERS_MORE", (len(aTraders) - 15,)))
+			return u"\n".join(aLines)
+		except:
+			return u""
+
+	# a left click on a line of a frozen window: is it the line of a colony of the traders? Then the jump is made (True)
+	def tryTraderJump( self, iLevel, iPara ):
+		try:
+			if iLevel < 0 or iLevel >= len(self.aFrozen) or not self.dTraderWin.has_key(self.aFrozen[iLevel][0]):
+				return False
+			aszParas = self.aFrozen[iLevel][2]
+			if iPara < 0 or iPara >= len(aszParas):
+				return False
+			iCity = self.dTraderLines.get(self.normTipText(aszParas[iPara]))
+			if iCity is None:
+				return False
+			return self.jumpToTradeCity(iLevel, iCity, self.dTraderWin[self.aFrozen[iLevel][0]])
+		except:
+			return False
+
+	def jumpToTradeCity( self, iLevel, iCity, iYield ):
+		tWin = CvScreensInterface.tradeRouteScreen
+		pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+		pCity = pPlayer.getCity(iCity)
+		if pCity is None or pCity.isNone() or not tWin.isOpen():
+			return False
+		if iCity == tWin.iCity:
+			# (the window of this colony is open: only its page goes to the good)
+			tWin.showYield(iYield)
+			return True
+		# what the way back needs: the window with what it shows, the view (city screen or map), the frozen tooltip and where the cursor was
+		tFz = self.aFrozen[iLevel]
+		tR = {"state": tWin.getState(), "city": tWin.iCity, "map": not CyInterface().isCityScreenUp(), "yield": iYield,
+			"frozen": (tFz[1], list(tFz[2]), list(tFz[3]), dict(tFz[4]), tFz[5]),
+			"cursor": (gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()), "look": None, "zoom": None, "unit": None}
+		if tR["map"]:
+			try:
+				tR["look"] = CyCamera().GetLookAt()
+			except:
+				tR["look"] = None
+			try:
+				tR["zoom"] = CyCamera().GetZoom()
+			except:
+				pass
+			try:
+				pUnit = CyInterface().getHeadSelectedUnit()
+				if pUnit is not None and not pUnit.isNone():
+					tR["unit"] = (pUnit.getOwner(), pUnit.getID())
+			except:
+				pass
+		self.aTradeReturn.append(tR)
+		tWin.finish(False, -1, True)
+		self.unfreezeAllTips()
+		CyInterface().selectCity(pCity, False)
+		self.tReopenTrade = {"city": iCity, "condensed": False, "focus": iYield, "map": False}
+		self.iReopenTries = 0
+		self.iReopenWait = 3
+		return True
+
+	# the window that was opened by a jump is closed by the player: back to where the jump started
+	def tradeWindowClosed( self ):
+		try:
+			if len(self.aTradeReturn) == 0:
+				return
+			tR = self.aTradeReturn.pop()
+			if tR["map"]:
+				# (back to the map: the city screen is left)
+				try:
+					CyInterface().clearSelectedCities()
+				except:
+					CvUtil.pyPrint("WTP trade jump: clearSelectedCities failed")
+			else:
+				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
+				if pCity is not None and not pCity.isNone():
+					CyInterface().selectCity(pCity, False)
+			tState = dict(tR["state"])
+			tState["map"] = tR["map"]
+			tState["return"] = tR
+			self.tReopenTrade = tState
+			self.iReopenTries = 0
+			self.iReopenWait = 3
+		except:
+			self.tReopenTrade = None
+
+	# the window of the starting colony is open again: the camera and the selected unit of the map, the frozen tooltip and the cursor as they were
+	def restoreAfterReturn( self, tR ):
+		try:
+			if tR["map"]:
+				try:
+					if tR["unit"] is not None:
+						pUnit = gc.getPlayer(tR["unit"][0]).getUnit(tR["unit"][1])
+						if pUnit is not None and not pUnit.isNone():
+							CyInterface().selectUnit(pUnit, True, False, False)
+				except:
+					pass
+				try:
+					if tR["look"] is not None:
+						CyCamera().JustLookAt(tR["look"])
+					else:
+						pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
+						CyCamera().JustLookAtPlot(pCity.plot())
+					if tR["zoom"] is not None:
+						CyCamera().SetZoom(tR["zoom"])
+				except:
+					pass
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			(tLayout, aszParas, aiIndent, dDetails, tAnchor) = tR["frozen"]
+			self.addFrozenWindow(screen, tLayout, aszParas, aiIndent, dDetails, tAnchor)
+			self.dTraderWin[self.aFrozen[-1][0]] = tR["yield"]
+			gc.getGame().setCursorClient(tR["cursor"][0], tR["cursor"][1])
+		except:
+			pass
 
 	# the picture of a good in the import / export window that has an outer frame (it restricts the production of the city): its help text gets a note
 	def addRawNote( self, szText ):
@@ -7782,9 +7946,11 @@ class CvMainInterface:
 					if len(szNote) > 0:
 						szText = szText + u"\n" + szNote
 					# the colonies that export / import the good at the moment
-					szTraders = tWin.getTradersNote(iYield)
+					szTraders = self.getTradersNote(iYield)
 					if len(szTraders) > 0:
 						szText = szText + u"\n" + szTraders
+					self.iTradeTipYield = iYield
+					self.szTradeTipText = szText
 		except:
 			pass
 		return szText

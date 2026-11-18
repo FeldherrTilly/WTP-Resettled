@@ -1868,14 +1868,14 @@
 		<German>Auf manuell setzen</German>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_WTP_TIP_TRADERS_EXPORT</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Exported by:[COLOR_REVERT] %s1</English>
-		<German>[COLOR_HIGHLIGHT_TEXT]Exportiert von:[COLOR_REVERT] %s1</German>
+		<Tag>TXT_KEY_WTP_TIP_TRADERS_IMPORTS</Tag>
+		<English>Imports</English>
+		<German>Importiert</German>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_WTP_TIP_TRADERS_IMPORT</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]Imported by:[COLOR_REVERT] %s1</English>
-		<German>[COLOR_HIGHLIGHT_TEXT]Importiert von:[COLOR_REVERT] %s1</German>
+		<Tag>TXT_KEY_WTP_TIP_TRADERS_EXPORTS</Tag>
+		<English>Exports</English>
+		<German>Exportiert</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_NONE</Tag>

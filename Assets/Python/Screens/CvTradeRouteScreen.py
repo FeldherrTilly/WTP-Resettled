@@ -8,6 +8,7 @@ from CvPythonExtensions import *
 import CvUtil
 import CvScreenEnums
 import WtpSearchComplete
+import WtpColors
 
 gc = CyGlobalContext()
 localText = CyTranslator()
@@ -1221,9 +1222,16 @@ class CvTradeRouteScreen:
 		self.addButton("TRSPreset4", localText.getText(szMarket, ()), pCity.isAutoMarketImport(), self.OX + 20, self.OY + 62, self.W - 40, 28, BTN_PRESET + 4)
 
 	# opens the window (1: it is open, 0: the DLL shows its own popup instead)
-	def open(self, iCity, bCondensed):
+	def open(self, iCity, bCondensed, bInternal = False):
 		if not self.bFinished:
 			return 1
+		if not bInternal:
+			# (a window the player opens is no part of a jump)
+			try:
+				import CvScreensInterface
+				CvScreensInterface.mainInterface.aTradeReturn = []
+			except:
+				pass
 		self.iCity = iCity
 		pCity = self.getCity()
 		if pCity == None or pCity.isNone():
@@ -1536,13 +1544,13 @@ class CvTradeRouteScreen:
 			self.dRawState = {}
 			iState = self.getRawState(pCity, iYield)
 			if iState == 2:
-				szColor = u"255,0,0,255"
+				szColor = WtpColors.code(WtpColors.RAW_MISSING)
 				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING"
 			elif iState == 1:
-				szColor = u"255,140,0,255"
+				szColor = WtpColors.code(WtpColors.RAW_SCARCE)
 				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT"
 			elif iState == 3:
-				szColor = u"255,200,110,255"
+				szColor = WtpColors.code(WtpColors.RAW_IMPORT_SET)
 				szKey = "TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET"
 			else:
 				return u""
@@ -1552,35 +1560,33 @@ class CvTradeRouteScreen:
 
 	# the note for the tooltip of a good: which colonies export / import it at the moment (their state in the game; the changes of the window
 	# that are not saved yet are not in it)
-	def getTradersNote(self, iYield):
+	# the colonies that import or export a good at the moment: [(id of the city, name, imports, exports)] by name (the tooltip of the good lists them)
+	def getTraders(self, iYield):
+		aTraders = []
 		try:
 			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
-			aExp = []
-			aImp = []
 			(pCity, iIter) = pPlayer.firstCity(False)
 			while pCity:
-				if pCity.isExport(iYield):
-					aExp.append(pCity.getName())
-				if pCity.isImport(iYield):
-					aImp.append(pCity.getName())
+				bImp = pCity.isImport(iYield)
+				bExp = pCity.isExport(iYield)
+				if bImp or bExp:
+					aTraders.append((pCity.getName(), pCity.getID(), bImp, bExp))
 				(pCity, iIter) = pPlayer.nextCity(iIter, False)
-			aLines = []
-			if len(aExp) > 0:
-				aLines.append(localText.getText("TXT_KEY_WTP_TIP_TRADERS_EXPORT", (self.joinCityNames(aExp),)))
-			if len(aImp) > 0:
-				aLines.append(localText.getText("TXT_KEY_WTP_TIP_TRADERS_IMPORT", (self.joinCityNames(aImp),)))
-			if len(aLines) == 0:
-				return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NONE", ())
-			return u"\n".join(aLines)
 		except:
-			return u""
+			pass
+		aTraders.sort()
+		return [(t[1], t[0], t[2], t[3]) for t in aTraders]
 
-	# the names of the colonies in one line (the tooltip wraps it); more than 12: the first ones and the number of the others
-	def joinCityNames(self, aNames):
-		szNames = u", ".join(aNames[:12])
-		if len(aNames) > 12:
-			szNames += u" " + localText.getText("TXT_KEY_WTP_TIP_TRADERS_MORE", (len(aNames) - 12,))
-		return szNames
+	# the page with a good (a jump from the tooltip of another colony opens the window of this one on it)
+	def showYield(self, iYield):
+		try:
+			if iYield in self.aYields and self.iVisible > 0:
+				self.iFirst = self.aYields.index(iYield) / self.iVisible * self.iVisible
+				self.drawRows()
+				self.drawPage()
+		except:
+			import traceback
+			logTrade(traceback.format_exc())
 
 	def drawOuterFrame(self, iSlot, iX, iY, iState):
 		screen = self.pHost
@@ -2046,7 +2052,7 @@ class CvTradeRouteScreen:
 		self.teardownLayout()
 		self.buildLayout()
 
-	def finish(self, bOk, iPreset):
+	def finish(self, bOk, iPreset, bInternal = False):
 		if self.bFinished:
 			return
 		if bOk:
@@ -2074,6 +2080,13 @@ class CvTradeRouteScreen:
 			except:
 				pass
 		self.pHost = None
+		if not bInternal:
+			# closed by the player: a window that was opened by a jump from a tooltip takes him back (see CvMainInterface)
+			try:
+				import CvScreensInterface
+				CvScreensInterface.mainInterface.tradeWindowClosed()
+			except:
+				pass
 
 	# a key down event (CvEventManager.onKbdEvent gives them to the window while it is open)
 	def handleKey(self, iKey, bCtrl, bShift = False, bAlt = False):
