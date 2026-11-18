@@ -8920,7 +8920,7 @@ class CvMainInterface:
 		except:
 			pass
 
-	# Esc held: all stacked windows of the jumps are closed, the view of the first starting colony is back (no window); X held: see closeAllTradeWindows
+	# Esc held: all stacked windows of the jumps are closed, no jump back (the city screen is left); X held: see closeAllTradeWindows
 	bEscHeld = False
 	bEscHoldDone = False
 	fEscStart = 0.0
@@ -8939,7 +8939,7 @@ class CvMainInterface:
 			if self.isTradeWindowOpen():
 				self.bEscHoldDone = True
 				if len(self.aTradeReturn) > 0:
-					self.closeAllTradeWindows()
+					self.closeAllTradeWindows(False)
 			elif self.tReopenTrade is None:
 				self.bEscHoldDone = True
 		except:
@@ -8952,7 +8952,7 @@ class CvMainInterface:
 		except:
 			return False
 
-	# all stacked windows go. bBack (Esc held): back to the view the first jump started in (the colony, or the map as it was); otherwise (X held)
+	# all stacked windows go. bBack (X held): back to the view the first jump started in (the colony, or the map as it was); otherwise (Esc held)
 	# no jump: the city screen is left, on the map the windows just close
 	def closeAllTradeWindows( self, bBack = True ):
 		tR = self.aTradeReturn[0]
@@ -9201,10 +9201,10 @@ class CvMainInterface:
 		self.updateAutoFreeze()
 		self.updateTradeTipSelect()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
-			# X held: all frozen windows are closed; with stacked import / export windows (jumps) all of them, like Esc held
+			# X held: all frozen windows are closed; with stacked import / export windows (jumps) all of them and back to the start of the first jump
 			self.bXHoldDone = True
 			if self.isTradeStackOpen():
-				self.closeAllTradeWindows(False)
+				self.closeAllTradeWindows()
 			else:
 				self.unfreezeAllTips()
 		if self.bTipFrozen:
