@@ -4005,6 +4005,7 @@ class CvMainInterface:
 						self.tTipWp = tRowWp
 				except:
 					self.tTipWp = None
+			aszParas = self.alignTabLines(aszParas)
 			for iPara in range(len(aszParas)):
 				aszWrapped = self.wrapMessage(aszParas[iPara], iCharsPerLine, True)
 				aszLines += aszWrapped
@@ -7830,6 +7831,62 @@ class CvMainInterface:
 		except:
 			self.tReopenTrade = None
 
+	# TAB STOPS. The text of the game has tab stops (31 pixels for a line of 22, from the start of the line): "Europe", "Africa", "Port Royal" and
+	# then the prices. A long name (Port Royal) takes one stop more than the others, the prices do not stand under each other. The widths are
+	# only estimated (getTextPixels), so a text that ends close to a tab stop gets blanks (4 pixels each) behind it: its end is then clearly on
+	# one side of the stop, the estimate cannot be one stop wrong. All numbers are for a line of 22 pixels (the game scales them).
+	TAB_STOP = 31.0
+
+	# (the blanks to put behind a text of the width fW, the number of tab stops it has passed then)
+	def getTabGuard( self, fW ):
+		fSpace = 3.98
+		iBlanks = 0
+		while iBlanks < 6:
+			fFrac = (fW + iBlanks * fSpace) % self.TAB_STOP
+			if fFrac >= 8.0 and fFrac <= self.TAB_STOP - 8.0:
+				break
+			iBlanks += 1
+		return (iBlanks, int((fW + iBlanks * fSpace) / self.TAB_STOP))
+
+	# lines in a row with a name, tabs and then text: the text of all of them starts at the same stop
+	def alignTabLines( self, aszParas ):
+		try:
+			aRuns = []
+			for szPara in aszParas:
+				mTab = re.match(u"(?is)^(.*?)((?:\\t| |<tab>)*(?:\\t|<tab>)(?:\\t| |<tab>)*)(\\S.*)$", szPara)
+				if mTab is None or mTab.group(1).strip() == u"":
+					aRuns.append(None)
+					continue
+				aRuns.append(mTab)
+			aNew = list(aszParas)
+			i = 0
+			while i < len(aszParas):
+				if aRuns[i] is None:
+					i += 1
+					continue
+				j = i
+				while j < len(aszParas) and aRuns[j] is not None:
+					j += 1
+				if j - i >= 2:
+					aEnds = []
+					aWidths = []
+					for k in range(i, j):
+						fW = self.getTextPixels(re.sub(u"<[^>]*>", u"", aRuns[k].group(1)), 22.0)
+						(iBlanks, iPassed) = self.getTabGuard(fW)
+						aWidths.append((iBlanks, iPassed))
+						aEnds.append(iPassed + len(re.findall(u"(?i)\\t|<tab>", aRuns[k].group(2))))
+					if min(aEnds) != max(aEnds):
+						for k in range(i, j):
+							mTab = aRuns[k]
+							szMark = u"\t"
+							if mTab.group(2).lower().find(u"<tab>") >= 0:
+								szMark = u"<tab>"
+							aNew[k] = mTab.group(1) + u" " * aWidths[k - i][0] + szMark * (max(aEnds) - aWidths[k - i][1]) + mTab.group(3)
+				i = j
+			return aNew
+		except:
+			return aszParas
+
 	# THE CITIES IN THE TOOLTIP OF A GOOD (import / export window). One line for every colony that imports or exports the good: "Imports" in
 	# the color of the import on the left of the name, "Exports" in the export color on the right of it. The names stand under each other
 	# (a line without the left word gets blanks of its width). A left click on the line of a frozen tooltip jumps to the colony with its window
@@ -7842,25 +7899,28 @@ class CvMainInterface:
 			aTraders = [t for t in aTraders if t[0] == iOwn] + [t for t in aTraders if t[0] != iOwn]
 			if len(aTraders) == 0:
 				return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NONE", ())
-			iLine = max(16, int(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution() * 0.0153))
 			szImp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_IMPORTS", ())
 			szExp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_EXPORTS", ())
-			fSpace = max(1.0, self.getTextPixels(u" ", iLine))
-			iBlanks = int(self.getTextPixels(szImp, iLine) / fSpace + 0.5)
+			# the columns are tab stops (as the sell prices of the cargo lines): the names stand under each other exactly, the word "Exports" too
 			aShown = aTraders[:15]
-			fMaxName = 0.0
+			(iGuardImp, iPassedImp) = self.getTabGuard(self.getTextPixels(szImp, 22.0))
+			iNameStop = iPassedImp + 1
+			aGuardName = []
+			iEnd = 0
 			for t in aShown:
-				fMaxName = max(fMaxName, self.getTextPixels(t[1], iLine))
+				(iGuard, iPassed) = self.getTabGuard(iNameStop * self.TAB_STOP + self.getTextPixels(t[1], 22.0))
+				aGuardName.append((iGuard, iPassed))
+				iEnd = max(iEnd, iPassed + 1)
 			aLines = []
-			for (iCity, szName, bImp, bExp) in aShown:
+			for k in range(len(aShown)):
+				(iCity, szName, bImp, bExp) = aShown[k]
 				if bImp:
-					szLine = WtpColors.tag(WtpColors.IMPORT, szImp) + u" "
+					szLine = WtpColors.tag(WtpColors.IMPORT, szImp) + u" " * iGuardImp + u"\t"
 				else:
-					szLine = u" " * (iBlanks + 1)
+					szLine = u"\t" * iNameStop
 				szLine += szName
 				if bExp:
-					# the word on the right starts in one column for all lines
-					szLine += u" " * (int((fMaxName - self.getTextPixels(szName, iLine)) / fSpace + 0.5) + 1) + WtpColors.tag(WtpColors.EXPORT, szExp)
+					szLine += u" " * aGuardName[k][0] + u"\t" * (iEnd - aGuardName[k][1]) + WtpColors.tag(WtpColors.EXPORT, szExp)
 				aLines.append(szLine)
 				self.dTraderLines[self.normTipText(szLine)] = iCity
 			if len(aTraders) > 15:
