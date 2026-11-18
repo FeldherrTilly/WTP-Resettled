@@ -7944,16 +7944,6 @@ class CvMainInterface:
 							# a line of a unit of a stack: the tooltip of the unit (beside the line) is frozen at once
 							self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
 							self.szAutoSelPrefix = self.aFrozen[-1][0]
-						elif tBlock is None and iLevel >= 0 and iLevel < len(self.aFrozen):
-							# the frozen tooltip of the unit stays; it goes with the next order of the unit
-							if len(self.szAutoSelPrefix) > 0 and self.szAutoSelPrefix != self.aFrozen[iLevel][0]:
-								szKeepPrefix = self.aFrozen[iLevel][0]
-								self.closeAutoSelWindows()
-								for iNewLevel in range(len(self.aFrozen)):
-									if self.aFrozen[iNewLevel][0] == szKeepPrefix:
-										iLevel = iNewLevel
-										break
-							self.szAutoSelPrefix = self.aFrozen[iLevel][0]
 						else:
 							self.unfreezeAllTips()
 						return
