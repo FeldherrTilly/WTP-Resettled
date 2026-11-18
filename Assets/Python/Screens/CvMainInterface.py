@@ -3950,7 +3950,7 @@ class CvMainInterface:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
-			if (CyInterface().isCityScreenUp() and not (bWidget and self.isCityYieldTipOk())) or len(szHelp) == 0:
+			if (CyInterface().isCityScreenUp() and not (bWidget and self.isTradeIconHover())) or len(szHelp) == 0:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
@@ -4695,6 +4695,17 @@ class CvMainInterface:
 				iX = iCursorX - int(iGap * 0.6) - iWidth
 		iX = max(4, iX)
 		iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
+		if len(self.aFrozen) > 0 and tRect is not None:
+			# beside a window of the mod (import / export window): not over a frozen tooltip, not over the window; the other side of the window
+			# and above / below the frozen ones if it is not free
+			iLeftX = tRect[0] - 12 - iWidth
+			iRightX = tRect[0] + tRect[2] + 12
+			iStep = iHeight + 6
+			aCands = []
+			for iSideX in (iX, iLeftX, iRightX):
+				for iShift in (0, 1, -1, 2, -2):
+					aCands.append((iSideX, iY + iShift * iStep))
+			(iX, iY) = self.pickFreeSpot(aCands, iWidth, iHeight, xRes, yRes, -1, [tRect])
 		if len(self.aFrozen) > 0 and tRect is None:
 			# it does not cover a frozen window: the other side of the cursor, then below and above the cursor
 			iRight = iCursorX + iGap
@@ -5633,6 +5644,9 @@ class CvMainInterface:
 		screen.addPanel(szPrefix + "Back2", u"", u"", True, False, iX, iY, iWidth, iHeight, PanelStyles.PANEL_STYLE_HUD_HELP, WidgetTypes.WIDGET_GENERAL, -1, -1)
 		# over an element of the HUD (the panel style is semi-transparent) one more layer, as the expanded message panel has
 		bOverHud = self.isTipOverHud(screen, iX, iY, iWidth, iHeight)
+		if self.isTradeWindowOpen():
+			# (with the import / export window open all tooltips are the darker variant)
+			bDark = True
 		if bDark:
 			# (the darker variant, as over an element of the HUD, wherever the window is)
 			bOverHud = True
@@ -7730,7 +7744,6 @@ class CvMainInterface:
 				# (log: after a click on a unit the game reports the contact help of the score table although the cursor is on the map)
 				return
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			self.bYieldHelpSeen = (int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD))
 			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD):
 				szText = self.addRawNote(szText)
 			if szText and len(szText) > 0:
@@ -7757,6 +7770,7 @@ class CvMainInterface:
 	dTraderLines = {} # the lines of the traders in the tooltips: text without colors -> id of the city
 	dTraderWin = {} # frozen windows with such lines: prefix -> the good
 	iTradeTipYield = -1
+	tPostJump = None # after a jump: the tooltip of the good is shown and frozen once the cursor is on its picture
 	szTradeTipText = u""
 
 	iReopenWait = 0 # frames the city screen gets to draw itself before the window is opened again
@@ -7791,6 +7805,10 @@ class CvMainInterface:
 			if tWin.open(tState["city"], tState["condensed"], True) != 0:
 				if tState.has_key("focus"):
 					tWin.showYield(tState["focus"])
+					# the cursor goes onto the picture of the good and its tooltip is frozen (as it was in the colony of the jump)
+					tPos = tWin.getIconCenter(tState["focus"])
+					if tPos is not None:
+						self.tPostJump = {"yield": tState["focus"], "pos": tPos, "wait": 4}
 				else:
 					tWin.restoreState(tState)
 				if tState.has_key("return"):
@@ -7810,16 +7828,22 @@ class CvMainInterface:
 			iLine = max(16, int(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution() * 0.0153))
 			szImp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_IMPORTS", ())
 			szExp = localText.getText("TXT_KEY_WTP_TIP_TRADERS_EXPORTS", ())
-			iBlanks = int(self.getTextPixels(szImp, iLine) / max(1.0, self.getTextPixels(u" ", iLine)) + 0.5)
+			fSpace = max(1.0, self.getTextPixels(u" ", iLine))
+			iBlanks = int(self.getTextPixels(szImp, iLine) / fSpace + 0.5)
+			aShown = aTraders[:15]
+			fMaxName = 0.0
+			for t in aShown:
+				fMaxName = max(fMaxName, self.getTextPixels(t[1], iLine))
 			aLines = []
-			for (iCity, szName, bImp, bExp) in aTraders[:15]:
+			for (iCity, szName, bImp, bExp) in aShown:
 				if bImp:
 					szLine = WtpColors.tag(WtpColors.IMPORT, szImp) + u" "
 				else:
 					szLine = u" " * (iBlanks + 1)
 				szLine += szName
 				if bExp:
-					szLine += u" " + WtpColors.tag(WtpColors.EXPORT, szExp)
+					# the word on the right starts in one column for all lines
+					szLine += u" " * (int((fMaxName - self.getTextPixels(szName, iLine)) / fSpace + 0.5) + 1) + WtpColors.tag(WtpColors.EXPORT, szExp)
 				aLines.append(szLine)
 				self.dTraderLines[self.normTipText(szLine)] = iCity
 			if len(aTraders) > 15:
@@ -7880,6 +7904,10 @@ class CvMainInterface:
 		self.tReopenTrade = {"city": iCity, "condensed": False, "focus": iYield, "map": False}
 		self.iReopenTries = 0
 		self.iReopenWait = 3
+		try:
+			CyInterface().playGeneralSound(self.szModJumpSound)
+		except:
+			pass
 		return True
 
 	# the window that was opened by a jump is closed by the player: back to where the jump started
@@ -7898,6 +7926,10 @@ class CvMainInterface:
 				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
 				if pCity is not None and not pCity.isNone():
 					CyInterface().selectCity(pCity, False)
+			try:
+				CyInterface().playGeneralSound(self.szModJumpSound)
+			except:
+				pass
 			tState = dict(tR["state"])
 			tState["map"] = tR["map"]
 			tState["return"] = tR
@@ -7906,6 +7938,28 @@ class CvMainInterface:
 			self.iReopenWait = 3
 		except:
 			self.tReopenTrade = None
+
+	def updatePostJump( self ):
+		t = self.tPostJump
+		if t is None:
+			return
+		try:
+			if not self.isTradeWindowOpen():
+				self.tPostJump = None
+				return
+			gc.getGame().setCursorClient(t["pos"][0], t["pos"][1])
+			if t["wait"] > 0:
+				t["wait"] -= 1
+				return
+			self.tPostJump = None
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			szHelp = gc.getGame().getWidgetHelpFor(int(WidgetTypes.WIDGET_HELP_YIELD), t["yield"], -1, False)
+			if szHelp and len(szHelp) > 0:
+				szHelp = self.addRawNote(szHelp, t["yield"])
+				self.showCursorTooltip(screen, szHelp, True, True)
+				self.freezeCursorTooltip()
+		except:
+			self.tPostJump = None
 
 	# the window of the starting colony is open again: the camera and the selected unit of the map, the frozen tooltip and the cursor as they were
 	def restoreAfterReturn( self, tR ):
@@ -7937,11 +7991,13 @@ class CvMainInterface:
 			pass
 
 	# the picture of a good in the import / export window that has an outer frame (it restricts the production of the city): its help text gets a note
-	def addRawNote( self, szText ):
+	def addRawNote( self, szText, iYieldOver = -1 ):
 		try:
 			tWin = CvScreensInterface.tradeRouteScreen
 			if tWin.isOpen():
-				iYield = tWin.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
+				iYield = iYieldOver
+				if iYield < 0:
+					iYield = tWin.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
 				if iYield >= 0:
 					szNote = tWin.getRawNote(iYield)
 					if len(szNote) > 0:
@@ -7955,13 +8011,6 @@ class CvMainInterface:
 		except:
 			pass
 		return szText
-
-	bYieldHelpSeen = False # the last help text of the game was one of a good (the goods bar of the city screen, the pictures of the window)
-
-	# the tooltip of a good in the city screen is ours (the game's one is emptied by the DLL while the import / export window is open): on the
-	# pictures of the window and on the goods bar of the city
-	def isCityYieldTipOk( self ):
-		return self.isTradeIconHover() or (self.isTradeWindowOpen() and self.bYieldHelpSeen)
 
 	def isTradeWindowOpen( self ):
 		try:
@@ -8152,7 +8201,7 @@ class CvMainInterface:
 			iDX = abs(gc.getGame().getCursorClientX() - self.tCursorTipAt[0])
 			iDY = abs(gc.getGame().getCursorClientY() - self.tCursorTipAt[1])
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			if iDX > 100 or iDY > 100 or (CyInterface().isCityScreenUp() and not self.isCityYieldTipOk()):
+			if iDX > 100 or iDY > 100 or (CyInterface().isCityScreenUp() and not self.isTradeIconHover()):
 				self.hideCursorTooltip(screen)
 			elif self.iTipMode == 0:
 				self.followCursorTip(screen)
@@ -10233,6 +10282,7 @@ class CvMainInterface:
 			pass
 		self.updateCursorTooltip()
 		self.pollWidgetHelp()
+		self.updatePostJump()
 		try:
 			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
 		except:

@@ -1577,6 +1577,17 @@ class CvTradeRouteScreen:
 		aTraders.sort()
 		return [(t[1], t[0], t[2], t[3]) for t in aTraders]
 
+	# where the picture of a good is on the screen now (its center), None if it is not on the page
+	def getIconCenter(self, iYield):
+		try:
+			if iYield in self.aYields:
+				iSlot = self.aYields.index(iYield) - self.iFirst
+				if iSlot >= 0 and iSlot < self.iVisible:
+					return (self.OX + 22 + 16, self.OY + self.LIST_Y + iSlot * self.ROW_H + self.ROW_H / 2)
+		except:
+			pass
+		return None
+
 	# the page with a good (a jump from the tooltip of another colony opens the window of this one on it)
 	def showYield(self, iYield):
 		try:
