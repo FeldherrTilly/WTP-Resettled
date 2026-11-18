@@ -5878,6 +5878,33 @@ class CvMainInterface:
 			self.tipError("runTradeTipSelection")
 		return False
 
+	# left click on the picture of a good of the import / export window: the tooltip that is shown for it is frozen (like X), a click on the
+	# picture of a good whose tooltip is frozen releases that tooltip (with the windows that belong to it)
+	def toggleTradeTipFreeze( self ):
+		try:
+			if not self.isTradeWindowOpen():
+				return False
+			iYield = CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())
+			if iYield < 0:
+				return False
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			for i in range(len(self.aFrozen)):
+				if self.dTraderWin.get(self.aFrozen[i][0], -1) == iYield:
+					self.clearTradeTipSelect(screen)
+					self.closeFrozenChild(screen, i)
+					return True
+			if self.bCursorTipShown and self.tTipLayout is not None and self.iTradeTipYield == iYield and self.szCursorTipText == self.szTradeTipText:
+				self.clearTradeTipSelect(screen)
+				self.freezeCursorTooltip()
+				return True
+			if self.szPendingHelp is not None and self.iTradeTipYield == iYield:
+				# (the tooltip still waits for its delay: the click shows it frozen at once)
+				self.pressX()
+				return True
+		except:
+			self.tipError("toggleTradeTipFreeze")
+		return False
+
 	def updateAutoFreeze( self ):
 		try:
 			tAuto = self.tAutoFreeze
@@ -6081,7 +6108,7 @@ class CvMainInterface:
 		try:
 			if self.isPediaActive():
 				return False
-			if not (self.bTipFrozen or self.bCursorTipShown or self.szPendingHelp is not None):
+			if not (self.bTipFrozen or self.bCursorTipShown or self.szPendingHelp is not None or self.isTradeStackOpen()):
 				return False
 			if not self.bXHeld:
 				self.bXHeld = True
@@ -8529,19 +8556,34 @@ class CvMainInterface:
 			if self.isTradeWindowOpen():
 				self.bEscHoldDone = True
 				if len(self.aTradeReturn) > 0:
-					self.closeAllTradeWindows()
+					self.closeAllTradeWindows(False)
 			elif self.tReopenTrade is None:
 				self.bEscHoldDone = True
 		except:
 			self.bEscHoldDone = True
 
-	def closeAllTradeWindows( self ):
+	# an import / export window is open that was opened by a jump (there are windows stacked)
+	def isTradeStackOpen( self ):
+		try:
+			return self.isTradeWindowOpen() and len(self.aTradeReturn) > 0
+		except:
+			return False
+
+	# all stacked windows go. bBack (X held): back to the view the first jump started in (the colony, or the map as it was); otherwise (Esc held)
+	# no jump: the city screen is left, on the map the windows just close
+	def closeAllTradeWindows( self, bBack = True ):
 		tR = self.aTradeReturn[0]
 		self.aTradeReturn = []
 		self.tPostJump = None
 		CvScreensInterface.tradeRouteScreen.finish(False, -1, True)
 		self.unfreezeAllTips()
-		if tR["map"]:
+		if not bBack:
+			if CyInterface().isCityScreenUp():
+				try:
+					CyInterface().clearSelectedCities()
+				except:
+					pass
+		elif tR["map"]:
 			if CyInterface().isCityScreenUp():
 				try:
 					CyInterface().clearSelectedCities()
@@ -8771,9 +8813,12 @@ class CvMainInterface:
 		self.updateAutoFreeze()
 		self.updateTradeTipSelect()
 		if self.bXHeld and not self.bXHoldDone and self.getTipNow() - self.fXStart >= 600:
-			# X held: all frozen windows are closed
+			# X held: all frozen windows are closed; with stacked import / export windows (jumps) all of them and back to the start of the first jump
 			self.bXHoldDone = True
-			self.unfreezeAllTips()
+			if self.isTradeStackOpen():
+				self.closeAllTradeWindows()
+			else:
+				self.unfreezeAllTips()
 		if self.bTipFrozen:
 			# a frozen window stays until Esc / X, but not into the city screen (except with the import / export window open there)
 			if (CyInterface().isCityScreenUp() and not self.isTradeWindowOpen()) or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL:
@@ -9055,6 +9100,10 @@ class CvMainInterface:
 			# WTP: right click on the picture of a good of the import / export window with a line of its tooltip chosen (Shift + wheel): it is run
 			if (inputClass.getButtonType() == WidgetTypes.WIDGET_HELP_YIELD and (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP)):
 				if self.runTradeTipSelection():
+					return 1
+			# WTP: left click on the picture of a good of the import / export window: the tooltip of the good is frozen / released
+			if (inputClass.getButtonType() == WidgetTypes.WIDGET_HELP_YIELD and (inputClass.getFlags() & MouseFlags.MOUSE_LBUTTONUP)):
+				if self.toggleTradeTipFreeze():
 					return 1
 
 			if (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == BUILDING_MANAGMENT_TOGGLE):
