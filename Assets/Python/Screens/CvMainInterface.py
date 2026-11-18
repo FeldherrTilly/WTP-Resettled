@@ -7830,6 +7830,9 @@ class CvMainInterface:
 	def getTradersNote( self, iYield ):
 		try:
 			aTraders = CvScreensInterface.tradeRouteScreen.getTraders(iYield)
+			# the colony the window belongs to is the first line
+			iOwn = CvScreensInterface.tradeRouteScreen.iCity
+			aTraders = [t for t in aTraders if t[0] == iOwn] + [t for t in aTraders if t[0] != iOwn]
 			if len(aTraders) == 0:
 				return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NONE", ())
 			iLine = max(16, int(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution() * 0.0153))
