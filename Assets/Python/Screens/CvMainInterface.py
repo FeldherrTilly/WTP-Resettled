@@ -3950,7 +3950,7 @@ class CvMainInterface:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
-			if (CyInterface().isCityScreenUp() and not (bWidget and self.isTradeIconHover())) or len(szHelp) == 0:
+			if (CyInterface().isCityScreenUp() and not (bWidget and self.isCityYieldTipOk())) or len(szHelp) == 0:
 				self.szSuppressHelp = u""
 				self.hideCursorTooltip(screen)
 				return
@@ -7730,6 +7730,7 @@ class CvMainInterface:
 				# (log: after a click on a unit the game reports the contact help of the score table although the cursor is on the map)
 				return
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			self.bYieldHelpSeen = (int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD))
 			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD):
 				szText = self.addRawNote(szText)
 			if szText and len(szText) > 0:
@@ -7955,6 +7956,13 @@ class CvMainInterface:
 			pass
 		return szText
 
+	bYieldHelpSeen = False # the last help text of the game was one of a good (the goods bar of the city screen, the pictures of the window)
+
+	# the tooltip of a good in the city screen is ours (the game's one is emptied by the DLL while the import / export window is open): on the
+	# pictures of the window and on the goods bar of the city
+	def isCityYieldTipOk( self ):
+		return self.isTradeIconHover() or (self.isTradeWindowOpen() and self.bYieldHelpSeen)
+
 	def isTradeWindowOpen( self ):
 		try:
 			return CvScreensInterface.tradeRouteScreen.isOpen()
@@ -8144,7 +8152,7 @@ class CvMainInterface:
 			iDX = abs(gc.getGame().getCursorClientX() - self.tCursorTipAt[0])
 			iDY = abs(gc.getGame().getCursorClientY() - self.tCursorTipAt[1])
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			if iDX > 100 or iDY > 100 or (CyInterface().isCityScreenUp() and not self.isTradeIconHover()):
+			if iDX > 100 or iDY > 100 or (CyInterface().isCityScreenUp() and not self.isCityYieldTipOk()):
 				self.hideCursorTooltip(screen)
 			elif self.iTipMode == 0:
 				self.followCursorTip(screen)
