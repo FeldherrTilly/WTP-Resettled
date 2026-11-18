@@ -4002,8 +4002,17 @@ class CvMainInterface:
 				try:
 					tRowWp = self.getHoverWaypointRow(aszParas, self.dTipDetails)
 					if tRowWp is not None:
-						tRowWp["paras"][len(aszParas)] = "row"
-						aszParas = list(aszParas) + [localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())]
+						iSlot = self.getWaypointSlot(aszParas)
+						tRowWp["paras"][iSlot] = "row"
+						aszParas = list(aszParas)
+						aszParas.insert(iSlot, localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ()))
+						dShift = {}
+						for kDet in self.dTipDetails.keys():
+							if kDet >= iSlot:
+								dShift[kDet + 1] = self.dTipDetails[kDet]
+							else:
+								dShift[kDet] = self.dTipDetails[kDet]
+						self.dTipDetails = dShift
 						self.tTipWp = tRowWp
 				except:
 					self.tTipWp = None
@@ -5311,6 +5320,28 @@ class CvMainInterface:
 				return k
 		return -1
 
+	# the row of the promotion pictures of a unit, also with its XP (foldUnitDetails puts the XP into that row)
+	def isPromoOrXpRow( self, szText ):
+		if self.isPromotionRow(szText):
+			return True
+		szPlain = re.sub(u"[^,<:()>]{1,10}:\\s*\\(\\s*[0-9]+\\s*/\\s*[0-9]+\\s*\\)", u"", szText)
+		return szPlain != szText and self.isPromotionRow(szPlain)
+
+	# the paragraph where the line "Set waypoint..." of a unit goes: directly below the row of its promotions, without that row directly below
+	# its name (iHead: the paragraph of the name, -1: the first unit of the tooltip)
+	def getWaypointSlot( self, aszParas, iHead = -1 ):
+		if iHead < 0:
+			for k in range(len(aszParas)):
+				if self.isUnitHeader(aszParas[k]):
+					iHead = k
+					break
+		if iHead < 0:
+			return len(aszParas)
+		iSlot = iHead + 1
+		if iSlot < len(aszParas) and self.isPromoOrXpRow(aszParas[iSlot]):
+			iSlot += 1
+		return iSlot
+
 	# the tooltip at the cursor (not frozen yet) of one own unit without the line "Commands": the registration of its line "Set waypoint..."
 	# (the paragraph is added by the caller), otherwise None
 	def getHoverWaypointRow( self, aszParas, dDetails ):
@@ -5350,15 +5381,41 @@ class CvMainInterface:
 				dReg["cmd"] = iCmd
 				self.aFrozen[iLevel][4] = dDetails
 			else:
-				iPara = len(aszParas)
-				aszParas.append(szRow)
+				# directly below the promotions of the unit (below its name without them); no unit header: above the hint lines at the end
+				iHead = -1
+				for k in range(len(aszParas)):
+					if self.isUnitHeader(aszParas[k]):
+						pHeader = self.getHeaderUnit(iLevel, aszParas, k)
+						if iHead < 0:
+							iHead = k
+						if pHeader is not None and not pHeader.isNone() and pHeader.getID() == pUnit.getID() and pHeader.getOwner() == pUnit.getOwner():
+							iHead = k
+							break
+				if iHead >= 0:
+					iPara = self.getWaypointSlot(aszParas, iHead)
+				else:
+					iPara = len(aszParas)
+				aszParas.insert(iPara, szRow)
 				(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
 				iChar = iLine * 0.32
 				aszRow = self.wrapMessage(szRow, max(20, int((iWidth - 2 * iPad) / iChar)))
-				# above the hint lines at the end
 				iAt = len(aiPara)
 				while iAt > 0 and aiPara[iAt - 1] < 0:
 					iAt -= 1
+				if iHead >= 0:
+					iAt = len(aiPara)
+					for k in range(len(aiPara)):
+						if aiPara[k] >= iPara:
+							iAt = k
+							break
+					aiPara = [(x + 1 if x >= iPara else x) for x in aiPara]
+					dShift = {}
+					for kDet in dDetails.keys():
+						if kDet >= iPara:
+							dShift[kDet + 1] = dDetails[kDet]
+						else:
+							dShift[kDet] = dDetails[kDet]
+					self.aFrozen[iLevel][4] = dShift
 				aszLines = list(aszLines[:iAt]) + aszRow + list(aszLines[iAt:])
 				aiPara = list(aiPara[:iAt]) + [iPara] * len(aszRow) + list(aiPara[iAt:])
 				aiIndent = list(aiIndent[:iAt]) + [0] * len(aszRow) + list(aiIndent[iAt:])
@@ -7147,6 +7204,14 @@ class CvMainInterface:
 			if len(szUnit) == 0:
 				return False
 			aLines = [szUnit]
+			szSetRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
+			iSetSlot = -1
+			if pUnit.getOwner() == gc.getGame().getActivePlayer():
+				# (the line "Set waypoint..." stands directly below the promotions of the unit, below its name without them)
+				aUnitParas = szUnit.split(u"\n")
+				iSetSlot = self.getWaypointSlot(aUnitParas, 0)
+				if iSetSlot > len(aUnitParas):
+					iSetSlot = len(aUnitParas)
 			szInfo = self.getUnitMoveInfoText(aszParas[iHead])
 			if len(szInfo) > 0:
 				aLines.append(szInfo)
@@ -7155,7 +7220,6 @@ class CvMainInterface:
 			else:
 				aPlotLines = self.getRootPlotLines(iLevel)
 			# (not the line "Set waypoint..." of the parent window: this window gets its own)
-			szSetRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
 			aPlotLines = [x for x in aPlotLines if x != szSetRow]
 			bOwn = (pUnit.getOwner() == gc.getGame().getActivePlayer())
 			# the line "Commands" of the stack: it goes to the end of this window (with its child window, which begins with "Set waypoint...")
@@ -7192,9 +7256,10 @@ class CvMainInterface:
 					dDetails = {iMain: szSetRow + u"\n" + szCmdDetails}
 					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {}, "cmd": iMain}
 				else:
-					# (the line "Set waypoint..." below the hint of the unit)
-					szTail = szSetRow
-					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {iMain: "row"}, "cmd": -1}
+					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {iSetSlot: "row"}, "cmd": -1}
+					aUnitParas = list(aLines[0].split(u"\n"))
+					aUnitParas.insert(iSetSlot, szSetRow)
+					aLines[0] = u"\n".join(aUnitParas)
 			elif iHead == 0:
 				eTalk = self.getTalkPlayer(aszParas, 0)
 				if eTalk >= 0:
@@ -7642,7 +7707,11 @@ class CvMainInterface:
 					else:
 						CyInterface().selectUnit(pSelect, True, False, False)
 						self.markTipSelection()
-						self.unfreezeAllTips()
+						if tBlock is not None and self.bSecondTipShown and self.tPreviewLayout is not None:
+							# a line of a unit of a stack: the tooltip of the unit (beside the line) is frozen at once
+							self.freezePreview(CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE))
+						else:
+							self.unfreezeAllTips()
 						return
 				elif eTalk >= 0:
 					if bSecond:
