@@ -6034,12 +6034,27 @@ class CvMainInterface:
 			self.tipError("getTraderChildText")
 		return u""
 
+	# the mouse wheel capture of the tooltips (Shift + wheel): with the import / export window open it is not simply switched off, the window
+	# decides (it needs the wheel while the cursor is in it)
+	def setWheelCapture( self, bOn ):
+		try:
+			if not bOn and CvScreensInterface.tradeRouteScreen.isOpen():
+				CvScreensInterface.tradeRouteScreen.updateWheelCapture()
+				return
+		except:
+			pass
+		gc.getGame().setWheelCapture(bOn)
+
+	# a tooltip takes the wheel just now (the import / export window leaves it alone)
+	def isTipWheelActive( self ):
+		return self.bTipWheel or self.bTradeSel or self.bMsgWheel
+
 	def clearTradeTipSelect( self, screen ):
 		try:
 			if self.bTradeSel:
 				self.bTradeSel = False
 				self.bTipWheel = False
-				gc.getGame().setWheelCapture(False)
+				self.setWheelCapture(False)
 			if self.bTradeChild:
 				self.bTradeChild = False
 				self.hideSecondTip(screen)
@@ -6077,7 +6092,7 @@ class CvMainInterface:
 			if bWheel != self.bTradeSel:
 				self.bTradeSel = bWheel
 				self.bTipWheel = bWheel
-				gc.getGame().setWheelCapture(bWheel)
+				self.setWheelCapture(bWheel)
 			if bWheel:
 				iNotches = gc.getGame().takeWheelNotches()
 				if iNotches != 0:
@@ -6789,7 +6804,7 @@ class CvMainInterface:
 			self.iTipSelIdx = 0
 			if self.bTipWheel:
 				self.bTipWheel = False
-				gc.getGame().setWheelCapture(False)
+				self.setWheelCapture(False)
 		except:
 			pass
 
@@ -7122,7 +7137,7 @@ class CvMainInterface:
 			pass
 		if bWheel != self.bTipWheel and not self.bTradeSel:
 			self.bTipWheel = bWheel
-			gc.getGame().setWheelCapture(bWheel)
+			self.setWheelCapture(bWheel)
 		if bWheel:
 			iNotches = gc.getGame().takeWheelNotches()
 			if iNotches != 0:
@@ -8051,7 +8066,7 @@ class CvMainInterface:
 		if self.bTipWheel:
 			self.bTipWheel = False
 			try:
-				gc.getGame().setWheelCapture(False)
+				self.setWheelCapture(False)
 			except:
 				pass
 		(szPrefix, tLayout, aszParas, aiIndent, dDetails, tAnchor, iParent, tRel) = self.aFrozen.pop()
@@ -8312,7 +8327,7 @@ class CvMainInterface:
 						self.iTipSelPara = -1
 						if self.bTipWheel:
 							self.bTipWheel = False
-							gc.getGame().setWheelCapture(False)
+							self.setWheelCapture(False)
 					except:
 						pass
 					return
@@ -8393,7 +8408,7 @@ class CvMainInterface:
 			self.tSecondTipKey = None
 			if self.bTipWheel:
 				self.bTipWheel = False
-				gc.getGame().setWheelCapture(False)
+				self.setWheelCapture(False)
 		except:
 			pass
 
@@ -10522,7 +10537,7 @@ class CvMainInterface:
 		if bWheel != self.bMsgWheel:
 			self.bMsgWheel = bWheel
 			try:
-				gc.getGame().setWheelCapture(bWheel)
+				self.setWheelCapture(bWheel)
 			except:
 				pass
 		if bWheel:
