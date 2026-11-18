@@ -94,6 +94,15 @@ def handleTipQuickClicked ( argsList ):
 		pass
 	return 1
 
+def handleTipAutoFreezeClicked ( argsList ):
+	"WTP: the tooltip of an activated unit is frozen until the unit gets an order"
+	bValue, szName = argsList
+	try:
+		CvScreensInterface.mainInterface.setTipAutoFreeze(bValue)
+	except:
+		pass
+	return 1
+
 def handleGameReset ( argsList ):
 	"Resets these options"
 	szName = argsList

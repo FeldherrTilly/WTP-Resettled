@@ -3694,6 +3694,16 @@
 		<German>Aus: Beim Weiterfahren zum nächsten Ziel verschwindet der Tooltip und die Verzögerung beginnt neu. An: Solange ein Tooltip angezeigt wird, erscheint der Tooltip des nächsten Ziels sofort. Die Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] zeigt einen Tooltip, der noch auf seine Verzögerung wartet, sofort an.</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE</Tag>
+		<English>Auto freeze by selection</English>
+		<German>Automatisch einfrieren bei Auswahl</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE_HELP</Tag>
+		<English>When a unit is activated, the tooltip of its plot is frozen at once (a stack with its unit lines, or the unit alone). The frozen tooltips (and their child tooltips) go again as soon as the unit gets an order. Off by default.</English>
+		<German>Wird eine Einheit aktiviert, wird der Tooltip ihres Feldes sofort eingefroren (ein Stapel mit seinen Einheitenzeilen oder die einzelne Einheit). Die eingefrorenen Tooltips (und ihre Child-Tooltips) verschwinden wieder, sobald die Einheit einen Befehl erhält. Standardmäßig aus.</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_5</Tag>
 		<English>Extra long (2 s)</English>
 		<German>Extra lang (2 s)</German>

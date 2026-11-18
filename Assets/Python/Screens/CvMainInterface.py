@@ -305,7 +305,7 @@ TIP_SETTINGS_FILE = "WTP_TooltipSettings.ini"
 
 def wtpLoadTipSettings():
 	# (mode, delay index, quick): default is the game tooltip (2), the delay "medium" (2) for the case that the hover tooltip is chosen
-	aiValues = [2, 2, 0]
+	aiValues = [2, 2, 0, 0]
 	try:
 		f = open(TIP_SETTINGS_FILE, "r")
 		for szLine in f.readlines():
@@ -318,6 +318,8 @@ def wtpLoadTipSettings():
 						aiValues[1] = max(0, min(len(TIP_DELAYS) - 1, int(aszPart[1])))
 					elif aszPart[0] == "quick":
 						aiValues[2] = max(0, min(1, int(aszPart[1])))
+					elif aszPart[0] == "autofreeze":
+						aiValues[3] = max(0, min(1, int(aszPart[1])))
 				except:
 					pass
 		f.close()
@@ -5844,7 +5846,7 @@ class CvMainInterface:
 	# single unit); it goes with the first order of the unit
 	def onUnitActivated( self, pUnit ):
 		try:
-			if not self.bHoverTip or pUnit is None or pUnit.isNone() or pUnit.getOwner() != gc.getGame().getActivePlayer():
+			if not self.bTipAutoFreeze or not self.bHoverTip or pUnit is None or pUnit.isNone() or pUnit.getOwner() != gc.getGame().getActivePlayer():
 				return
 			if self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
 				# (selected from a frozen window: it keeps its own handling)
@@ -8652,6 +8654,12 @@ class CvMainInterface:
 		self.szPendingHelp = None
 		self.saveTipSettings()
 
+	def setTipAutoFreeze( self, bValue ):
+		self.bTipAutoFreeze = bool(bValue)
+		if not self.bTipAutoFreeze:
+			self.tAutoFreeze = None
+		self.saveTipSettings()
+
 	def setTipQuick( self, bQuick ):
 		self.bTipQuick = bool(bQuick)
 		self.saveTipSettings()
@@ -8665,11 +8673,16 @@ class CvMainInterface:
 				f.write("quick=1\n")
 			else:
 				f.write("quick=0\n")
+			if self.bTipAutoFreeze:
+				f.write("autofreeze=1\n")
+			else:
+				f.write("autofreeze=0\n")
 			f.close()
 		except:
 			pass
 
 	iTipDelayIndex = aiTipSettings[1]
+	bTipAutoFreeze = (aiTipSettings[3] == 1) # options screen: the tooltip of an activated unit is frozen until the unit gets an order (default off)
 	bTipQuick = (aiTipSettings[2] == 1) # options screen: the next tooltip appears without delay while a tooltip is shown
 
 	# the cursor is on a panel of the HUD that is not part of the map (message panel): the plot under it is not interesting, only the

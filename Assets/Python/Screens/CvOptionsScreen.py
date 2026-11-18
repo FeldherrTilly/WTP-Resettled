@@ -260,7 +260,11 @@ class CvOptionsScreen:
 		tab.setLayoutFlag("GamePanel", "LAYOUT_SIZE_HEXPANDING")
 		tab.setLayoutFlag("GamePanel", "LAYOUT_SIZE_VEXPANDING")
 
-		tab.attachHBox("GamePanel", "GameHBox")
+		# WTP: one box in the scroll panel holds all options (the tooltip options and those below scroll with the others)
+		tab.attachVBox("GamePanel", "GameOuterVBox")
+		tab.setLayoutFlag("GameOuterVBox", "LAYOUT_SIZE_HEXPANDING")
+
+		tab.attachHBox("GameOuterVBox", "GameHBox")
 		tab.setLayoutFlag("GameHBox", "LAYOUT_SIZE_HEXPANDING")
 
 		tab.attachVBox("GameHBox", "GameVBox1")
@@ -298,10 +302,10 @@ class CvOptionsScreen:
 				i += 1
 
 
-		tab.attachSpacer("GamePanelCenter")
+		tab.attachSpacer("GameOuterVBox")
 
 		# WTP: tooltip mode (hover tooltip at the cursor / own window at the original position / game tooltip), Ctrl + Shift + T
-		tab.attachHBox("GamePanelCenter", "TipHBox")
+		tab.attachHBox("GameOuterVBox", "TipHBox")
 		tab.attachLabel("TipHBox", "TipLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE", ()))
 		tab.setToolTip("TipLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP", ()))
 		tab.attachSpacer("TipHBox")
@@ -316,7 +320,7 @@ class CvOptionsScreen:
 		tab.setLayoutFlag("TipModeDropdownBox", "LAYOUT_LEFT")
 		tab.setToolTip("TipModeDropdownBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP", ()))
 
-		tab.attachHBox("GamePanelCenter", "TipDelayHBox")
+		tab.attachHBox("GameOuterVBox", "TipDelayHBox")
 		tab.attachLabel("TipDelayHBox", "TipDelayLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY", ()))
 		tab.setToolTip("TipDelayLabel", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP", ()))
 		tab.attachSpacer("TipDelayHBox")
@@ -336,12 +340,20 @@ class CvOptionsScreen:
 			bTipQuick = CvScreensInterface.mainInterface.bTipQuick
 		except:
 			pass
-		tab.attachCheckBox("GamePanelCenter", "TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK", ()), self.callbackIFace, "handleTipQuickClicked", "TipQuickCheckBox", bTipQuick)
+		tab.attachCheckBox("GameOuterVBox", "TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK", ()), self.callbackIFace, "handleTipQuickClicked", "TipQuickCheckBox", bTipQuick)
 		tab.setToolTip("TipQuickCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_QUICK_HELP", ()))
 
-		tab.attachSpacer("GamePanelCenter")
+		bTipAutoFreeze = False
+		try:
+			bTipAutoFreeze = CvScreensInterface.mainInterface.bTipAutoFreeze
+		except:
+			pass
+		tab.attachCheckBox("GameOuterVBox", "TipAutoFreezeCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE", ()), self.callbackIFace, "handleTipAutoFreezeClicked", "TipAutoFreezeCheckBox", bTipAutoFreeze)
+		tab.setToolTip("TipAutoFreezeCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE_HELP", ()))
 
-		tab.attachHBox("GamePanelCenter", "LangHBox")
+		tab.attachSpacer("GameOuterVBox")
+
+		tab.attachHBox("GameOuterVBox", "LangHBox")
 
 		# Languages Dropdown
 		tab.attachLabel("LangHBox", "LangLabel", localText.getText("TXT_KEY_OPTIONS_SCREEN_LANGUAGE", ()))	# Label
@@ -369,8 +381,8 @@ class CvOptionsScreen:
 		# WTP: storage multiplier, military upkeep multiplier and its game speed dependence (applied from the next turn or after loading)
 		import WtpGameOptions
 		aiWtpValues = WtpGameOptions.load()
-		tab.attachSpacer("GamePanelCenter")
-		tab.attachHBox("GamePanelCenter", "WtpStorageHBox")
+		tab.attachSpacer("GameOuterVBox")
+		tab.attachHBox("GameOuterVBox", "WtpStorageHBox")
 		tab.attachLabel("WtpStorageHBox", "WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE", ()))
 		tab.setToolTip("WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
 		tab.attachSpacer("WtpStorageHBox")
@@ -381,7 +393,7 @@ class CvOptionsScreen:
 		tab.setLayoutFlag("WtpStorageDropdownBox", "LAYOUT_LEFT")
 		tab.setToolTip("WtpStorageDropdownBox", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
 
-		tab.attachHBox("GamePanelCenter", "WtpUpkeepHBox")
+		tab.attachHBox("GameOuterVBox", "WtpUpkeepHBox")
 		tab.attachLabel("WtpUpkeepHBox", "WtpUpkeepLabel", localText.getText("TXT_KEY_WTP_OPT_UPKEEP", ()))
 		tab.setToolTip("WtpUpkeepLabel", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_HELP", ()))
 		tab.attachSpacer("WtpUpkeepHBox")
@@ -393,7 +405,7 @@ class CvOptionsScreen:
 		tab.setToolTip("WtpUpkeepDropdownBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_HELP", ()))
 
 		bWtpSpeed = (aiWtpValues[2] == 1)
-		tab.attachCheckBox("GamePanelCenter", "WtpUpkeepSpeedCheckBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_SPEED", ()), self.callbackIFace, "handleWtpUpkeepSpeedClicked", "WtpUpkeepSpeedCheckBox", bWtpSpeed)
+		tab.attachCheckBox("GameOuterVBox", "WtpUpkeepSpeedCheckBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_SPEED", ()), self.callbackIFace, "handleWtpUpkeepSpeedClicked", "WtpUpkeepSpeedCheckBox", bWtpSpeed)
 		tab.setToolTip("WtpUpkeepSpeedCheckBox", localText.getText("TXT_KEY_WTP_OPT_UPKEEP_SPEED_HELP", ()))
 
 		########## Lower Panel
