@@ -353,6 +353,14 @@ class CvOptionsScreen:
 		tab.attachCheckBox("GameOuterVBox", "TipAutoFreezeCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE", ()), self.callbackIFace, "handleTipAutoFreezeClicked", "TipAutoFreezeCheckBox", bTipAutoFreeze)
 		tab.setToolTip("TipAutoFreezeCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE_HELP", ()))
 
+		bTipDebug = False
+		try:
+			bTipDebug = CvScreensInterface.mainInterface.bTipDebug
+		except:
+			pass
+		tab.attachCheckBox("GameOuterVBox", "TipDebugCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DEBUG", ()), self.callbackIFace, "handleTipDebugClicked", "TipDebugCheckBox", bTipDebug)
+		tab.setToolTip("TipDebugCheckBox", localText.getText("TXT_KEY_WTP_OPTIONS_TIP_DEBUG_HELP", ()))
+
 		tab.attachSpacer("GameOuterVBox")
 
 		tab.attachHBox("GameOuterVBox", "LangHBox")

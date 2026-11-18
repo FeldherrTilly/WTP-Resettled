@@ -3439,6 +3439,49 @@
 		<German>Wird eine Einheit aktiviert, wird der Tooltip ihres Feldes sofort eingefroren (ein Stapel mit seinen Einheitenzeilen oder die einzelne Einheit). Die eingefrorenen Tooltips (und ihre Child-Tooltips) verschwinden wieder, sobald die Einheit einen Befehl erhält. Standardmäßig aus.</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG</Tag>
+		<English>Show errors of the tooltips (test)</English>
+		<German>Fehler der Tooltips anzeigen (Test)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG_HELP</Tag>
+		<English>For the test phase: when the code of the tooltips fails, a message with the place of the error is shown (once for the same error) instead of the error being ignored silently. Off by default.</English>
+		<German>Für die Testphase: Wenn der Code der Tooltips fehlschlägt, wird eine Meldung mit der Stelle des Fehlers angezeigt (einmal je gleichem Fehler), statt den Fehler still zu ignorieren. Standardmäßig aus.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS</Tag>
+		<English>Export settings</English>
+		<German>Exporteinstellung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS</Tag>
+		<English>Import settings</English>
+		<German>Importeinstellung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_LETTERS</Tag>
+		<English>I/F/L/S</English>
+		<Portuguese>I/A/T/M</Portuguese>
+		<French>I/F/T/M</French>
+		<German>I/F/L/S</German>
+		<Italian>I/A/T/M</Italian>
+		<Spanish>I/A/T/M</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_LETTERS</Tag>
+		<English>E/A/L/S</English>
+		<Portuguese>E/A/T/M</Portuguese>
+		<French>E/A/T/M</French>
+		<German>E/A/L/S</German>
+		<Italian>E/A/T/M</Italian>
+		<Spanish>E/A/T/M</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_STOCK</Tag>
+		<English>In stock: %d1</English>
+		<German>Auf Lager: %d1</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_5</Tag>
 		<English>Extra long (2 s)</English>
 		<German>Extra lang (2 s)</German>
