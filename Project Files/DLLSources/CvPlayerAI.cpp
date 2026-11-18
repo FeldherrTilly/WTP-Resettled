@@ -668,6 +668,9 @@ void CvPlayerAI::AI_doTurnUnitsPost()
 		// units are collected first as buying goods creates units
 		std::vector<CvUnitAI*> apTraders;
 		std::vector<CvUnitAI*> apBack;
+		// WTP: the same for the ships with the treasure automation (they sell the treasures and sail to a waiting one)
+		std::vector<CvUnitAI*> apTreasureShips;
+		std::vector<CvUnitAI*> apTreasureShipsBack;
 		for (pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
 		{
 			CvUnitAI* const pTrader = static_cast<CvUnitAI*>(pLoopUnit);
@@ -681,6 +684,18 @@ void CvPlayerAI::AI_doTurnUnitsPost()
 			{
 				apBack.push_back(pTrader);
 			}
+			else if (pTrader->AI_isTreasureShip())
+			{
+				if (pLoopUnit->getUnitTravelState() == UNIT_TRAVEL_STATE_IN_EUROPE)
+				{
+					apTreasureShips.push_back(pTrader);
+				}
+				else if (pLoopUnit->isOnMap_() && pLoopUnit->getGroup() != NULL && pLoopUnit->getGroup()->getNumUnits() == 1
+					&& pLoopUnit->getGroup()->getAutomateType() == NO_AUTOMATE)
+				{
+					apTreasureShipsBack.push_back(pTrader);
+				}
+			}
 		}
 		for (uint i = 0; i < apTraders.size(); ++i)
 		{
@@ -689,6 +704,14 @@ void CvPlayerAI::AI_doTurnUnitsPost()
 		for (uint i = 0; i < apBack.size(); ++i)
 		{
 			apBack[i]->getGroup()->setAutomateType(AUTOMATE_NATIVE_TRADE);
+		}
+		for (uint i = 0; i < apTreasureShips.size(); ++i)
+		{
+			apTreasureShips[i]->AI_treasureShipEurope();
+		}
+		for (uint i = 0; i < apTreasureShipsBack.size(); ++i)
+		{
+			apTreasureShipsBack[i]->getGroup()->setAutomateType(AUTOMATE_TREASURE_SHIP);
 		}
 		// WTP: units on their way to a port for a transport (transport to a city or plot, job automation): their ship is
 		// chosen again now that the ships have their moves back, one unit after the other (each counts the tours before)
@@ -4434,6 +4457,25 @@ int CvPlayerAI::AI_militaryHelp(PlayerTypes ePlayer, int& iNumUnits, UnitTypes& 
 	return kPlayer.getEuropeUnitBuyPrice(eUnit) * GC.getDefineINT("KING_BUY_UNIT_PRICE_MODIFIER") / 100;
 }
 
+// WTP: new price after one successful bargain when selling to natives. iBase is the first offer of the natives,
+// iIncrease the rise in per mille (random, trader bonus included). Below BARGAIN_SELL_SOFT_CAP_PERCENT of iBase the
+// price rises by iIncrease, above it each bargain only closes iIncrease / 2 per mille of the gap to
+// BARGAIN_SELL_MAX_PERCENT of iBase, so even endless bargaining never goes beyond that.
+static int bargainSellPrice(int iBase, int iPrice, int iIncrease)
+{
+	const int iSoftCap = iBase * GLOBAL_DEFINE_BARGAIN_SELL_SOFT_CAP_PERCENT / 100;
+	const int iMax = iBase * GLOBAL_DEFINE_BARGAIN_SELL_MAX_PERCENT / 100;
+	if (iPrice >= iMax)
+	{
+		return iPrice;
+	}
+	if (iPrice < iSoftCap)
+	{
+		return std::min(iSoftCap, iPrice * (1000 + iIncrease) / 1000);
+	}
+	return iPrice + std::max(1, (iMax - iPrice) * iIncrease / 2000);
+}
+
 bool CvPlayerAI::AI_counterPropose(PlayerTypes ePlayer, const CLinkList<TradeData>* pTheirList, const CLinkList<TradeData>* pOurList, CLinkList<TradeData>* pTheirInventory, CLinkList<TradeData>* pOurInventory, CLinkList<TradeData>* pTheirCounter, CLinkList<TradeData>* pOurCounter, const IDInfo& kTransport)
 {
 	FAssert(CxDesyncMonitor::isNeverSync());
@@ -4476,8 +4518,6 @@ bool CvPlayerAI::AI_counterPropose(PlayerTypes ePlayer, const CLinkList<TradeDat
 				{
 					randomPriceChange = priceIncreaseMax / 3;
 				}
-				int newPrice = oldPrice * (1000 + randomPriceChange) / 1000;
-
 				// R&R, ray, change for Trait Trader - START
 				// WTP, ray, also consider European Trait
 				int iTotalNativeTradeModifier = GET_PLAYER(getID()).getNativeTradeModifier() + kTradingPartner.getNativeTradeModifier();
@@ -4486,9 +4526,17 @@ bool CvPlayerAI::AI_counterPropose(PlayerTypes ePlayer, const CLinkList<TradeDat
 				{
 					iTotalNativeTradeModifier = GLOBAL_DEFINE_MAX_NATIVE_BARGAIN_MODIFIER;
 				}
-				// here we calculate the price
-				newPrice = newPrice * (100 + iTotalNativeTradeModifier) / 100;
+				// WTP: the trader bonus speeds up each bargain, the limits stay those of the first offer
+				randomPriceChange = randomPriceChange * (100 + iTotalNativeTradeModifier) / 100;
 				// R&R, ray, change for Trait Trader - END
+
+				// WTP: the first offer is what the natives would pay without bargaining
+				int iFirstOffer = AI_dealVal(ePlayer, pTheirList);
+				if (iFirstOffer <= 0)
+				{
+					iFirstOffer = oldPrice;
+				}
+				int newPrice = bargainSellPrice(iFirstOffer, oldPrice, randomPriceChange);
 
 				// R&R, ray, small correction to stop at max gold of player
 				int iGoldAvailable = this->AI_maxGoldTrade(ePlayer);
@@ -5551,7 +5599,8 @@ bool CvPlayerAI::AI_nativeSellProfit(YieldTypes eYield, int iAmount, const CvCit
 
 // WTP: the AI bargains once for a better price when it sells to natives (the bargaining of the diplomacy screen is
 // Python driven, the AI has no access to it). Same rules: the natives may refuse (they do not trade with us for some
-// turns and like us less), otherwise the price rises by 7 to 21% plus the trader bonus, never above what the tribe may pay.
+// turns and like us less), otherwise the price rises by 10 to 30% plus the trader bonus (bargainSellPrice), never above
+// what the tribe may pay.
 // Returns true if the price was raised. iPrice is the price in gold the natives pay for the whole deal.
 bool CvPlayerAI::AI_bargainWithNatives(PlayerTypes eNative, int& iPrice)
 {
@@ -5572,10 +5621,10 @@ bool CvPlayerAI::AI_bargainWithNatives(PlayerTypes eNative, int& iPrice)
 	}
 
 	const int iMaxIncrease = GLOBAL_DEFINE_PRICE_INCREASE_BARGAIN_SELL;
-	const int iIncrease = std::max(iMaxIncrease / 3, GC.getGameINLINE().getSorenRandNum(std::max(1, iMaxIncrease), "AI bargain sell price"));
 	const int iModifier = std::min(getNativeTradeModifier() + kNative.getNativeTradeModifier(), GLOBAL_DEFINE_MAX_NATIVE_BARGAIN_MODIFIER);
-	int iNewPrice = iPrice * (1000 + iIncrease) / 1000;
-	iNewPrice = iNewPrice * (100 + iModifier) / 100;
+	const int iIncrease = std::max(iMaxIncrease / 3, GC.getGameINLINE().getSorenRandNum(std::max(1, iMaxIncrease), "AI bargain sell price")) * (100 + iModifier) / 100;
+	// the AI bargains once, so iPrice is the first offer
+	int iNewPrice = bargainSellPrice(iPrice, iPrice, iIncrease);
 	iNewPrice = std::min(iNewPrice, kNative.AI_maxGoldTrade(getID()));
 	if (iNewPrice <= iPrice)
 	{
@@ -6649,6 +6698,11 @@ bool CvPlayerAI::AI_hasSeaTransport(const CvUnit* pCargo) const
 	{
 		if (pLoopUnit != pCargo && pLoopUnit->getDomainType() == DOMAIN_SEA)
 		{
+			// WTP: a human player's treasures count only his ships with the treasure automation
+			if (isHuman() && pCargo->getUnitInfo().isTreasure() && !static_cast<CvUnitAI*>(pLoopUnit)->AI_isTreasureShip())
+			{
+				continue;
+			}
 			if (pLoopUnit->cargoSpace() >= pCargo->getUnitInfo().getRequiredTransportSize())
 			{
 				return true;
@@ -21614,7 +21668,7 @@ bool CvPlayerAI::AI_doNativeTraderPurchase()
 // area with one of our colonies or on the coast: our transports bring the trader there)
 bool CvPlayerAI::AI_hasTradePostTarget() const
 {
-	if (getNativeTradePostSuccessPercent() < 40)
+	if (getNativeTradePostSuccessPercent() - getTradePostCountPenalty() < 40)
 	{
 		return false;
 	}
@@ -21644,7 +21698,8 @@ bool CvPlayerAI::AI_hasTradePostTarget() const
 			const CvPlot* const pPlot = pVillage->plot();
 			if (pVillage->getTradePostCivilization() != getCivilizationType() && pPlot->isRevealed(getTeam(), false)
 				&& (pPlot->area()->getCitiesPerPlayer(getID()) > 0 || pPlot->isCoastalLand(GC.getMIN_WATER_SIZE_FOR_OCEAN()))
-				&& pPlot->calculateCulturePercent(pPlot->getOwnerINLINE()) == 100)
+				&& pPlot->calculateCulturePercent(pPlot->getOwnerINLINE()) == 100
+				&& pVillage->getTradeBlockingFortOwner(getID()) == NO_PLAYER)
 			{
 				return true;
 			}
@@ -21681,6 +21736,167 @@ bool CvPlayerAI::AI_isTraderTargetTaken(int iPlotIndex, int iUnitID) const
 		}
 	}
 	return false;
+}
+
+// WTP: pioneer plan (user 2026-10-25): the plot a pioneer with the automation AUTOMATE_PIONEER_PLAN works on (-1: none).
+// Marks whose improvement exists already are removed. Free pioneers get their plots together, the nearest pair of pioneer
+// and plot first (a priority 2 plot counts 6 plots further away): a priority 1 plot gets a hardy pioneer or two pioneers
+// (a hardy pioneer counts twice), a priority 2 plot one; twice as many where the build clears a forest. Only plots on the
+// pioneer's land area.
+namespace
+{
+	// the strength a pioneer brings to a priority 1 plot (2 are needed): a hardy pioneer (expert pioneer) 2, others 1
+	int pioneerPlanStrength(const CvUnit& kUnit)
+	{
+		const ProfessionTypes ePioneer = (ProfessionTypes)GC.getInfoTypeForString("PROFESSION_PIONEER");
+		return (ePioneer != NO_PROFESSION && GC.getProfessionInfo(ePioneer).LbD_getExpert() == kUnit.getUnitClassType()) ? 2 : 1;
+	}
+
+	// the strength a marked plot wants: priority 1 two, priority 2 one; WTP (user 2026-10-27): twice that if the build clears the
+	// plot's feature (a farm in a forest)
+	int pioneerPlanWanted(const CvPlayer& kPlayer, int iPlotIndex)
+	{
+		int iWanted = (kPlayer.getPioneerPlanPriority(iPlotIndex) == 1) ? 2 : 1;
+		const CvPlot* const pPlot = GC.getMap().plotByIndexINLINE(iPlotIndex);
+		const BuildTypes eBuild = kPlayer.getPioneerPlanBuild(iPlotIndex);
+		if (pPlot != NULL && eBuild != NO_BUILD && pPlot->getFeatureType() != NO_FEATURE && GC.getBuildInfo(eBuild).isFeatureRemove(pPlot->getFeatureType()))
+		{
+			iWanted *= 2;
+		}
+		return iWanted;
+	}
+}
+
+// WTP: the pioneer found no way to the plot: it does not get that plot again for PIONEER_PLAN_NO_WAY_TURNS turns (it got the
+// same plot every turn and stood still)
+static const int PIONEER_PLAN_NO_WAY_TURNS = 5;
+void CvPlayerAI::AI_setPioneerPlanNoWay(int iUnitID, int iPlotIndex)
+{
+	m_mapPioneerPlanTargets.erase(iUnitID);
+	m_mapPioneerPlanNoWay[std::make_pair(iUnitID, iPlotIndex)] = GC.getGameINLINE().getGameTurn();
+}
+
+int CvPlayerAI::AI_pioneerPlanTarget(const CvUnit& kPioneer)
+{
+	const CvMap& kMap = GC.getMap();
+	// marks already done
+	std::vector<int> aiDone;
+	for (std::map<int, int>::const_iterator it = getPioneerPlans().begin(); it != getPioneerPlans().end(); ++it)
+	{
+		const CvPlot* const pPlot = kMap.plotByIndexINLINE(it->first);
+		const BuildTypes eBuild = (BuildTypes)(it->second / 10);
+		const ImprovementTypes eImprovement = (eBuild >= 0 && eBuild < GC.getNumBuildInfos()) ? (ImprovementTypes)GC.getBuildInfo(eBuild).getImprovement() : NO_IMPROVEMENT;
+		if (pPlot == NULL || eImprovement == NO_IMPROVEMENT || pPlot->getImprovementType() == eImprovement)
+		{
+			aiDone.push_back(it->first);
+		}
+	}
+	for (uint i = 0; i < aiDone.size(); ++i)
+	{
+		setPioneerPlan(aiDone[i], NO_BUILD, 0);
+	}
+	// targets of pioneers that are gone, no longer automated or whose mark is gone; the strength on each plot
+	std::map<int, int> mapStrength;
+	for (std::map<int, int>::iterator it = m_mapPioneerPlanTargets.begin(); it != m_mapPioneerPlanTargets.end(); )
+	{
+		const CvUnit* const pUnit = getUnit(it->first);
+		if (pUnit == NULL || pUnit->getGroup() == NULL || pUnit->getGroup()->getAutomateType() != AUTOMATE_PIONEER_PLAN
+			|| getPioneerPlanBuild(it->second) == NO_BUILD)
+		{
+			m_mapPioneerPlanTargets.erase(it++);
+		}
+		else
+		{
+			mapStrength[it->second] += pioneerPlanStrength(*pUnit);
+			++it;
+		}
+	}
+	std::map<int, int>::const_iterator itOwn = m_mapPioneerPlanTargets.find(kPioneer.getID());
+	if (itOwn != m_mapPioneerPlanTargets.end())
+	{
+		return itOwn->second;
+	}
+	// the free pioneers
+	std::vector<const CvUnit*> apFree;
+	int iLoop;
+	for (const CvUnit* pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
+	{
+		if (pLoopUnit->getGroup() != NULL && pLoopUnit->getGroup()->getAutomateType() == AUTOMATE_PIONEER_PLAN && pLoopUnit->isOnMap()
+			&& !pLoopUnit->isCargo() && m_mapPioneerPlanTargets.find(pLoopUnit->getID()) == m_mapPioneerPlanTargets.end())
+		{
+			apFree.push_back(pLoopUnit);
+		}
+	}
+	// WTP (user 2026-10-25): priority 1 and 2 plots together; a priority 2 plot counts PIONEER_PLAN_PRIORITY_DISTANCE plots
+	// further away (a pioneer takes it if the nearest priority 1 plot is that much further); a priority 1 plot wants strength 2
+	// (a hardy pioneer or two pioneers), a priority 2 plot one pioneer
+	static const int PIONEER_PLAN_PRIORITY_DISTANCE = 6;
+	std::vector<int> aiPlots;
+	for (std::map<int, int>::const_iterator it = getPioneerPlans().begin(); it != getPioneerPlans().end(); ++it)
+	{
+		const int iWanted = pioneerPlanWanted(*this, it->first);
+		const std::map<int, int>::const_iterator itStrength = mapStrength.find(it->first);
+		if (itStrength == mapStrength.end() || itStrength->second < iWanted)
+		{
+			aiPlots.push_back(it->first);
+		}
+	}
+	while (!aiPlots.empty() && !apFree.empty())
+	{
+		int iBestDistance = MAX_INT;
+		int iBestUnit = -1;
+		int iBestPlot = -1;
+		for (uint u = 0; u < apFree.size(); ++u)
+		{
+			for (uint p = 0; p < aiPlots.size(); ++p)
+			{
+				const CvPlot* const pPlot = kMap.plotByIndexINLINE(aiPlots[p]);
+				if (pPlot->area() != apFree[u]->area() || !apFree[u]->canBuild(pPlot, getPioneerPlanBuild(aiPlots[p])))
+				{
+					continue;
+				}
+				const std::map<std::pair<int, int>, int>::const_iterator itNoWay = m_mapPioneerPlanNoWay.find(std::make_pair(apFree[u]->getID(), aiPlots[p]));
+				if (itNoWay != m_mapPioneerPlanNoWay.end() && GC.getGameINLINE().getGameTurn() - itNoWay->second < PIONEER_PLAN_NO_WAY_TURNS)
+				{
+					continue;
+				}
+				const int iDistance = plotDistance(apFree[u]->getX_INLINE(), apFree[u]->getY_INLINE(), pPlot->getX_INLINE(), pPlot->getY_INLINE())
+					+ ((getPioneerPlanPriority(aiPlots[p]) == 2) ? PIONEER_PLAN_PRIORITY_DISTANCE : 0);
+				if (iDistance < iBestDistance)
+				{
+					iBestDistance = iDistance;
+					iBestUnit = u;
+					iBestPlot = p;
+				}
+			}
+		}
+		if (iBestUnit < 0)
+		{
+			break;
+		}
+		const int iPlot = aiPlots[iBestPlot];
+		m_mapPioneerPlanTargets[apFree[iBestUnit]->getID()] = iPlot;
+		mapStrength[iPlot] += pioneerPlanStrength(*apFree[iBestUnit]);
+		if (mapStrength[iPlot] >= pioneerPlanWanted(*this, iPlot))
+		{
+			aiPlots.erase(aiPlots.begin() + iBestPlot);
+		}
+		apFree.erase(apFree.begin() + iBestUnit);
+	}
+	itOwn = m_mapPioneerPlanTargets.find(kPioneer.getID());
+	return (itOwn != m_mapPioneerPlanTargets.end()) ? itOwn->second : -1;
+}
+
+// WTP: pioneer plan (user 2026-10-27): true the first time in a turn that a pioneer finds no marked improvement left
+// (the player is told once per turn, not by every waiting pioneer)
+bool CvPlayerAI::AI_pioneerPlanDoneNotice()
+{
+	if (!getPioneerPlans().empty() || m_iPioneerPlanDoneTurn == GC.getGameINLINE().getGameTurn())
+	{
+		return false;
+	}
+	m_iPioneerPlanDoneTurn = GC.getGameINLINE().getGameTurn();
+	return true;
 }
 
 // WTP: an immigrant on the docks the workforce plan wants as an expert: it has a job task the unit is an expert for
@@ -23610,7 +23826,18 @@ int CvPlayerAI::AI_firstCityFoundValue(const CvPlot& kPlot)
 	return static_cast<int>(val);
 }
 
-// WTP: a transport a colonist may board on its way: the AI's transports; of a human player only the automated ones
+// WTP: automatic job assignment for a human player's colonist (AUTOMATE_ASSIGN_JOB). The travel times of the workforce plan are
+// made once per turn for the human player (the AI makes them at the start of its plan)
+void CvPlayerAI::AI_wfEnsureTravel(const CvUnit& kColonist)
+{
+	if (m_iWfTravelTurn != GC.getGameINLINE().getGameTurn())
+	{
+		AI_wfUpdateTravel(kColonist);
+		m_iWfTravelTurn = GC.getGameINLINE().getGameTurn();
+	}
+}
+
+// a transport a colonist may board on its way: the AI's transports; of a human player only the automated ones
 bool CvPlayerAI::AI_isWfShip(const CvUnit& kShip)
 {
 	if (kShip.AI_getUnitAIType() != UNITAI_TRANSPORT_SEA && kShip.AI_getUnitAIType() != UNITAI_TRANSPORT_COAST)
@@ -23631,15 +23858,6 @@ bool CvPlayerAI::AI_hasWfShip() const
 		}
 	}
 	return false;
-// WTP: automatic job assignment for a human player's colonist (AUTOMATE_ASSIGN_JOB). The travel times of the workforce plan are
-// made once per turn for the human player (the AI makes them at the start of its plan)
-void CvPlayerAI::AI_wfEnsureTravel(const CvUnit& kColonist)
-{
-	if (m_iWfTravelTurn != GC.getGameINLINE().getGameTurn())
-	{
-		AI_wfUpdateTravel(kColonist);
-		m_iWfTravelTurn = GC.getGameINLINE().getGameTurn();
-	}
 }
 
 namespace
@@ -23937,16 +24155,12 @@ void CvPlayerAI::AI_humanFindJobs(const CvUnit& kUnit, std::vector<HumanJob>& aJ
 		bFoodWorker = eUnitClass == (UnitClassTypes)GC.getInfoTypeForString(aszFoodWorkers[k]);
 	}
 
-	std::map<int, int> mapIncoming; // city ID -> new citizens on their way (not replacing anybody)
-			else
-			{
-				++mapIncoming[kOther.AI_getWfCityID()];
-			}
 	// the jobs other colonists with the job automation are on their way to: their plots, their building slots (per colony and
 	// building) and the colonists they replace
 	std::set<std::pair<int, int> > aReservedPlots; // (city ID, plot number)
 	std::map<std::pair<int, int>, int> mapReservedSlots; // (city ID, special building) -> colonists on their way
 	std::set<int> aReplaced; // unit IDs
+	std::map<int, int> mapIncoming; // city ID -> new citizens on their way (not replacing anybody)
 	{
 		int iUnitLoop;
 		for (CvUnit* pLoopUnit = firstUnit(&iUnitLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iUnitLoop))
@@ -23967,6 +24181,10 @@ void CvPlayerAI::AI_humanFindJobs(const CvUnit& kUnit, std::vector<HumanJob>& aJ
 			if (kOther.AI_getWfVillageX() >= 0)
 			{
 				aReplaced.insert(kOther.AI_getWfVillageX());
+			}
+			else
+			{
+				++mapIncoming[kOther.AI_getWfCityID()];
 			}
 		}
 	}

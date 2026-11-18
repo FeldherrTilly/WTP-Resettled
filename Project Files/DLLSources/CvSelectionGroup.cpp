@@ -645,6 +645,22 @@ bool CvSelectionGroup::canStartMission(int iMission, int iData1, int iData2, CvP
 {
 	PROFILE_FUNC();
 
+	// WTP: a private pioneer only builds what it was paid for (or waits): the player cannot move or command it
+	// (the player sees only its build: skip is for its AI and has no button)
+	{
+		CLLNode<IDInfo>* pPrivateNode = headUnitNode();
+		while (pPrivateNode != NULL)
+		{
+			const CvUnit* const pPrivate = ::getUnit(pPrivateNode->m_data);
+			pPrivateNode = nextUnitNode(pPrivateNode);
+			const BuildTypes ePrivateBuild = (pPrivate != NULL) ? static_cast<const CvUnitAI*>(pPrivate)->AI_getPrivateBuild() : NO_BUILD;
+			if (ePrivateBuild != NO_BUILD && !(iMission == MISSION_BUILD && iData1 == ePrivateBuild) && (iMission != MISSION_SKIP || bTestVisible))
+			{
+				return false;
+			}
+		}
+	}
+
 	CLLNode<IDInfo>* pUnitNode;
 	CvUnit* pTargetUnit;
 	CvUnit* pLoopUnit;
@@ -1640,6 +1656,12 @@ bool CvSelectionGroup::canDoInterfaceMode(InterfaceModeTypes eInterfaceMode) con
 		if (pLoopUnit == NULL)
 		{
 			continue;
+		}
+
+		// WTP: the private pioneer cannot be moved (no go to, route to, transport to, ...)
+		if (static_cast<const CvUnitAI*>(pLoopUnit)->AI_getPrivateBuild() != NO_BUILD)
+		{
+			return false;
 		}
 
 		switch (eInterfaceMode)
@@ -3603,6 +3625,7 @@ void CvSelectionGroup::setAutomateType(AutomateTypes eNewValue, bool bImplicit)
 		else if (eOldValue == AUTOMATE_NATIVE_SUPPLY && eNewValue != AUTOMATE_NATIVE_TRADE && getHeadUnit() != NULL)
 		{
 			static_cast<CvUnitAI*>(getHeadUnit())->AI_clearNativeTradeHome();
+		}
 		// WTP: automatic job assignment: the colonist gets its job (none: the automation is off again); switched off, it drops it
 		if (eNewValue == AUTOMATE_ASSIGN_JOB && getHeadUnit() != NULL)
 		{
@@ -3616,6 +3639,21 @@ void CvSelectionGroup::setAutomateType(AutomateTypes eNewValue, bool bImplicit)
 			&& static_cast<CvUnitAI*>(getHeadUnit())->AI_getWfTask() == CvUnitAI::WF_ASSIGN)
 		{
 			static_cast<CvUnitAI*>(getHeadUnit())->AI_clearWfTask();
+		}
+		// WTP: patrol around the plot where it is switched on
+		if (eNewValue == AUTOMATE_PATROL && getHeadUnit() != NULL)
+		{
+			static_cast<CvUnitAI*>(getHeadUnit())->AI_setPatrolCenter(getHeadUnit()->plot());
+		}
+		// WTP: treasure automation of a ship: it keeps the role when the automation of the group is lost on the way to or from
+		// Europe (implicit), and drops it when switched off or to another automation
+		if (eNewValue == AUTOMATE_TREASURE_SHIP && getHeadUnit() != NULL)
+		{
+			static_cast<CvUnitAI*>(getHeadUnit())->AI_setTreasureShip(true);
+		}
+		else if (eOldValue == AUTOMATE_TREASURE_SHIP && (eNewValue != NO_AUTOMATE || !bImplicit) && getHeadUnit() != NULL)
+		{
+			static_cast<CvUnitAI*>(getHeadUnit())->AI_setTreasureShip(false);
 		}
 		// WTP: transport to a city or plot: switched off, the unit drops its journey
 		if (eOldValue == AUTOMATE_TRAVEL && !bImplicit && getHeadUnit() != NULL
