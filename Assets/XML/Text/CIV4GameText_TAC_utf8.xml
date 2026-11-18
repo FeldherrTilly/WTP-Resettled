@@ -1893,6 +1893,11 @@
 		<German>Exporteinstellung</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS</Tag>
+		<English>Import settings</English>
+		<German>Importeinstellung</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_STOCK</Tag>
 		<English>In stock: %d1</English>
 		<German>Auf Lager: %d1</German>

@@ -5987,7 +5987,8 @@ class CvMainInterface:
 		return szDetail
 
 	# the child tooltip of the line of a colony in the tooltip of a good (import / export window): the name of the colony, its export settings
-	# for the good as the letters E (export), A (auto export), L (land), S (sea) - those that are on in the colony are yellow - and the stock
+	# for the good as the letters E (export), A (auto export), L (land), S (sea), and for an importing colony I (import), F (feeder), L, S - those
+	# that are on in the colony are yellow - and the stock
 	def getTraderChildText( self, iYield, iCity ):
 		try:
 			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(iCity)
@@ -5996,6 +5997,9 @@ class CvMainInterface:
 			bExp = pCity.isExport(iYield)
 			bAuto = pCity.isAutoExport(iYield)
 			iDom = pCity.getExportDomains(iYield)
+			bImp = pCity.isImport(iYield)
+			bFeeder = pCity.isImportFeeder(iYield)
+			iImpDom = pCity.getImportDomains(iYield)
 			tWin = CvScreensInterface.tradeRouteScreen
 			if tWin.isOpen() and tWin.iCity == iCity and tWin.dData.has_key(iYield):
 				# (the colony of the open window: what the window shows is the newer state)
@@ -6003,15 +6007,27 @@ class CvMainInterface:
 				bExp = d["exp"]
 				bAuto = d["auto"]
 				iDom = d["expDom"]
-			aLetters = [(u"E", bExp), (u"A", bAuto), (u"L", (iDom & 1) != 0), (u"S", (iDom & 2) != 0)]
-			aParts = []
-			for tLetter in aLetters:
-				if tLetter[1]:
-					aParts.append(u"<color=255,255,0,255>" + tLetter[0] + u"</color>")
-				else:
-					aParts.append(tLetter[0])
-			szStock = localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
-			return pCity.getName() + u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS", ()) + u":  " + u"  ".join(aParts) + u"\n" + szStock
+				bImp = d["imp"]
+				bFeeder = d["feeder"]
+				iImpDom = d["impDom"]
+			szLines = pCity.getName()
+			# (the settings of what the colony does with the good: the import row if it imports, the export row if it exports; the letters that are on
+			# are yellow)
+			aRows = []
+			if bImp:
+				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS", ()), [(u"I", bImp), (u"F", bFeeder), (u"L", (iImpDom & 1) != 0), (u"S", (iImpDom & 2) != 0)]))
+			if bExp or not bImp:
+				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS", ()), [(u"E", bExp), (u"A", bAuto), (u"L", (iDom & 1) != 0), (u"S", (iDom & 2) != 0)]))
+			for tRow in aRows:
+				aParts = []
+				for tLetter in tRow[1]:
+					if tLetter[1]:
+						aParts.append(u"<color=255,255,0,255>" + tLetter[0] + u"</color>")
+					else:
+						aParts.append(tLetter[0])
+				szLines += u"\n" + tRow[0] + u":  " + u"  ".join(aParts)
+			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			return szLines
 		except:
 			self.tipError("getTraderChildText")
 		return u""
