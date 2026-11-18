@@ -6216,10 +6216,13 @@ class CvMainInterface:
 			self.iPreviewFreezeLines = len(aszFreeze)
 			iWidth = self.getTipTextWidth(aszLines, iChar, iMaxWidth, iPad)
 			iHeight = len(aszLines) * iLine + 2 * iPad
-			# always to the left of the parent as long as there is room, otherwise to the right
-			iX = iFX - 12 - iWidth
-			if iX < 4:
-				iX = iFX + iFW + 12
+			# goods tooltips of the import/export window: the child windows always open to the left of the parent as long as there is room
+			bLeft = self.isTradeWindowOpen()
+			iX = iFX + iFW + 12
+			if bLeft and iFX - 12 - iWidth >= 4:
+				iX = iFX - 12 - iWidth
+			elif iX + iWidth > xRes - 4:
+				iX = iFX - 12 - iWidth
 			iX = max(4, iX)
 			iY = max(4, min(yRes - iHeight - 4, iCursorY + self.getCursorBottom(yRes)))
 			# it does not cover another frozen window: beside the window (right, left), then above and below it
