@@ -5408,7 +5408,13 @@ class CvMainInterface:
 						if aiPara[k] >= iPara:
 							iAt = k
 							break
-					aiPara = [(x + 1 if x >= iPara else x) for x in aiPara]
+					aiShift = []
+					for x in aiPara:
+						if x >= iPara:
+							aiShift.append(x + 1)
+						else:
+							aiShift.append(x)
+					aiPara = aiShift
 					dShift = {}
 					for kDet in dDetails.keys():
 						if kDet >= iPara:
