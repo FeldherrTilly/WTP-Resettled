@@ -1898,6 +1898,24 @@
 		<German>Importeinstellung</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_LETTERS</Tag>
+		<English>I/F/L/S</English>
+		<Portuguese>I/A/T/M</Portuguese>
+		<French>I/F/T/M</French>
+		<German>I/F/L/S</German>
+		<Italian>I/A/T/M</Italian>
+		<Spanish>I/A/T/M</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_LETTERS</Tag>
+		<English>E/A/L/S</English>
+		<Portuguese>E/A/T/M</Portuguese>
+		<French>E/A/T/M</French>
+		<German>E/A/L/S</German>
+		<Italian>E/A/T/M</Italian>
+		<Spanish>E/A/T/M</Spanish>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_STOCK</Tag>
 		<English>In stock: %d1</English>
 		<German>Auf Lager: %d1</German>

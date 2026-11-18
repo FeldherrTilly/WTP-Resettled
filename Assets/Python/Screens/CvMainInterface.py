@@ -6013,19 +6013,21 @@ class CvMainInterface:
 			szLines = pCity.getName()
 			# (the settings of what the colony does with the good: the import row if it imports, the export row if it exports; the letters that are on
 			# are yellow)
+			# (the letters of each language are in the text keys, 4 letters divided by slashes, e.g. I/F/L/S)
 			aRows = []
 			if bImp:
-				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS", ()), [(u"I", bImp), (u"F", bFeeder), (u"L", (iImpDom & 1) != 0), (u"S", (iImpDom & 2) != 0)]))
+				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS", ()), localText.getText("TXT_KEY_WTP_TIP_TRADER_IMPORT_LETTERS", ()), [bImp, bFeeder, (iImpDom & 1) != 0, (iImpDom & 2) != 0]))
 			if bExp or not bImp:
-				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS", ()), [(u"E", bExp), (u"A", bAuto), (u"L", (iDom & 1) != 0), (u"S", (iDom & 2) != 0)]))
+				aRows.append((localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS", ()), localText.getText("TXT_KEY_WTP_TIP_TRADER_EXPORT_LETTERS", ()), [bExp, bAuto, (iDom & 1) != 0, (iDom & 2) != 0]))
 			for tRow in aRows:
+				aLetters = tRow[1].split(u"/")
 				aParts = []
-				for tLetter in tRow[1]:
-					if tLetter[1]:
-						aParts.append(u"<color=255,255,0,255>" + tLetter[0] + u"</color>")
+				for i in range(len(aLetters)):
+					if i < len(tRow[2]) and tRow[2][i]:
+						aParts.append(u"<color=255,255,0,255>" + aLetters[i] + u"</color>")
 					else:
-						aParts.append(tLetter[0])
-				szLines += u"\n" + tRow[0] + u":  " + u"  ".join(aParts)
+						aParts.append(aLetters[i])
+				szLines += u"\n" + tRow[0] + u": " + u"/".join(aParts)
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			return szLines
 		except:
