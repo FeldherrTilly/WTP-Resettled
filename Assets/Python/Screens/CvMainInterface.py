@@ -5984,7 +5984,6 @@ class CvMainInterface:
 			if self.iTradeTipYield >= 0 and self.szCursorTipText == self.szTradeTipText:
 				# (the tooltip of a good of the import / export window: its lines of colonies can be clicked)
 				self.dTraderWin[self.aFrozen[-1][0]] = self.iTradeTipYield
-				self.iSuppressYield = self.iTradeTipYield
 			try:
 				# the tooltip of an own unit: the line "Set waypoint..."
 				iNew = len(self.aFrozen) - 1
@@ -7745,9 +7744,9 @@ class CvMainInterface:
 				# (log: after a click on a unit the game reports the contact help of the score table although the cursor is on the map)
 				return
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD) and self.iSuppressYield >= 0 and self.isTradeWindowOpen():
-				if CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) == self.iSuppressYield:
-					# (its tooltip is frozen already, the cursor is still on the picture: not a second one)
+			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD) and self.isTradeWindowOpen():
+				if self.isYieldTipFrozen(CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY())):
+					# (the tooltip of this good is frozen: no second one as long as it is)
 					screen.setHelpTextString(u"")
 					return
 			if szText and len(szText) > 0 and int(eWidgetType) == int(WidgetTypes.WIDGET_HELP_YIELD):
@@ -7776,7 +7775,15 @@ class CvMainInterface:
 	dTraderLines = {} # the lines of the traders in the tooltips: text without colors -> id of the city
 	dTraderWin = {} # frozen windows with such lines: prefix -> the good
 	iTradeTipYield = -1
-	iSuppressYield = -1 # the good whose tooltip was frozen with the cursor on its picture: no new tooltip of it until the cursor has left it
+	# is there a frozen tooltip of this good (import / export window)?
+	def isYieldTipFrozen( self, iYield ):
+		if iYield < 0:
+			return False
+		for tFz in self.aFrozen:
+			if self.dTraderWin.get(tFz[0], -1) == iYield:
+				return True
+		return False
+
 	tPostJump = None # after a jump: the tooltip of the good is shown and frozen once the cursor is on its picture
 	szTradeTipText = u""
 
@@ -7910,8 +7917,15 @@ class CvMainInterface:
 		self.aTradeReturn.append(tR)
 		tWin.finish(False, -1, True)
 		self.unfreezeAllTips()
-		CyInterface().selectCity(pCity, False)
-		self.tReopenTrade = {"city": iCity, "condensed": False, "focus": iYield, "map": False}
+		if tR["map"]:
+			# the window of the starting colony was open on the map: the jump stays on the map (the camera goes to the colony, its window opens there)
+			try:
+				CyCamera().JustLookAtPlot(pCity.plot())
+			except:
+				CvUtil.pyPrint("WTP trade jump: JustLookAtPlot failed")
+		else:
+			CyInterface().selectCity(pCity, False)
+		self.tReopenTrade = {"city": iCity, "condensed": False, "focus": iYield, "map": tR["map"]}
 		self.iReopenTries = 0
 		self.iReopenWait = 3
 		try:
@@ -7929,11 +7943,12 @@ class CvMainInterface:
 			# (the tooltip that was frozen in the colony of the jump goes: the one of the starting colony is made again)
 			self.unfreezeAllTips()
 			if tR["map"]:
-				# (back to the map: the city screen is left)
-				try:
-					CyInterface().clearSelectedCities()
-				except:
-					CvUtil.pyPrint("WTP trade jump: clearSelectedCities failed")
+				# (back to the map: nothing to leave when the jump stayed on the map)
+				if CyInterface().isCityScreenUp():
+					try:
+						CyInterface().clearSelectedCities()
+					except:
+						CvUtil.pyPrint("WTP trade jump: clearSelectedCities failed")
 			else:
 				pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(tR["city"])
 				if pCity is not None and not pCity.isNone():
@@ -7999,7 +8014,6 @@ class CvMainInterface:
 			self.addFrozenWindow(screen, tLayout, aszParas, aiIndent, dDetails, tAnchor)
 			self.dTraderWin[self.aFrozen[-1][0]] = tR["yield"]
 			gc.getGame().setCursorClient(tR["cursor"][0], tR["cursor"][1])
-			self.iSuppressYield = tR["yield"]
 		except:
 			pass
 
@@ -8159,11 +8173,6 @@ class CvMainInterface:
 		# the pictures of the goods of the import / export window in the city screen: the game gives no help text of its own there (the DLL
 		# empties it; python cannot clear the help of the city screen). It is on as long as the window is open: a flag that follows the cursor
 		# comes too late when the cursor moves fast from one picture to the next (the game tooltip showed up for a moment then)
-		try:
-			if self.iSuppressYield >= 0 and (not self.isTradeWindowOpen() or CvScreensInterface.tradeRouteScreen.getIconYieldAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) != self.iSuppressYield):
-				self.iSuppressYield = -1
-		except:
-			self.iSuppressYield = -1
 		try:
 			gc.getGame().setHideYieldHelp(self.bHoverTip and CyInterface().isCityScreenUp() and self.isTradeWindowOpen())
 		except:
