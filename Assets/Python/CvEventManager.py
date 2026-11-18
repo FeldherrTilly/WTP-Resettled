@@ -789,7 +789,7 @@ class CvEventManager:
 
 		try:
 			# the target of an order to move can become a waypoint of the unit (tooltips of units, "Set waypoint...")
-			CvScreensInterface.mainInterface.onWaypointMission(eOwner, eMission)
+			CvScreensInterface.mainInterface.onWaypointMission(eOwner, eMission, listUnitIds)
 		except:
 			pass
 

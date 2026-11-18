@@ -3704,6 +3704,16 @@
 		<German>Wird eine Einheit aktiviert, wird der Tooltip ihres Feldes sofort eingefroren (ein Stapel mit seinen Einheitenzeilen oder die einzelne Einheit). Die eingefrorenen Tooltips (und ihre Child-Tooltips) verschwinden wieder, sobald die Einheit einen Befehl erhält. Standardmäßig aus.</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG</Tag>
+		<English>Show errors of the tooltips (test)</English>
+		<German>Fehler der Tooltips anzeigen (Test)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG_HELP</Tag>
+		<English>For the test phase: when the code of the tooltips fails, a message with the place of the error is shown (once for the same error) instead of the error being ignored silently. Off by default.</English>
+		<German>Für die Testphase: Wenn der Code der Tooltips fehlschlägt, wird eine Meldung mit der Stelle des Fehlers angezeigt (einmal je gleichem Fehler), statt den Fehler still zu ignorieren. Standardmäßig aus.</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_5</Tag>
 		<English>Extra long (2 s)</English>
 		<German>Extra lang (2 s)</German>
