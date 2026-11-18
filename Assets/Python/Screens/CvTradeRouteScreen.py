@@ -375,6 +375,7 @@ class CvTradeRouteScreen:
 		self.pHost = None
 		self.aYields = []
 		self.dData = {}
+		self.dBase = {} # good -> the settings as they were in the city when read / sent (what the window changed is dData against it)
 		self.iFirst = 0
 		self.iVisible = 0
 		self.iYRes = 1440
@@ -421,13 +422,15 @@ class CvTradeRouteScreen:
 	# what the window shows (not what was changed in it): the view, the goods of the filter, the search text, the page; the window of the same
 	# city is opened again with it in the city screen (see CvMainInterface)
 	def getState(self):
-		return {"city": self.iCity, "condensed": self.bCondensed, "view": self.iView, "confirmed": list(self.aConfirmed), "query": self.szQuery, "temp": self.bTempFilter, "first": self.iFirst, "data": dict([(k, dict(v)) for (k, v) in self.dData.items()])}
+		return {"city": self.iCity, "condensed": self.bCondensed, "view": self.iView, "confirmed": list(self.aConfirmed), "query": self.szQuery, "temp": self.bTempFilter, "first": self.iFirst, "data": dict([(k, dict(v)) for (k, v) in self.dData.items()]), "base": dict([(k, dict(v)) for (k, v) in self.dBase.items()])}
 
 	def restoreState(self, tState):
 		try:
 			# (the changes that were not confirmed yet stay in the window)
 			for iYield in tState["data"].keys():
-				self.dData[iYield] = dict(tState["data"][iYield])
+				# (only what the player changed in the window stays; the rest is read from the city, which may have changed meanwhile)
+				if not tState.has_key("base") or not tState["base"].has_key(iYield) or tState["data"][iYield] != tState["base"][iYield]:
+					self.dData[iYield] = dict(tState["data"][iYield])
 			self.bTempFilter = tState["temp"]
 			self.aConfirmed = list(tState["confirmed"])
 			self.szQuery = tState["query"]
@@ -576,7 +579,7 @@ class CvTradeRouteScreen:
 		self.findSuggestion()
 		self.drawSearchText()
 		if self.iView == VIEW_FILTER:
-			self.buildView()
+			self.buildView(True)
 			self.refreshList()
 		else:
 			self.drawRows()
@@ -597,14 +600,14 @@ class CvTradeRouteScreen:
 			self.aFav.append(szType)
 		saveFavorites(self.aFav)
 		if self.iView == VIEW_FAV:
-			self.buildView()
-			self.drawRows()
-			self.drawPage()
+			self.buildView(True)
+			self.refreshList()
 		else:
 			self.drawRows()
 
 	# the goods of the view: all of them (default) or the favorites
-	def buildView(self):
+	def buildView(self, bKeepPage = False):
+		iOldFirst = self.iFirst
 		if self.iView == VIEW_FAV:
 			self.aYields = [i for i in self.aAllYields if self.isFav(i)]
 		elif self.iView == VIEW_MARKED:
@@ -643,6 +646,9 @@ class CvTradeRouteScreen:
 					aKept.append(iYield)
 			self.aYields = aKept
 		self.iFirst = 0
+		if bKeepPage and self.iVisible > 0:
+			# (the page stays, only moved back if the list became shorter)
+			self.iFirst = max(0, min(iOldFirst, max(0, len(self.aYields) - 1))) / self.iVisible * self.iVisible
 
 	def getAllCargo(self):
 		aKeys = self.dData.keys()
@@ -687,6 +693,7 @@ class CvTradeRouteScreen:
 		d["maintain"] = pCity.getMaintainLevel(iYield)
 		d["expDom"] = pCity.getExportDomains(iYield)
 		self.dData[iYield] = d
+		self.dBase[iYield] = dict(d)
 
 	# the settings of the city are read again (after a preset: the city changes a moment after the command was sent)
 	def reloadFromCity(self):
@@ -694,13 +701,16 @@ class CvTradeRouteScreen:
 		if pCity == None or pCity.isNone():
 			return
 		for iYield in self.dData.keys():
+			# (a good the player changed in the window since it was read / sent keeps his settings; the others get the state of the city)
+			if self.dBase.has_key(iYield) and self.dData[iYield] != self.dBase[iYield]:
+				continue
 			self.loadYield(pCity, iYield)
 		if self.iView == VIEW_MARKED:
-			self.buildView()
-			self.drawPage()
+			self.buildView(True)
+			self.refreshList()
 		self.drawMarketButton(pCity)
 		self.drawBuildButton()
-		self.drawRows()
+		self.syncAndDraw()
 
 	# a good does something for the trade routes: the feeder is on (the game switches the import on with it), or it imports with an
 	# import amount above 0 (import on with the amount 0 does nothing without the feeder)
@@ -713,6 +723,7 @@ class CvTradeRouteScreen:
 		if self.tWarn != None or len(self.aWarnQueue) > 0 or self.iCity < 0:
 			return # (a notice is open: the player may still reset the goods)
 		bChanged = False
+		aAffected = []
 		for p in PRESETS:
 			dBuild = loadBuild(p["prefix"])
 			if not dBuild.has_key(self.iCity):
@@ -726,15 +737,35 @@ class CvTradeRouteScreen:
 				# the preset is off: its goods go back to what they were
 				aSkipped = self.revertPresetGoods(p, dBuild[self.iCity])
 				self.clearPresetLeftovers(p)
+				aAffected += self.getPresetYields(p, dBuild[self.iCity])
 				del dBuild[self.iCity]
 				saveBuild(dBuild, p["prefix"])
 				bChanged = True
 		if bChanged:
-			self.apply()
+			self.apply(aAffected) # (only the goods of the presets: the other changes of the window stay unsent)
 			self.drawBuildButton()
 			if self.iView == VIEW_MARKED:
-				self.buildView()
-				self.drawPage()
+				self.buildView(True)
+				self.refreshList()
+
+	# the goods (yield numbers) a preset touches: its fixed list, and the goods it remembered
+	def getPresetYields(self, p, aEntries):
+		aTypes = []
+		if p["goods"] != None:
+			aTypes += list(p["goods"])
+		for aType in aEntries:
+			aTypes.append(aType[0])
+		aYields = []
+		for szType in aTypes:
+			iYield = self.getYieldByType(szType)
+			if iYield >= 0 and not iYield in aYields:
+				aYields.append(iYield)
+		return aYields
+
+	# the redraw after a click: a preset none of whose goods is active any more goes off first (drawing alone does nothing)
+	def syncAndDraw(self):
+		self.updatePresetState()
+		self.drawRows()
 
 	# the goods of a preset: the fixed list, for the auto-export preset the goods it remembered
 	def getPresetGoods(self, p):
@@ -886,8 +917,8 @@ class CvTradeRouteScreen:
 		self.warnSkipped(aSkipped)
 		self.drawBuildButton()
 		if self.iView == VIEW_MARKED:
-			self.buildView()
-			self.drawPage()
+			self.buildView(True)
+			self.refreshList()
 		self.drawRows()
 		self.iReload = 60
 
@@ -1097,16 +1128,27 @@ class CvTradeRouteScreen:
 		self.apply()
 		self.drawBuildButton()
 		if self.iView == VIEW_MARKED:
-			self.buildView()
-			self.drawPage()
+			self.buildView(True)
+			self.refreshList()
 
 	def showWarn(self, szLine1, szLine2, iYield, aGoods = None, bQueue = False, p = None):
 		if aGoods == None:
 			aGoods = []
-		if bQueue and self.tWarn != None:
-			self.aWarnQueue.append((szLine1, szLine2, iYield, aGoods, p))
+		tNew = (szLine1, szLine2, iYield, aGoods, p)
+		if self.tWarn != None:
+			# a notice is open: the new one waits (it never replaces a question that is not answered); the same notice is not queued twice;
+			# the question about unsaved changes comes first
+			for tOld in [self.tWarn] + self.aWarnQueue:
+				if tOld == tNew:
+					return
+			if p == "unsaved":
+				self.aWarnQueue.insert(0, self.tWarn)
+				self.tWarn = tNew
+				self.drawWarn()
+			else:
+				self.aWarnQueue.append(tNew)
 			return
-		self.tWarn = (szLine1, szLine2, iYield, aGoods, p)
+		self.tWarn = tNew
 		self.drawWarn()
 
 	def hideWarn(self):
@@ -1245,6 +1287,7 @@ class CvTradeRouteScreen:
 		(self.iMoveX, self.iMoveY) = self.dPos.get(self.getContext(), (0, 0))
 		self.aYields = []
 		self.dData = {}
+		self.dBase = {}
 		self.aFav = loadFavorites()
 		self.iView = VIEW_ALL
 		self.dBtn = {}
@@ -1310,11 +1353,34 @@ class CvTradeRouteScreen:
 		self.aHeld = []
 		self.bFinished = False
 		self.buildLayout()
+		self.updatePresetState() # (a preset none of whose goods is active any more goes off; drawing alone does not do it)
 		try:
 			CyGame().setWheelCapture(True)
 		except:
 			pass
 		return 1
+
+	# the mouse wheel belongs to the window while the cursor is in it (the map zooms otherwise); a tooltip that takes the wheel itself
+	# (Shift) has priority, see CvMainInterface.setWheelCapture
+	def isCursorInside(self):
+		iX = CyGame().getCursorClientX()
+		iY = CyGame().getCursorClientY()
+		return iX >= self.OX and iX < self.OX + self.W and iY >= self.OY and iY < self.OY + self.H
+
+	def isTipWheel(self):
+		try:
+			import CvScreensInterface
+			return CvScreensInterface.mainInterface.isTipWheelActive()
+		except:
+			return False
+
+	def updateWheelCapture(self):
+		try:
+			if self.bFinished:
+				return
+			CyGame().setWheelCapture(self.isCursorInside())
+		except:
+			pass
 
 	# the widgets of the window at its current place (also used to move it)
 	def buildLayout(self):
@@ -1622,7 +1688,6 @@ class CvTradeRouteScreen:
 		screen = self.pHost
 		self.dRawState = {}
 		pRawCity = self.getCity()
-		self.updatePresetState() # (the highlight of the button under the mouse stays: removeButton takes it away when a button is drawn again)
 		szImport = localText.getText("TXT_KEY_POPUP_IMPORT_IMPORT", ())
 		szFeeder = localText.getText("TXT_KEY_POPUP_IMPORT_FEEDER", ())
 		szLand = localText.getText("TXT_KEY_POPUP_IMPORT_LAND", ())
@@ -1755,7 +1820,7 @@ class CvTradeRouteScreen:
 			szKey = "maintain"
 		d[szKey] = max(0, min(MAX_VALUE, d[szKey] + iDelta))
 		self.checkMarketChange(self.aYields[iIndex], dOld) # (before the redraw: a notice keeps the preset on until it is answered)
-		self.drawRows()
+		self.syncAndDraw()
 
 	def toggleField(self, iSlot, iField):
 		iIndex = self.iFirst + iSlot
@@ -1790,7 +1855,7 @@ class CvTradeRouteScreen:
 		elif iField == F_EXP_SEA:
 			d["expDom"] = (d["expDom"] ^ 2) & 2
 		self.checkMarketChange(self.aYields[iIndex], dOld) # (before the redraw: a notice keeps the preset on until it is answered)
-		self.drawRows()
+		self.syncAndDraw()
 
 	# are there changes in the window that are not applied to the city yet (what apply sends)?
 	def hasChanges(self):
@@ -1808,19 +1873,21 @@ class CvTradeRouteScreen:
 
 	# Esc and Cancel: with unsaved changes the notice asks first (OK applies them, Close discards them)
 	def requestClose(self):
-		if self.tWarn != None and self.tWarn[4] == "unsaved":
-			self.hideWarn() # (Esc again: back to the window)
+		if self.tWarn != None:
+			self.hideWarn() # (a notice is open: Esc closes it first - Esc again closes the window, or back to the window from the question)
 			return
 		if self.hasChanges():
 			self.showWarn(localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_1", ()), localText.getText("TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_2", ()), -1, [], False, "unsaved")
 			return
 		self.finish(False, -1)
 
-	def apply(self):
+	def apply(self, aOnly = None):
 		pCity = self.getCity()
 		if pCity == None or pCity.isNone():
 			return
 		for iYield in self.dData.keys():
+			if aOnly != None and not iYield in aOnly:
+				continue
 			d = self.dData[iYield]
 			if (d["imp"] != pCity.isImport(iYield) or d["exp"] != pCity.isExport(iYield) or d["feeder"] != pCity.isImportFeeder(iYield)
 				or d["auto"] != pCity.isAutoExport(iYield) or d["impDom"] != pCity.getImportDomains(iYield)
@@ -1832,6 +1899,7 @@ class CvTradeRouteScreen:
 				if iData2 >= 2147483648L:
 					iData2 = iData2 - 4294967296L
 				CyMessageControl().sendDoTask(self.iCity, TaskTypes.TASK_YIELD_TRADEROUTE, iData1, int(iData2), d["imp"], d["exp"], d["feeder"], d["auto"])
+				self.dBase[iYield] = dict(d) # (sent: what the window shows from now on is a change again only when the player changes it)
 
 	def favClicked(self, iSlot):
 		iIndex = self.iFirst + iSlot
@@ -1913,12 +1981,12 @@ class CvTradeRouteScreen:
 				d["auto"] = True
 		self.apply()
 		if self.iView == VIEW_MARKED:
-			self.buildView()
-			self.drawPage()
+			self.buildView(True)
+			self.refreshList()
 		self.warnSkipped(aSkipped)
 		if iPreset == 0:
 			self.checkPresetLost(self.aYields, True, dOldAll)
-		self.drawRows() # (after the notices: with one open a preset stays on until it is answered)
+		self.syncAndDraw() # (after the notices: with one open a preset stays on until it is answered)
 		self.iReload = 60
 
 	def runPreset(self, iPreset):
@@ -2220,7 +2288,10 @@ class CvTradeRouteScreen:
 		if bCtrl:
 			iStep = STEP_CTRL
 		if iData == BTN_OK:
-			self.finish(True, -1)
+			if self.tWarn != None:
+				self.hideWarn() # (a notice is open: OK closes it first)
+			else:
+				self.finish(True, -1)
 		elif iData == BTN_CANCEL:
 			self.requestClose()
 		elif iData == BTN_WARN_SAVE:
@@ -2240,12 +2311,12 @@ class CvTradeRouteScreen:
 				aGoods = self.tWarn[3]
 				self.resetPresetGoods(aGoods)
 				self.hideWarn()
-				self.drawRows()
+				self.syncAndDraw()
 		elif iData == BTN_WARN_OK:
 			if self.tWarn != None and len(self.tWarn[3]) > 0:
 				self.ignorePresetGoods(self.tWarn[3])
 			self.hideWarn()
-			self.drawRows()
+			self.syncAndDraw()
 		elif iData == BTN_CLEAR_SEARCH:
 			self.szQuery = u""
 			self.aConfirmed = []
@@ -2293,6 +2364,12 @@ class CvTradeRouteScreen:
 				self.iReload -= 1
 				if self.iReload % 10 == 0:
 					self.reloadFromCity()
+			if self.isTipWheel():
+				return 0 # (a tooltip takes the wheel with Shift)
+			# (every frame: whatever else switched the capture off meanwhile is corrected)
+			self.updateWheelCapture()
+			if not self.isCursorInside():
+				return 0
 			iNotches = CyGame().takeWheelNotches()
 			if iNotches == 0:
 				return 0
@@ -2312,7 +2389,9 @@ class CvTradeRouteScreen:
 			bShift = CyGame().isShiftKeyPressed()
 			for i in range(abs(iNotches)):
 				if iBlock >= 0 and bShift:
-					if iNotches > 0:
+					if self.tWarn != None:
+						pass # (a notice is open: the amounts behind it stay)
+					elif iNotches > 0:
 						self.changeValue(iSlot, iBlock, iStep)
 					else:
 						self.changeValue(iSlot, iBlock, -iStep)
