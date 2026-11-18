@@ -4005,7 +4005,7 @@ class CvMainInterface:
 						iSlot = self.getWaypointSlot(aszParas)
 						tRowWp["paras"][iSlot] = "row"
 						aszParas = list(aszParas)
-						aszParas.insert(iSlot, localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ()))
+						aszParas.insert(iSlot, localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ()))
 						dShift = {}
 						for kDet in self.dTipDetails.keys():
 							if kDet >= iSlot:
@@ -5338,8 +5338,17 @@ class CvMainInterface:
 		if iHead < 0:
 			return len(aszParas)
 		iSlot = iHead + 1
-		if iSlot < len(aszParas) and self.isPromoOrXpRow(aszParas[iSlot]):
-			iSlot += 1
+		# (the line "commanded by" of a unit with a leader belongs to the lines of the name: the row goes below it)
+		szCommanded = self.normTipText(localText.getText("TXT_KEY_UNIT_HELP_COMMANDED_BY", ()))
+		for k in range(2):
+			if iSlot >= len(aszParas):
+				break
+			if self.isPromoOrXpRow(aszParas[iSlot]):
+				iSlot += 1
+			elif len(szCommanded) > 3 and self.normTipText(aszParas[iSlot]).find(szCommanded) == 0:
+				iSlot += 1
+			else:
+				break
 		return iSlot
 
 	# the tooltip at the cursor (not frozen yet) of one own unit without the line "Commands": the registration of its line "Set waypoint..."
@@ -5369,6 +5378,7 @@ class CvMainInterface:
 			aiIndent = list(self.aFrozen[iLevel][3])
 			dDetails = dict(self.aFrozen[iLevel][4])
 			szRow = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET", ())
+			szRowOwn = localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ())
 			dReg = {"unit": (pUnit.getOwner(), pUnit.getID()), "sea": self.isSeaUnit(pUnit), "paras": {}, "cmd": -1}
 			szCmd = self.normTipText(localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()))
 			iCmd = -1
@@ -5395,6 +5405,7 @@ class CvMainInterface:
 					iPara = self.getWaypointSlot(aszParas, iHead)
 				else:
 					iPara = len(aszParas)
+				szRow = szRowOwn
 				aszParas.insert(iPara, szRow)
 				(iX, iY, iWidth, iHeight, aszLines, aiPara, iPad, iLine) = tLayout
 				iChar = iLine * 0.32
@@ -7226,7 +7237,7 @@ class CvMainInterface:
 			else:
 				aPlotLines = self.getRootPlotLines(iLevel)
 			# (not the line "Set waypoint..." of the parent window: this window gets its own)
-			aPlotLines = [x for x in aPlotLines if x != szSetRow]
+			aPlotLines = [x for x in aPlotLines if x != szSetRow and x != localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ())]
 			bOwn = (pUnit.getOwner() == gc.getGame().getActivePlayer())
 			# the line "Commands" of the stack: it goes to the end of this window (with its child window, which begins with "Set waypoint...")
 			szCmdLine = None
@@ -7264,7 +7275,7 @@ class CvMainInterface:
 				else:
 					tRowWp = {"unit": tUnit, "sea": self.isSeaUnit(pUnit), "paras": {iSetSlot: "row"}, "cmd": -1}
 					aUnitParas = list(aLines[0].split(u"\n"))
-					aUnitParas.insert(iSetSlot, szSetRow)
+					aUnitParas.insert(iSetSlot, localText.getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW", ()))
 					aLines[0] = u"\n".join(aUnitParas)
 			elif iHead == 0:
 				eTalk = self.getTalkPlayer(aszParas, 0)

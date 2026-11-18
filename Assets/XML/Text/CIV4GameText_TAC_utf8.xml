@@ -3764,6 +3764,11 @@
 		<German>[COLOR:140:255:40:255]Wegpunkt setzen...[COLOR_REVERT]</German>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW</Tag>
+		<English>[COLOR_SELECTED_TEXT]Set waypoint...[COLOR_REVERT]</English>
+		<German>[COLOR_SELECTED_TEXT]Wegpunkt setzen...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_NEW</Tag>
 		<English>[COLOR_SELECTED_TEXT]New waypoint[COLOR_REVERT]</English>
 		<German>[COLOR_SELECTED_TEXT]Neuer Wegpunkt[COLOR_REVERT]</German>
