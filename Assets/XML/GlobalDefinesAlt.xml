@@ -2023,4 +2023,9 @@
 		<DefineName>PIRATE_BARBARIAN_MOVES</DefineName>
 		<iDefineIntVal>7</iDefineIntVal>
 	</Define>
+	<!-- WTP: factor for the map scroll speed (edge scrolling) while the shift key is held. 1.0 = no change, 2.5 = two and a half times as fast -->
+	<Define>
+		<DefineName>SHIFT_SCROLL_SPEED_MULTIPLIER</DefineName>
+		<fDefineFloatVal>2.5</fDefineFloatVal>
+	</Define>
 </Civ4Defines>

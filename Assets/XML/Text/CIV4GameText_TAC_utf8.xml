@@ -1691,10 +1691,10 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_MISC_STUDENT_ALMOST_GRADUATED</Tag>
-		<English>%s2_city : A striving citizen will finish his education at the %s3_building in %d1_Num [NUM1:turn:turns].</English>
+		<English>[COLOR_CAT_RESEARCH]%s2_city : A striving citizen will finish his education at the %s3_building in %d1_Num [NUM1:turn:turns].[COLOR_REVERT]</English>
 		<Portuguese>%s2_city: Um cidadão esforçado terminará seus estudos no %s3_building em %d1_Num [NUM1:turno:turnos].</Portuguese>
 		<French>%s2_city : Un étudiant va bientôt achever sa formation dans l'%s3_building : %d1_Num [NUM1:tour:tours].</French>
-		<German>%s2_city : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.</German>
+		<German>[COLOR_CAT_RESEARCH]%s2_city : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.[COLOR_REVERT]</German>
 		<Russian>[COLOR_SELECTED_TEXT]%s2_city :[COLOR_REVERT] Способный горожанин закончит обучение в [COLOR_FONT_CREAM]%s3_building[COLOR_REVERT] через %d1_Num [NUM1:ход:хода].</Russian>
 		<Hungarian>%s2_city : Egy ügyes lakos %d1_Num [NUM1:kör:kör] múlva befejezi a városi %s3_building falai között a tanulmányait.</Hungarian>
 	</TEXT>
@@ -3332,5 +3332,518 @@
 		</Spanish>
 		<Russian>Испанским</Russian>
 		<Hungarian>Spanyol Királyi:Spanyol Királyi</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
+		<English>Left click: show the place on the map[NEWLINE]Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP2</Tag>
+		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_MESSAGE_CONCEPT_WORDS</Tag>
+		<English>happi=CONCEPT_HAPPINESS_UNHAPPINESS;unhappi=CONCEPT_HAPPINESS_UNHAPPINESS;educat=CONCEPT_TRAINING;grow=CONCEPT_FOOD;well-fed=CONCEPT_FOOD;fed=CONCEPT_FOOD;famine=CONCEPT_FOOD;starv=CONCEPT_FOOD;healthy=CONCEPT_HEALTH;sick=CONCEPT_HEALTH;disease=CONCEPT_HEALTH;rebel=CONCEPT_REBEL_SENTIMENT;independence=CONCEPT_INDEPENDENCE_WAR;tax=CONCEPT_TAX_RATE;storm=CONCEPT_WINDS_AND_STORMS;hurricane=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;smuggl=CONCEPT_SMUGGLING;domestic=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;emigrat=CONCEPT_IMMIGRATION;immigrat=CONCEPT_IMMIGRATION;upkeep=CONCEPT_MILITARY_UPKEEP;monaster=CONCEPT_MONASTERIES;livestock=CONCEPT_CATTLE_OR_SHEEP_BREEDING;whal=CONCEPT_WHALING;storage=CONCEPT_NEW_STORAGE;specialist=CONCEPT_SPECIALISTS;founding father=CONCEPT_FATHERS;raid=CONCEPT_NATIVES;forced labo=CONCEPT_SLAVES;slave=CONCEPT_SLAVES;servant=CONCEPT_SLAVES;unhealth=CONCEPT_HEALTH;fresh water=CONCEPT_HEALTH;defense bonus=CONCEPT_COMBAT;defence bonus=CONCEPT_COMBAT;barracks=CONCEPT_NEW_BARRACKS_SYSTEM;withdrawal=CONCEPT_COMBAT;withdraw=CONCEPT_COMBAT;fortify bonus=CONCEPT_COMBAT;social status=CONCEPT_TRAINING;harbour space=CONCEPT_NEW_HARBOUR_SYSTEM;harbor space=CONCEPT_NEW_HARBOUR_SYSTEM;ignores border=CONCEPT_BORDERS</English>
+		<German>zufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;unzufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;glück=CONCEPT_HAPPINESS_UNHAPPINESS;bildung=CONCEPT_TRAINING;ausbildung=CONCEPT_TRAINING;wachs=CONCEPT_FOOD;wächst=CONCEPT_FOOD;ernährt=CONCEPT_FOOD;hungersnot=CONCEPT_FOOD;verhungert=CONCEPT_FOOD;gesund=CONCEPT_HEALTH;krank=CONCEPT_HEALTH;seuche=CONCEPT_HEALTH;rebell=CONCEPT_REBEL_SENTIMENT;unabhängigkeit=CONCEPT_INDEPENDENCE_WAR;steuer=CONCEPT_TAX_RATE;sturm=CONCEPT_WINDS_AND_STORMS;orkan=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;schmuggel=CONCEPT_SMUGGLING;binnen=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;auswander=CONCEPT_IMMIGRATION;unterhalt=CONCEPT_MILITARY_UPKEEP;kloster=CONCEPT_MONASTERIES;vieh=CONCEPT_CATTLE_OR_SHEEP_BREEDING;walfang=CONCEPT_WHALING;lager=CONCEPT_NEW_STORAGE;spezialist=CONCEPT_SPECIALISTS;gründervater=CONCEPT_FATHERS;überfall=CONCEPT_NATIVES;stoßtrupp=CONCEPT_NATIVES;eindringling=CONCEPT_NATIVES;zwangsarbeit=CONCEPT_SLAVES;sklav=CONCEPT_SLAVES;leibeigen=CONCEPT_SLAVES;ungesund=CONCEPT_HEALTH;süßwasser=CONCEPT_HEALTH;defensivbonus=CONCEPT_COMBAT;verteidigungsbonus=CONCEPT_COMBAT;kasernenplatz=CONCEPT_NEW_BARRACKS_SYSTEM;kasernenplätze=CONCEPT_NEW_BARRACKS_SYSTEM;rückzug=CONCEPT_COMBAT;verschanzungsbonus=CONCEPT_COMBAT;sozialer status=CONCEPT_TRAINING;ankerplätze=CONCEPT_NEW_HARBOUR_SYSTEM;ankerplatz=CONCEPT_NEW_HARBOUR_SYSTEM;ignoriert grenz=CONCEPT_BORDERS</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_ON</Tag>
+		<English>Nested tooltips: on</English>
+		<German>Nested Tooltips: an</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_ORIGINAL</Tag>
+		<English>Nested tooltips: window at the original position</English>
+		<German>Nested Tooltips: Fenster an der ursprünglichen Position</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE</Tag>
+		<English>Tooltips:</English>
+		<German>Tooltips:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_0</Tag>
+		<English>Nested tooltips (at the cursor) (recommended)</English>
+		<German>Nested Tooltips (am Mauszeiger) (empfohlen)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_1</Tag>
+		<English>Own window at the original position</English>
+		<German>Eigenes Fenster an der ursprünglichen Position</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_2</Tag>
+		<English>Game tooltip</English>
+		<German>Spiel-Tooltip</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP</Tag>
+		<English>How tooltips are shown. Nested tooltips: a window right at the mouse cursor. Key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] freezes it (and again the tooltip beside it, and so on), right click opens the Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] unfreezes the last one, holding [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] all of them. Hotkey to switch between the three modes: [COLOR_HIGHLIGHT_TEXT]Ctrl + Shift + T[COLOR_REVERT].</English>
+		<German>Wie Tooltips angezeigt werden. Nested Tooltips: ein Fenster direkt am Mauszeiger. Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] friert es ein (und erneut den Tooltip daneben, und so weiter), Rechtsklick öffnet die Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] hebt das letzte Einfrieren auf, X gehalten alle. Tastenkombination zum Umschalten zwischen den drei Modi: [COLOR_HIGHLIGHT_TEXT]Strg + Umschalt + T[COLOR_REVERT].</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY</Tag>
+		<English>Tooltip delay:</English>
+		<German>Tooltip-Verzögerung:</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_0</Tag>
+		<English>None</English>
+		<German>Keine</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_1</Tag>
+		<English>Short (0.25 s)</English>
+		<German>Kurz (0,25 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_2</Tag>
+		<English>Medium (0.5 s)</English>
+		<German>Mittel (0,5 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_3</Tag>
+		<English>Long (0.8 s)</English>
+		<German>Lang (0,8 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_4</Tag>
+		<English>Very long (1.2 s)</English>
+		<German>Sehr lang (1,2 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP</Tag>
+		<English>How long the cursor has to rest on something before the nested tooltip appears. While a tooltip is shown, the next one appears at once. Moving the cursor starts the time again. "Only on key X": the tooltip appears only when you press X.</English>
+		<German>Wie lange der Mauszeiger auf etwas ruhen muss, bevor der Nested Tooltip erscheint. Solange ein Tooltip angezeigt wird, erscheint der nächste sofort. Bewegt man den Mauszeiger, beginnt die Zeit neu. "Nur mit Taste X": Der Tooltip erscheint nur, wenn Sie X drücken.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK</Tag>
+		<English>Next tooltip without delay (while a tooltip is shown)</English>
+		<German>Nächster Tooltip ohne Verzögerung (solange ein Tooltip angezeigt wird)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK_HELP</Tag>
+		<English>Off: moving the cursor on to the next thing removes the tooltip and the delay starts again. On: while a tooltip is shown, the tooltip of the next thing appears at once. The key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] shows a tooltip that still waits for its delay at once.</English>
+		<German>Aus: Beim Weiterfahren zum nächsten Ziel verschwindet der Tooltip und die Verzögerung beginnt neu. An: Solange ein Tooltip angezeigt wird, erscheint der Tooltip des nächsten Ziels sofort. Die Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] zeigt einen Tooltip, der noch auf seine Verzögerung wartet, sofort an.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE</Tag>
+		<English>Auto freeze by selection</English>
+		<German>Automatisch einfrieren bei Auswahl</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE_HELP</Tag>
+		<English>When a unit is activated, the tooltip of its plot is frozen at once (a stack with its unit lines, or the unit alone). The frozen tooltips (and their child tooltips) go again as soon as the unit gets an order. Off by default.</English>
+		<German>Wird eine Einheit aktiviert, wird der Tooltip ihres Feldes sofort eingefroren (ein Stapel mit seinen Einheitenzeilen oder die einzelne Einheit). Die eingefrorenen Tooltips (und ihre Child-Tooltips) verschwinden wieder, sobald die Einheit einen Befehl erhält. Standardmäßig aus.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG</Tag>
+		<English>Show errors of the tooltips (test)</English>
+		<German>Fehler der Tooltips anzeigen (Test)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG_HELP</Tag>
+		<English>For the test phase: when the code of the tooltips fails, a message with the place of the error is shown (once for the same error) instead of the error being ignored silently. Off by default.</English>
+		<German>Für die Testphase: Wenn der Code der Tooltips fehlschlägt, wird eine Meldung mit der Stelle des Fehlers angezeigt (einmal je gleichem Fehler), statt den Fehler still zu ignorieren. Standardmäßig aus.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS</Tag>
+		<English>Export settings</English>
+		<German>Exporteinstellung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS</Tag>
+		<English>Import settings</English>
+		<German>Importeinstellung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_LETTERS</Tag>
+		<English>I/F/L/S</English>
+		<Portuguese>I/A/T/M</Portuguese>
+		<French>I/F/T/M</French>
+		<German>I/F/L/S</German>
+		<Italian>I/A/T/M</Italian>
+		<Spanish>I/A/T/M</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_LETTERS</Tag>
+		<English>E/A/L/S</English>
+		<Portuguese>E/A/T/M</Portuguese>
+		<French>E/A/T/M</French>
+		<German>E/A/L/S</German>
+		<Italian>E/A/T/M</Italian>
+		<Spanish>E/A/T/M</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_STOCK</Tag>
+		<English>In stock: %d1</English>
+		<German>Auf Lager: %d1</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_5</Tag>
+		<English>Extra long (2 s)</English>
+		<German>Extra lang (2 s)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_6</Tag>
+		<English>Only on key X</English>
+		<German>Nur mit Taste X</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TOTAL_PRICE_HELP</Tag>
+		<English>[NEWLINE]	Total[TAB][TAB]</English>
+		<German>[NEWLINE]	Gesamt[TAB][TAB]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HOVER_TIP_OFF</Tag>
+		<English>Nested tooltips: off</English>
+		<German>Nested Tooltips: aus</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FROZEN_HINT</Tag>
+		<English>[COLOR:140:255:40:255]Frozen - Esc or hold X: close[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Eingefroren - Esc oder X halten: schließen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_RUN_COMMAND</Tag>
+		<English>Right click: run this command</English>
+		<German>Rechtsklick: diesen Befehl ausführen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PROMO_SUM</Tag>
+		<English>[COLOR_CAT_MILITARY]Promotion sum.[COLOR_REVERT]</English>
+		<German>[COLOR_CAT_MILITARY]Bef.-Details[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORAGE</Tag>
+		<English>Storage : %d1 / %d2</English>
+		<German>Lager : %d1 / %d2</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORAGE_FULL</Tag>
+		<English>[COLOR_NEGATIVE_TEXT]Storage : %d1 / %d2[COLOR_REVERT]</English>
+		<German>[COLOR_NEGATIVE_TEXT]Lager : %d1 / %d2[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_HEAD</Tag>
+		<English>Surplus at the next turn change (estimate):</English>
+		<German>Überschuss beim nächsten Rundenwechsel (geschätzt):</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_SOLD</Tag>
+		<English>%s1 %s2 : -%d3, sold for %d4 gold</English>
+		<German>%s1 %s2 : -%d3, verkauft für %d4 Gold</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_LOST</Tag>
+		<English>%s1 %s2 : -%d3, lost</English>
+		<German>%s1 %s2 : -%d3, verloren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_TOTAL</Tag>
+		<English>Gold from the sale: +%d1</English>
+		<German>Ertrag aus dem Verkauf: +%d1 Gold</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_SET</Tag>
+		<English>[COLOR:140:255:40:255]Set waypoint...[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Wegpunkt setzen...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW</Tag>
+		<English>[COLOR_SELECTED_TEXT]Set waypoint...[COLOR_REVERT]</English>
+		<German>[COLOR_SELECTED_TEXT]Wegpunkt setzen...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_NEW</Tag>
+		<English>[COLOR_SELECTED_TEXT]New waypoint[COLOR_REVERT]</English>
+		<German>[COLOR_SELECTED_TEXT]Neuer Wegpunkt[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_NEW_HELP</Tag>
+		<English>Right click: the unit is selected, then right click the target on the map. The unit starts to go there and the place is saved as a waypoint.</English>
+		<German>Rechtsklick: die Einheit wird ausgewählt, dann per Rechtsklick das Ziel auf der Karte wählen. Die Einheit macht sich auf den Weg und der Ort wird als Wegpunkt gespeichert.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_OPTIONS</Tag>
+		<English>Right click: start (the unit goes there)[NEWLINE]Ctrl + right click: delete waypoint[NEWLINE]Shift + right click: rename</English>
+		<German>Rechtsklick: Start (die Einheit geht dorthin)[NEWLINE]Strg + Rechtsklick: Wegpunkt löschen[NEWLINE]Umschalt + Rechtsklick: umbenennen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_WHEEL</Tag>
+		<English>[COLOR:140:255:40:255]Shift + mouse wheel: choose, right click: run[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Umschalt + Mausrad: auswählen, Rechtsklick: ausführen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_KEYS</Tag>
+		<English>[COLOR:140:255:40:255]Ctrl + right click: delete waypoint[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + right click: rename[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + mouse wheel click or left click: look at the waypoint[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Strg + Rechtsklick: Wegpunkt löschen[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Umschalt + Rechtsklick: umbenennen[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Umschalt + Mausradklick oder Linksklick: zum Wegpunkt springen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_HINT</Tag>
+		<English>[COLOR:140:255:40:255]Ctrl + right click: Set waypoint[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Strg + Rechtsklick: Wegpunkt setzen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_WAYPOINT_SAVED</Tag>
+		<English>Waypoint saved: %s1</English>
+		<German>Wegpunkt gespeichert: %s1</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_WAYPOINT_NAME_COLONY</Tag>
+		<English>"%s1" is the name of a colony and cannot be used for a waypoint.</English>
+		<German>"%s1" ist der Name einer Kolonie und kann nicht für einen Wegpunkt verwendet werden.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_WAYPOINT_RENAME</Tag>
+		<English>Name of the waypoint. A number and a dot in front (2. name) puts it at that place of the list.</English>
+		<German>Name des Wegpunkts. Mit Zahl und Punkt davor (2. Name) wird er an diese Stelle der Liste gesetzt.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_BUILDINGS</Tag>
+		<English>[COLOR_SELECTED_TEXT]Buildings...[COLOR_REVERT]</English>
+		<German>[COLOR_SELECTED_TEXT]Gebäude...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_FOLD</Tag>
+		<English>Stored...</English>
+		<German>Gelagert...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_FOLD</Tag>
+		<English>Producing...</English>
+		<German>Produziert...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_MISSING</Tag>
+		<English>Producing...missing</English>
+		<German>Produziert...missing</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT</Tag>
+		<English>Producing...need imp.</English>
+		<German>Produziert...bent. Imp.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_WOOD</Tag>
+		<English>Stored...wood</English>
+		<German>Gelagert...Holz</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_FOOD</Tag>
+		<English>Stored...food</English>
+		<German>Gelagert...Nahrung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_BOTH</Tag>
+		<English>Stored...wood&amp;food</English>
+		<German>Gelagert...Holz&amp;Nahrung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET</Tag>
+		<English>Producing...imp. set</English>
+		<German>Produziert...Imp. ges.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_COLORS</Tag>
+		<English>[COLOR:255:240:0:255]Golden yellow[COLOR_REVERT]: exported goods[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: imported goods</English>
+		<German>[COLOR:255:240:0:255]Goldgelb[COLOR_REVERT]: exportierte Waren[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: importierte Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_LEGEND_WOOD</Tag>
+		<English>no lumber in stock</English>
+		<German>kein Holz im Lager</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_LEGEND_FOOD</Tag>
+		<English>no food in stock</English>
+		<German>keine Nahrung im Lager</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_STORED_LEGEND_BOTH</Tag>
+		<English>neither lumber nor food in stock</English>
+		<German>weder Holz noch Nahrung im Lager</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING</Tag>
+		<English>raw materials missing, output reduced</English>
+		<German>Rohstoffe fehlen, Ausstoß gedrosselt</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT</Tag>
+		<English>raw materials scarce, import needed</English>
+		<German>Rohstoffe knapp, Import nötig</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET</Tag>
+		<English>raw material import set</English>
+		<German>Rohstoff-Import gesetzt</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_GOODS_TRADE_HINT</Tag>
+		<English>Right click on the list: import / export window of the city, showing these goods</English>
+		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit diesen Waren öffnen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_GOODS_TRADE_HINT_RAW</Tag>
+		<English>Right click on the list: import / export window of the city, showing the raw materials of these goods</English>
+		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit den Rohstoffen dieser Waren öffnen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PRODUCED_COLORS</Tag>
+		<English>[COLOR:255:0:0:255]Red[COLOR_REVERT]: raw materials missing, output reduced[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: raw materials scarce, import needed[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: raw material import set</English>
+		<German>[COLOR:255:0:0:255]Rot[COLOR_REVERT]: Rohstoffe fehlen, Ausstoß gedrosselt[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: Rohstoffe knapp, Import nötig[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: Rohstoff-Import gesetzt</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT_CHILD</Tag>
+		<English>[COLOR:140:255:40:255]X or left click: freeze this tooltip[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]X oder Linksklick: Tooltip einfrieren[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FROZEN_HINT_CHILD</Tag>
+		<English>[COLOR:140:255:40:255]Frozen - left click on its line, Esc or hold X: close[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Eingefroren - Linksklick auf die Zeile, Esc oder X halten: schließen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT</Tag>
+		<English>[COLOR:140:255:40:255]X: freeze this tooltip[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]X: Tooltip einfrieren[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_MORE_UNITS</Tag>
+		<English>[COLOR:140:255:40:255]more...units[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]mehr...Einheiten[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_COMMANDS</Tag>
+		<English>[COLOR:140:255:40:255]Commands...[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Kommandos...[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_GOODS</Tag>
+		<English>Carries goods only</English>
+		<German>Lädt nur Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_SLAVE</Tag>
+		<English>Carries slaves and goods only</English>
+		<German>Lädt nur Sklaven und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_TREASURE</Tag>
+		<English>Carries treasures and goods only</English>
+		<German>Lädt nur Schätze und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_TROOP</Tag>
+		<English>Carries military units and goods only</English>
+		<German>Lädt nur Militäreinheiten und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_CARGO_ALL</Tag>
+		<English>Carries units and goods</English>
+		<German>Lädt Einheiten und Waren</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORTS</Tag>
+		<English>Ports: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Häfen: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_NO_OCEAN</Tag>
+		<English>[COLOR_WARNING_TEXT]Not ocean-going[COLOR_REVERT]</English>
+		<German>[COLOR_WARNING_TEXT]Nicht überseetauglich[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_EUROPE</Tag>
+		<English>Europe</English>
+		<German>Europa</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_AFRICA</Tag>
+		<English>Africa</English>
+		<German>Afrika</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PORT_ROYAL</Tag>
+		<English>Port Royal</English>
+		<German>Port Royal</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_DRAFT_DEEP</Tag>
+		<English>Draft: [COLOR_HIGHLIGHT_TEXT]deep[COLOR_REVERT] - cannot enter: %s1</English>
+		<German>Tiefgang: [COLOR_HIGHLIGHT_TEXT]tief[COLOR_REVERT] - kein Zugang zu: %s1</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_DRAFT_SHALLOW_LIM</Tag>
+		<English>Draft: [COLOR_HIGHLIGHT_TEXT]shallow[COLOR_REVERT] - cannot enter: %s1</English>
+		<German>Tiefgang: [COLOR_HIGHLIGHT_TEXT]flach[COLOR_REVERT] - kein Zugang zu: %s1</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_DRAFT_SHALLOW</Tag>
+		<English>Draft: [COLOR_HIGHLIGHT_TEXT]shallow[COLOR_REVERT]</English>
+		<German>Tiefgang: [COLOR_HIGHLIGHT_TEXT]flach[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_IGNORE_BORDERS</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Ignores borders[COLOR_REVERT]</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Ignoriert Grenzen[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_MORE</Tag>
+		<English>more...</English>
+		<German>mehr...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TALK</Tag>
+		<English>Right click: Talk to [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Rechtsklick: Mit [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] sprechen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_SELECT_UNIT</Tag>
+		<English>Right click: Select [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Rechtsklick: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] auswählen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP</Tag>
+		<English>Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP2</Tag>
+		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
+		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_PEDIA_LIST</Tag>
+		<English>[COLOR:140:255:40:255]All hits (Shift + mouse wheel: choose):[COLOR_REVERT]</English>
+		<German>[COLOR:140:255:40:255]Alle Treffer (Shift + Mausrad: auswählen):[COLOR_REVERT]</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_VALUE_FOLD</Tag>
+		<English>Value...</English>
+		<German>Wert...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADERS_IMPORTS</Tag>
+		<English>Imports</English>
+		<German>Importiert</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADERS_EXPORTS</Tag>
+		<English>Exports</English>
+		<German>Exportiert</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADERS_NONE</Tag>
+		<English>No colony exports or imports this good at the moment.</English>
+		<German>Keine Kolonie exportiert oder importiert diese Ware im Moment.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADERS_MORE</Tag>
+		<English>and %d1 more</English>
+		<German>und %d1 weitere</German>
 	</TEXT>
 </Civ4GameText>

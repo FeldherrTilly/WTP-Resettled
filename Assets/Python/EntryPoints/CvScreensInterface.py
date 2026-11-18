@@ -667,6 +667,18 @@ def handleForward(screens):
 	return 0
 
 def getWidgetHelp(argsList):
+	szText = getWidgetHelpText(argsList)
+	# WTP: the own tooltip window at the cursor shows the same text
+	try:
+		mainInterface.widgetHelpSeen(szText, argsList[1])
+		# the HUD elements of the mod give their help text through here: with the diplomacy screen open the game would show it a second time
+		if mainInterface.bHoverTip and gc.getGame().isDiplomacyUp():
+			return u""
+	except:
+		pass
+	return szText
+
+def getWidgetHelpText(argsList):
 	iScreen = argsList[0]
 	if (HandleMouseoverMap.has_key(iScreen)):
 		screen = HandleMouseoverMap.get(iScreen)
