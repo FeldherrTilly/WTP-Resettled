@@ -228,41 +228,49 @@
 		<Tag>TXT_KEY_WTP_WAYPOINT_HEADER</Tag>
 		<English>Waypoint for units from %s1_Village: choose the destination city</English>
 		<German>Wegpunkt für Einheiten aus %s1_Village: Zielstadt wählen</German>
+		<Russian>Путевая точка для юнитов из %s1_Village: выберите город назначения</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_REMOVE</Tag>
 		<English>Remove waypoint</English>
 		<German>Wegpunkt entfernen</German>
+		<Russian>Удалить путевую точку</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_UNIT_SENT</Tag>
 		<English>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] is on its way to %s2_City (waypoint), about %d3 turns.</English>
 		<German>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] ist auf dem Weg nach %s2_City (Wegpunkt), voraussichtlich %d3 Runden.</German>
+		<Russian>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] направляется в %s2_City (путевая точка), ходов в пути: около %d3.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_UNIT_SENT_NOPATH</Tag>
 		<English>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] is on its way to %s2_City (waypoint).</English>
 		<German>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] ist auf dem Weg nach %s2_City (Wegpunkt).</German>
+		<Russian>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] направляется в %s2_City (путевая точка).</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_COLUMN</Tag>
 		<English>Waypoint</English>
 		<German>Wegpunkt</German>
+		<Russian>Путевая точка</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_BANNER</Tag>
 		<English> [ICON_MOVES]</English>
 		<German> [ICON_MOVES]</German>
+		<Russian> [ICON_MOVES]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_BUY_MISSING_YIELDS</Tag>
 		<English>Buy the missing materials (%d1_Price[ICON_GOLD])</English>
 		<German>Fehlende Materialien kaufen (%d1_Price[ICON_GOLD])</German>
+		<Russian>Купить недостающие материалы (%d1_Price[ICON_GOLD])</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_BUY_MATERIALS_HEADER</Tag>
 		<English>[COLOR_SELECTED_TEXT]%s2_CityName[COLOR_REVERT][NEWLINE][NEWLINE]Next turn the [COLOR_BUILDING_TEXT]%s1_Project[COLOR_REVERT] would be completed, but not all materials will be there. Buy them now?%s3_Requires</English>
 		<German>[COLOR_SELECTED_TEXT]%s2_CityName[COLOR_REVERT][NEWLINE][NEWLINE]Naechste Runde waere [COLOR_BUILDING_TEXT]%s1_Project[COLOR_REVERT] fertig, aber nicht alle Materialien werden da sein. Jetzt kaufen?%s3_Requires</German>
+		<Russian>[COLOR_SELECTED_TEXT]%s2_CityName[COLOR_REVERT][NEWLINE][NEWLINE]В следующий ход [COLOR_BUILDING_TEXT]%s1_Project[COLOR_REVERT] был бы завершён, но не все материалы будут в наличии. Купить их сейчас?%s3_Requires</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_SETTLE_NEW_CITY_NAME</Tag>
