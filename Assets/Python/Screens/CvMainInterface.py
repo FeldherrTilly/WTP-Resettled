@@ -9198,7 +9198,7 @@ class CvMainInterface:
 				return
 			self.tPostJump = None
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			szHelp = gc.getGame().getWidgetHelpFor(int(WidgetTypes.WIDGET_HELP_YIELD), t["yield"], -1, False)
+			szHelp = gc.getGame().getWidgetHelpFor(int(WidgetTypes.WIDGET_HELP_YIELD), t["yield"], CvScreensInterface.tradeRouteScreen.iCity, False)
 			if szHelp and len(szHelp) > 0:
 				szHelp = self.addRawNote(szHelp, t["yield"])
 				self.showCursorTooltip(screen, szHelp, True, True)
