@@ -4729,6 +4729,56 @@ class CvMainInterface:
 			aLines.append(szName)
 		return u"\n".join(aLines)
 
+	# the frozen tooltip of a plot with an own city (the units of the city, the plot): the line with the name of the city gets the list of the
+	# cities as its child window, like the name line of the tooltip of the city
+	def registerPlotCity( self, iLevel ):
+		try:
+			tA = self.aFrozen[iLevel][5]
+			if tA is None or tA[0] < 0:
+				return
+			pPlot = CyMap().plot(tA[0], tA[1])
+			if pPlot is None or pPlot.isNone() or not pPlot.isCity():
+				return
+			pCity = pPlot.getPlotCity()
+			if pCity is None or pCity.isNone() or pCity.getOwner() != gc.getGame().getActivePlayer():
+				return
+			szList = self.getCityListText(pCity.getID())
+			if len(szList) == 0:
+				return
+			szName = self.normTipText(pCity.getName())
+			aszParas = self.aFrozen[iLevel][2]
+			for k in range(len(aszParas)):
+				if self.normTipText(aszParas[k]) == szName:
+					self.aFrozen[iLevel][4][k] = szList
+					self.dCityWin[self.aFrozen[iLevel][0]] = pCity.getID()
+					self.dCityPlotWin[self.aFrozen[iLevel][0]] = True
+					return
+		except:
+			self.tipError("registerPlotCity")
+
+	# the paragraph of the line with the name of the city in a frozen tooltip with the list of the cities (-1: none): the first line of the
+	# tooltip of the city, in the tooltip of a plot the line with the name (it moves when the units are sorted)
+	def getCityLinePara( self, iLevel ):
+		try:
+			if iLevel < 0 or iLevel >= len(self.aFrozen):
+				return -1
+			szPrefix = self.aFrozen[iLevel][0]
+			if not self.dCityWin.has_key(szPrefix):
+				return -1
+			if not self.dCityPlotWin.has_key(szPrefix):
+				return 0
+			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(self.dCityWin[szPrefix])
+			if pCity is None or pCity.isNone():
+				return -1
+			szName = self.normTipText(pCity.getName())
+			aszParas = self.aFrozen[iLevel][2]
+			for k in range(len(aszParas)):
+				if self.normTipText(aszParas[k]) == szName and self.aFrozen[iLevel][4].has_key(k):
+					return k
+		except:
+			pass
+		return -1
+
 	# the frozen tooltip of an own city: its city (-1: it is no such window)
 	def getCityOfWindow( self, iLevel ):
 		try:
@@ -4744,13 +4794,13 @@ class CvMainInterface:
 	def tryCityListJump( self, iLevel, iPara, bLeft ):
 		try:
 			iCur = self.getCityOfWindow(iLevel)
-			if iPara != 0 or iCur < 0:
+			if iCur < 0 or iPara < 0 or iPara != self.getCityLinePara(iLevel):
 				return False
 			aOrder = self.getCityOrder()
 			if len(aOrder) == 0:
 				return False
 			iTarget = iCur
-			if self.iTipSelPara == 0 and self.iTipSelLevel == iLevel and self.iTipSelIdx >= 0 and self.iTipSelIdx < len(aOrder):
+			if self.iTipSelPara == iPara and self.iTipSelLevel == iLevel and self.iTipSelIdx >= 0 and self.iTipSelIdx < len(aOrder):
 				iTarget = aOrder[self.iTipSelIdx][1]
 			elif bLeft:
 				iPos = 0
@@ -6915,6 +6965,8 @@ class CvMainInterface:
 			if self.tTipCity is not None:
 				# (the tooltip of an own city: the list of the cities in the name line)
 				self.dCityWin[self.aFrozen[-1][0]] = self.tTipCity
+			else:
+				self.registerPlotCity(len(self.aFrozen) - 1)
 			try:
 				# the tooltip of an own unit: the line "Set waypoint..."
 				iNew = len(self.aFrozen) - 1
@@ -7351,9 +7403,9 @@ class CvMainInterface:
 						iWpRowCount = len(aChildKeys)
 		# (the name line of the tooltip of an own city: the wheel goes through the list of the cities in its child window)
 		bCityRow = False
-		if iFz >= 0 and iPara == 0 and not bWpRow and not bCmdRow and dDetails.has_key(0) and self.dCityWin.has_key(self.aFrozen[iFz][0]):
+		if iFz >= 0 and iPara >= 0 and not bWpRow and not bCmdRow and dDetails.has_key(iPara) and iPara == self.getCityLinePara(iFz):
 			bCityRow = True
-			iWpRowCount = len(dDetails[0].split(u"\n"))
+			iWpRowCount = len(dDetails[iPara].split(u"\n"))
 		bWpWindow = (iFz >= 0 and iPara >= 0 and self.dWpWin.has_key(self.aFrozen[iFz][0]) and self.dWpWin[self.aFrozen[iFz][0]]["paras"].has_key(iPara))
 		try:
 			if (bWpLine or bWpRow or bCmdRow or bCityRow) and bShift:
@@ -8810,6 +8862,7 @@ class CvMainInterface:
 	dTraderLines = {} # the lines of the traders in the tooltips: text without colors -> id of the city
 	dTraderWin = {} # frozen windows with such lines: prefix -> the good
 	dCityWin = {} # frozen tooltips of an own city: prefix -> the city (its name line has the list of the own cities)
+	dCityPlotWin = {} # frozen tooltips of a plot with an own city: prefix -> True (the line of the name of the city has the list of the cities)
 	tTipCity = None # the own city of the tooltip of the cursor (None: it is not the tooltip of an own city)
 	tCityJump = None # after the jump to a city: its tooltip is made and frozen when the camera is there
 	bCityHold = False # the jump to a city is not finished: the child windows of the frozen tooltips do not appear yet
