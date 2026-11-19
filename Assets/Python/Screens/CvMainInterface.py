@@ -9300,6 +9300,25 @@ class CvMainInterface:
 		except:
 			pass
 
+	# the line "all colonies: +N per turn" of the tooltip of a good (import / export window)
+	def getTotalNetNote( self, iYield ):
+		try:
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			iNet = 0
+			(loopCity, iter) = pPlayer.firstCity(False)
+			while loopCity:
+				iNet += loopCity.calculateNetYield(iYield)
+				(loopCity, iter) = pPlayer.nextCity(iter, False)
+			if iNet > 0:
+				szNet = u"<color=0,255,0,255>+%d</color>" % iNet
+			elif iNet < 0:
+				szNet = u"<color=255,0,0,255>%d</color>" % iNet
+			else:
+				szNet = u"0"
+			return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NET_ALL", (szNet,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+		except:
+			return u""
+
 	# the picture of a good in the import / export window that has an outer frame (it restricts the production of the city): its help text gets a note
 	def addRawNote( self, szText, iYieldOver = -1 ):
 		try:
@@ -9316,6 +9335,10 @@ class CvMainInterface:
 					szTraders = self.getTradersNote(iYield)
 					if len(szTraders) > 0:
 						szText = szText + u"\n" + szTraders
+					# the surplus per turn of all the colonies together (production minus own use), green with a plus sign, red when negative
+					szTotal = self.getTotalNetNote(iYield)
+					if len(szTotal) > 0:
+						szText = szText + u"\n" + szTotal
 					self.iTradeTipYield = iYield
 					self.szTradeTipText = szText
 		except:
