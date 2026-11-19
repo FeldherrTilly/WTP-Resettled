@@ -14,7 +14,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Лиственный лес</Russian>
+		<Russian>[COLOR_CAT_PROD]Лиственный лес[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_FOREST_PEDIA</Tag>
@@ -37,7 +37,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Хвойный лес</Russian>
+		<Russian>[COLOR_CAT_PROD]Хвойный лес[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_FOREST_EVERGREEN_PEDIA</Tag>
@@ -62,7 +62,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Густой лес</Russian>
+		<Russian>[COLOR_CAT_PROD]Густой лес[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_DENSE_FOREST_PEDIA</Tag>
@@ -84,7 +84,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Северный лес</Russian>
+		<Russian>[COLOR_CAT_PROD]Северный лес[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ANCIENT_FOREST</Tag>
@@ -100,7 +100,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Старый северный лес</Russian>
+		<Russian>[COLOR_CAT_PROD]Старый северный лес[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ANCIENT_FOREST_PEDIA</Tag>
@@ -139,7 +139,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Полярный лед</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Полярный лед[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ICE_PEDIA</Tag>
@@ -176,7 +176,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Джунгли</Russian>
+		<Russian>[COLOR_CAT_PROD]Джунгли[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_JUNGLE_PEDIA</Tag>
@@ -199,7 +199,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Манговые заросли</Russian>
+		<Russian>[COLOR_CAT_PROD]Манговые заросли[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_MANGROVE_PEDIA</Tag>
@@ -221,7 +221,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Тропическая роща</Russian>
+		<Russian>[COLOR_CAT_FOOD]Тропическая роща[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_TROPICAL_GROVES_PEDIA</Tag>
@@ -243,7 +243,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Битумная яма</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Битумная яма[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_TAR_PIT_PEDIA</Tag>
@@ -265,7 +265,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Соляная пустыня</Russian>
+		<Russian>[COLOR_CAT_GOLD]Соляная пустыня[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_SALT_PAN_PEDIA</Tag>
@@ -287,7 +287,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Солончаки</Russian>
+		<Russian>[COLOR_CAT_GOLD]Солончаки[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_SALT_DRAINAGE_PEDIA</Tag>
@@ -309,7 +309,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Плодородные поймы</Russian>
+		<Russian>[COLOR_CAT_FOOD]Плодородные поймы[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_FLOOD_PLAINS_PEDIA</Tag>
@@ -331,7 +331,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Метеоритный кратер</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Метеоритный кратер[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_CRATER_PEDIA</Tag>
@@ -353,7 +353,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Высокогорный пик</Russian>
+		<Russian>[COLOR_CAT_HILLS]Высокогорный пик[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_REMARKABLE_MOUNTAIN_PEDIA</Tag>
@@ -376,7 +376,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Скальные образования (пустыня)</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Скальные образования (пустыня)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ROCK_FORMATIONS_DESERT_PEDIA</Tag>
@@ -398,7 +398,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Скальные образования (умеренный климат)</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Скальные образования (умеренный климат)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ROCK_FORMATIONS_TEMPERATE_PEDIA</Tag>
@@ -420,7 +420,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Скальные образования (полярные)</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Скальные образования (полярные)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ROCK_FORMATIONS_POLAR_PEDIA</Tag>
@@ -452,7 +452,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Редколесье</Russian>
+		<Russian>[COLOR_CAT_PROD]Редколесье[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_LIGHT_FOREST_PEDIA</Tag>
@@ -475,7 +475,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Трясина</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Трясина[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_SWAMP_PEDIA</Tag>
@@ -497,7 +497,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Топь</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Топь[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_BOG_PEDIA</Tag>
@@ -519,7 +519,7 @@
 			<Gender>Neuter</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Поле бочковых кактусов</Russian>
+		<Russian>[COLOR_CAT_FOOD]Поле бочковых кактусов[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_BARREL_CACTUS_PEDIA</Tag>
@@ -541,7 +541,7 @@
 			<Gender>Male</Gender>
 			<Plural>1</Plural>
 		</German>
-		<Russian>Кактусовые деревья</Russian>
+		<Russian>[COLOR_CAT_FOOD]Кактусовые деревья[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_CACTUS_TREES_PEDIA</Tag>
@@ -563,7 +563,7 @@
 			<Gender>Female</Gender>
 			<Plural>1</Plural>
 		</German>
-		<Russian>Лишайник</Russian>
+		<Russian>[COLOR_CAT_FOOD]Лишайник[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_LICHEN_PEDIA</Tag>
@@ -585,7 +585,7 @@
 			<Gender>Neuter</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Мох</Russian>
+		<Russian>[COLOR_CAT_FOOD]Мох[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_MOSS_PEDIA</Tag>
@@ -607,7 +607,7 @@
 			<Gender>Neuter</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Заросли</Russian>
+		<Russian>[COLOR_CAT_PROD]Заросли[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_THICKET_PEDIA</Tag>
@@ -643,7 +643,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Шторм</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Шторм[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_STORM_PEDIA</Tag>
@@ -666,7 +666,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Песчаная буря</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Песчаная буря[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_SANDSTORM_PEDIA</Tag>
@@ -687,7 +687,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Снежная буря</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Снежная буря[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_BLIZZARD_PEDIA</Tag>
@@ -709,7 +709,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Туман</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Туман[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_FOG_PEDIA</Tag>
@@ -731,7 +731,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Коралловый риф</Russian>
+		<Russian>[COLOR_CAT_FOOD]Коралловый риф[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_REEF_PEDIA</Tag>
@@ -753,7 +753,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Скалистый риф</Russian>
+		<Russian>[COLOR_CAT_PROD]Скалистый риф[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_STONE_REEF_PEDIA</Tag>
@@ -775,7 +775,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Жемчужный риф</Russian>
+		<Russian>[COLOR_CAT_GOLD]Жемчужный риф[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEARL_REEF_PEDIA</Tag>
@@ -797,7 +797,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Бурые водоросли</Russian>
+		<Russian>[COLOR_CAT_FOOD]Бурые водоросли[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_KELP_PEDIA</Tag>
@@ -819,7 +819,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Водоросли</Russian>
+		<Russian>[COLOR_CAT_FOOD]Водоросли[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_SEAGRASS_PEDIA</Tag>
@@ -841,7 +841,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Северное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Северное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_N_PEDIA</Tag>
@@ -863,7 +863,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Южное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Южное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_S_PEDIA</Tag>
@@ -885,7 +885,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Восточное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Восточное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_E_PEDIA</Tag>
@@ -907,7 +907,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Западное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Западное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_W_PEDIA</Tag>
@@ -929,7 +929,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Северо-восточное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Северо-восточное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_NE_PEDIA</Tag>
@@ -951,7 +951,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Северо-западное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Северо-западное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_NW_PEDIA</Tag>
@@ -973,7 +973,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Юго-восточное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Юго-восточное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_SE_PEDIA</Tag>
@@ -995,7 +995,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Юго-западное течение</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Юго-западное течение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_ARROW_SW_PEDIA</Tag>
@@ -1017,7 +1017,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Сочная трава</Russian>
+		<Russian>[COLOR_CAT_FOOD]Сочная трава[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_LUSHGRASS_PEDIA</Tag>
@@ -1039,7 +1039,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Дикие цветы</Russian>
+		<Russian>[COLOR_CAT_FOOD]Дикие цветы[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_WILD_FLOWERS_PEDIA</Tag>
@@ -1062,7 +1062,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Горный луг</Russian>
+		<Russian>[COLOR_CAT_FOOD]Горный луг[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_MEADOW_PEDIA</Tag>
@@ -1084,7 +1084,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Непролазный кустарник</Russian>
+		<Russian>[COLOR_CAT_FOOD]Непролазный кустарник[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_SHRUB_PEDIA</Tag>
@@ -1100,7 +1100,7 @@
 		<German>[COLOR_WARNING_TEXT]Tornado[COLOR_REVERT]</German>
 		<Italian>Tornado</Italian>
 		<Spanish>Tornado</Spanish>
-		<Russian>Торнадо</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Торнадо[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_TORNADO_PEDIA</Tag>
@@ -1137,7 +1137,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Неблагоприятный ветер</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Неблагоприятный ветер[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_VENT_DEF_PEDIA</Tag>
@@ -1174,7 +1174,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Благоприятный ветер</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Благоприятный ветер[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_VENT_FAV_PEDIA</Tag>
@@ -1191,7 +1191,7 @@
 		<German>[COLOR_WARNING_TEXT]Vulkan[COLOR_REVERT]</German>
 		<Italian>Vulcano</Italian>
 		<Spanish>Volcán</Spanish>
-		<Russian>Вулкан</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Вулкан[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_VOLCANO_PEDIA</Tag>
@@ -1206,7 +1206,7 @@
 		<Portuguese>Vau Fluvial</Portuguese>
 		<French>Passage à gué</French>
 		<German>[COLOR_CAT_MILITARY]Flussfurt[COLOR_REVERT]</German>
-		<Russian>Речной брод</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Речной брод[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_RIVER_FORD_PEDIA</Tag>
@@ -1214,7 +1214,7 @@
 		<Portuguese>[BOLD]Estratégia:[\BOLD][PARAGRAPH:1][COLOR_HIGHLIGHT_TEXT]Vaus fluviais[COLOR_REVERT] permitem que todas as unidades terrestres atravessem um [LINK=TERRAIN_LARGE_RIVERS]grande rio[\LINK] sem serem arrastadas. Eles se formam naturalmente a partir de sedimentos depositados pelo rio que flui.</Portuguese>
 		<French>[BOLD]Stratégie :[\BOLD][PARAGRAPH:1]Les [COLOR_HIGHLIGHT_TEXT]passages à gué[COLOR_REVERT] permettent à toutes les unités de traverser des [LINK=TERRAIN_LARGE_RIVERS]grandes  rivières[\LINK] sans être emportés par le courant. Ils se forment naturellement avec le dépôt de sédiments par le cours de la rivière. </French>
 		<German>[BOLD]Strategie :[\BOLD][PARAGRAPH:1][COLOR_HIGHLIGHT_TEXT]Flussfurten[COLOR_REVERT] erlauben es allen Landeinheiten, einen [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]Großen Fluss[\LINK][COLOR_REVERT] zu überqueren. Sie entstehen auf natürliche Weise durch Ablagerungen von Sedimenten.</German>
-		<Russian>[BOLD]Стратегия:[\BOLD][PARAGRAPH:1][COLOR_HIGHLIGHT_TEXT]Речные броды[COLOR_REVERT] позволяют всем сухопутным юнитам переправляться через [LINK=TERRAIN_LARGE_RIVERS]большие реки[\LINK], не опасаясь быть смытыми мощными потоками воды. Они образуются естественным образом из осадка, принесённого текущей рекой.</Russian>
+		<Russian>[BOLD]Стратегия:[\BOLD][PARAGRAPH:1][COLOR_HIGHLIGHT_TEXT]Речные броды[COLOR_REVERT] позволяют всем сухопутным юнитам переправляться через [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]большие реки[\LINK][COLOR_REVERT], не опасаясь быть смытыми мощными потоками воды. Они образуются естественным образом из осадка, принесённого текущей рекой.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_TERRAIN_FEATURE_ALLOWS_CROSSING_OF_LARGE_RIVERS</Tag>
@@ -1222,13 +1222,13 @@
 		<Portuguese>[ICON_BULLET]Permite que todas as unidades terrestres cruzem [LINK=TERRAIN_LARGE_RIVERS]grandes rios[\LINK]</Portuguese>
 		<French>[ICON_BULLETPermet à toutes les unités terrestres de traverser les [LINK=TERRAIN_LARGE_RIVERS]grandes rivières[\LINK]</French>
 		<German>[ICON_BULLET]Erlaubt es allen Landeinheiten, einen [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]Großen Fluss[\LINK][COLOR_REVERT] zu überqueren.</German>
-		<Russian>[ICON_BULLET]Позволяет всем сухопутным юнитам пересекать [LINK=TERRAIN_LARGE_RIVERS]большие реки[\LINK]</Russian>
+		<Russian>[ICON_BULLET]Позволяет всем сухопутным юнитам пересекать [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]большие реки[\LINK][COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEAK2</Tag>
 		<English>[COLOR_CAT_HILLS]Mountain Peak[COLOR_REVERT]</English>
 		<German>[COLOR_CAT_HILLS]Berggipfel[COLOR_REVERT]</German>
-		<Russian>Горная вершина</Russian>
+		<Russian>[COLOR_CAT_HILLS]Горная вершина[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEAK2_PEDIA</Tag>
@@ -1240,7 +1240,7 @@
 		<Tag>TXT_KEY_FEATURE_PEAK1</Tag>
 		<English>[COLOR_CAT_HILLS]Mountain Peak[COLOR_REVERT]</English>
 		<German>[COLOR_CAT_HILLS]Berggipfel[COLOR_REVERT]</German>
-		<Russian>Горная вершина</Russian>
+		<Russian>[COLOR_CAT_HILLS]Горная вершина[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEAK1_PEDIA</Tag>
@@ -1252,7 +1252,7 @@
 		<Tag>TXT_KEY_FEATURE_PEAK3</Tag>
 		<English>[COLOR_CAT_HILLS]Mountain Peak[COLOR_REVERT]</English>
 		<German>[COLOR_CAT_HILLS]Berggipfel[COLOR_REVERT]</German>
-		<Russian>Горная вершина</Russian>
+		<Russian>[COLOR_CAT_HILLS]Горная вершина[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FEATURE_PEAK3_PEDIA</Tag>

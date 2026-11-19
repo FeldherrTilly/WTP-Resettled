@@ -228,41 +228,49 @@
 		<Tag>TXT_KEY_WTP_WAYPOINT_HEADER</Tag>
 		<English>Waypoint for units from %s1_Village: choose the destination city</English>
 		<German>Wegpunkt für Einheiten aus %s1_Village: Zielstadt wählen</German>
+		<Russian>Путевая точка для юнитов из %s1_Village: выберите город назначения</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_REMOVE</Tag>
 		<English>Remove waypoint</English>
 		<German>Wegpunkt entfernen</German>
+		<Russian>Удалить путевую точку</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_UNIT_SENT</Tag>
 		<English>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] is on its way to %s2_City (waypoint), about %d3 turns.</English>
 		<German>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] ist auf dem Weg nach %s2_City (Wegpunkt), voraussichtlich %d3 Runden.</German>
+		<Russian>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] направляется в %s2_City (путевая точка), ходов в пути: около %d3.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_UNIT_SENT_NOPATH</Tag>
 		<English>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] is on its way to %s2_City (waypoint).</English>
 		<German>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] ist auf dem Weg nach %s2_City (Wegpunkt).</German>
+		<Russian>[COLOR_YELLOW]%s1_Unit[COLOR_REVERT] направляется в %s2_City (путевая точка).</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_COLUMN</Tag>
 		<English>Waypoint</English>
 		<German>Wegpunkt</German>
+		<Russian>Путевая точка</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_BANNER</Tag>
 		<English> [ICON_MOVES]</English>
 		<German> [ICON_MOVES]</German>
+		<Russian> [ICON_MOVES]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_BUY_MISSING_YIELDS</Tag>
 		<English>Buy the missing materials (%d1_Price[ICON_GOLD])</English>
 		<German>Fehlende Materialien kaufen (%d1_Price[ICON_GOLD])</German>
+		<Russian>Купить недостающие материалы (%d1_Price[ICON_GOLD])</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_BUY_MATERIALS_HEADER</Tag>
 		<English>[COLOR_SELECTED_TEXT]%s2_CityName[COLOR_REVERT][NEWLINE][NEWLINE]Next turn the [COLOR_BUILDING_TEXT]%s1_Project[COLOR_REVERT] would be completed, but not all materials will be there. Buy them now?%s3_Requires</English>
 		<German>[COLOR_SELECTED_TEXT]%s2_CityName[COLOR_REVERT][NEWLINE][NEWLINE]Naechste Runde waere [COLOR_BUILDING_TEXT]%s1_Project[COLOR_REVERT] fertig, aber nicht alle Materialien werden da sein. Jetzt kaufen?%s3_Requires</German>
+		<Russian>[COLOR_SELECTED_TEXT]%s2_CityName[COLOR_REVERT][NEWLINE][NEWLINE]В следующий ход [COLOR_BUILDING_TEXT]%s1_Project[COLOR_REVERT] был бы завершён, но не все материалы будут в наличии. Купить их сейчас?%s3_Requires</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_SETTLE_NEW_CITY_NAME</Tag>
@@ -781,7 +789,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ ist auf %d3[ICON_GOLD] [COLOR_GREEN]gestiegen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ è salito a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en %s2_civ ha subido a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ поднялась до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ [COLOR_GREEN]поднялась до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 		<Hungarian>[COLOR_POSITIVE_TEXT]Áremelkedés![COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] ára %s2_civ piacán %d3[ICON_GOLD] lett.</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -792,7 +800,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ ist auf %d3[ICON_GOLD] [COLOR_RED]gefallen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ è sceso a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en %s2_civ ha bajado a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ упала до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ [COLOR_RED]упала до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 		<Hungarian>[COLOR_WARNING_TEXT]Árcsökkenés![COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] ára %s2_civ piacán %d3[ICON_GOLD] lett.</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -803,7 +811,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Afrika ist auf %d3[ICON_GOLD] [COLOR_GREEN]gestiegen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Africa è salito a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en África ha subido a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке выросла до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке [COLOR_GREEN]выросла до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PRICE_FALL_AFRICA</Tag>
@@ -813,7 +821,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Afrika ist auf %d3[ICON_GOLD] [COLOR_RED]gefallen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Africa è sceso a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en África ha bajado a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке упала до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке [COLOR_RED]упала до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PRICE_RISE_PORT_ROYAL</Tag>
@@ -823,7 +831,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Port Royal ist auf %d3[ICON_GOLD] [COLOR_GREEN]gestiegen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] a Port Royal è salito a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en Port Royal ha subido a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале выросла до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале [COLOR_GREEN]выросла до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PRICE_FALL_PORT_ROYAL</Tag>
@@ -833,7 +841,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Port Royal ist auf %d3[ICON_GOLD] [COLOR_RED]gefallen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] a Port Royal è sceso a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en Port Royal ha bajado a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале упала до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале [COLOR_RED]упала до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUY_AND_SELL_YIELD</Tag>
@@ -2270,7 +2278,7 @@
 		<German>Einheit transportiert Waren komplett automatisch zwischen den Siedlungen[NEWLINE][NEWLINE]Handelsrouten-Manager: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</German>
 		<Italian>Automatizza totalmente il trasporto</Italian>
 		<Spanish>Automatizar completamente el transporte</Spanish>
-		<Russian>Автоматизировать транспорт для доставки товаров</Russian>
+		<Russian>Автоматизировать транспорт для доставки товаров[NEWLINE][NEWLINE]Менеджер торговых маршрутов: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</Russian>
 		<Hungarian>A szállítás teljes automatizálása</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -4073,7 +4081,7 @@
 		<German>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Die Menschen sind so [COLOR_POSITIVE_TEXT]wohlgenährt und gesund[COLOR_REVERT], dass sie viele Kinder in die Welt setzen - [COLOR_POSITIVE_TEXT]die Stadt wächst![COLOR_REVERT]</German>
 		<Italian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]L'abbondanza di cibo a ha causato un aumento della popolazione!</Italian>
 		<Spanish>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]La abundancia de Alimentos en ha comportado un aumento de población.</Spanish>
-		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Люди настолько сыты и здоровы, что рожают на свет много детей - город растет!</Russian>
+		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Люди настолько [COLOR_POSITIVE_TEXT]сыты и здоровы[COLOR_REVERT], что рожают на свет много детей - [COLOR_POSITIVE_TEXT]город растет![COLOR_REVERT]</Russian>
 		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Az emberek olyan jól tápláltak és egészségesek, hogy sok gyermek született - a város növekszik!</Hungarian>
 	</TEXT>
 	<TEXT>

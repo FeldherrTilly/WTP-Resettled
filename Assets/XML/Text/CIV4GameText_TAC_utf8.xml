@@ -1340,7 +1340,7 @@
 		<Portuguese>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]O estoque de %F2_yield_icon está diminuindo. Em breve teremos um problema com a produção de %F3_yield_icon.</Portuguese>
 		<French>%s1_city est presque à cours de %F2_yield_icon et ne pourra en conséquence plus produire de %F3_yield_icon.</French>
 		<German>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Es [COLOR_WARNING_TEXT]neigt sich[COLOR_REVERT] der Lagervorrat an %F2_yield_icon. Bei der Herstellung von %F3_yield_icon werden wir bald ein Problem bekommen.</German>
-		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Запас %F2_yield_icon снижается. Скоро у нас возникнут проблемы с производством %F3_yield_icon.</Russian>
+		<Russian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]Запас %F2_yield_icon [COLOR_WARNING_TEXT]снижается[COLOR_REVERT]. Скоро у нас возникнут проблемы с производством %F3_yield_icon.</Russian>
 		<Hungarian>[COLOR_WARNING_TEXT]%s1_city : [COLOR_REVERT]%F2_yield_icon készlet csökken. %F3_yield_icon előállításával hamarosan gond lesz.</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -1695,7 +1695,7 @@
 		<Portuguese>%s2_city: Um cidadão esforçado terminará seus estudos no %s3_building em %d1_Num [NUM1:turno:turnos].</Portuguese>
 		<French>%s2_city : Un étudiant va bientôt achever sa formation dans l'%s3_building : %d1_Num [NUM1:tour:tours].</French>
 		<German>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : In %d1 [NUM1:Runde:Runden] wird ein strebsamer Bürger an der %s3_building seine Ausbildung beenden.[COLOR_REVERT]</German>
-		<Russian>[COLOR_SELECTED_TEXT]%s2_city :[COLOR_REVERT] Способный горожанин закончит обучение в [COLOR_FONT_CREAM]%s3_building[COLOR_REVERT] через %d1_Num [NUM1:ход:хода].</Russian>
+		<Russian>[COLOR_POSITIVE_TEXT]%s2_city[COLOR_REVERT][COLOR_CAT_RESEARCH] : Способный горожанин закончит обучение в %s3_building через %d1_Num [NUM1:ход:хода].[COLOR_REVERT]</Russian>
 		<Hungarian>%s2_city : Egy ügyes lakos %d1_Num [NUM1:kör:kör] múlva befejezi a városi %s3_building falai között a tanulmányait.</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -1756,146 +1756,175 @@
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_EXPAND</Tag>
 		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to expand)[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Aufklappen)[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Сообщения этого хода: %d1_Num  (щёлкните, чтобы развернуть)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_COLLAPSE</Tag>
 		<English>[COLOR_FONT_CREAM]Messages of this turn: %d1_Num  (click to collapse)[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Meldungen dieser Runde: %d1_Num  (Klick zum Zuklappen)[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Сообщения этого хода: %d1_Num  (щёлкните, чтобы свернуть)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADE_ORDER_STOP</Tag>
 		<English>[COLOR_CYAN]Stop on the way: %s1_city[NEWLINE]loads%s2_yields[COLOR_REVERT]</English>
 		<German>[COLOR_CYAN]Zwischenstopp: %s1_city[NEWLINE]lädt%s2_yields[COLOR_REVERT]</German>
+		<Russian>[COLOR_CYAN]Остановка в пути: %s1_city[NEWLINE]загружает%s2_yields[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADE_ORDER_WAIT</Tag>
 		<English>[COLOR_CYAN]Waits in %s1_city[NEWLINE]for the production of%s2_yields[COLOR_REVERT]</English>
 		<German>[COLOR_CYAN]Wartet in %s1_city[NEWLINE]auf die Produktion von%s2_yields[COLOR_REVERT]</German>
+		<Russian>[COLOR_CYAN]Ждёт в %s1_city[NEWLINE]производства:%s2_yields[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADE_ORDER_BRING</Tag>
 		<English>[COLOR_CYAN]Brings %F1_Icon %s2_yield[NEWLINE]from %s3_from to %s4_to[COLOR_REVERT]</English>
 		<German>[COLOR_CYAN]Bringt %F1_Icon %s2_yield[NEWLINE]von %s3_from nach %s4_to[COLOR_REVERT]</German>
+		<Russian>[COLOR_CYAN]Доставляет %F1_Icon %s2_yield[NEWLINE]из %s3_from в %s4_to[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADE_ORDER_FETCH</Tag>
 		<English>[COLOR_CYAN]Fetches %F1_Icon %s2_yield[NEWLINE]from %s3_from to %s4_to[COLOR_REVERT]</English>
 		<German>[COLOR_CYAN]Holt %F1_Icon %s2_yield[NEWLINE]von %s3_from nach %s4_to[COLOR_REVERT]</German>
+		<Russian>[COLOR_CYAN]Забирает %F1_Icon %s2_yield[NEWLINE]из %s3_from в %s4_to[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TITLE</Tag>
 		<English>Trade Route Manager</English>
 		<German>Handelsrouten-Manager</German>
+		<Russian>Менеджер торговых маршрутов</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_BUTTON</Tag>
 		<English>Trade Route Manager: overview of all transports ([COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT])</English>
 		<German>Handelsrouten-Manager: Uebersicht aller Transporter ([COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT])</German>
+		<Russian>Менеджер торговых маршрутов: обзор всех транспортов ([COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT])</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_POSITION</Tag>
 		<English>Transports %d1 - %d2 of %d3</English>
 		<German>Transporter %d1 - %d2 von %d3</German>
+		<Russian>Транспорты %d1 - %d2 из %d3</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_ASSIGNED</Tag>
 		<English>%d1 of %d2 routes assigned</English>
 		<German>%d1 von %d2 Routen zugewiesen</German>
+		<Russian>Назначено маршрутов: %d1 из %d2</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_LAND_SEA</Tag>
 		<English>Land and sea</English>
 		<German>Land und See</German>
+		<Russian>Суша и море</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_LAND</Tag>
 		<English>Land only</English>
 		<German>Nur Land</German>
+		<Russian>Только суша</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SEA</Tag>
 		<English>Sea only</English>
 		<German>Nur See</German>
+		<Russian>Только море</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_ALL</Tag>
 		<English>All transports</English>
 		<German>Alle Transporter</German>
+		<Russian>Все транспорты</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_WITH_ROUTES</Tag>
 		<English>Only with trade routes</English>
 		<German>Nur mit Handelsrouten</German>
+		<Russian>Только с торговыми маршрутами</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_WITHOUT_ROUTES</Tag>
 		<English>Only without trade routes</English>
 		<German>Nur ohne Handelsrouten</German>
+		<Russian>Только без торговых маршрутов</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SEARCH_HINT</Tag>
 		<English>Type to search a city, goods or transport (Tab completes)</English>
 		<German>Tippen zum Suchen nach Stadt, Ware oder Transporter (Tab vervollstaendigt)</German>
+		<Russian>Введите текст для поиска города, товара или транспорта (Tab — автодополнение)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TYPE_ROUTES</Tag>
 		<English>Trade routes (R)</English>
 		<German>Handelsrouten (R)</German>
+		<Russian>Торговые маршруты (R)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_TYPE_AUTO</Tag>
 		<English>Fully automatic (Shift+Alt+C)</English>
 		<German>Vollautomatisch (Shift+Alt+C)</German>
+		<Russian>Полностью автоматически (Shift+Alt+C)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_NAME_ROUTE</Tag>
 		<English>Trade route</English>
 		<German>Handelsroute</German>
+		<Russian>Торговый маршрут</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_NAME_AUTO</Tag>
 		<English>Auto route</English>
 		<German>Autoroute</German>
+		<Russian>Авто-маршрут</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_RENAME</Tag>
 		<English>Rename %s1_name? OK takes the name below (you can change it), Cancel keeps the old name.</English>
 		<German>%s1_name umbenennen? OK uebernimmt den Namen unten (du kannst ihn ändern), Abbrechen behält den alten Namen.</German>
+		<Russian>Переименовать %s1_name? OK принимает имя ниже (его можно изменить), «Отмена» оставляет прежнее имя.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_MANUAL</Tag>
 		<English>Set to manual</English>
 		<German>Auf manuell setzen</German>
+		<Russian>Перевести на ручное управление</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_VALUE_FOLD</Tag>
 		<English>Value...</English>
 		<German>Wert...</German>
+		<Russian>Ценность...</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_IMPORTS</Tag>
 		<English>Imports</English>
 		<German>Importiert</German>
+		<Russian>Импорт</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_EXPORTS</Tag>
 		<English>Exports</English>
 		<German>Exportiert</German>
+		<Russian>Экспорт</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_NONE</Tag>
 		<English>No colony exports or imports this good at the moment.</English>
 		<German>Keine Kolonie exportiert oder importiert diese Ware im Moment.</German>
+		<Russian>Сейчас ни одна колония не экспортирует и не импортирует этот товар.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_SETTINGS</Tag>
 		<English>Export settings</English>
 		<German>Exporteinstellung</German>
+		<Russian>Настройки экспорта</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_SETTINGS</Tag>
 		<English>Import settings</English>
 		<German>Importeinstellung</German>
+		<Russian>Настройки импорта</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_IMPORT_LETTERS</Tag>
@@ -1905,6 +1934,7 @@
 		<German>I/F/L/S</German>
 		<Italian>I/A/T/M</Italian>
 		<Spanish>I/A/T/M</Spanish>
+		<Russian>И/Ф/С/М</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_EXPORT_LETTERS</Tag>
@@ -1914,31 +1944,37 @@
 		<German>E/A/L/S</German>
 		<Italian>E/A/T/M</Italian>
 		<Spanish>E/A/T/M</Spanish>
+		<Russian>Э/А/С/М</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_STOCK</Tag>
 		<English>In stock: %d1</English>
 		<German>Auf Lager: %d1</German>
+		<Russian>На складе: %d1</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_MORE</Tag>
 		<English>and %d1 more</English>
 		<German>und %d1 weitere</German>
+		<Russian>и ещё %d1</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL</Tag>
 		<English>Select all</English>
 		<German>Alle auswählen</German>
+		<Russian>Выбрать все</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_SELECT_ALL_UNDO</Tag>
 		<English>Undo select all</English>
 		<German>Auswahl rückgängig</German>
+		<Russian>Отменить выбор всех</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRANSPORT_OVERVIEW_MANUAL_DONE</Tag>
 		<English>Set to manual</English>
 		<German>Auf manuell gesetzt</German>
+		<Russian>Перевести на ручное управление</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_LBD_VETERAN_BY_MILITARY_SERVICE</Tag>
@@ -3525,764 +3561,919 @@
 		<Tag>TXT_KEY_WTP_EDUCATION_ASK_LATER</Tag>
 		<English>Ask me again at the end of the turn</English>
 		<German>Zum Ende der Runde noch einmal fragen</German>
+		<Russian>Спросить снова в конце хода</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_SURPLUS_SOLD</Tag>
 		<English>%s1_city : Due to limited storage capacity a surplus was sold: %s2_yields for a total of %d3[ICON_GOLD].</English>
 		<German>%s1_city : Wegen begrenzter Lagerkapazität wurde ein Überschuss verkauft: %s2_yields für insgesamt %d3[ICON_GOLD].</German>
+		<Russian>%s1_city : из-за ограниченной ёмкости хранилища излишки проданы: %s2_yields на сумму %d3[ICON_GOLD].</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_SURPLUS_LOST</Tag>
 		<English>[COLOR_RED]%s1_city[COLOR_REVERT] : Lost due to limited storage capacity: %s2_yields</English>
 		<German>[COLOR_RED]%s1_city[COLOR_REVERT] : Wegen begrenzter Lagerkapazität verloren gegangen: %s2_yields</German>
+		<Russian>[COLOR_RED]%s1_city[COLOR_REVERT] : потеряно из-за ограниченной ёмкости хранилища: %s2_yields</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_NO_RAW_AMOUNT</Tag>
 		<English>[COLOR_RED]%s1_city[COLOR_REVERT] : Production stopped, [COLOR_RED]%d4%F2_yield_icon per turn[COLOR_REVERT] missing to produce %F3_yield_icon</English>
 		<German>[COLOR_RED]%s1_city[COLOR_REVERT] : Produktion steht still, es fehlen [COLOR_RED]%d4%F2_yield_icon pro Runde[COLOR_REVERT] für die Produktion von %F3_yield_icon</German>
+		<Russian>[COLOR_RED]%s1_city[COLOR_REVERT] : производство остановлено, не хватает [COLOR_RED]%d4%F2_yield_icon в ход[COLOR_REVERT] для производства %F3_yield_icon</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_MORE</Tag>
 		<English>[COLOR_FONT_CREAM]%d1_Num older messages: click to see them (page %d2_Num of %d3_Num)[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]%d1_Num ältere Meldungen: Klick zum Anzeigen (Seite %d2_Num von %d3_Num)[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Более старых сообщений: %d1_Num. Щёлкните, чтобы увидеть их (страница %d2_Num из %d3_Num)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS</Tag>
 		<English>[COLOR_FONT_CREAM]Show the messages of the previous turn[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Meldungen der vorherigen Runde anzeigen[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Показать сообщения предыдущего хода[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_CURRENT</Tag>
 		<English>[COLOR_FONT_CREAM]Back to the messages of this turn[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Zurück zu den Meldungen dieser Runde[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Назад к сообщениям этого хода[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_PREVIOUS_HEADER</Tag>
 		<English>[COLOR_FONT_CREAM]Messages of the previous turn: %d1_Num[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Meldungen der vorherigen Runde: %d1_Num[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Сообщения предыдущего хода: %d1_Num[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_ON</Tag>
 		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_POSITIVE_TEXT]on[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_POSITIVE_TEXT]an[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Автоматическое разворачивание: [COLOR_POSITIVE_TEXT]вкл.[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_OFF</Tag>
 		<English>[COLOR_FONT_CREAM]Auto expand: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Auto-Ausklappen: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Автоматическое разворачивание: [COLOR_NEGATIVE_TEXT]выкл.[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_AUTO_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Auto expand[COLOR_REVERT][NEWLINE]Click: the message panel opens expanded at the start of every turn (on) or stays collapsed (off).[NEWLINE]Move the panel: hold Ctrl and Shift and press W, A, S, D (two keys: diagonal).[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Auto-Ausklappen[COLOR_REVERT][NEWLINE]Klick: Das Meldungs-Panel öffnet zu Beginn jeder Runde ausgeklappt (an) oder bleibt eingeklappt (aus).[NEWLINE]Panel verschieben: Strg und Umschalt gedrückt halten und W, A, S, D drücken (zwei Tasten: diagonal).[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Автоматическое разворачивание[COLOR_REVERT][NEWLINE]Щелчок: панель сообщений в начале каждого хода открывается развёрнутой (вкл.) или остаётся свёрнутой (выкл.).[NEWLINE]Переместить панель: удерживайте Ctrl и Shift и нажимайте W, A, S, D (две клавиши: по диагонали).[NEWLINE]Ctrl+Shift+Q: вернуть на место по умолчанию.[NEWLINE]Положение: %d1, %d2</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_LAND</Tag>
 		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]land[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]Land[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Список путевых точек: [COLOR_POSITIVE_TEXT]суша[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_SEA</Tag>
 		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_POSITIVE_TEXT]sea[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_POSITIVE_TEXT]See[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Список путевых точек: [COLOR_POSITIVE_TEXT]море[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_OFF</Tag>
 		<English>[COLOR_FONT_CREAM]List WPs: [COLOR_NEGATIVE_TEXT]off[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]WP-Liste: [COLOR_NEGATIVE_TEXT]aus[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Список путевых точек: [COLOR_NEGATIVE_TEXT]выкл.[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_EXPAND</Tag>
 		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num  (click to expand)[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num  (Klick zum Ausklappen)[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Путевые точки: %d1_Num  (щёлкните, чтобы развернуть)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HEADER_COLLAPSE</Tag>
 		<English>[COLOR_FONT_CREAM]Waypoints: %d1_Num  (click to collapse)[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Wegpunkte: %d1_Num  (Klick zum Einklappen)[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Путевые точки: %d1_Num  (щёлкните, чтобы свернуть)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_EMPTY</Tag>
 		<English>[COLOR_FONT_CREAM]No waypoints set yet[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Noch keine Wegpunkte gesetzt[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Путевые точки ещё не заданы[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_MORE</Tag>
 		<English>[COLOR_FONT_CREAM]More waypoints: click for the next page (%d1_Num of %d2_Num)[COLOR_REVERT]</English>
 		<German>[COLOR_FONT_CREAM]Weitere Wegpunkte: Klick für die nächste Seite (%d1_Num von %d2_Num)[COLOR_REVERT]</German>
+		<Russian>[COLOR_FONT_CREAM]Ещё путевые точки: щёлкните, чтобы перейти на следующую страницу (%d1_Num из %d2_Num)[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_LAND</Tag>
 		<English>waypoint of the land units</English>
 		<German>Wegpunkt der Landeinheiten</German>
+		<Russian>путевая точка наземных юнитов</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_KIND_SEA</Tag>
 		<English>waypoint of the ships</English>
 		<German>Wegpunkt der Schiffe</German>
+		<Russian>путевая точка кораблей</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PANEL_WPS_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]%s1_Name[COLOR_REVERT] (%s2_Kind)[NEWLINE]Left click: show the place on the map[NEWLINE]Right click: rename[NEWLINE]Shift + right click: delete</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]%s1_Name[COLOR_REVERT] (%s2_Kind)[NEWLINE]Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: umbenennen[NEWLINE]Umschalt + Rechtsklick: löschen</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]%s1_Name[COLOR_REVERT] (%s2_Kind)[NEWLINE]Щелчок левой кнопкой: показать место на карте[NEWLINE]Щелчок правой кнопкой: переименовать[NEWLINE]Shift + щелчок правой кнопкой: удалить</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP</Tag>
 		<English>Left click: show the place on the map[NEWLINE]Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+		<Russian>Щелчок левой кнопкой: показать место на карте[NEWLINE]Щелчок правой кнопкой: Колопедия - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_CONTACT_HELP</Tag>
 		<English>Left click: show the place on the map[NEWLINE]Right click: talk to [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Linksklick: Ort auf der Karte zeigen[NEWLINE]Rechtsklick: mit [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] sprechen</German>
+		<Russian>Щелчок левой кнопкой: показать место на карте[NEWLINE]Щелчок правой кнопкой: поговорить с [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP2</Tag>
 		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+		<Russian>Ctrl + щелчок правой кнопкой: Колопедия - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_CONCEPT_WORDS</Tag>
 		<English>happi=CONCEPT_HAPPINESS_UNHAPPINESS;unhappi=CONCEPT_HAPPINESS_UNHAPPINESS;educat=CONCEPT_TRAINING;grow=CONCEPT_FOOD;well-fed=CONCEPT_FOOD;fed=CONCEPT_FOOD;famine=CONCEPT_FOOD;starv=CONCEPT_FOOD;healthy=CONCEPT_HEALTH;sick=CONCEPT_HEALTH;disease=CONCEPT_HEALTH;rebel=CONCEPT_REBEL_SENTIMENT;independence=CONCEPT_INDEPENDENCE_WAR;tax=CONCEPT_TAX_RATE;storm=CONCEPT_WINDS_AND_STORMS;hurricane=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;smuggl=CONCEPT_SMUGGLING;domestic=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;emigrat=CONCEPT_IMMIGRATION;immigrat=CONCEPT_IMMIGRATION;upkeep=CONCEPT_MILITARY_UPKEEP;monaster=CONCEPT_MONASTERIES;livestock=CONCEPT_CATTLE_OR_SHEEP_BREEDING;whal=CONCEPT_WHALING;storage=CONCEPT_NEW_STORAGE;specialist=CONCEPT_SPECIALISTS;founding father=CONCEPT_FATHERS;raid=CONCEPT_NATIVES;forced labo=CONCEPT_SLAVES;slave=CONCEPT_SLAVES;servant=CONCEPT_SLAVES</English>
 		<German>zufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;unzufrieden=CONCEPT_HAPPINESS_UNHAPPINESS;glück=CONCEPT_HAPPINESS_UNHAPPINESS;bildung=CONCEPT_TRAINING;ausbildung=CONCEPT_TRAINING;wachs=CONCEPT_FOOD;wächst=CONCEPT_FOOD;ernährt=CONCEPT_FOOD;hungersnot=CONCEPT_FOOD;verhungert=CONCEPT_FOOD;gesund=CONCEPT_HEALTH;krank=CONCEPT_HEALTH;seuche=CONCEPT_HEALTH;rebell=CONCEPT_REBEL_SENTIMENT;unabhängigkeit=CONCEPT_INDEPENDENCE_WAR;steuer=CONCEPT_TAX_RATE;sturm=CONCEPT_WINDS_AND_STORMS;orkan=CONCEPT_WINDS_AND_STORMS;pirat=CONCEPT_SMUGGLING;schmuggel=CONCEPT_SMUGGLING;binnen=CONCEPT_DOMESTIC_MARKETS;missionar=CONCEPT_MISSIONARIES;auswander=CONCEPT_IMMIGRATION;unterhalt=CONCEPT_MILITARY_UPKEEP;kloster=CONCEPT_MONASTERIES;vieh=CONCEPT_CATTLE_OR_SHEEP_BREEDING;walfang=CONCEPT_WHALING;lager=CONCEPT_NEW_STORAGE;spezialist=CONCEPT_SPECIALISTS;gründervater=CONCEPT_FATHERS;überfall=CONCEPT_NATIVES;stoßtrupp=CONCEPT_NATIVES;eindringling=CONCEPT_NATIVES;zwangsarbeit=CONCEPT_SLAVES;sklav=CONCEPT_SLAVES;leibeigen=CONCEPT_SLAVES</German>
+		<Russian>счастл=CONCEPT_HAPPINESS_UNHAPPINESS;несчастн=CONCEPT_HAPPINESS_UNHAPPINESS;недовольн=CONCEPT_HAPPINESS_UNHAPPINESS;довольн=CONCEPT_HAPPINESS_UNHAPPINESS;обучен=CONCEPT_TRAINING;образован=CONCEPT_TRAINING;рост=CONCEPT_FOOD;растёт=CONCEPT_FOOD;вырос=CONCEPT_FOOD;сыт=CONCEPT_FOOD;голод=CONCEPT_FOOD;здоров=CONCEPT_HEALTH;болезн=CONCEPT_HEALTH;больн=CONCEPT_HEALTH;эпидеми=CONCEPT_HEALTH;протестн=CONCEPT_REBEL_SENTIMENT;мятеж=CONCEPT_REBEL_SENTIMENT;бунт=CONCEPT_REBEL_SENTIMENT;повстан=CONCEPT_REBEL_SENTIMENT;независимост=CONCEPT_INDEPENDENCE_WAR;налог=CONCEPT_TAX_RATE;шторм=CONCEPT_WINDS_AND_STORMS;ураган=CONCEPT_WINDS_AND_STORMS;буря=CONCEPT_WINDS_AND_STORMS;бури=CONCEPT_WINDS_AND_STORMS;бурю=CONCEPT_WINDS_AND_STORMS;бурей=CONCEPT_WINDS_AND_STORMS;пират=CONCEPT_SMUGGLING;контрабанд=CONCEPT_SMUGGLING;внутренн=CONCEPT_DOMESTIC_MARKETS;миссионер=CONCEPT_MISSIONARIES;эмигр=CONCEPT_IMMIGRATION;иммигр=CONCEPT_IMMIGRATION;содержани=CONCEPT_MILITARY_UPKEEP;монастыр=CONCEPT_MONASTERIES;скотовод=CONCEPT_CATTLE_OR_SHEEP_BREEDING;разведени=CONCEPT_CATTLE_OR_SHEEP_BREEDING;китобо=CONCEPT_WHALING;хранилищ=CONCEPT_NEW_STORAGE;специалист=CONCEPT_SPECIALISTS;отцы основател=CONCEPT_FATHERS;отцов основател=CONCEPT_FATHERS;отца основател=CONCEPT_FATHERS;отцу основател=CONCEPT_FATHERS;набег=CONCEPT_NATIVES;рейд=CONCEPT_NATIVES;принудительн=CONCEPT_SLAVES;рабств=CONCEPT_SLAVES;рабов=CONCEPT_SLAVES;рабы=CONCEPT_SLAVES;раба=CONCEPT_SLAVES;рабом=CONCEPT_SLAVES;кабальн=CONCEPT_SLAVES;слуг=CONCEPT_SLAVES</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_HOVER_TIP_ON</Tag>
 		<English>Nested tooltips: on</English>
 		<German>Nested Tooltips: an</German>
+		<Russian>Вложенные подсказки: вкл.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_HOVER_TIP_ORIGINAL</Tag>
 		<English>Nested tooltips: window at the original position</English>
 		<German>Nested Tooltips: Fenster an der ursprünglichen Position</German>
+		<Russian>Вложенные подсказки: окно на исходном месте</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE</Tag>
 		<English>Tooltips:</English>
 		<German>Tooltips:</German>
+		<Russian>Подсказки:</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_0</Tag>
 		<English>Nested tooltips (at the cursor) (recommended)</English>
 		<German>Nested Tooltips (am Mauszeiger) (empfohlen)</German>
+		<Russian>Вложенные подсказки (у курсора) (рекомендуется)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_1</Tag>
 		<English>Own window at the original position</English>
 		<German>Eigenes Fenster an der ursprünglichen Position</German>
+		<Russian>Собственное окно на исходном месте</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_2</Tag>
 		<English>Game tooltip</English>
 		<German>Spiel-Tooltip</German>
+		<Russian>Игровая подсказка</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_MODE_HELP</Tag>
 		<English>How tooltips are shown. Nested tooltips: a window right at the mouse cursor. Key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] freezes it (and again the tooltip beside it, and so on), right click opens the Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] unfreezes the last one, holding [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] all of them. Hotkey to switch between the three modes: [COLOR_HIGHLIGHT_TEXT]Ctrl + Shift + T[COLOR_REVERT].</English>
 		<German>Wie Tooltips angezeigt werden. Nested Tooltips: ein Fenster direkt am Mauszeiger. Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] friert es ein (und erneut den Tooltip daneben, und so weiter), Rechtsklick öffnet die Colopedia, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] hebt das letzte Einfrieren auf, X gehalten alle. Tastenkombination zum Umschalten zwischen den drei Modi: [COLOR_HIGHLIGHT_TEXT]Strg + Umschalt + T[COLOR_REVERT].</German>
+		<Russian>Как показываются подсказки. Вложенные подсказки: окно прямо у курсора мыши. Клавиша [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] закрепляет его (и далее подсказку рядом с ним, и так далее), щелчок правой кнопкой открывает Колопедию, [COLOR_HIGHLIGHT_TEXT]Esc[COLOR_REVERT] открепляет последнюю, удержание [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] — все. Горячая клавиша для переключения между тремя режимами: [COLOR_HIGHLIGHT_TEXT]Ctrl + Shift + T[COLOR_REVERT].</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY</Tag>
 		<English>Tooltip delay:</English>
 		<German>Tooltip-Verzögerung:</German>
+		<Russian>Задержка подсказки:</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_0</Tag>
 		<English>None</English>
 		<German>Keine</German>
+		<Russian>Нет</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_1</Tag>
 		<English>Short (0.25 s)</English>
 		<German>Kurz (0,25 s)</German>
+		<Russian>Короткая (0,25 с)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_2</Tag>
 		<English>Medium (0.5 s)</English>
 		<German>Mittel (0,5 s)</German>
+		<Russian>Средняя (0,5 с)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_3</Tag>
 		<English>Long (0.8 s)</English>
 		<German>Lang (0,8 s)</German>
+		<Russian>Длинная (0,8 с)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_4</Tag>
 		<English>Very long (1.2 s)</English>
 		<German>Sehr lang (1,2 s)</German>
+		<Russian>Очень длинная (1,2 с)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_HELP</Tag>
 		<English>How long the cursor has to rest on something before the nested tooltip appears. While a tooltip is shown, the next one appears at once. Moving the cursor starts the time again. "Only on key X": the tooltip appears only when you press X.</English>
 		<German>Wie lange der Mauszeiger auf etwas ruhen muss, bevor der Nested Tooltip erscheint. Solange ein Tooltip angezeigt wird, erscheint der nächste sofort. Bewegt man den Mauszeiger, beginnt die Zeit neu. "Nur mit Taste X": Der Tooltip erscheint nur, wenn Sie X drücken.</German>
+		<Russian>Как долго курсор должен оставаться на объекте, прежде чем появится вложенная подсказка. Пока подсказка показана, следующая появляется сразу. При движении курсора время отсчитывается заново. «Только по клавише X»: подсказка появляется только при нажатии X.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK</Tag>
 		<English>Next tooltip without delay (while a tooltip is shown)</English>
 		<German>Nächster Tooltip ohne Verzögerung (solange ein Tooltip angezeigt wird)</German>
+		<Russian>Следующая подсказка без задержки (пока показана подсказка)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_QUICK_HELP</Tag>
 		<English>Off: moving the cursor on to the next thing removes the tooltip and the delay starts again. On: while a tooltip is shown, the tooltip of the next thing appears at once. The key [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] shows a tooltip that still waits for its delay at once.</English>
 		<German>Aus: Beim Weiterfahren zum nächsten Ziel verschwindet der Tooltip und die Verzögerung beginnt neu. An: Solange ein Tooltip angezeigt wird, erscheint der Tooltip des nächsten Ziels sofort. Die Taste [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] zeigt einen Tooltip, der noch auf seine Verzögerung wartet, sofort an.</German>
+		<Russian>Выкл.: при переходе курсора к следующему объекту подсказка исчезает, и задержка отсчитывается заново. Вкл.: пока показана подсказка, подсказка следующего объекта появляется сразу. Клавиша [COLOR_HIGHLIGHT_TEXT]X[COLOR_REVERT] сразу показывает подсказку, которая ещё ждёт своей задержки.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE</Tag>
 		<English>Auto freeze by selection</English>
 		<German>Automatisch einfrieren bei Auswahl</German>
+		<Russian>Автозакрепление при выборе</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_AUTOFREEZE_HELP</Tag>
 		<English>When a unit is activated, the tooltip of its plot is frozen at once (a stack with its unit lines, or the unit alone). The frozen tooltips (and their child tooltips) go again as soon as the unit gets an order. Off by default.</English>
 		<German>Wird eine Einheit aktiviert, wird der Tooltip ihres Feldes sofort eingefroren (ein Stapel mit seinen Einheitenzeilen oder die einzelne Einheit). Die eingefrorenen Tooltips (und ihre Child-Tooltips) verschwinden wieder, sobald die Einheit einen Befehl erhält. Standardmäßig aus.</German>
+		<Russian>При активации юнита подсказка его клетки закрепляется сразу (стопка с её строками юнитов или один юнит). Закреплённые подсказки (и их дочерние подсказки) исчезают, как только юнит получает приказ. По умолчанию выключено.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG</Tag>
 		<English>Show errors of the tooltips (test)</English>
 		<German>Fehler der Tooltips anzeigen (Test)</German>
+		<Russian>Показывать ошибки подсказок (тест)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DEBUG_HELP</Tag>
 		<English>For the test phase: when the code of the tooltips fails, a message with the place of the error is shown (once for the same error) instead of the error being ignored silently. Off by default.</English>
 		<German>Für die Testphase: Wenn der Code der Tooltips fehlschlägt, wird eine Meldung mit der Stelle des Fehlers angezeigt (einmal je gleichem Fehler), statt den Fehler still zu ignorieren. Standardmäßig aus.</German>
+		<Russian>Для этапа тестирования: если код подсказок даёт сбой, показывается сообщение с местом ошибки (один раз для одной и той же ошибки) вместо того, чтобы ошибка молча игнорировалась. По умолчанию выключено.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_5</Tag>
 		<English>Extra long (2 s)</English>
 		<German>Extra lang (2 s)</German>
+		<Russian>Очень-очень длинная (2 с)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_OPTIONS_TIP_DELAY_6</Tag>
 		<English>Only on key X</English>
 		<German>Nur mit Taste X</German>
+		<Russian>Только по клавише X</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TOTAL_PRICE_HELP</Tag>
 		<English>[NEWLINE]	Total[TAB][TAB]</English>
 		<German>[NEWLINE]	Gesamt[TAB][TAB]</German>
+		<Russian>[NEWLINE]	Итого[TAB][TAB]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_HOVER_TIP_OFF</Tag>
 		<English>Nested tooltips: off</English>
 		<German>Nested Tooltips: aus</German>
+		<Russian>Вложенные подсказки: выкл.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_FROZEN_HINT</Tag>
 		<English>[COLOR:140:255:40:255]Frozen - Esc or hold X: close[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Eingefroren - Esc oder X halten: schließen[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Закреплено - Esc или удержание X: закрыть[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_RUN_COMMAND</Tag>
 		<English>Right click: run this command</English>
 		<German>Rechtsklick: diesen Befehl ausführen</German>
+		<Russian>Щелчок правой кнопкой: выполнить эту команду</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PROMO_SUM</Tag>
 		<English>[COLOR_CAT_MILITARY]Promotion sum.[COLOR_REVERT]</English>
 		<German>[COLOR_CAT_MILITARY]Bef.-Details[COLOR_REVERT]</German>
+		<Russian>[COLOR_CAT_MILITARY]Сумма повышений[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORAGE</Tag>
 		<English>Storage : %d1 / %d2</English>
 		<German>Lager : %d1 / %d2</German>
+		<Russian>Хранилище : %d1 / %d2</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORAGE_FULL</Tag>
 		<English>[COLOR_NEGATIVE_TEXT]Storage : %d1 / %d2[COLOR_REVERT]</English>
 		<German>[COLOR_NEGATIVE_TEXT]Lager : %d1 / %d2[COLOR_REVERT]</German>
+		<Russian>[COLOR_NEGATIVE_TEXT]Хранилище : %d1 / %d2[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_HEAD</Tag>
 		<English>Surplus at the next turn change (estimate):</English>
 		<German>Überschuss beim nächsten Rundenwechsel (geschätzt):</German>
+		<Russian>Излишки при смене хода (оценка):</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_SOLD</Tag>
 		<English>%s1 %s2 : -%d3, sold for %d4 gold</English>
 		<German>%s1 %s2 : -%d3, verkauft für %d4 Gold</German>
+		<Russian>%s1 %s2 : -%d3, продано за %d4 золота</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_LOST</Tag>
 		<English>%s1 %s2 : -%d3, lost</English>
 		<German>%s1 %s2 : -%d3, verloren</German>
+		<Russian>%s1 %s2 : -%d3, потеряно</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_OVERFLOW_TOTAL</Tag>
 		<English>Gold from the sale: +%d1</English>
 		<German>Ertrag aus dem Verkauf: +%d1 Gold</German>
+		<Russian>Золото от продажи: +%d1</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_SET</Tag>
 		<English>[COLOR:140:255:40:255]Set waypoint...[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Wegpunkt setzen...[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Задать путевую точку...[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW</Tag>
 		<English>[COLOR_SELECTED_TEXT]Set waypoint...[COLOR_REVERT]</English>
 		<German>[COLOR_SELECTED_TEXT]Wegpunkt setzen...[COLOR_REVERT]</German>
+		<Russian>[COLOR_SELECTED_TEXT]Задать путевую точку...[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_NEW</Tag>
 		<English>[COLOR_SELECTED_TEXT]New waypoint[COLOR_REVERT]</English>
 		<German>[COLOR_SELECTED_TEXT]Neuer Wegpunkt[COLOR_REVERT]</German>
+		<Russian>[COLOR_SELECTED_TEXT]Новая путевая точка[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_NEW_HELP</Tag>
 		<English>Right click: the unit is selected, then right click the target on the map. The unit starts to go there and the place is saved as a waypoint.</English>
 		<German>Rechtsklick: die Einheit wird ausgewählt, dann per Rechtsklick das Ziel auf der Karte wählen. Die Einheit macht sich auf den Weg und der Ort wird als Wegpunkt gespeichert.</German>
+		<Russian>Щелчок правой кнопкой: юнит выбирается, затем щёлкните правой кнопкой по цели на карте. Юнит отправляется туда, а место сохраняется как путевая точка.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_OPTIONS</Tag>
 		<English>Right click: start (the unit goes there)[NEWLINE]Ctrl + right click: delete waypoint[NEWLINE]Shift + right click: rename</English>
 		<German>Rechtsklick: Start (die Einheit geht dorthin)[NEWLINE]Strg + Rechtsklick: Wegpunkt löschen[NEWLINE]Umschalt + Rechtsklick: umbenennen</German>
+		<Russian>Щелчок правой кнопкой: старт (юнит отправляется туда)[NEWLINE]Ctrl + щелчок правой кнопкой: удалить путевую точку[NEWLINE]Shift + щелчок правой кнопкой: переименовать</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_WHEEL</Tag>
 		<English>[COLOR:140:255:40:255]Shift + mouse wheel: choose, right click: run[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Umschalt + Mausrad: auswählen, Rechtsklick: ausführen[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Shift + колесо мыши: выбрать, щелчок правой кнопкой: выполнить[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_KEYS</Tag>
 		<English>[COLOR:140:255:40:255]Ctrl + right click: delete waypoint[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + right click: rename[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + mouse wheel click or left click: look at the waypoint[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Strg + Rechtsklick: Wegpunkt löschen[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Umschalt + Rechtsklick: umbenennen[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Umschalt + Mausradklick oder Linksklick: zum Wegpunkt springen[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Ctrl + щелчок правой кнопкой: удалить путевую точку[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + щелчок правой кнопкой: переименовать[COLOR_REVERT][NEWLINE][COLOR:140:255:40:255]Shift + щелчок колесом мыши или левой кнопкой: посмотреть путевую точку[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_WAYPOINT_HINT</Tag>
 		<English>[COLOR:140:255:40:255]Ctrl + right click: Set waypoint[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Strg + Rechtsklick: Wegpunkt setzen[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Ctrl + щелчок правой кнопкой: задать путевую точку[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_SAVED</Tag>
 		<English>Waypoint saved: %s1</English>
 		<German>Wegpunkt gespeichert: %s1</German>
+		<Russian>Путевая точка сохранена: %s1</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_NAME_COLONY</Tag>
 		<English>"%s1" is the name of a colony and cannot be used for a waypoint.</English>
 		<German>"%s1" ist der Name einer Kolonie und kann nicht für einen Wegpunkt verwendet werden.</German>
+		<Russian>«%s1» — название колонии, его нельзя использовать для путевой точки.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_WAYPOINT_RENAME</Tag>
 		<English>Name of the waypoint. A number and a dot in front (2. name) puts it at that place of the list.</English>
 		<German>Name des Wegpunkts. Mit Zahl und Punkt davor (2. Name) wird er an diese Stelle der Liste gesetzt.</German>
+		<Russian>Название путевой точки. Число и точка в начале (2. название) помещают её на это место в списке.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_BUILDINGS</Tag>
 		<English>[COLOR_SELECTED_TEXT]Buildings...[COLOR_REVERT]</English>
 		<German>[COLOR_SELECTED_TEXT]Gebäude...[COLOR_REVERT]</German>
+		<Russian>[COLOR_SELECTED_TEXT]Здания...[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_FOLD</Tag>
 		<English>Stored...</English>
 		<German>Gelagert...</German>
+		<Russian>На складе...</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_FOLD</Tag>
 		<English>Producing...</English>
 		<German>Produziert...</German>
+		<Russian>Производится...</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_MISSING</Tag>
 		<English>Producing...missing</English>
 		<German>Produziert...missing</German>
+		<Russian>Производится...не хватает</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT</Tag>
 		<English>Producing...need imp.</English>
 		<German>Produziert...bent. Imp.</German>
+		<Russian>Производится...нужен имп.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_WOOD</Tag>
 		<English>Stored...wood</English>
 		<German>Gelagert...Holz</German>
+		<Russian>На складе...дерево</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_FOOD</Tag>
 		<English>Stored...food</English>
 		<German>Gelagert...Nahrung</German>
+		<Russian>На складе...еда</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_BOTH</Tag>
 		<English>Stored...wood&amp;food</English>
 		<German>Gelagert...Holz&amp;Nahrung</German>
+		<Russian>На складе...дерево&amp;еда</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_IMPORT_SET</Tag>
 		<English>Producing...imp. set</English>
 		<German>Produziert...Imp. ges.</German>
+		<Russian>Производится...имп. задан</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_COLORS</Tag>
 		<English>[COLOR:255:240:0:255]Golden yellow[COLOR_REVERT]: exported goods[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: imported goods</English>
 		<German>[COLOR:255:240:0:255]Goldgelb[COLOR_REVERT]: exportierte Waren[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: importierte Waren</German>
+		<Russian>[COLOR:255:240:0:255]Золотисто-жёлтый[COLOR_REVERT]: экспортируемые товары[NEWLINE][COLOR:255:200:110:255]Светло-оранжевый[COLOR_REVERT]: импортируемые товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_LEGEND_WOOD</Tag>
 		<English>no lumber in stock</English>
 		<German>kein Holz im Lager</German>
+		<Russian>нет древесины на складе</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_LEGEND_FOOD</Tag>
 		<English>no food in stock</English>
 		<German>keine Nahrung im Lager</German>
+		<Russian>нет еды на складе</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_STORED_LEGEND_BOTH</Tag>
 		<English>neither lumber nor food in stock</English>
 		<German>weder Holz noch Nahrung im Lager</German>
+		<Russian>нет ни древесины, ни еды на складе</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_LEGEND_MISSING</Tag>
 		<English>raw materials missing, output reduced</English>
 		<German>Rohstoffe fehlen, Ausstoß gedrosselt</German>
+		<Russian>не хватает сырья, выпуск снижен</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT</Tag>
 		<English>raw materials scarce, import needed</English>
 		<German>Rohstoffe knapp, Import nötig</German>
+		<Russian>сырья мало, нужен импорт</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_LEGEND_IMPORT_SET</Tag>
 		<English>raw material import set</English>
 		<German>Rohstoff-Import gesetzt</German>
+		<Russian>импорт сырья задан</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_GOODS_TRADE_HINT</Tag>
 		<English>Right click on the list: import / export window of the city, showing these goods</English>
 		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit diesen Waren öffnen</German>
+		<Russian>Щелчок правой кнопкой по списку: окно импорта / экспорта города с этими товарами</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_GOODS_TRADE_HINT_RAW</Tag>
 		<English>Right click on the list: import / export window of the city, showing the raw materials of these goods</English>
 		<German>Rechtsklick auf die Liste: Import-/Export-Fenster der Stadt mit den Rohstoffen dieser Waren öffnen</German>
+		<Russian>Щелчок правой кнопкой по списку: окно импорта / экспорта города с сырьём для этих товаров</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_RAW_NOTE</Tag>
 		<English>Producing: %s1_Reason</English>
 		<German>Produziert: %s1_Reason</German>
+		<Russian>Производство: %s1_Reason</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_1</Tag>
 		<English>Unsaved changes</English>
 		<German>Nicht gespeicherte Änderungen</German>
+		<Russian>Несохранённые изменения</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_2</Tag>
 		<English>There are changes that are not saved yet. They only take effect when the window is closed with OK.</English>
 		<German>Es gibt Änderungen, die noch nicht gespeichert sind. Sie gelten nur, wenn das Fenster mit OK geschlossen wird.</German>
+		<Russian>Есть изменения, которые ещё не сохранены. Они вступят в силу, только если закрыть окно кнопкой «OK».</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_OK_HELP</Tag>
 		<English>Apply the changes and close the window</English>
 		<German>Änderungen übernehmen und das Fenster schließen</German>
+		<Russian>Применить изменения и закрыть окно</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE</Tag>
 		<English>Close</English>
 		<German>Schließen</German>
+		<Russian>Закрыть</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE_HELP</Tag>
 		<English>The changes are discarded</English>
 		<German>Die Änderungen werden verworfen</German>
+		<Russian>Изменения будут отброшены</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PRODUCED_COLORS</Tag>
 		<English>[COLOR:255:0:0:255]Red[COLOR_REVERT]: raw materials missing, output reduced[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: raw materials scarce, import needed[NEWLINE][COLOR:255:200:110:255]Light orange[COLOR_REVERT]: raw material import set</English>
 		<German>[COLOR:255:0:0:255]Rot[COLOR_REVERT]: Rohstoffe fehlen, Ausstoß gedrosselt[NEWLINE][COLOR:255:140:0:255]Orange[COLOR_REVERT]: Rohstoffe knapp, Import nötig[NEWLINE][COLOR:255:200:110:255]Hellorange[COLOR_REVERT]: Rohstoff-Import gesetzt</German>
+		<Russian>[COLOR:255:0:0:255]Красный[COLOR_REVERT]: не хватает сырья, выпуск снижен[NEWLINE][COLOR:255:140:0:255]Оранжевый[COLOR_REVERT]: сырья мало, нужен импорт[NEWLINE][COLOR:255:200:110:255]Светло-оранжевый[COLOR_REVERT]: импорт сырья задан</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT_CHILD</Tag>
 		<English>[COLOR:140:255:40:255]X or left click: freeze this tooltip[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]X oder Linksklick: Tooltip einfrieren[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]X или щелчок левой кнопкой: закрепить эту подсказку[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_FROZEN_HINT_CHILD</Tag>
 		<English>[COLOR:140:255:40:255]Frozen - left click on its line, Esc or hold X: close[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Eingefroren - Linksklick auf die Zeile, Esc oder X halten: schließen[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Закреплено - щелчок левой кнопкой по её строке, Esc или удержание X: закрыть[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_FREEZE_HINT</Tag>
 		<English>[COLOR:140:255:40:255]X: freeze this tooltip[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]X: Tooltip einfrieren[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]X: закрепить эту подсказку[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_MORE_UNITS</Tag>
 		<English>[COLOR:140:255:40:255]more...units[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]mehr...Einheiten[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]ещё...юниты[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_COMMANDS</Tag>
 		<English>[COLOR:140:255:40:255]Commands...[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Kommandos...[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Команды...[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_CARGO_GOODS</Tag>
 		<English>Carries goods only</English>
 		<German>Lädt nur Waren</German>
+		<Russian>Перевозит только товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_CARGO_SLAVE</Tag>
 		<English>Carries slaves and goods only</English>
 		<German>Lädt nur Sklaven und Waren</German>
+		<Russian>Перевозит только рабов и товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_CARGO_TREASURE</Tag>
 		<English>Carries treasures and goods only</English>
 		<German>Lädt nur Schätze und Waren</German>
+		<Russian>Перевозит только сокровища и товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_CARGO_TROOP</Tag>
 		<English>Carries military units and goods only</English>
 		<German>Lädt nur Militäreinheiten und Waren</German>
+		<Russian>Перевозит только военные юниты и товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_CARGO_ALL</Tag>
 		<English>Carries units and goods</English>
 		<German>Lädt Einheiten und Waren</German>
+		<Russian>Перевозит юниты и товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PORTS</Tag>
 		<English>Ports: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Häfen: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+		<Russian>Порты: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_NO_OCEAN</Tag>
 		<English>[COLOR_WARNING_TEXT]Not ocean-going[COLOR_REVERT]</English>
 		<German>[COLOR_WARNING_TEXT]Nicht überseetauglich[COLOR_REVERT]</German>
+		<Russian>[COLOR_WARNING_TEXT]Не океанский[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PORT_EUROPE</Tag>
 		<English>Europe</English>
 		<German>Europa</German>
+		<Russian>Европа</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PORT_AFRICA</Tag>
 		<English>Africa</English>
 		<German>Afrika</German>
+		<Russian>Африка</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PORT_ROYAL</Tag>
 		<English>Port Royal</English>
 		<German>Port Royal</German>
+		<Russian>Порт-Рояль</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_DRAFT_DEEP</Tag>
 		<English>Draft: [COLOR_HIGHLIGHT_TEXT]deep[COLOR_REVERT] - cannot enter: %s1</English>
 		<German>Tiefgang: [COLOR_HIGHLIGHT_TEXT]tief[COLOR_REVERT] - kein Zugang zu: %s1</German>
+		<Russian>Осадка: [COLOR_HIGHLIGHT_TEXT]глубокая[COLOR_REVERT] - не может войти: %s1</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_DRAFT_SHALLOW_LIM</Tag>
 		<English>Draft: [COLOR_HIGHLIGHT_TEXT]shallow[COLOR_REVERT] - cannot enter: %s1</English>
 		<German>Tiefgang: [COLOR_HIGHLIGHT_TEXT]flach[COLOR_REVERT] - kein Zugang zu: %s1</German>
+		<Russian>Осадка: [COLOR_HIGHLIGHT_TEXT]малая[COLOR_REVERT] - не может войти: %s1</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_DRAFT_SHALLOW</Tag>
 		<English>Draft: [COLOR_HIGHLIGHT_TEXT]shallow[COLOR_REVERT]</English>
 		<German>Tiefgang: [COLOR_HIGHLIGHT_TEXT]flach[COLOR_REVERT]</German>
+		<Russian>Осадка: [COLOR_HIGHLIGHT_TEXT]малая[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_IGNORE_BORDERS</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Ignores borders[COLOR_REVERT]</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Ignoriert Grenzen[COLOR_REVERT]</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Игнорирует границы[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_MORE</Tag>
 		<English>more...</English>
 		<German>mehr...</German>
+		<Russian>ещё...</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TALK</Tag>
 		<English>Right click: Talk to [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Rechtsklick: Mit [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] sprechen</German>
+		<Russian>Щелчок правой кнопкой: поговорить с [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_SELECT_UNIT</Tag>
 		<English>Right click: Select [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Rechtsklick: [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT] auswählen</German>
+		<Russian>Щелчок правой кнопкой: выбрать [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP</Tag>
 		<English>Right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+		<Russian>Щелчок правой кнопкой: Колопедия - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PEDIA_HELP2</Tag>
 		<English>Ctrl + right click: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</English>
 		<German>Strg + Rechtsklick: Colopedia - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</German>
+		<Russian>Ctrl + щелчок правой кнопкой: Колопедия - [COLOR_HIGHLIGHT_TEXT]%s1[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_PEDIA_LIST</Tag>
 		<English>[COLOR:140:255:40:255]All hits (Shift + mouse wheel: choose):[COLOR_REVERT]</English>
 		<German>[COLOR:140:255:40:255]Alle Treffer (Shift + Mausrad: auswählen):[COLOR_REVERT]</German>
+		<Russian>[COLOR:140:255:40:255]Все совпадения (Shift + колесо мыши: выбрать):[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_MESSAGE_PEDIA_HELP_MORE</Tag>
 		<English>Shift + mouse wheel: choose among the %d1 hits</English>
 		<German>Shift + Mausrad: unter den %d1 Treffern auswählen</German>
+		<Russian>Shift + колесо мыши: выбрать среди найденного (%d1)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_MAX</Tag>
 		<English>Max</English>
 		<German>Max</German>
+		<Russian>Макс.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_HINT1</Tag>
 		<English>[COLOR:140:255:40:255]Page Up[COLOR_REVERT] / [COLOR:140:255:40:255]Page Down[COLOR_REVERT] or [COLOR:140:255:40:255]mouse wheel[COLOR_REVERT]: +/- 25   ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 50)</English>
 		<German>[COLOR:140:255:40:255]Bild auf[COLOR_REVERT] / [COLOR:140:255:40:255]Bild ab[COLOR_REVERT] oder [COLOR:140:255:40:255]Mausrad[COLOR_REVERT]: +/- 25   ([COLOR:140:255:40:255]Strg[COLOR_REVERT]: +/- 50)</German>
+		<Russian>[COLOR:140:255:40:255]Page Up[COLOR_REVERT] / [COLOR:140:255:40:255]Page Down[COLOR_REVERT] или [COLOR:140:255:40:255]колесо мыши[COLOR_REVERT]: +/- 25   ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 50)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_HINT2</Tag>
 		<English>[COLOR:140:255:40:255]Digits[COLOR_REVERT]: type an amount    [COLOR:140:255:40:255]Enter[COLOR_REVERT]: OK    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: cancel</English>
 		<German>[COLOR:140:255:40:255]Ziffern[COLOR_REVERT]: Betrag eintippen    [COLOR:140:255:40:255]Enter[COLOR_REVERT]: OK    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: Abbrechen</German>
+		<Russian>[COLOR:140:255:40:255]Цифры[COLOR_REVERT]: ввести количество    [COLOR:140:255:40:255]Enter[COLOR_REVERT]: OK    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: отмена</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_MOVE_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Click to move the window in this direction, hold the button to keep moving.[NEWLINE]Position: %d1, %d2</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Klick: Fenster in diese Richtung bewegen, Knopf gedrückt halten, um weiterzuschieben.[NEWLINE]Position: %d1, %d2</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Переместить окно[COLOR_REVERT][NEWLINE]Щелчок перемещает окно в этом направлении, удерживайте кнопку для непрерывного перемещения.[NEWLINE]Положение: %d1, %d2</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_MOVE_HELP_KEYS</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Moves the window; hold the button to keep moving. The arrow keys do the same. Shift: double steps, Ctrl: half steps, both: a third.[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Verschiebt das Fenster; Knopf gedrückt halten, um weiterzuschieben. Die Pfeiltasten machen dasselbe. Umschalt: doppelte Schritte, Strg: halbe Schritte, beide: ein Drittel.[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Переместить окно[COLOR_REVERT][NEWLINE]Перемещает окно; удерживайте кнопку для непрерывного перемещения. Стрелки на клавиатуре делают то же самое. Shift: двойные шаги, Ctrl: половинные шаги, оба: треть шага.[NEWLINE]Ctrl+Shift+Q: вернуть на место по умолчанию.[NEWLINE]Положение: %d1, %d2</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_EXPORT_OPTIONS</Tag>
 		<English>Export options</English>
 		<German>Export-Optionen</German>
+		<Russian>Параметры экспорта</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_FAVORITE</Tag>
 		<English>Favorite</English>
 		<German>Favorit</German>
+		<Russian>Избранное</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_FAVORITE_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Favorite[COLOR_REVERT][NEWLINE]Marks this good as a favorite. The favorites view (drop down at the bottom right) lists only the favorite goods. Favorites apply to all cities and are saved with the game.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Favorit[COLOR_REVERT][NEWLINE]Markiert diese Ware als Favorit. Die Favoritenansicht (Auswahlmenü unten rechts) zeigt nur die Favoriten. Favoriten gelten für alle Städte und werden mit dem Spielstand gespeichert.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Избранное[COLOR_REVERT][NEWLINE]Отмечает этот товар как избранный. В режиме избранного (выпадающий список справа внизу) показываются только избранные товары. Избранное действует для всех городов и сохраняется вместе с игрой.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_HINT</Tag>
 		<English>[COLOR:140:255:40:255]Shift + mouse wheel[COLOR_REVERT] over a number: +/- 50 ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 10), [COLOR:140:255:40:255]mouse wheel[COLOR_REVERT]: turns the page    [COLOR:140:255:40:255]Num 1-0[COLOR_REVERT]: view    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: cancel</English>
 		<German>[COLOR:140:255:40:255]Umschalt + Mausrad[COLOR_REVERT] über einer Zahl: +/- 50 ([COLOR:140:255:40:255]Strg[COLOR_REVERT]: +/- 10), [COLOR:140:255:40:255]Mausrad[COLOR_REVERT]: blättert um    [COLOR:140:255:40:255]Num 1-0[COLOR_REVERT]: Ansicht    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: Abbrechen</German>
+		<Russian>[COLOR:140:255:40:255]Shift + колесо мыши[COLOR_REVERT] над числом: +/- 50 ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 10), [COLOR:140:255:40:255]колесо мыши[COLOR_REVERT]: перелистывает страницу    [COLOR:140:255:40:255]Num 1-0[COLOR_REVERT]: режим    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: отмена</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_IMPORT_OPTIONS</Tag>
 		<English>Import options</English>
 		<German>Import-Optionen</German>
+		<Russian>Параметры импорта</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_MOVE_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Moves the window; hold the button to keep moving. The arrow keys do the same. Shift: double steps, Ctrl: half steps, both: a third.[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Verschiebt das Fenster; Knopf gedrückt halten, um weiterzuschieben. Die Pfeiltasten machen dasselbe. Umschalt: doppelte Schritte, Strg: halbe Schritte, beide: ein Drittel.[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Переместить окно[COLOR_REVERT][NEWLINE]Перемещает окно; удерживайте кнопку для непрерывного перемещения. Стрелки на клавиатуре делают то же самое. Shift: двойные шаги, Ctrl: половинные шаги, оба: треть шага.[NEWLINE]Ctrl+Shift+Q: вернуть на место по умолчанию.[NEWLINE]Положение: %d1, %d2</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_SELL_ALL_SHIFT_HELP</Tag>
 		<English>Shift + click: sells the goods of all ships in the port.</English>
 		<German>Umschalt + Klick: verkauft die Waren aller Schiffe im Hafen.</German>
+		<Russian>Shift + щелчок: продаёт товары со всех кораблей в порту.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_BUILDING_UPGRADE_HEADER</Tag>
 		<English>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]Upgrade %s1_building to:</English>
 		<German>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]%s1_building ausbauen zu:</German>
+		<Russian>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]Улучшить %s1_building до:</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE</Tag>
 		<English>Page %d1 / %d2</English>
 		<German>Seite %d1 / %d2</German>
+		<Russian>Страница %d1 / %d2</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE_NEXT_HELP</Tag>
 		<English>Next page</English>
 		<German>Nächste Seite</German>
+		<Russian>Следующая страница</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE_PREV_HELP</Tag>
 		<English>Previous page</English>
 		<German>Vorherige Seite</German>
+		<Russian>Предыдущая страница</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Clear All[COLOR_REVERT][NEWLINE]Removes all import and export settings of this city.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic and goods whose automatic export you set by hand are not changed. The switch turns itself off when no good has automatic export any more.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Alles löschen[COLOR_REVERT][NEWLINE]Entfernt alle Import- und Export-Einstellungen dieser Stadt.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert, ebenso Waren, bei denen du den automatischen Export von Hand gesetzt hast. Der Schalter geht von selbst aus, wenn keine Ware mehr automatischen Export hat.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Очистить всё[COLOR_REVERT][NEWLINE]Удаляет все настройки импорта и экспорта этого города.[NEWLINE][NEWLINE]Действует для всех товаров текущего режима просмотра (выбранного в выпадающем списке справа внизу, каким бы он ни был) на всех страницах, а не только на видимой. Товары, которыми управляет «Рыночная автоматика», и товары, у которых авто-экспорт задан вручную, не меняются. Переключатель выключается сам, когда ни у одного товара больше нет авто-экспорта.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Import all goods[COLOR_REVERT][NEWLINE]Turns import on for all goods.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren importieren[COLOR_REVERT][NEWLINE]Schaltet den Import für alle Waren ein.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Импорт всех товаров[COLOR_REVERT][NEWLINE]Включает импорт для всех товаров.[NEWLINE][NEWLINE]Действует для всех товаров текущего режима просмотра (выбранного в выпадающем списке справа внизу, каким бы он ни был) на всех страницах, а не только на видимой.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Auto-export all goods[COLOR_REVERT][NEWLINE]Turns automatic export on for all goods. Click again to switch it off.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic and goods whose automatic export you set by hand are not changed. The switch turns itself off when no good has automatic export any more.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren automatisch exportieren[COLOR_REVERT][NEWLINE]Schaltet den automatischen Export für alle Waren ein. Erneut klicken schaltet ihn wieder aus.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Авто-экспорт всех товаров[COLOR_REVERT][NEWLINE]Включает автоматический экспорт для всех товаров. Повторный щелчок выключает его.[NEWLINE][NEWLINE]Действует для всех товаров текущего режима просмотра (выбранного в выпадающем списке справа внизу, каким бы он ни был) на всех страницах, а не только на видимой.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT</Tag>
 		<English>Building material</English>
 		<German>Baumaterial</German>
+		<Russian>Стройматериалы</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_SHORT_ON</Tag>
 		<English>Auto-export all goods: ON</English>
 		<German>Automatischer Export aller Güter: AN</German>
+		<Russian>Авто-экспорт всех товаров: ВКЛ.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON</Tag>
 		<English>Building material: ON</English>
 		<German>Baumaterial: AN</German>
+		<Russian>Стройматериалы: ВКЛ.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT</Tag>
 		<English>Market automatic</English>
 		<German>Markt-Automatik</German>
+		<Russian>Рыночная автоматика</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT_ON</Tag>
 		<English>Market automatic: ON</English>
 		<German>Markt-Automatik: AN</German>
+		<Russian>Рыночная автоматика: ВКЛ.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_CLEAR_HELP</Tag>
 		<English>Clear the search</English>
 		<German>Suche löschen</German>
+		<Russian>Очистить поиск</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Search goods[COLOR_REVERT][NEWLINE]Type the name of a good: all goods that contain it are listed. Tab completes the grey suggestion. Enter confirms the good (the exact one, or the nearest) and empties the field for the next one: all confirmed goods stay listed in the filter view (kept for the next time, also after closing the window). Backspace on an empty field takes back the last one, X empties the filter.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Ware suchen[COLOR_REVERT][NEWLINE]Name einer Ware tippen: alle Waren, die ihn enthalten, werden angezeigt. Tab übernimmt den grauen Vorschlag. Enter bestätigt die Ware (die genaue oder die nächstliegende) und leert das Feld für die nächste: alle bestätigten Waren bleiben in der Filteransicht (auch nach dem Schließen des Fensters für das nächste Mal gemerkt). Rücktaste bei leerem Feld nimmt die letzte zurück, X leert den Filter.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Поиск товаров[COLOR_REVERT][NEWLINE]Введите название товара: показываются все товары, содержащие его. Tab принимает серую подсказку. Enter подтверждает товар (точное совпадение или ближайшее) и очищает поле для следующего: все подтверждённые товары остаются в списке режима фильтра (сохраняется и на будущее, в том числе после закрытия окна). Backspace в пустом поле отменяет последний, X очищает фильтр.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_HINT</Tag>
 		<English>Search goods</English>
 		<German>Ware suchen</German>
+		<Russian>Поиск товаров</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_ALL</Tag>
 		<English>All goods</English>
 		<German>Alle Waren</German>
+		<Russian>Все товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_FAV</Tag>
 		<English>Favorites</English>
 		<German>Favoriten</German>
+		<Russian>Избранное</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]View[COLOR_REVERT][NEWLINE]Switches between all goods, your favorite goods, only the goods that are marked (import, feeder, export or auto export) in this city, the goods the presets Building material and Market automatic ask for, the goods this city produces, and the goods its current production needs.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Ansicht[COLOR_REVERT][NEWLINE]Wechselt zwischen allen Waren, deinen Favoriten, nur den Waren, die in dieser Stadt markiert sind (Import, Feeder, Export oder Auto-Export), den Waren, die die Presets Baumaterial und Markt-Automatik anfordern, den Waren, die diese Stadt produziert, und den Waren, die ihre aktuelle Produktion benötigt.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Режим просмотра[COLOR_REVERT][NEWLINE]Переключает между всеми товарами, вашими избранными, только отмеченными в этом городе (импорт, фидер, экспорт или авто-экспорт), товарами, которые запрашивают шаблоны «Стройматериалы» и «Рыночная автоматика», товарами, которые производит этот город, и товарами, нужными для его текущего производства.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED</Tag>
 		<English>Marked only</English>
 		<German>Nur markierte</German>
+		<Russian>Только отмеченные</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED</Tag>
 		<English>Needed goods</English>
 		<German>Benötigte Waren</German>
+		<Russian>Нужные товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED</Tag>
 		<English>Produced goods</English>
 		<German>Produzierte Waren</German>
+		<Russian>Производимые товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER</Tag>
@@ -4299,120 +4490,144 @@
 		<Tag>TXT_KEY_WTP_TRADEROUTE_FILTER_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Filter[COLOR_REVERT][NEWLINE]Adds this good to the filter or takes it out again. The filter view (drop down at the bottom right) lists the goods of your searches: confirmed goods (Enter) stay in it, also for the next time and for all cities, and are saved with the game.</English>
 		<German>[COLOR_HIGHLIGHT_TEXT]Filter[COLOR_REVERT][NEWLINE]Nimmt diese Ware in den Filter auf oder wieder heraus. Die Filteransicht (Auswahlmenü unten rechts) zeigt die Waren deiner Suchen: bestätigte Waren (Enter) bleiben darin, auch für das nächste Mal und für alle Städte, und werden mit dem Spielstand gespeichert.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Фильтр[COLOR_REVERT][NEWLINE]Добавляет этот товар в фильтр или убирает его оттуда. В режиме фильтра (выпадающий список справа внизу) показываются товары из ваших поисков: подтверждённые товары (Enter) остаются в нём, в том числе на будущее и для всех городов, и сохраняются вместе с игрой.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT</Tag>
 		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] works in the view "All goods" only. While it is on, the goods it manages cannot be changed by the buttons Clear All, Import all goods, Auto-export all goods or presets, only by hand (you get a notice then, with a button to set the good back).</English>
 		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] funktioniert nur in der Ansicht „Alle Waren". Solange er an ist, können die Waren, die er verwaltet, nicht durch die Knöpfe Alles löschen, Alle Waren importieren, Alle Waren automatisch exportieren oder Presets verändert werden, nur von Hand (dann erscheint ein Hinweis mit einem Knopf, der die Ware zurücksetzt).</German>
+		<Russian>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Защита шаблонов:[COLOR_REVERT] работает только в режиме «Все товары». Пока она включена, товары, которыми она управляет, нельзя изменить кнопками «Очистить всё», «Импорт всех товаров», «Авто-экспорт всех товаров» или шаблонами, только вручную (тогда появится уведомление с кнопкой, возвращающей товар в прежнее состояние).</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1</Tag>
 		<English>Preset protection: %s1_good is managed by Market automatic</English>
 		<German>Preset-Schutz: %s1_good wird von der Markt-Automatik verwaltet</German>
+		<Russian>Защита шаблонов: %s1_good управляется «Рыночной автоматикой»</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_2</Tag>
 		<English>Your change differs from the setting Market automatic makes for this good.</English>
 		<German>Deine Änderung weicht von der Einstellung ab, die „Markt-Automatik" für diese Ware setzt.</German>
+		<Russian>Ваше изменение отличается от настройки, которую «Рыночная автоматика» задаёт для этого товара.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_RESET</Tag>
 		<English>Reset</English>
 		<German>Zurücksetzen</German>
+		<Russian>Сбросить</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE</Tag>
 		<English>Ignore</English>
 		<German>Ignorieren</German>
+		<Russian>Игнорировать</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_1</Tag>
 		<English>Preset protection: %s1_count goods not changed (managed by Market automatic)</English>
 		<German>Preset-Schutz: %s1_count Waren nicht geändert (von der Markt-Automatik verwaltet)</German>
+		<Russian>Защита шаблонов: товаров не изменено: %s1_count (ими управляет «Рыночная автоматика»)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_2</Tag>
 		<English>%s1_goods - only manual changes are possible for them while it is on.</English>
 		<German>%s1_goods - solange er an ist, sind für sie nur manuelle Änderungen möglich.</German>
+		<Russian>%s1_goods - пока она включена, для них возможны только ручные изменения.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_1</Tag>
 		<English>Preset protection: Market automatic</English>
 		<German>Preset-Schutz: Markt-Automatik</German>
+		<Russian>Защита шаблонов: «Рыночная автоматика»</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_2</Tag>
 		<English>can only be switched on or off in the view "All goods".</English>
 		<German>kann nur in der Ansicht „Alle Waren" ein- und ausgeschaltet werden.</German>
+		<Russian>можно включить или выключить только в режиме «Все товары».</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1</Tag>
 		<English>Preset protection: %s1_count goods asked for by presets are switched off</English>
 		<German>Preset-Schutz: %s1_count Waren, die Presets anfordern, sind ausgeschaltet</German>
+		<Russian>Защита шаблонов: выключено товаров, запрошенных шаблонами: %s1_count</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2</Tag>
 		<English>%s1_goods - Reset puts them back. Ignore: they no longer count for the presets (a preset none of whose goods is active any more switches itself off).</English>
 		<German>%s1_goods - Zurücksetzen stellt sie wieder her. Ignorieren: sie zählen dann nicht mehr für die Presets (ein Preset, von dem keine Ware mehr aktiv ist, schaltet sich selbst aus).</German>
+		<Russian>%s1_goods - «Сбросить» возвращает их обратно. «Игнорировать»: они больше не учитываются для шаблонов (шаблон, ни один товар которого больше не активен, выключается сам).</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT</Tag>
 		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] while the preset is on, you get a notice when its goods are switched off again (by hand or by Clear All), with a button to put them back. If you ignore it and none of its goods is active any more, the preset switches itself off. The notice names every good with all the presets that ask for it.</English>
 		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] solange das Preset an ist, erscheint ein Hinweis, wenn seine Waren wieder ausgeschaltet werden (von Hand oder durch Alles löschen), mit einem Knopf, der sie zurücksetzt. Ignorierst du ihn und ist keine seiner Waren mehr aktiv, schaltet sich das Preset selbst aus. Der Hinweis nennt jede Ware mit allen Presets, die sie anfordern.</German>
+		<Russian>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Защита шаблонов:[COLOR_REVERT] пока шаблон включён, вы получаете уведомление, когда его товары снова выключаются (вручную или кнопкой «Очистить всё»), с кнопкой, возвращающей их обратно. Если проигнорировать его и ни один товар шаблона больше не активен, шаблон выключается сам. В уведомлении названы все товары со всеми шаблонами, которые их запрашивают.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT</Tag>
 		<English>Livestock</English>
 		<German>Viehzucht</German>
+		<Russian>Скот</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON</Tag>
 		<English>Livestock: ON</English>
 		<German>Viehzucht: AN</German>
+		<Russian>Скот: ВКЛ.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_HELP</Tag>
 		<English>Livestock: import and feeder for all livestock (horses, cattle, geese, goats, pigs, sheep, chicken), import limit and maintain level 150. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
 		<German>Viehzucht: Import und Feeder für alles Vieh (Pferde, Rinder, Gänse, Ziegen, Schweine, Schafe, Hühner), Importlimit und Maintain-Level 150. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
+		<Russian>Скот: импорт и фидер для всего скота (лошади, коровы, гуси, козы, свиньи, овцы, куры), ограничение на импорт и поддерживаемый уровень 150. Повторный щелчок выключает его: выключаются только товары, которые включил шаблон, товары, заданные ранее вручную, остаются как есть.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT</Tag>
 		<English>Military goods</English>
 		<German>Militärgüter</German>
+		<Russian>Военные товары</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON</Tag>
 		<English>Military goods: ON</English>
 		<German>Militärgüter: AN</German>
+		<Russian>Военные товары: ВКЛ.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_HELP</Tag>
 		<English>Military goods: import and feeder for muskets, blades, cannons, black powder, bakery goods (provisions) and horses, at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
 		<German>Militärgüter: Import und Feeder für Musketen, Säbel, Kanonen, Schießpulver, Proviant (Backwaren) und Pferde, höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
+		<Russian>Военные товары: импорт и фидер для мушкетов, клинков, пушек, чёрного пороха, выпечки (провиант) и лошадей, импортируется не более 100. Повторный щелчок выключает его: выключаются только товары, которые включил шаблон, товары, заданные ранее вручную, остаются как есть.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_ON_BY</Tag>
 		<English>Switched on by: </English>
 		<German>Eingeschaltet durch: </German>
+		<Russian>Включено через: </Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_HAND</Tag>
 		<English>by hand</English>
 		<German>von Hand</German>
+		<Russian>вручную</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_MARKET</Tag>
 		<English>market automatic</English>
 		<German>Market automatic</German>
+		<Russian>рыночная автоматика</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_LIMIT</Tag>
 		<English>Import limit</English>
 		<German>Importlimit</German>
+		<Russian>Ограничение на импорт</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_MAINTAIN</Tag>
 		<English>Maintain level</English>
 		<German>Maintain-Level</German>
+		<Russian>Поддерживаемый уровень</Russian>
 	</TEXT>
 </Civ4GameText>
