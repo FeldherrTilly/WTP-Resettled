@@ -75,6 +75,23 @@ def showMainInterface():
 	DesyncDetectorInstance = gc.startDesyncMonitor()
 	mainInterface.interfaceScreen()
 
+# WTP: the own waypoints for the window "Select destination" of the Go to button (called by the DLL): one line per waypoint "x<TAB>y<TAB>text",
+# without the waypoints that lead to an own colony (those are listed as colonies anyway); the waypoints of ships for ships, the others for land units
+def getGotoWaypoints(argsList):
+	try:
+		iUnit = argsList[0]
+		ePlayer = gc.getGame().getActivePlayer()
+		pUnit = gc.getPlayer(ePlayer).getUnit(iUnit)
+		bSea = mainInterface.isSeaUnit(pUnit)
+		szResult = u""
+		for tEntry in mainInterface.getWaypointView(bSea, ePlayer):
+			if mainInterface.getOwnColonyAt(tEntry[1], tEntry[2], ePlayer) is not None:
+				continue
+			szResult += u"%d\t%d\t%s\n" % (tEntry[1], tEntry[2], tEntry[4].replace(u"\t", u" ").replace(u"\n", u" "))
+		return szResult
+	except:
+		return u""
+
 def numPlotListButtons():
 	return mainInterface.numPlotListButtons()
 
