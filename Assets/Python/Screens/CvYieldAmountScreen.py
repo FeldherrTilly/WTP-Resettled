@@ -17,8 +17,8 @@ BTN_OK = 40004
 BTN_CANCEL = 40005
 BTN_MOVE = 40010 # +0 left, +1 right, +2 up, +3 down
 MOVE_STEP = 60
-MOVE_DELAY = 18 # frames until the held move button repeats
-MOVE_REPEAT = 3 # frames between the steps
+MOVE_DELAY = 30 # frames until the held move button repeats
+MOVE_REPEAT = 5 # frames between the steps
 
 STEP = 25
 STEP_CTRL = 50
@@ -59,6 +59,8 @@ class CvYieldAmountScreen:
 		self.bRepeatDone = False
 		self.iPendX = 0
 		self.iPendY = 0
+		self.bCtrlDown = False # the state of Shift and Ctrl, noted from the key events (the interface does not give it in this dialog)
+		self.bShiftDown = False
 		self.tReopen = None # the dialog that Alt+Tab closed (it is opened again for the same transfer)
 		self.iReopenWait = 0
 		self.iReopenTries = 0
@@ -122,6 +124,8 @@ class CvYieldAmountScreen:
 		self.iKeyBack = self.getKeyId("KB_BACKSPACE")
 		self.aKeyOk = [self.getKeyId("KB_RETURN"), self.getKeyId("KB_NUMPADENTER")]
 		self.iKeyEsc = self.getKeyId("KB_ESCAPE")
+		self.aKeyShift = [self.getKeyId("KB_LSHIFT"), self.getKeyId("KB_RSHIFT")]
+		self.aKeyCtrl = [self.getKeyId("KB_LCONTROL"), self.getKeyId("KB_RCONTROL")]
 		self.iKeyUp = self.getKeyId("KB_PGUP")
 		self.iKeyDown = self.getKeyId("KB_PGDN")
 		self.aKeyArrows = [self.getKeyId("KB_LEFT"), self.getKeyId("KB_RIGHT"), self.getKeyId("KB_UP"), self.getKeyId("KB_DOWN")] # (move the window)
@@ -229,11 +233,19 @@ class CvYieldAmountScreen:
 			return MOVE_STEP / 2
 		return MOVE_STEP
 
+	# Ctrl and Shift for the move buttons and the held keys: Ctrl from the game window (as the mouse wheel), Shift from the key events
 	def getModifiers(self):
+		bCtrl = self.bCtrlDown
+		bShift = self.bShiftDown
 		try:
-			return (CyInterface().ctrlKey(), CyInterface().shiftKey())
+			bCtrl = bCtrl or CyGame().isCtrlKeyPressed()
 		except:
-			return (False, False)
+			pass
+		try:
+			bShift = bShift or CyInterface().shiftKey()
+		except:
+			pass
+		return (bCtrl, bShift)
 
 	# a step is only noted here, the window is moved once per frame
 	def queueMove(self, iDir, iStep):
@@ -297,6 +309,10 @@ class CvYieldAmountScreen:
 		self.drawLayout(screen)
 
 	def handleKeyUp(self, iKey):
+		if iKey in self.aKeyShift:
+			self.bShiftDown = False
+		if iKey in self.aKeyCtrl:
+			self.bCtrlDown = False
 		if iKey in self.aKeyArrows:
 			iDir = self.aKeyArrows.index(iKey)
 			if iDir in self.aHeld:
@@ -474,6 +490,8 @@ class CvYieldAmountScreen:
 
 	# a key down event (CvEventManager.onKbdEvent gives them to the dialog while it is open)
 	def handleKey(self, iKey, bCtrl, bShift = False, bAlt = False):
+		self.bCtrlDown = bCtrl or iKey in self.aKeyCtrl
+		self.bShiftDown = bShift or iKey in self.aKeyShift
 		if bCtrl and bShift and iKey == self.getKeyId("KB_Q"):
 			self.resetPosition()
 		elif iKey in self.aKeyArrows:
