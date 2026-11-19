@@ -5790,17 +5790,22 @@ class CvMainInterface:
 			self.remapFrozenParas(iLevel, dMap)
 			self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, aNewIndent, self.dFrozenDark.has_key(szPrefix))
 			try:
-				# the cursor goes with the line of the unit that it was on (the block of the unit is at the start of the list now): the same line
-				# of the block, below the first line of the units
+				# the cursor was on a line of the units (the right click that selected the unit): it goes to the name line of the unit, that is at
+				# the start of the list now (the line "Set waypoint..." moved to this unit before: no line below the name); the child window of
+				# the unit (beside the line, frozen next) goes with it
 				iCurX = gc.getGame().getCursorClientX()
 				iCurY = gc.getGame().getCursorClientY()
 				if iCurX >= iX and iCurX < iX + iWidth and iCurY >= iY + iPad and iCurY < iY + iPad + len(aszLines) * iLine:
 					iOldLine = int((iCurY - iY - iPad) / iLine)
-					aBlockLines = [k for k in range(iFrom, iTo + 1) if aiPara[k] >= aBounds[iBlock][0] and aiPara[k] < aBounds[iBlock][1]]
-					if iOldLine in aBlockLines:
-						iNewLine = iFrom + (iOldLine - aBlockLines[0])
-						gc.getGame().setCursorClient(iCurX, iY + iPad + iNewLine * iLine + iLine / 2)
+					if iOldLine >= iFrom and iOldLine <= iTo:
+						iNewY = iY + iPad + iFrom * iLine + iLine / 2
+						gc.getGame().setCursorClient(iCurX, iNewY)
 						self.tSecondTipKey = None
+						if self.bSecondTipShown and self.tPreviewLayout is not None:
+							tP = self.tPreviewLayout
+							iPNewY = max(4, min(screen.getYResolution() - tP[3] - 4, tP[1] + (iNewY - iCurY)))
+							self.iPreviewPrefDY += iPNewY - tP[1]
+							self.tPreviewLayout = (tP[0], iPNewY, tP[2], tP[3], tP[4], tP[5], tP[6], tP[7])
 			except:
 				pass
 		except:
