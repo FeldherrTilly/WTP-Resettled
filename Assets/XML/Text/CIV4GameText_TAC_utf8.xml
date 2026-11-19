@@ -3337,5 +3337,6 @@
 		<Tag>TXT_KEY_WTP_EDUCATION_ASK_LATER</Tag>
 		<English>Ask me again at the end of the turn</English>
 		<German>Zum Ende der Runde noch einmal fragen</German>
+		<Russian>Спросить снова в конце хода</Russian>
 	</TEXT>
 </Civ4GameText>
