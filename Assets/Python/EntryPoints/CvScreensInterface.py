@@ -617,7 +617,7 @@ def update (argsList):
 		screen.update(argsList[1])
 
 	# WTP: the mouse wheel of the amount dialog when it is drawn on a harbor screen
-	if (yieldAmountScreen.isOpen() and yieldAmountScreen.isEmbedded() and argsList[0] != YIELD_AMOUNT):
+	if (yieldAmountScreen.isOpen() and yieldAmountScreen.isEmbedded() and argsList[0] != YIELD_AMOUNT and not yieldAmountScreen.isHostMain()): # (on the main interface its own update does it: not twice per frame)
 		yieldAmountScreen.update(argsList[1])
 
 def onClose (argsList):
