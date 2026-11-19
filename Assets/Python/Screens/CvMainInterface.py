@@ -4811,7 +4811,16 @@ class CvMainInterface:
 				return
 			self.tCityJump = None
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			# (the cursor goes to the city, but not onto the HUD: a city at the lower right of the map (the camera cannot center it there) would put
+			# the cursor on the score table; the game then reports the help of the HUD and no tooltip is made)
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			iSX = max(int(xRes * 0.05), min(int(xRes * 0.72), iSX))
+			iSY = max(int(yRes * 0.12), min(int(yRes * 0.62), iSY))
 			gc.getGame().setCursorClient(iSX, iSY)
+			self.bHudHover = False
+			self.szHudHelp = u""
+			self.szPendingHelp = None
 			szHelp = gc.getGame().getCityBarHelpFor(pCity.getOwner(), pCity.getID())
 			if len(szHelp) == 0:
 				return
