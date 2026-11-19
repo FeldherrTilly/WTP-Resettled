@@ -565,6 +565,12 @@ class CvEventManager:
 	def onWindowActivation(self, argsList):
 		'Called when the game window activates or deactivates'
 		bActive = argsList[0]
+		# the amount dialog of the transfers is drawn again (the city screen is not drawn again while it is open)
+		try:
+			if bActive:
+				CvScreensInterface.yieldAmountScreen.windowActivated()
+		except:
+			pass
 		# the frozen tooltips are drawn again (their widgets are gone after alt-tab)
 		try:
 			if bActive:

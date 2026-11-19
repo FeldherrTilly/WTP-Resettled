@@ -59,6 +59,8 @@ class CvYieldAmountScreen:
 		self.bRepeatDone = False
 		self.iPendX = 0
 		self.iPendY = 0
+		self.bHidden = False # the widgets are taken away for a moment after Alt+Tab (the city is drawn again meanwhile)
+		self.iReopenWait = 0
 
 	def getScreen(self):
 		return CyGInterfaceScreen(self.SCREEN_NAME, CvScreenEnums.YIELD_AMOUNT)
@@ -89,6 +91,8 @@ class CvYieldAmountScreen:
 		self.szValue = unicode(iMax)
 		self.bSelected = True
 		self.bFinished = False
+		self.bHidden = False
+		self.iReopenWait = 0
 
 		# a harbor screen (Europe / Africa / Port Royal) that is open would be closed by the game when another screen opens: the
 		# dialog is drawn on that screen then (a screen of its own is used everywhere else)
@@ -350,7 +354,18 @@ class CvYieldAmountScreen:
 			pass
 
 	def isHostMain(self):
-		return self.bHostMain and not self.bFinished
+		# (not while the widgets are away after Alt+Tab: the interface may redraw the city then)
+		return self.bHostMain and not self.bFinished and not self.bHidden
+
+	# the game window was activated again (Alt+Tab): the city screen is not drawn again while the dialog is on this screen (the redraw
+	# is blocked then). The dialog goes away for a few frames, the city is drawn, then the dialog comes back with its value and place.
+	def windowActivated(self):
+		if self.bFinished or not self.bHostMain or self.bHidden:
+			return
+		self.bHidden = True
+		self.iReopenWait = 4
+		self.dropWidgets()
+		self.refreshView()
 
 	def refreshView(self):
 		# ask the interface to redraw the parts that show artifacts (minimap, ovals) in the city screen
@@ -372,6 +387,8 @@ class CvYieldAmountScreen:
 		return self.pHost != None
 
 	def drawValue(self):
+		if self.bHidden:
+			return
 		screen = self.getDrawScreen()
 		if self.bSelected:
 			szText = u"<color=255,220,100>" + self.szValue + u"</color>"
@@ -514,6 +531,13 @@ class CvYieldAmountScreen:
 		try:
 			if self.pHost != None and not self.bHostMain and not self.pHost.isActive():
 				self.finish(False) # the harbor screen was closed meanwhile
+				return 0
+			if self.bHidden:
+				self.iReopenWait -= 1
+				if self.iReopenWait <= 0:
+					self.bHidden = False
+					self.applyPosition(self.pHost)
+					self.drawLayout(self.pHost)
 				return 0
 			self.updateMove()
 			iNotches = CyGame().takeWheelNotches()
