@@ -535,7 +535,7 @@
 		<German>Entlädt alle transportierten Einheiten.[NEWLINE]Umschalt + Klick oder Strg+Umschalt+U: entlädt alle Transporter der gleichen Art (Land oder See) auf diesem Feld.</German>
 		<Italian>Per scaricare tutte le unità a bordo del trasporto.</Italian>
 		<Spanish>Con esto desembarcarán todas las unidades transportadas.</Spanish>
-		<Russian>Позволяет выгрузить сразу всею юниты, находящиеся в транспорте</Russian>
+		<Russian>Позволяет выгрузить сразу всею юниты, находящиеся в транспорте[NEWLINE]Shift + щелчок или Ctrl+Shift+U: выгружает все транспорты того же вида (наземные или морские) на этой клетке.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_COMMAND_UPGRADE</Tag>
