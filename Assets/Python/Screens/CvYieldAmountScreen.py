@@ -249,11 +249,6 @@ class CvYieldAmountScreen:
 
 	# a step is only noted here, the window is moved once per frame
 	def queueMove(self, iDir, iStep):
-		try:
-			aMod = self.getModifiers()
-			CyInterface().addImmediateMessage("WTP-DEBUG move dir %d step %d  interface ctrl/shift %s/%s  game ctrl %s" % (iDir, iStep, str(aMod[0]), str(aMod[1]), str(CyGame().isCtrlKeyPressed())), "")
-		except:
-			pass
 		self.iPendX += [-iStep, iStep, 0, 0][iDir]
 		self.iPendY += [0, 0, -iStep, iStep][iDir]
 		if self.pHost == None:
@@ -285,10 +280,6 @@ class CvYieldAmountScreen:
 
 	# an arrow key goes down (the repeats of the keyboard are ignored: the held keys are handled in updateMove)
 	def pressArrow(self, iDir, bCtrl, bShift):
-		try:
-			CyInterface().addImmediateMessage("WTP-DEBUG arrow key event ctrl/shift %s/%s" % (str(bCtrl), str(bShift)), "")
-		except:
-			pass
 		if iDir in self.aHeld:
 			return
 		self.aHeld.append(iDir)
