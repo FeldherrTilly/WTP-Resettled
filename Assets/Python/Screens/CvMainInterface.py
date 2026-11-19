@@ -4832,6 +4832,8 @@ class CvMainInterface:
 			gc.getGame().setCursorClient(tL[0] + iDX, tL[1] + iDY)
 			self.tCursorFollow = [self.aFrozen[iNew][0], iDX, iDY, (self.getTipNow() / 1000.0), -1, -1, 0]
 			self.szCityHoldWin = self.aFrozen[iNew][0]
+			self.tCityHoldPos = None
+			self.iCityHoldStill = 0
 			self.tSecondTipKey = None
 		except:
 			self.tCityJump = None
@@ -7430,7 +7432,21 @@ class CvMainInterface:
 		# come when the window stands still (the cursor is free then and the update below makes the window of the line the cursor is on)
 		if self.bCityHold:
 			bFollowCity = (self.tCursorFollow is not None and self.tCursorFollow[0] == self.szCityHoldWin)
-			if self.tCityJump is None and not bFollowCity:
+			bStill = False
+			if self.tCityJump is None and bFollowCity:
+				# (the window stands still for two frames: the jump is finished at once, the cursor follows no longer; no waiting time)
+				for iHold in range(len(self.aFrozen)):
+					if self.aFrozen[iHold][0] == self.szCityHoldWin:
+						tHoldPos = (self.aFrozen[iHold][1][0], self.aFrozen[iHold][1][1])
+						if tHoldPos == self.tCityHoldPos:
+							self.iCityHoldStill += 1
+						else:
+							self.iCityHoldStill = 0
+						self.tCityHoldPos = tHoldPos
+						bStill = (self.iCityHoldStill >= 2)
+			if bStill:
+				self.tCursorFollow = None
+			if self.tCityJump is None and (not bFollowCity or bStill):
 				self.bCityHold = False
 				self.tSecondTipKey = None
 			else:
@@ -8759,6 +8775,8 @@ class CvMainInterface:
 	tCityJump = None # after the jump to a city: its tooltip is made and frozen when the camera is there
 	bCityHold = False # the jump to a city is not finished: the child windows of the frozen tooltips do not appear yet
 	szCityHoldWin = u"" # the window of the city that the jump made (the cursor goes with it until it has found its place)
+	tCityHoldPos = None # its place in the last frame
+	iCityHoldStill = 0 # the frames it stands still
 	iTradeTipYield = -1
 	# is there a frozen tooltip of this good (import / export window)?
 	def isYieldTipFrozen( self, iYield ):
