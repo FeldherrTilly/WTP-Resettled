@@ -4621,7 +4621,7 @@ bool CvDLLButtonPopup::launchGotoMenuPopup(CvPopup* pPopup, CvPopupInfo &info)
 				const int iWpX = _wtoi(szLine.substr(0, iTab1).c_str());
 				const int iWpY = _wtoi(szLine.substr(iTab1 + 1, iTab2 - iTab1 - 1).c_str());
 				const CvWString szName = szLine.substr(iTab2 + 1);
-				CvPlot* pWpPlot = GC.getMapINLINE().plotINLINE(iWpX, iWpY);
+				CvPlot* pWpPlot = GC.getMap().plotINLINE(iWpX, iWpY);
 				if (pWpPlot == NULL || pWpPlot == pUnit->plot())
 				{
 					continue;
