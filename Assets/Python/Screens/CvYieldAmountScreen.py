@@ -59,8 +59,9 @@ class CvYieldAmountScreen:
 		self.bRepeatDone = False
 		self.iPendX = 0
 		self.iPendY = 0
-		self.bHidden = False # the widgets are taken away for a moment after Alt+Tab (the city is drawn again meanwhile)
+		self.tReopen = None # the dialog that Alt+Tab closed (it is opened again for the same transfer)
 		self.iReopenWait = 0
+		self.iReopenTries = 0
 
 	def getScreen(self):
 		return CyGInterfaceScreen(self.SCREEN_NAME, CvScreenEnums.YIELD_AMOUNT)
@@ -91,8 +92,7 @@ class CvYieldAmountScreen:
 		self.szValue = unicode(iMax)
 		self.bSelected = True
 		self.bFinished = False
-		self.bHidden = False
-		self.iReopenWait = 0
+		self.tReopen = None
 
 		# a harbor screen (Europe / Africa / Port Royal) that is open would be closed by the game when another screen opens: the
 		# dialog is drawn on that screen then (a screen of its own is used everywhere else)
@@ -237,6 +237,11 @@ class CvYieldAmountScreen:
 
 	# a step is only noted here, the window is moved once per frame
 	def queueMove(self, iDir, iStep):
+		try:
+			aMod = self.getModifiers()
+			CyInterface().addImmediateMessage("WTP-DEBUG move dir %d step %d  interface ctrl/shift %s/%s  game ctrl %s" % (iDir, iStep, str(aMod[0]), str(aMod[1]), str(CyGame().isCtrlKeyPressed())), "")
+		except:
+			pass
 		self.iPendX += [-iStep, iStep, 0, 0][iDir]
 		self.iPendY += [0, 0, -iStep, iStep][iDir]
 		if self.pHost == None:
@@ -268,6 +273,10 @@ class CvYieldAmountScreen:
 
 	# an arrow key goes down (the repeats of the keyboard are ignored: the held keys are handled in updateMove)
 	def pressArrow(self, iDir, bCtrl, bShift):
+		try:
+			CyInterface().addImmediateMessage("WTP-DEBUG arrow key event ctrl/shift %s/%s" % (str(bCtrl), str(bShift)), "")
+		except:
+			pass
 		if iDir in self.aHeld:
 			return
 		self.aHeld.append(iDir)
@@ -354,18 +363,37 @@ class CvYieldAmountScreen:
 			pass
 
 	def isHostMain(self):
-		# (not while the widgets are away after Alt+Tab: the interface may redraw the city then)
-		return self.bHostMain and not self.bFinished and not self.bHidden
+		return self.bHostMain and not self.bFinished
 
 	# the game window was activated again (Alt+Tab): the city screen is not drawn again while the dialog is on this screen (the redraw
-	# is blocked then). The dialog goes away for a few frames, the city is drawn, then the dialog comes back with its value and place.
+	# is blocked then). The dialog is closed for a few frames (the city is drawn) and opened again with the same transfer, value and place.
 	def windowActivated(self):
-		if self.bFinished or not self.bHostMain or self.bHidden:
+		if self.bFinished or not self.bHostMain:
 			return
-		self.bHidden = True
+		self.tReopen = (self.iYield, self.iUnit, self.iMax, self.iData3, self.bPlayerAction, self.iFromPlayer, self.szValue, self.bSelected, CyInterface().isCityScreenUp())
 		self.iReopenWait = 4
-		self.dropWidgets()
-		self.refreshView()
+		self.iReopenTries = 0
+		self.finish(False)
+
+	def checkReopen(self):
+		if self.iReopenWait > 0:
+			self.iReopenWait -= 1
+			return
+		try:
+			tState = self.tReopen
+			if CyInterface().isCityScreenUp() != tState[8]:
+				# (the screen is not there yet; the dialog is not opened for ever)
+				self.iReopenTries += 1
+				if self.iReopenTries > 240:
+					self.tReopen = None
+				return
+			self.tReopen = None
+			if self.open(tState[0], tState[1], tState[2], tState[3], tState[4], tState[5]) != 0:
+				self.szValue = tState[6]
+				self.bSelected = tState[7]
+				self.drawValue()
+		except:
+			self.tReopen = None
 
 	def refreshView(self):
 		# ask the interface to redraw the parts that show artifacts (minimap, ovals) in the city screen
@@ -387,8 +415,6 @@ class CvYieldAmountScreen:
 		return self.pHost != None
 
 	def drawValue(self):
-		if self.bHidden:
-			return
 		screen = self.getDrawScreen()
 		if self.bSelected:
 			szText = u"<color=255,220,100>" + self.szValue + u"</color>"
@@ -526,18 +552,14 @@ class CvYieldAmountScreen:
 
 	# the mouse wheel (collected by the DLL while the dialog is open)
 	def update(self, fDelta):
+		if self.tReopen != None:
+			self.checkReopen()
+			return 0
 		if self.bFinished:
 			return 0
 		try:
 			if self.pHost != None and not self.bHostMain and not self.pHost.isActive():
 				self.finish(False) # the harbor screen was closed meanwhile
-				return 0
-			if self.bHidden:
-				self.iReopenWait -= 1
-				if self.iReopenWait <= 0:
-					self.bHidden = False
-					self.applyPosition(self.pHost)
-					self.drawLayout(self.pHost)
 				return 0
 			self.updateMove()
 			iNotches = CyGame().takeWheelNotches()
