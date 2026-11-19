@@ -4808,7 +4808,12 @@ class CvMainInterface:
 			iNew = len(self.aFrozen) - 1
 			tL = self.aFrozen[iNew][1]
 			self.aFrozen[iNew][5] = self.makeAnchor(tL, (pCity.getX(), pCity.getY()))
-			gc.getGame().setCursorClient(tL[0] + min(tL[2] / 2, 60), tL[1] + tL[6] + tL[7] / 2)
+			# (the cursor on the name line: it goes with the window while the window finds its place - the anchor, the other windows that it gives
+			# way to - as after a jump to a waypoint)
+			iDX = min(tL[2] / 2, 60)
+			iDY = tL[6] + tL[7] / 2
+			gc.getGame().setCursorClient(tL[0] + iDX, tL[1] + iDY)
+			self.tCursorFollow = [self.aFrozen[iNew][0], iDX, iDY, (self.getTipNow() / 1000.0), -1, -1, 0]
 			self.tSecondTipKey = None
 		except:
 			self.tCityJump = None
