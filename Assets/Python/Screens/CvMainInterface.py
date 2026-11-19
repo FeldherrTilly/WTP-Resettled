@@ -5800,7 +5800,12 @@ class CvMainInterface:
 					if iOldLine >= iFrom and iOldLine <= iTo:
 						iNewY = iY + iPad + iFrom * iLine + iLine / 2
 						gc.getGame().setCursorClient(iCurX, iNewY)
-						self.tSecondTipKey = None
+						# (the line that the window is frozen for is the name line at the start of the list now: the frozen child window is
+						# registered for it, no second one comes for the line under the cursor)
+						iKeySel = -1
+						if self.tSecondTipKey is not None:
+							iKeySel = self.tSecondTipKey[2]
+						self.tSecondTipKey = (iLevel, aHeads[0], iKeySel, iFrom, False)
 						if self.bSecondTipShown and self.tPreviewLayout is not None:
 							tP = self.tPreviewLayout
 							iPNewY = max(4, min(screen.getYResolution() - tP[3] - 4, tP[1] + (iNewY - iCurY)))
