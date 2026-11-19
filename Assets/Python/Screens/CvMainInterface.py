@@ -4771,6 +4771,9 @@ class CvMainInterface:
 			if not bLeft or iTarget == iCur:
 				return True
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			# (the list window of the old city goes at once, it does not wait for the camera)
+			self.hideSecondTip(screen)
+			self.tSecondTipKey = None
 			self.closeFrozenChild(screen, iLevel)
 			self.tCityJump = {"city": iTarget, "wait": 3, "tries": 0, "still": 0, "last": None}
 			return True
