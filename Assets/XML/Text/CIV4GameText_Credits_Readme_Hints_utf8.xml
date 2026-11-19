@@ -1423,14 +1423,14 @@ Viel Spass![NEWLINE]
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_HINT_INTERFACE_16</Tag>
-		<English>Press the middle mouse button to center the camera on the active unit.</English>
-		<Portuguese>Pressione o botão do meio do mouse para centralizar a câmera na unidade ativa.</Portuguese>
-		<French>Appuyez sur le bouton central de la souris pour centrer la caméra sur l'unité active.</French>
+		<English>Press [COLOR:140:255:40:255]&lt; middle mouse button &gt;[COLOR_REVERT] to center the camera on the active unit.</English>
+		<Portuguese>Pressione [COLOR:140:255:40:255]&lt; botão do meio do mouse &gt;[COLOR_REVERT] para centralizar a câmera na unidade ativa.</Portuguese>
+		<French>Appuyez sur [COLOR:140:255:40:255]&lt; bouton central de la souris &gt;[COLOR_REVERT] pour centrer la caméra sur l'unité active.</French>
 		<German>Drücken Sie die [COLOR:140:255:40:255]&lt; mittlere Maustaste &gt;[COLOR_REVERT], um die Kamera über der aktiven Einheit zu zentrieren.</German>
-		<Italian>Premi il pulsante centrale del mouse per centrare la visuale sull'unità attiva.</Italian>
-		<Spanish>Pulsar el botón central del ratón para centrar la cámara en la unidad activa.</Spanish>
-		<Russian>Нажмите среднюю кнопку мыши, чтобы центрировать камеру на активном объекте.</Russian>
-		<Hungarian>A középső egérgombbal a kamerát az aktív egységre állíthatod.</Hungarian>
+		<Italian>Premi [COLOR:140:255:40:255]&lt; pulsante centrale del mouse &gt;[COLOR_REVERT] per centrare la visuale sull'unità attiva.</Italian>
+		<Spanish>Pulsar [COLOR:140:255:40:255]&lt; botón central del ratón &gt;[COLOR_REVERT] para centrar la cámara en la unidad activa.</Spanish>
+		<Russian>Нажмите [COLOR:140:255:40:255]среднюю кнопку мыши[COLOR_REVERT], чтобы центрировать камеру на активном объекте.</Russian>
+		<Hungarian>A [COLOR:140:255:40:255]&lt; középső egérgombbal &gt;[COLOR_REVERT] a kamerát az aktív egységre állíthatod.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_HINT_INTERFACE_17</Tag>
@@ -1665,14 +1665,14 @@ Viel Spass![NEWLINE]
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_HINT_INTERFACE_39</Tag>
-		<English>To view combat odds, hold down the right mouse button on the target tile.</English>
-		<Portuguese>Para visualizar as probabilidades de combate, mantenha pressionado o botão direito do mouse no lote alvo.</Portuguese>
-		<French>Pour connaître vos chances en cas de combat, maintenez le bouton droit de la souris enfoncé sur la case visée.</French>
+		<English>To view combat odds, hold down [COLOR:140:255:40:255]&lt; right mouse button &gt;[COLOR_REVERT] on the target tile.</English>
+		<Portuguese>Para visualizar as probabilidades de combate, mantenha pressionado [COLOR:140:255:40:255]&lt; botão direito do mouse &gt;[COLOR_REVERT] no lote alvo.</Portuguese>
+		<French>Pour connaître vos chances en cas de combat, maintenez [COLOR:140:255:40:255]&lt; bouton droit de la souris &gt;[COLOR_REVERT] enfoncé sur la case visée.</French>
 		<German>Möchten Sie Ihre Kampfchancen betrachten, halten Sie die [COLOR:140:255:40:255]&lt; rechte Maustaste &gt;[COLOR_REVERT] über dem gewünschten Geländefeld gedrückt.</German>
-		<Italian>Per visualizzare le probabilità di vittoria di uno scontro, tieni premuto il pulsante destro del mouse su una casella bersaglio.</Italian>
+		<Italian>Per visualizzare le probabilità di vittoria di uno scontro, tieni premuto [COLOR:140:255:40:255]&lt; pulsante destro del mouse &gt;[COLOR_REVERT] su una casella bersaglio.</Italian>
 		<Spanish>Mantener el cursor encima de la casilla objetivo para ver las probabilidades del combate.</Spanish>
-		<Russian>Чтобы просмотреть примерный расчет итогов сражения, удерживайте правую кнопку мыши на целевой клетке.</Russian>
-		<Hungarian>A harci esélyek megtekintéséhez tartsd lenyomva a jobb egérgombot a célpont mezőn.</Hungarian>
+		<Russian>Чтобы просмотреть примерный расчет итогов сражения, удерживайте [COLOR:140:255:40:255]правую кнопку мыши[COLOR_REVERT] на целевой клетке.</Russian>
+		<Hungarian>A harci esélyek megtekintéséhez tartsd lenyomva [COLOR:140:255:40:255]&lt; jobb egérgombot &gt;[COLOR_REVERT] a célpont mezőn.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_HINT_INTERFACE_40</Tag>
@@ -1731,14 +1731,14 @@ Viel Spass![NEWLINE]
 	</TEXT>-->
 	<TEXT>
 		<Tag>TXT_KEY_HINT_INTERFACE_45</Tag>
-		<English>Press the forward and back buttons on your mouse to cycle through units on the same plot.</English>
-		<Portuguese>Pressione os botões avançar e voltar do mouse para percorrer as unidades no mesmo lote.</Portuguese>
-		<French>Appuyez sur le bouton Suivant et Précédent de votre souris pour faire défiler les unités stationnées sur la même case.</French>
+		<English>Press [COLOR:140:255:40:255]&lt; forward and back buttons &gt;[COLOR_REVERT] on your mouse to cycle through units on the same plot.</English>
+		<Portuguese>Pressione [COLOR:140:255:40:255]&lt; botões avançar e voltar &gt;[COLOR_REVERT] do mouse para percorrer as unidades no mesmo lote.</Portuguese>
+		<French>Appuyez sur [COLOR:140:255:40:255]&lt; bouton Suivant et Précédent &gt;[COLOR_REVERT] de votre souris pour faire défiler les unités stationnées sur la même case.</French>
 		<German>Drücken Sie die [COLOR:140:255:40:255]&lt; Vorwärts-/Rückwärts-Tasten &gt;[COLOR_REVERT] Ihrer Maus, um durch alle Einheiten auf einem Geländefeld zu schalten.</German>
-		<Italian>Premi i pulsanti su e giù sul mouse per scorrere le unità sulla stessa casella.</Italian>
-		<Spanish>Pulsar los botones de adelante y atrás del ratón para pasar de una unidad a otra en la misma casilla.</Spanish>
-		<Russian>Нажимайте кнопки "Вперед" и "Назад" на мыши, чтобы переключаться между юнитами на одной клетке.</Russian>
-		<Hungarian>Az egér előre és vissza gombjaival válthatsz az ugyanazon a mezőn lévő egységek között.</Hungarian>
+		<Italian>Premi [COLOR:140:255:40:255]&lt; pulsanti su e giù &gt;[COLOR_REVERT] sul mouse per scorrere le unità sulla stessa casella.</Italian>
+		<Spanish>Pulsar [COLOR:140:255:40:255]&lt; botones de adelante y atrás &gt;[COLOR_REVERT] del ratón para pasar de una unidad a otra en la misma casilla.</Spanish>
+		<Russian>Нажимайте [COLOR:140:255:40:255]кнопки "Вперед" и "Назад"[COLOR_REVERT] на мыши, чтобы переключаться между юнитами на одной клетке.</Russian>
+		<Hungarian>Az [COLOR:140:255:40:255]&lt; egér előre és vissza gombjaival &gt;[COLOR_REVERT] válthatsz az ugyanazon a mezőn lévő egységek között.</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_HINT_INTERFACE_46</Tag>
