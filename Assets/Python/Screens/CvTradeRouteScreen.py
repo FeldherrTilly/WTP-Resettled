@@ -1717,7 +1717,7 @@ class CvTradeRouteScreen:
 			self.drawOuterFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, iRawState)
 			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
 			self.drop(szIcon)
-			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - 32) / 2, 32, 32, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
+			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - 32) / 2, 32, 32, WidgetTypes.WIDGET_HELP_YIELD, iYield, self.iCity) # (the city: the tooltip of the good then shows what the colony makes of it, also on the map, where no colony is selected)
 			# import block
 			iX = self.OX + self.BLOCK_IMP_X
 			self.drawSpin(iSlot, 0, d["impLimit"], iX, iY, iBase + F_IMP_MINUS, iBase + F_IMP_PLUS)

@@ -347,6 +347,7 @@ class CvMainInterface:
 	BUTTON_MESSAGE_LINE = 757 # WTP: a line of a message of the message panel (click: center the map on its place)
 	BUTTON_MESSAGE_WPS = 763 # WTP: message panel: the toggle "List WPs" (the panel shows the waypoints instead of the messages)
 	BUTTON_MESSAGE_WP = 764 # WTP: message panel: a waypoint of the list (iData2 = its index in aMsgWpEntries)
+	BUTTON_TRADE_ROUTE_MANAGER = 765 # WTP: HUD button next to the military advisor: opens the Trade Route Manager
 	BUTTON_TIP_LINE = 762 # WTP: a line of a frozen hover tooltip (right click: Colopedia)
 	dMessagePediaChars = {}
 	aMessageConceptPatterns = []
@@ -1047,6 +1048,13 @@ class CvMainInterface:
 		screen.setImageShape("MilitaryAdvisorButton", ImageShapes.IMAGE_SHAPE_ELLIPSE, -1)
 		screen.setHitMargins("MilitaryAdvisorButton", self.ADVISOR_BUTTON_SIZE / 6, self.ADVISOR_BUTTON_SIZE / 6)
 		self.appendtoHideState(screen, "MilitaryAdvisorButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
+		iBtnX += self.ADVISOR_BUTTON_SPACING
+
+		# WTP: Trade Route Manager (anchored to the military advisor: the same distance as the other buttons; the symbol of the Domestic Advisor)
+		screen.setImageButton("TradeRouteManagerButton", "Art/Interface/Game Hud/Actions/automate_city_high_res.dds", iBtnX, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE) / 2, self.ADVISOR_BUTTON_SIZE, self.ADVISOR_BUTTON_SIZE, WidgetTypes.WIDGET_GENERAL, self.BUTTON_TRADE_ROUTE_MANAGER, -1 )
+		screen.setImageShape("TradeRouteManagerButton", ImageShapes.IMAGE_SHAPE_ELLIPSE, -1)
+		screen.setHitMargins("TradeRouteManagerButton", self.ADVISOR_BUTTON_SIZE / 6, self.ADVISOR_BUTTON_SIZE / 6)
+		self.appendtoHideState(screen, "TradeRouteManagerButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
 		iBtnX += self.ADVISOR_BUTTON_SPACING * 2
 
 		screen.setImageButton( "FatherAdvisorButton", ArtFileMgr.getInterfaceArtInfo("INTERFACE_FOUNDING_FATHER").getPath(), iBtnX, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE) / 2, self.ADVISOR_BUTTON_SIZE, self.ADVISOR_BUTTON_SIZE, WidgetTypes.WIDGET_ACTION, gc.getControlInfo(ControlTypes.CONTROL_FATHER_SCREEN).getActionInfoIndex(), -1 )
@@ -6268,6 +6276,15 @@ class CvMainInterface:
 						aParts.append(aLetters[i])
 				szLines += u"\n" + tRow[0] + u": " + u"/".join(aParts)
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (the production of the good per turn, what is left after the colony's own use: green with a plus sign, red when negative)
+			iNet = pCity.calculateNetYield(iYield)
+			if iNet > 0:
+				szNet = u"<color=0,255,0,255>+%d</color>" % iNet
+			elif iNet < 0:
+				szNet = u"<color=255,0,0,255>%d</color>" % iNet
+			else:
+				szNet = u"0"
+			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_NET", (szNet,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			return szLines
 		except:
 			self.tipError("getTraderChildText")
@@ -9181,7 +9198,7 @@ class CvMainInterface:
 				return
 			self.tPostJump = None
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
-			szHelp = gc.getGame().getWidgetHelpFor(int(WidgetTypes.WIDGET_HELP_YIELD), t["yield"], -1, False)
+			szHelp = gc.getGame().getWidgetHelpFor(int(WidgetTypes.WIDGET_HELP_YIELD), t["yield"], CvScreensInterface.tradeRouteScreen.iCity, False)
 			if szHelp and len(szHelp) > 0:
 				szHelp = self.addRawNote(szHelp, t["yield"])
 				self.showCursorTooltip(screen, szHelp, True, True)
@@ -9283,6 +9300,25 @@ class CvMainInterface:
 		except:
 			pass
 
+	# the line "all colonies: +N per turn" of the tooltip of a good (import / export window)
+	def getTotalNetNote( self, iYield ):
+		try:
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			iNet = 0
+			(loopCity, iter) = pPlayer.firstCity(False)
+			while loopCity:
+				iNet += loopCity.calculateNetYield(iYield)
+				(loopCity, iter) = pPlayer.nextCity(iter, False)
+			if iNet > 0:
+				szNet = u"<color=0,255,0,255>+%d</color>" % iNet
+			elif iNet < 0:
+				szNet = u"<color=255,0,0,255>%d</color>" % iNet
+			else:
+				szNet = u"0"
+			return localText.getText("TXT_KEY_WTP_TIP_TRADERS_NET_ALL", (szNet,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+		except:
+			return u""
+
 	# the picture of a good in the import / export window that has an outer frame (it restricts the production of the city): its help text gets a note
 	def addRawNote( self, szText, iYieldOver = -1 ):
 		try:
@@ -9299,6 +9335,10 @@ class CvMainInterface:
 					szTraders = self.getTradersNote(iYield)
 					if len(szTraders) > 0:
 						szText = szText + u"\n" + szTraders
+					# the surplus per turn of all the colonies together (production minus own use), green with a plus sign, red when negative
+					szTotal = self.getTotalNetNote(iYield)
+					if len(szTotal) > 0:
+						szText = szText + u"\n" + szTotal
 					self.iTradeTipYield = iYield
 					self.szTradeTipText = szText
 		except:
@@ -9841,6 +9881,9 @@ class CvMainInterface:
 					self.onTipLineLeftClick(inputClass.getData2())
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_PIONEER_PLAN):
 				self.togglePioneerPlan()
+
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TRADE_ROUTE_MANAGER):
+				self.openTradeRouteManager()
 
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_PRIVATE_BUILD):
 				self.togglePrivateBuild()
@@ -11376,6 +11419,18 @@ class CvMainInterface:
 				self.hideBuildingUpgradePanel()
 
 	# WTP: pioneer plan mode: choose an improvement and a priority, left click marks a plot, right click removes the mark
+	# WTP: the HUD button of the Trade Route Manager (the same as the hotkey Shift+Alt+T, see CvEventManager)
+	def openTradeRouteManager(self):
+		try:
+			import CvTransportRoutesOverview
+			CvTransportRoutesOverview.g_FromHotkey = True
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+			popupInfo.setText(u"showTransportRoutesOverview")
+			popupInfo.addPopup(gc.getGame().getActivePlayer())
+		except:
+			pass
+
 	def togglePioneerPlan(self):
 
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
@@ -11743,6 +11798,8 @@ class CvMainInterface:
 				return u""
 			elif iData1 == self.BUTTON_PIONEER_PLAN:
 				return localText.getText("TXT_KEY_INTERFACE_PIONEER_PLAN", ());
+			elif iData1 == self.BUTTON_TRADE_ROUTE_MANAGER:
+				return localText.getText("TXT_KEY_INTERFACE_TRADE_ROUTE_MANAGER", ("Shift+Alt+T", ""));
 			elif iData1 == self.BUTTON_TIP_LINE:
 				if CyInterface().isCityScreenUp() and self.isTradeWindowOpen():
 					# (in the city screen with the import / export window the game shows this text in a window of its own, over ours)

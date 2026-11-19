@@ -2722,6 +2722,17 @@
 		<Hungarian>[COLOR_YELLOW]Úttörőterv[COLOR_REVERT]: mezők megjelölése egy fejlesztéshez (fent válaszd ki azt és a prioritást; bal kattintás: megjelölés, jobb kattintás: törlés). Az „Úttörőterv végrehajtása” automatizálású úttörők építik meg.</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_INTERFACE_TRADE_ROUTE_MANAGER</Tag>
+		<English>[COLOR_YELLOW]Trade Route Manager[COLOR_REVERT]: the overview of all transports and their trade routes. Hotkey: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</English>
+		<Portuguese>[COLOR_YELLOW]Gerenciador de rotas comerciais[COLOR_REVERT]: a visão geral de todos os transportes e suas rotas comerciais. Tecla de atalho: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Portuguese>
+		<French>[COLOR_YELLOW]Gestionnaire de routes commerciales[COLOR_REVERT] : l'aperçu de tous les transports et de leurs routes commerciales. Raccourci : [COLOR:140:255:40:255]%s1[COLOR_REVERT]</French>
+		<German>[COLOR_YELLOW]Handelsrouten-Manager[COLOR_REVERT]: die Übersicht aller Transporte und ihrer Handelsrouten. Tastenkürzel: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</German>
+		<Italian>[COLOR_YELLOW]Gestore delle rotte commerciali[COLOR_REVERT]: la panoramica di tutti i trasporti e delle loro rotte commerciali. Scorciatoia: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Italian>
+		<Spanish>[COLOR_YELLOW]Gestor de rutas comerciales[COLOR_REVERT]: la vista general de todos los transportes y sus rutas comerciales. Atajo: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Spanish>
+		<Russian>[COLOR_YELLOW]Менеджер торговых маршрутов[COLOR_REVERT]: обзор всех транспортов и их торговых маршрутов. Горячая клавиша: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Russian>
+		<Hungarian>[COLOR_YELLOW]Kereskedelmi útvonalak kezelője[COLOR_REVERT]: az összes szállítás és kereskedelmi útvonaluk áttekintése. Gyorsbillentyű: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Hungarian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_PIONEER_PLAN_DONE</Tag>
 		<English>Pioneer Plan: no improvements are marked any more. %s1 and the other pioneers of the plan wait.</English>
 		<Portuguese>Plano dos pioneiros: não há mais melhorias marcadas. %s1 e os outros pioneiros do plano esperam.</Portuguese>
