@@ -1496,25 +1496,25 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FATHER_JOINED_TEAM</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] has been able to enlist the support of [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</English>
-		<Portuguese>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] conseguiu o apoio de [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</Portuguese>
-		<French>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] a rejoint [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</French>
-		<German>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] hat die Unterstützung von [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] gewinnen können.</German>
-		<Italian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] si è unito alla squadra [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Italian>
-		<Spanish>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [NUM1:se ha:se ha:se han:se han] unido a [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Spanish>
-		<Russian>[COLOR_HIGHLIGHT_TEXT]%s1_person[COLOR_REVERT] вошел в состав Континентального конгресса [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Russian>
-		<Hungarian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] mellé állt.</Hungarian>
+		<English>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]has been able to enlist the support of[COLOR_REVERT] [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</English>
+		<Portuguese>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]conseguiu o apoio de[COLOR_REVERT] [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</Portuguese>
+		<French>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]a rejoint[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</French>
+		<German>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]hat die Unterstützung von[COLOR_REVERT] [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] gewinnen können.</German>
+		<Italian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]si è unito alla squadra[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Italian>
+		<Spanish>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED][NUM1:se ha:se ha:se han:se han] unido a[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Spanish>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]вошел в состав Континентального конгресса[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Russian>
+		<Hungarian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]mellé állt[COLOR_REVERT].</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FATHER_JOINED_UNKNOWN</Tag>
-		<English>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] is no longer available to join our cause.</English>
-		<Portuguese>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] não está mais disponível para se juntar à nossa causa.</Portuguese>
-		<French>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] n'est plus disponible pour rallier votre cause.</French>
-		<German>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] kann sich unserer Sache nun nicht mehr anschließen.</German>
-		<Italian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] non è più disponibile per unirsi alla nostra causa.</Italian>
-		<Spanish>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] ya no [NUM1:está disponible:está disponible:están disponibles:están disponibles] para unirse a nuestra causa.</Spanish>
-		<Russian>[COLOR_HIGHLIGHT_TEXT]%s1_person[COLOR_REVERT] больше не может присоединиться к нашему делу.</Russian>
-		<Hungarian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] már nem választható a Kontinentális Kongresszusodba.</Hungarian>
+		<English>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]is no longer available to join our cause[COLOR_REVERT].</English>
+		<Portuguese>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]não está mais disponível para se juntar à nossa causa[COLOR_REVERT].</Portuguese>
+		<French>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]n'est plus disponible pour rallier votre cause[COLOR_REVERT].</French>
+		<German>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]kann sich unserer Sache nun nicht mehr anschließen[COLOR_REVERT].</German>
+		<Italian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]non è più disponibile per unirsi alla nostra causa[COLOR_REVERT].</Italian>
+		<Spanish>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]ya no [NUM1:está disponible:está disponible:están disponibles:están disponibles] para unirse a nuestra causa[COLOR_REVERT].</Spanish>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]больше не может присоединиться к нашему делу[COLOR_REVERT].</Russian>
+		<Hungarian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]már nem választható a Kontinentális Kongresszusodba[COLOR_REVERT].</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FATHER_REJECTED</Tag>
