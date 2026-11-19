@@ -6409,7 +6409,7 @@
 		<Portuguese>Há rumores de que Sua Majestade enviou um arquiteto experiente às suas colônias para apoiar o desenvolvimento das colônias.</Portuguese>
 		<French>Il paraitrait que sa Majesté a envoyé un architecte expérimenté dans vos colonies afin d'aider à les bâtir.</French>
 		<German>Es heißt, der König habe zur Förderung der Entwicklung seiner Kolonien in der Neuen Welt einen [COLOR_POSITIVE_TEXT]Architekten[COLOR_REVERT] nach [COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT] entsandt.</German>
-		<Russian>Ходят слухи об отправке в колонии опытного архитектора, чтобы поддержать их развитие.</Russian>
+		<Russian>Ходят слухи об отправке в колонии [COLOR_POSITIVE_TEXT]опытного архитектора[COLOR_REVERT], чтобы поддержать их развитие.</Russian>
 		<Hungarian>Pletykák szerint Őfelsége egy tapasztalt építészt küldött a gyarmatainkra, hogy támogassa azok fejlődését.</Hungarian>
 	</TEXT>
 	<TEXT>

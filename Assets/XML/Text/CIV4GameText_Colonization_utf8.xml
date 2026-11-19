@@ -741,7 +741,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ ist auf %d3[ICON_GOLD] [COLOR_GREEN]gestiegen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ è salito a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en %s2_civ ha subido a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ поднялась до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ [COLOR_GREEN]поднялась до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 		<Hungarian>[COLOR_POSITIVE_TEXT]Áremelkedés![COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] ára %s2_civ piacán %d3[ICON_GOLD] lett.</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -752,7 +752,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ ist auf %d3[ICON_GOLD] [COLOR_RED]gefallen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in %s2_civ è sceso a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en %s2_civ ha bajado a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ упала до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в %s2_civ [COLOR_RED]упала до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 		<Hungarian>[COLOR_WARNING_TEXT]Árcsökkenés![COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] ára %s2_civ piacán %d3[ICON_GOLD] lett.</Hungarian>
 	</TEXT>
 	<TEXT>
@@ -763,7 +763,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Afrika ist auf %d3[ICON_GOLD] [COLOR_GREEN]gestiegen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Africa è salito a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en África ha subido a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке выросла до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке [COLOR_GREEN]выросла до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PRICE_FALL_AFRICA</Tag>
@@ -773,7 +773,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Afrika ist auf %d3[ICON_GOLD] [COLOR_RED]gefallen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Africa è sceso a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en África ha bajado a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке упала до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Африке [COLOR_RED]упала до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PRICE_RISE_PORT_ROYAL</Tag>
@@ -783,7 +783,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Port Royal ist auf %d3[ICON_GOLD] [COLOR_GREEN]gestiegen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] a Port Royal è salito a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en Port Royal ha subido a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале выросла до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале [COLOR_GREEN]выросла до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_PRICE_FALL_PORT_ROYAL</Tag>
@@ -793,7 +793,7 @@
 		<German>Der Preis für [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] in Port Royal ist auf %d3[ICON_GOLD] [COLOR_RED]gefallen[COLOR_REVERT]</German>
 		<Italian>Il prezzo di [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] a Port Royal è sceso a %d3[ICON_GOLD]</Italian>
 		<Spanish>El precio [NUM1:del:de la:de los:de las] [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] en Port Royal ha bajado a %d3[ICON_GOLD].</Spanish>
-		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале упала до %d3[ICON_GOLD]</Russian>
+		<Russian>Цена на [COLOR_HIGHLIGHT_TEXT]%s1_yield[COLOR_REVERT] в Порт-Ройале [COLOR_RED]упала до[COLOR_REVERT] %d3[ICON_GOLD]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUY_AND_SELL_YIELD</Tag>
@@ -4015,7 +4015,7 @@
 		<German>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Die Menschen sind so [COLOR_POSITIVE_TEXT]wohlgenährt und gesund[COLOR_REVERT], dass sie viele Kinder in die Welt setzen - [COLOR_POSITIVE_TEXT]die Stadt wächst![COLOR_REVERT]</German>
 		<Italian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]L'abbondanza di cibo a ha causato un aumento della popolazione!</Italian>
 		<Spanish>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]La abundancia de Alimentos en ha comportado un aumento de población.</Spanish>
-		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Люди настолько сыты и здоровы, что рожают на свет много детей - город растет!</Russian>
+		<Russian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Люди настолько [COLOR_POSITIVE_TEXT]сыты и здоровы[COLOR_REVERT], что рожают на свет много детей - [COLOR_POSITIVE_TEXT]город растет![COLOR_REVERT]</Russian>
 		<Hungarian>[COLOR_POSITIVE_TEXT]%s1_city : [COLOR_REVERT]Az emberek olyan jól tápláltak és egészségesek, hogy sok gyermek született - a város növekszik!</Hungarian>
 	</TEXT>
 	<TEXT>
