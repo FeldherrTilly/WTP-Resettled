@@ -4776,6 +4776,8 @@ class CvMainInterface:
 			self.tSecondTipKey = None
 			self.closeFrozenChild(screen, iLevel)
 			self.tCityJump = {"city": iTarget, "wait": 3, "tries": 0, "still": 0, "last": None}
+			self.bCityHold = True
+			self.szCityHoldWin = u""
 			return True
 		except:
 			self.tipError("tryCityListJump")
@@ -4829,6 +4831,7 @@ class CvMainInterface:
 			iDY = tL[6] + tL[7] / 2
 			gc.getGame().setCursorClient(tL[0] + iDX, tL[1] + iDY)
 			self.tCursorFollow = [self.aFrozen[iNew][0], iDX, iDY, (self.getTipNow() / 1000.0), -1, -1, 0]
+			self.szCityHoldWin = self.aFrozen[iNew][0]
 			self.tSecondTipKey = None
 		except:
 			self.tCityJump = None
@@ -7423,6 +7426,18 @@ class CvMainInterface:
 					self.showModMessage(u"Wheel click: no jump (" + szWhy + u")")
 		except:
 			pass
+		# the jump to a city is not finished (the camera is on its way, the new window and the cursor find their places): no child windows yet; they
+		# come when the window stands still (the cursor is free then and the update below makes the window of the line the cursor is on)
+		if self.bCityHold:
+			bFollowCity = (self.tCursorFollow is not None and self.tCursorFollow[0] == self.szCityHoldWin)
+			if self.tCityJump is None and not bFollowCity:
+				self.bCityHold = False
+				self.tSecondTipKey = None
+			else:
+				if self.bSecondTipShown:
+					self.hideSecondTip(screen)
+				self.tSecondTipKey = None
+				return
 		tKey = (iFz, iPara, iSel, iLineIdx, bPromoLine)
 		if tKey == self.tSecondTipKey:
 			return
@@ -8742,6 +8757,8 @@ class CvMainInterface:
 	dCityWin = {} # frozen tooltips of an own city: prefix -> the city (its name line has the list of the own cities)
 	tTipCity = None # the own city of the tooltip of the cursor (None: it is not the tooltip of an own city)
 	tCityJump = None # after the jump to a city: its tooltip is made and frozen when the camera is there
+	bCityHold = False # the jump to a city is not finished: the child windows of the frozen tooltips do not appear yet
+	szCityHoldWin = u"" # the window of the city that the jump made (the cursor goes with it until it has found its place)
 	iTradeTipYield = -1
 	# is there a frozen tooltip of this good (import / export window)?
 	def isYieldTipFrozen( self, iYield ):
