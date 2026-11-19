@@ -5789,6 +5789,20 @@ class CvMainInterface:
 			self.aFrozen[iLevel][3] = aNewIndent
 			self.remapFrozenParas(iLevel, dMap)
 			self.drawTipWindow(screen, szPrefix, tNew, True, iLevel, aNewIndent, self.dFrozenDark.has_key(szPrefix))
+			try:
+				# the cursor goes with the line of the unit that it was on (the block of the unit is at the start of the list now): the same line
+				# of the block, below the first line of the units
+				iCurX = gc.getGame().getCursorClientX()
+				iCurY = gc.getGame().getCursorClientY()
+				if iCurX >= iX and iCurX < iX + iWidth and iCurY >= iY + iPad and iCurY < iY + iPad + len(aszLines) * iLine:
+					iOldLine = int((iCurY - iY - iPad) / iLine)
+					aBlockLines = [k for k in range(iFrom, iTo + 1) if aiPara[k] >= aBounds[iBlock][0] and aiPara[k] < aBounds[iBlock][1]]
+					if iOldLine in aBlockLines:
+						iNewLine = iFrom + (iOldLine - aBlockLines[0])
+						gc.getGame().setCursorClient(iCurX, iY + iPad + iNewLine * iLine + iLine / 2)
+						self.tSecondTipKey = None
+			except:
+				pass
 		except:
 			self.tipError("moveUnitToTop")
 
