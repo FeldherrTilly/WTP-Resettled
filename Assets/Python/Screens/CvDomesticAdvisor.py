@@ -965,10 +965,10 @@ class CvDomesticAdvisor:
 		screen.setStyle( szTableName, "Table_StandardCiv_Style" )
 		screen.hide( szTableName )
 
-		# WTP: button for the overview of the trade route assignments of all transports (symbol of the automate trade routes command), in the lower row after the tab buttons
-		iOverviewSize = self.iButtonSize * 4 / 3 # the symbol has more empty border than the round tab buttons
+		# WTP: button for the overview of the trade route assignments of all transports (the same icon as the HUD button of the Trade Route Manager), in the lower row after the tab buttons
+		iOverviewSize = self.iButtonSize * 4 / 3 # (the position of the former, larger symbol; the icon is a round button like the tab buttons)
 		iOverviewX = self.nScreenWidth * 843 / 1000
-		screen.setImageButton("TransportOverviewButton", "Art/Interface/Game Hud/Actions/automate_city_high_res.dds", iOverviewX, self.Y_LOWER_ROW + self.iButtonSize / 2 - iOverviewSize / 2, iOverviewSize, iOverviewSize, WidgetTypes.WIDGET_GENERAL, 10002, -1)
+		screen.setImageButton("TransportOverviewButton", ArtFileMgr.getInterfaceArtInfo("INTERFACE_TRADE_ROUTE_MANAGER").getPath(), iOverviewX + (iOverviewSize - self.iButtonSize) / 2, self.Y_LOWER_ROW, self.iButtonSize, self.iButtonSize, WidgetTypes.WIDGET_GENERAL, 10002, -1)
 		screen.show("TransportOverviewButton")
 
 		screen.setTableColumnHeader( szTableName, 0, localText.getText("TXT_KEY_SOURCE", ()), (150 * self.nTableWidth) / self.nNormalizedTableWidth)
