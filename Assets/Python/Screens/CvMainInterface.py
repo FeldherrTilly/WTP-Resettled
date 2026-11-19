@@ -3997,6 +3997,7 @@ class CvMainInterface:
 			aiPara = [] # the paragraph (text between two line breaks of the help) of every line: right click in the frozen window
 			aiIndent = [] # indent of continued rows of icons (pixels)
 			aszRaw = self.carryColors(self.stripCarries(szHelp).split(u"\n"))
+			self.tTipCity = None
 			aszParas = self.foldYieldDetails(aszRaw)
 			if aszParas is None:
 				aszParas = self.foldCityDetails(aszRaw)
@@ -4687,10 +4688,171 @@ class CvMainInterface:
 				if aEntry[1] is not None:
 					self.dTipDetails[len(aNew)] = aEntry[1]
 				aNew.append(aEntry[0])
+			try:
+				# an own city: the name line has the list of the own cities as its child window (see tryCityListJump)
+				if pCity.getOwner() == gc.getGame().getActivePlayer():
+					self.tTipCity = pCity.getID()
+					szCities = self.getCityListText(pCity.getID())
+					if len(szCities) > 0:
+						self.dTipDetails[0] = szCities
+			except:
+				pass
 			return aNew
 		except:
 			self.dTipDetails = {}
 		return None
+
+	# the own cities in the order of their foundation: (turn of the foundation, id, name)
+	def getCityOrder( self ):
+		aList = []
+		try:
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			(loopCity, iter) = pPlayer.firstCity(False)
+			while loopCity:
+				aList.append((loopCity.getGameTurnFounded(), loopCity.getID(), loopCity.getName()))
+				(loopCity, iter) = pPlayer.nextCity(iter, False)
+		except:
+			pass
+		aList.sort()
+		return aList
+
+	# the child window of the name line of an own city: the own cities one per line, the city of the tooltip in green; u"" if there is only one
+	def getCityListText( self, iCurrent ):
+		aOrder = self.getCityOrder()
+		if len(aOrder) < 2:
+			return u""
+		aLines = []
+		for tCity in aOrder:
+			szName = re.sub(u"<[^>]*>", u"", tCity[2])
+			if tCity[1] == iCurrent:
+				szName = u"<color=120,230,120,255>" + szName + u"</color>"
+			aLines.append(szName)
+		return u"\n".join(aLines)
+
+	# the frozen tooltip of an own city: its city (-1: it is no such window)
+	def getCityOfWindow( self, iLevel ):
+		try:
+			if iLevel < 0 or iLevel >= len(self.aFrozen):
+				return -1
+			return self.dCityWin.get(self.aFrozen[iLevel][0], -1)
+		except:
+			return -1
+
+	# A click on the name line of the frozen tooltip of an own city. Right click: the map looks at the city that Shift + mouse wheel has chosen in
+	# the list (without a choice: at the city of the tooltip). Left click: the jump to the next city of the list (the chosen one): the tooltip of
+	# this one is frozen there and the cursor stands on its name line again; the tooltip that the click was made in is closed.
+	def tryCityListJump( self, iLevel, iPara, bLeft ):
+		try:
+			iCur = self.getCityOfWindow(iLevel)
+			if iPara != 0 or iCur < 0:
+				return False
+			aOrder = self.getCityOrder()
+			if len(aOrder) == 0:
+				return False
+			iTarget = iCur
+			if self.iTipSelPara == 0 and self.iTipSelLevel == iLevel and self.iTipSelIdx >= 0 and self.iTipSelIdx < len(aOrder):
+				iTarget = aOrder[self.iTipSelIdx][1]
+			elif bLeft:
+				iPos = 0
+				for k in range(len(aOrder)):
+					if aOrder[k][1] == iCur:
+						iPos = k
+						break
+				iTarget = aOrder[(iPos + 1) % len(aOrder)][1]
+			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(iTarget)
+			if pCity is None or pCity.isNone():
+				return False
+			CyCamera().JustLookAtPlot(pCity.plot())
+			self.tJump = (pCity.getX(), pCity.getY(), (self.getTipNow() / 1000.0))
+			try:
+				CyInterface().playGeneralSound(self.szModJumpSound)
+			except:
+				pass
+			if not bLeft or iTarget == iCur:
+				return True
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			# (the list window of the old city goes at once, it does not wait for the camera)
+			self.hideSecondTip(screen)
+			self.tSecondTipKey = None
+			self.closeFrozenChild(screen, iLevel)
+			self.tCityJump = {"city": iTarget, "wait": 3, "tries": 0, "still": 0, "last": None}
+			self.bCityHold = True
+			self.szCityHoldWin = u""
+			return True
+		except:
+			self.tipError("tryCityListJump")
+		return False
+
+	# after the jump to a city: when the camera is there the tooltip of the city (the text that the game shows on its banner) is made, frozen at
+	# the city (it moves with the map, other frozen windows give way) and the cursor goes to its name line
+	def updateCityJump( self ):
+		t = self.tCityJump
+		if t is None:
+			return
+		try:
+			if t["wait"] > 0:
+				t["wait"] -= 1
+				return
+			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(t["city"])
+			if pCity is None or pCity.isNone():
+				self.tCityJump = None
+				return
+			(iSX, iSY) = self.getPlotScreen(pCity.getX(), pCity.getY())
+			# (the camera needs some time to arrive: the window is made when the city has stood still on the screen for a few frames, so that the
+			# window does not fly along with the city; at most about 1.5 seconds)
+			t["tries"] += 1
+			tLast = t["last"]
+			if tLast is not None and abs(iSX - tLast[0]) <= 1 and abs(iSY - tLast[1]) <= 1:
+				t["still"] += 1
+			else:
+				t["still"] = 0
+			t["last"] = (iSX, iSY)
+			# (a city that has not moved yet is standing still too: the camera may start late. It counts as arrived when the city is near the
+			# middle of the screen; a city that the camera cannot center (map edge) counts after about a second)
+			xCheck = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getXResolution()
+			yCheck = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution()
+			bCentered = (abs(iSX - xCheck / 2) < xCheck * 0.3 and abs(iSY - yCheck / 2) < yCheck * 0.3)
+			bReady = (t["still"] >= 4 and (bCentered or t["tries"] >= 60))
+			if not bReady and t["tries"] < 150:
+				return
+			self.tCityJump = None
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
+			# (the cursor goes to the city, but not onto the HUD: a city at the lower right of the map (the camera cannot center it there) would put
+			# the cursor on the score table; the game then reports the help of the HUD and no tooltip is made)
+			xRes = screen.getXResolution()
+			yRes = screen.getYResolution()
+			iSX = max(int(xRes * 0.05), min(int(xRes * 0.72), iSX))
+			iSY = max(int(yRes * 0.12), min(int(yRes * 0.62), iSY))
+			gc.getGame().setCursorClient(iSX, iSY)
+			self.bHudHover = False
+			self.szHudHelp = u""
+			self.szPendingHelp = None
+			szHelp = gc.getGame().getCityBarHelpFor(pCity.getOwner(), pCity.getID())
+			if len(szHelp) == 0:
+				return
+			self.szSuppressHelp = u""
+			self.hideCursorTooltip(screen)
+			self.showCursorTooltip(screen, szHelp, False, True)
+			if not self.bCursorTipShown or self.tTipCity != t["city"]:
+				return
+			if not self.freezeCursorTooltip() or len(self.aFrozen) == 0:
+				return
+			iNew = len(self.aFrozen) - 1
+			tL = self.aFrozen[iNew][1]
+			self.aFrozen[iNew][5] = self.makeAnchor(tL, (pCity.getX(), pCity.getY()))
+			# (the cursor on the name line: it goes with the window while the window finds its place - the anchor, the other windows that it gives
+			# way to - as after a jump to a waypoint)
+			iDX = min(tL[2] / 2, 60)
+			iDY = tL[6] + tL[7] / 2
+			gc.getGame().setCursorClient(tL[0] + iDX, tL[1] + iDY)
+			self.tCursorFollow = [self.aFrozen[iNew][0], iDX, iDY, (self.getTipNow() / 1000.0), -1, -1, 0]
+			self.szCityHoldWin = self.aFrozen[iNew][0]
+			self.tCityHoldPos = None
+			self.iCityHoldStill = 0
+			self.tSecondTipKey = None
+		except:
+			self.tCityJump = None
+			self.tipError("updateCityJump")
 
 	# where a window of this size goes: mode 0 beside the cursor (right of it, left if there is no room; beside the own windows when the cursor is
 	# on one) with its top at the lower end of the cursor; mode 1 at the place of the game tooltip (left, above the HUD, growing upwards)
@@ -5189,6 +5351,9 @@ class CvMainInterface:
 			iPara = iData % 1000
 			# a line of a colony in the tooltip of a good of the import / export window: the jump to it
 			if self.tryTraderJump(iLevel, iPara):
+				return
+			# the name line of the tooltip of an own city: the jump to the next city
+			if self.tryCityListJump(iLevel, iPara, True):
 				return
 			# a window with waypoints: the left click on the line of a waypoint jumps to it (the update of the frozen windows knows which one is chosen);
 			# when it is no waypoint (the line "Set waypoint..."), the click does what it always did
@@ -6723,6 +6888,9 @@ class CvMainInterface:
 			if self.iTradeTipYield >= 0 and self.szCursorTipText == self.szTradeTipText:
 				# (the tooltip of a good of the import / export window: its lines of colonies can be clicked)
 				self.dTraderWin[self.aFrozen[-1][0]] = self.iTradeTipYield
+			if self.tTipCity is not None:
+				# (the tooltip of an own city: the list of the cities in the name line)
+				self.dCityWin[self.aFrozen[-1][0]] = self.tTipCity
 			try:
 				# the tooltip of an own unit: the line "Set waypoint..."
 				iNew = len(self.aFrozen) - 1
@@ -7157,9 +7325,14 @@ class CvMainInterface:
 						iRowChild = i
 						aChildKeys = range(len(self.aFrozen[i][2]))
 						iWpRowCount = len(aChildKeys)
+		# (the name line of the tooltip of an own city: the wheel goes through the list of the cities in its child window)
+		bCityRow = False
+		if iFz >= 0 and iPara == 0 and not bWpRow and not bCmdRow and dDetails.has_key(0) and self.dCityWin.has_key(self.aFrozen[iFz][0]):
+			bCityRow = True
+			iWpRowCount = len(dDetails[0].split(u"\n"))
 		bWpWindow = (iFz >= 0 and iPara >= 0 and self.dWpWin.has_key(self.aFrozen[iFz][0]) and self.dWpWin[self.aFrozen[iFz][0]]["paras"].has_key(iPara))
 		try:
-			if (bWpLine or bWpRow or bCmdRow) and bShift:
+			if (bWpLine or bWpRow or bCmdRow or bCityRow) and bShift:
 				bWheel = True
 			elif iPara >= 0 and not bWpWindow and not bPromoLine and bShift and len(self.getTextPediaAllTargets(aszTopParas[iPara])) > 0 and self.getBlockUnit(iFz, aszTopParas, iPara) is None:
 				bWheel = True
@@ -7173,7 +7346,7 @@ class CvMainInterface:
 			if iNotches != 0:
 				if bWpLine:
 					aTargets = aWpStops
-				elif bWpRow or bCmdRow:
+				elif bWpRow or bCmdRow or bCityRow:
 					aTargets = range(iWpRowCount)
 				else:
 					aTargets = self.getTextPediaAllTargets(aszTopParas[iPara])
@@ -7270,6 +7443,32 @@ class CvMainInterface:
 					self.showModMessage(u"Wheel click: no jump (" + szWhy + u")")
 		except:
 			pass
+		# the jump to a city is not finished (the camera is on its way, the new window and the cursor find their places): no child windows yet; they
+		# come when the window stands still (the cursor is free then and the update below makes the window of the line the cursor is on)
+		if self.bCityHold:
+			bFollowCity = (self.tCursorFollow is not None and self.tCursorFollow[0] == self.szCityHoldWin)
+			bStill = False
+			if self.tCityJump is None and bFollowCity:
+				# (the window stands still for two frames: the jump is finished at once, the cursor follows no longer; no waiting time)
+				for iHold in range(len(self.aFrozen)):
+					if self.aFrozen[iHold][0] == self.szCityHoldWin:
+						tHoldPos = (self.aFrozen[iHold][1][0], self.aFrozen[iHold][1][1])
+						if tHoldPos == self.tCityHoldPos:
+							self.iCityHoldStill += 1
+						else:
+							self.iCityHoldStill = 0
+						self.tCityHoldPos = tHoldPos
+						bStill = (self.iCityHoldStill >= 2)
+			if bStill:
+				self.tCursorFollow = None
+			if self.tCityJump is None and (not bFollowCity or bStill):
+				self.bCityHold = False
+				self.tSecondTipKey = None
+			else:
+				if self.bSecondTipShown:
+					self.hideSecondTip(screen)
+				self.tSecondTipKey = None
+				return
 		tKey = (iFz, iPara, iSel, iLineIdx, bPromoLine)
 		if tKey == self.tSecondTipKey:
 			return
@@ -7338,8 +7537,8 @@ class CvMainInterface:
 				szDetail = dDetails[iPara]
 				iMarkCmd = -1
 				szMarkOrig = u""
-				if bCmdRow and iSel >= 0:
-					# (the line of the commands that the wheel has chosen is yellow)
+				if (bCmdRow or bCityRow) and iSel >= 0:
+					# (the line of the commands (or of the city) that the wheel has chosen is yellow)
 					aDetailLines = szDetail.split(u"\n")
 					if iSel < len(aDetailLines):
 						iMarkCmd = iSel
@@ -8298,6 +8497,9 @@ class CvMainInterface:
 			iLevel = iData / 1000
 			iPara = iData % 1000
 			aszParas = self.getLevelParas(iLevel)
+			# right click on the name line of the tooltip of an own city: the map looks at the city chosen in the list
+			if self.tryCityListJump(iLevel, iPara, False):
+				return
 			# right click on the list of the stored / producing goods of a city: the import / export window of the city with these goods
 			tKindHit = self.dFrozenKind.get(self.aFrozen[iLevel][0])
 			if tKindHit is not None and tKindHit[0] == "list" and iPara >= 0 and iPara < len(aszParas):
@@ -8583,6 +8785,13 @@ class CvMainInterface:
 	aTradeReturn = [] # the views the jumps from the tooltips of the import / export window started from (the last one is the one to go back to)
 	dTraderLines = {} # the lines of the traders in the tooltips: text without colors -> id of the city
 	dTraderWin = {} # frozen windows with such lines: prefix -> the good
+	dCityWin = {} # frozen tooltips of an own city: prefix -> the city (its name line has the list of the own cities)
+	tTipCity = None # the own city of the tooltip of the cursor (None: it is not the tooltip of an own city)
+	tCityJump = None # after the jump to a city: its tooltip is made and frozen when the camera is there
+	bCityHold = False # the jump to a city is not finished: the child windows of the frozen tooltips do not appear yet
+	szCityHoldWin = u"" # the window of the city that the jump made (the cursor goes with it until it has found its place)
+	tCityHoldPos = None # its place in the last frame
+	iCityHoldStill = 0 # the frames it stands still
 	iTradeTipYield = -1
 	# is there a frozen tooltip of this good (import / export window)?
 	def isYieldTipFrozen( self, iYield ):
@@ -11351,6 +11560,7 @@ class CvMainInterface:
 		self.updateCursorTooltip()
 		self.pollWidgetHelp()
 		self.updatePostJump()
+		self.updateCityJump()
 		try:
 			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
 		except:

@@ -7,6 +7,7 @@
 #include "CvPopupInfo.h"
 #include "CvDLLInterfaceIFaceBase.h"
 #include "CvDLLWidgetData.h"
+#include "CvGameTextMgr.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
 #include "CyPlayer.h"
@@ -886,6 +887,23 @@ std::wstring CyGame::getWidgetHelpFor(int eWidgetType, int iData1, int iData2, b
 	wtpSetInternalHelp(true);
 	CvDLLWidgetData::getInstance().parseHelp(szBuffer, widgetData);
 	wtpSetInternalHelp(false);
+	return std::wstring(szBuffer.getCString());
+}
+
+std::wstring CyGame::getCityBarHelpFor(int iPlayer, int iCityID) const
+{
+	// the text that the game shows when the cursor is on the banner of the city (CvGameTextMgr::setCityBarHelp); only for cities of a player
+	if (iPlayer < 0 || iPlayer >= MAX_PLAYERS)
+	{
+		return std::wstring();
+	}
+	CvCity* pCity = GET_PLAYER((PlayerTypes)iPlayer).getCity(iCityID);
+	if (pCity == NULL)
+	{
+		return std::wstring();
+	}
+	CvWStringBuffer szBuffer;
+	GAMETEXT.setCityBarHelp(szBuffer, pCity);
 	return std::wstring(szBuffer.getCString());
 }
 
