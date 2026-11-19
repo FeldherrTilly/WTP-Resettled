@@ -4772,7 +4772,7 @@ class CvMainInterface:
 				return True
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			self.closeFrozenChild(screen, iLevel)
-			self.tCityJump = {"city": iTarget, "wait": 4}
+			self.tCityJump = {"city": iTarget, "wait": 3, "tries": 0, "still": 0, "last": None}
 			return True
 		except:
 			self.tipError("tryCityListJump")
@@ -4788,12 +4788,24 @@ class CvMainInterface:
 			if t["wait"] > 0:
 				t["wait"] -= 1
 				return
-			self.tCityJump = None
 			pCity = gc.getPlayer(gc.getGame().getActivePlayer()).getCity(t["city"])
 			if pCity is None or pCity.isNone():
+				self.tCityJump = None
 				return
-			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			(iSX, iSY) = self.getPlotScreen(pCity.getX(), pCity.getY())
+			# (the camera needs some time to arrive: the window is made when the city has stood still on the screen for a few frames, so that the
+			# window does not fly along with the city; at most about 1.5 seconds)
+			t["tries"] += 1
+			tLast = t["last"]
+			if tLast is not None and abs(iSX - tLast[0]) <= 1 and abs(iSY - tLast[1]) <= 1:
+				t["still"] += 1
+			else:
+				t["still"] = 0
+			t["last"] = (iSX, iSY)
+			if t["still"] < 3 and t["tries"] < 90:
+				return
+			self.tCityJump = None
+			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 			gc.getGame().setCursorClient(iSX, iSY)
 			szHelp = gc.getGame().getCityBarHelpFor(pCity.getOwner(), pCity.getID())
 			if len(szHelp) == 0:
