@@ -17,8 +17,8 @@ BTN_OK = 40004
 BTN_CANCEL = 40005
 BTN_MOVE = 40010 # +0 left, +1 right, +2 up, +3 down
 MOVE_STEP = 60
-MOVE_DELAY = 18 # frames until the held move button repeats
-MOVE_REPEAT = 3 # frames between the steps
+MOVE_DELAY = 30 # frames until the held move button repeats
+MOVE_REPEAT = 5 # frames between the steps
 
 STEP = 25
 STEP_CTRL = 50
@@ -59,6 +59,11 @@ class CvYieldAmountScreen:
 		self.bRepeatDone = False
 		self.iPendX = 0
 		self.iPendY = 0
+		self.bCtrlDown = False # the state of Shift and Ctrl, noted from the key events (the interface does not give it in this dialog)
+		self.bShiftDown = False
+		self.tReopen = None # the dialog that Alt+Tab closed (it is opened again for the same transfer)
+		self.iReopenWait = 0
+		self.iReopenTries = 0
 
 	def getScreen(self):
 		return CyGInterfaceScreen(self.SCREEN_NAME, CvScreenEnums.YIELD_AMOUNT)
@@ -89,6 +94,7 @@ class CvYieldAmountScreen:
 		self.szValue = unicode(iMax)
 		self.bSelected = True
 		self.bFinished = False
+		self.tReopen = None
 
 		# a harbor screen (Europe / Africa / Port Royal) that is open would be closed by the game when another screen opens: the
 		# dialog is drawn on that screen then (a screen of its own is used everywhere else)
@@ -118,6 +124,8 @@ class CvYieldAmountScreen:
 		self.iKeyBack = self.getKeyId("KB_BACKSPACE")
 		self.aKeyOk = [self.getKeyId("KB_RETURN"), self.getKeyId("KB_NUMPADENTER")]
 		self.iKeyEsc = self.getKeyId("KB_ESCAPE")
+		self.aKeyShift = [self.getKeyId("KB_LSHIFT"), self.getKeyId("KB_RSHIFT")]
+		self.aKeyCtrl = [self.getKeyId("KB_LCONTROL"), self.getKeyId("KB_RCONTROL")]
 		self.iKeyUp = self.getKeyId("KB_PGUP")
 		self.iKeyDown = self.getKeyId("KB_PGDN")
 		self.aKeyArrows = [self.getKeyId("KB_LEFT"), self.getKeyId("KB_RIGHT"), self.getKeyId("KB_UP"), self.getKeyId("KB_DOWN")] # (move the window)
@@ -225,11 +233,19 @@ class CvYieldAmountScreen:
 			return MOVE_STEP / 2
 		return MOVE_STEP
 
+	# Ctrl and Shift for the move buttons and the held keys: Ctrl from the game window (as the mouse wheel), Shift from the key events
 	def getModifiers(self):
+		bCtrl = self.bCtrlDown
+		bShift = self.bShiftDown
 		try:
-			return (CyInterface().ctrlKey(), CyInterface().shiftKey())
+			bCtrl = bCtrl or CyGame().isCtrlKeyPressed()
 		except:
-			return (False, False)
+			pass
+		try:
+			bShift = bShift or CyInterface().shiftKey()
+		except:
+			pass
+		return (bCtrl, bShift)
 
 	# a step is only noted here, the window is moved once per frame
 	def queueMove(self, iDir, iStep):
@@ -284,6 +300,10 @@ class CvYieldAmountScreen:
 		self.drawLayout(screen)
 
 	def handleKeyUp(self, iKey):
+		if iKey in self.aKeyShift:
+			self.bShiftDown = False
+		if iKey in self.aKeyCtrl:
+			self.bCtrlDown = False
 		if iKey in self.aKeyArrows:
 			iDir = self.aKeyArrows.index(iKey)
 			if iDir in self.aHeld:
@@ -351,6 +371,36 @@ class CvYieldAmountScreen:
 
 	def isHostMain(self):
 		return self.bHostMain and not self.bFinished
+
+	# the game window was activated again (Alt+Tab): the city screen is not drawn again while the dialog is on this screen (the redraw
+	# is blocked then). The dialog is closed for a few frames (the city is drawn) and opened again with the same transfer, value and place.
+	def windowActivated(self):
+		if self.bFinished or not self.bHostMain:
+			return
+		self.tReopen = (self.iYield, self.iUnit, self.iMax, self.iData3, self.bPlayerAction, self.iFromPlayer, self.szValue, self.bSelected, CyInterface().isCityScreenUp())
+		self.iReopenWait = 4
+		self.iReopenTries = 0
+		self.finish(False)
+
+	def checkReopen(self):
+		if self.iReopenWait > 0:
+			self.iReopenWait -= 1
+			return
+		try:
+			tState = self.tReopen
+			if CyInterface().isCityScreenUp() != tState[8]:
+				# (the screen is not there yet; the dialog is not opened for ever)
+				self.iReopenTries += 1
+				if self.iReopenTries > 240:
+					self.tReopen = None
+				return
+			self.tReopen = None
+			if self.open(tState[0], tState[1], tState[2], tState[3], tState[4], tState[5]) != 0:
+				self.szValue = tState[6]
+				self.bSelected = tState[7]
+				self.drawValue()
+		except:
+			self.tReopen = None
 
 	def refreshView(self):
 		# ask the interface to redraw the parts that show artifacts (minimap, ovals) in the city screen
@@ -431,6 +481,8 @@ class CvYieldAmountScreen:
 
 	# a key down event (CvEventManager.onKbdEvent gives them to the dialog while it is open)
 	def handleKey(self, iKey, bCtrl, bShift = False, bAlt = False):
+		self.bCtrlDown = bCtrl or iKey in self.aKeyCtrl
+		self.bShiftDown = bShift or iKey in self.aKeyShift
 		if bCtrl and bShift and iKey == self.getKeyId("KB_Q"):
 			self.resetPosition()
 		elif iKey in self.aKeyArrows:
@@ -509,6 +561,9 @@ class CvYieldAmountScreen:
 
 	# the mouse wheel (collected by the DLL while the dialog is open)
 	def update(self, fDelta):
+		if self.tReopen != None:
+			self.checkReopen()
+			return 0
 		if self.bFinished:
 			return 0
 		try:
