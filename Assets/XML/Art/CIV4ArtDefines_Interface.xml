@@ -906,5 +906,9 @@
 			<Type>INTERFACE_PRIVATE_PIONEER</Type>
 			<Path>Art/Interface/Game Hud/Top_buttons/Private_Pioneer.dds</Path>
 		</InterfaceArtInfo>
+		<InterfaceArtInfo>
+			<Type>INTERFACE_TRADE_ROUTE_MANAGER</Type>
+			<Path>Art/Interface/Game Hud/Top_buttons/Trade_Route_Manager.dds</Path>
+		</InterfaceArtInfo>
 	</InterfaceArtInfos>
 </Civ4ArtDefines>

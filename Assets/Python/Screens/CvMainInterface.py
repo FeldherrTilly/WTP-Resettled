@@ -347,6 +347,7 @@ class CvMainInterface:
 	BUTTON_MESSAGE_LINE = 757 # WTP: a line of a message of the message panel (click: center the map on its place)
 	BUTTON_MESSAGE_WPS = 763 # WTP: message panel: the toggle "List WPs" (the panel shows the waypoints instead of the messages)
 	BUTTON_MESSAGE_WP = 764 # WTP: message panel: a waypoint of the list (iData2 = its index in aMsgWpEntries)
+	BUTTON_TRADE_ROUTE_MANAGER = 765 # WTP: HUD button next to the military advisor: opens the Trade Route Manager
 	BUTTON_TIP_LINE = 762 # WTP: a line of a frozen hover tooltip (right click: Colopedia)
 	dMessagePediaChars = {}
 	aMessageConceptPatterns = []
@@ -1047,6 +1048,13 @@ class CvMainInterface:
 		screen.setImageShape("MilitaryAdvisorButton", ImageShapes.IMAGE_SHAPE_ELLIPSE, -1)
 		screen.setHitMargins("MilitaryAdvisorButton", self.ADVISOR_BUTTON_SIZE / 6, self.ADVISOR_BUTTON_SIZE / 6)
 		self.appendtoHideState(screen, "MilitaryAdvisorButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
+		iBtnX += self.ADVISOR_BUTTON_SPACING
+
+		# WTP: Trade Route Manager (anchored to the military advisor: the same distance as the other buttons)
+		screen.setImageButton("TradeRouteManagerButton", ArtFileMgr.getInterfaceArtInfo("INTERFACE_TRADE_ROUTE_MANAGER").getPath(), iBtnX, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE) / 2, self.ADVISOR_BUTTON_SIZE, self.ADVISOR_BUTTON_SIZE, WidgetTypes.WIDGET_GENERAL, self.BUTTON_TRADE_ROUTE_MANAGER, -1 )
+		screen.setImageShape("TradeRouteManagerButton", ImageShapes.IMAGE_SHAPE_ELLIPSE, -1)
+		screen.setHitMargins("TradeRouteManagerButton", self.ADVISOR_BUTTON_SIZE / 6, self.ADVISOR_BUTTON_SIZE / 6)
+		self.appendtoHideState(screen, "TradeRouteManagerButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
 		iBtnX += self.ADVISOR_BUTTON_SPACING * 2
 
 		screen.setImageButton( "FatherAdvisorButton", ArtFileMgr.getInterfaceArtInfo("INTERFACE_FOUNDING_FATHER").getPath(), iBtnX, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE) / 2, self.ADVISOR_BUTTON_SIZE, self.ADVISOR_BUTTON_SIZE, WidgetTypes.WIDGET_ACTION, gc.getControlInfo(ControlTypes.CONTROL_FATHER_SCREEN).getActionInfoIndex(), -1 )
@@ -9842,6 +9850,9 @@ class CvMainInterface:
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_PIONEER_PLAN):
 				self.togglePioneerPlan()
 
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TRADE_ROUTE_MANAGER):
+				self.openTradeRouteManager()
+
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_PRIVATE_BUILD):
 				self.togglePrivateBuild()
 
@@ -11376,6 +11387,18 @@ class CvMainInterface:
 				self.hideBuildingUpgradePanel()
 
 	# WTP: pioneer plan mode: choose an improvement and a priority, left click marks a plot, right click removes the mark
+	# WTP: the HUD button of the Trade Route Manager (the same as the hotkey Shift+Alt+T, see CvEventManager)
+	def openTradeRouteManager(self):
+		try:
+			import CvTransportRoutesOverview
+			CvTransportRoutesOverview.g_FromHotkey = True
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+			popupInfo.setText(u"showTransportRoutesOverview")
+			popupInfo.addPopup(gc.getGame().getActivePlayer())
+		except:
+			pass
+
 	def togglePioneerPlan(self):
 
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
@@ -11743,6 +11766,8 @@ class CvMainInterface:
 				return u""
 			elif iData1 == self.BUTTON_PIONEER_PLAN:
 				return localText.getText("TXT_KEY_INTERFACE_PIONEER_PLAN", ());
+			elif iData1 == self.BUTTON_TRADE_ROUTE_MANAGER:
+				return localText.getText("TXT_KEY_INTERFACE_TRADE_ROUTE_MANAGER", ("Shift+Alt+T", ""));
 			elif iData1 == self.BUTTON_TIP_LINE:
 				if CyInterface().isCityScreenUp() and self.isTradeWindowOpen():
 					# (in the city screen with the import / export window the game shows this text in a window of its own, over ours)
