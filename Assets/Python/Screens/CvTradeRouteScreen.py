@@ -389,6 +389,8 @@ class CvTradeRouteScreen:
 		self.iMoveDir = -1 # the move button that is held (0 left, 1 right, 2 up, 3 down)
 		self.iMoveWait = 0
 		self.aHeld = [] # the arrow keys that are down
+		self.bCtrlDown = False # the state of Shift and Ctrl, noted from the key events (the interface does not give it in this window)
+		self.bShiftDown = False
 		self.iHoldWait = 0
 		self.bMouseWasDown = False
 		self.bRepeatDone = False
@@ -1345,6 +1347,8 @@ class CvTradeRouteScreen:
 		self.iKey6 = self.getKeyId("KB_6")
 		self.iKey7 = self.getKeyId("KB_7")
 		self.iKeyEsc = self.getKeyId("KB_ESCAPE")
+		self.aKeyShift = [self.getKeyId("KB_LSHIFT"), self.getKeyId("KB_RSHIFT")]
+		self.aKeyCtrl = [self.getKeyId("KB_LCONTROL"), self.getKeyId("KB_RCONTROL")]
 		self.pHost = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
 		self.iFirst = 0
 		self.iPendX = 0
@@ -2050,11 +2054,19 @@ class CvTradeRouteScreen:
 		self.iPendX += [-iStep, iStep, 0, 0][iDir]
 		self.iPendY += [0, 0, -iStep, iStep][iDir]
 
+	# Ctrl and Shift for the move buttons and the held keys: Ctrl from the game window (as the mouse wheel), Shift from the key events
 	def getModifiers(self):
+		bCtrl = self.bCtrlDown
+		bShift = self.bShiftDown
 		try:
-			return (CyInterface().ctrlKey(), CyInterface().shiftKey())
+			bCtrl = bCtrl or CyGame().isCtrlKeyPressed()
 		except:
-			return (False, False)
+			pass
+		try:
+			bShift = bShift or CyInterface().shiftKey()
+		except:
+			pass
+		return (bCtrl, bShift)
 
 	# an arrow key goes down (the repeats of the keyboard are ignored: the held keys are handled in updateMove)
 	def pressArrow(self, iDir, bCtrl, bShift):
@@ -2074,6 +2086,10 @@ class CvTradeRouteScreen:
 		self.buildLayout()
 
 	def handleKeyUp(self, iKey):
+		if iKey in self.aKeyShift:
+			self.bShiftDown = False
+		if iKey in self.aKeyCtrl:
+			self.bCtrlDown = False
 		if iKey in self.aKeyArrows:
 			iDir = self.aKeyArrows.index(iKey)
 			if iDir in self.aHeld:
@@ -2169,6 +2185,8 @@ class CvTradeRouteScreen:
 
 	# a key down event (CvEventManager.onKbdEvent gives them to the window while it is open)
 	def handleKey(self, iKey, bCtrl, bShift = False, bAlt = False):
+		self.bCtrlDown = bCtrl or iKey in self.aKeyCtrl
+		self.bShiftDown = bShift or iKey in self.aKeyShift
 		if bAlt and iKey != self.iKeyEsc:
 			# Alt+Tab (switching out of the game) must not count as Tab (accept the suggestion) or as typing
 			return

@@ -4043,6 +4043,23 @@ class CvMainInterface:
 	iReopenTries = 0
 	iReopenWait = 0 # frames the city screen gets to draw itself before the window is opened again
 
+	# after the game window was activated again (Alt+Tab): the import / export window open in the city screen (or on the map). The city is
+	# not drawn again while the window is on this screen (the redraw is blocked then): the window is closed, the city can be drawn and the
+	# window is opened again with its state (checkReopenTradeWindow)
+	def windowActivatedTradeWindow( self ):
+		try:
+			tWin = CvScreensInterface.tradeRouteScreen
+			if tWin.isHostMain() and (CyInterface().isCityScreenUp() and not tWin.isFromMap() or not CyInterface().isCityScreenUp()):
+				# (on the map the window is opened again on the map: the HUD is hidden and the window not drawn after the alt-tab otherwise)
+				self.tReopenTrade = tWin.getState()
+				self.tReopenTrade["map"] = not CyInterface().isCityScreenUp()
+				self.iReopenWait = 4
+				tWin.finish(False, -1, True)
+				CyInterface().setDirty(InterfaceDirtyBits.CityScreen_DIRTY_BIT, True)
+				CyInterface().setDirty(InterfaceDirtyBits.Domestic_Advisor_DIRTY_BIT, True)
+		except:
+			pass
+
 	def checkReopenTradeWindow( self ):
 		if self.tReopenTrade is None:
 			return

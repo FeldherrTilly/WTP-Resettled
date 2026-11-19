@@ -491,6 +491,12 @@ class CvEventManager:
 	def onWindowActivation(self, argsList):
 		'Called when the game window activates or deactivates'
 		bActive = argsList[0]
+		# the import / export window is closed and opened again, so that the city screen is drawn again
+		try:
+			if bActive:
+				CvScreensInterface.mainInterface.windowActivatedTradeWindow()
+		except:
+			pass
 
 	def onCityScreenOpen(self, argsList):
 		'Called when the game window activates or deactivates'
