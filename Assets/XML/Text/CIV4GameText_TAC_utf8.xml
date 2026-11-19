@@ -2363,6 +2363,12 @@
 		<Hungarian>Úticél kiválasztása</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_NOT_MADE_RAW_MISSING</Tag>
+		<English>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] cannot be made (raw materials missing)</English>
+		<German>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] nicht herstellbar (Rohstoffe fehlen)</German>
+		<Russian>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] не произведено (не хватает сырья)</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_COMMAND_GOTO_MENU_SELECTION</Tag>
 		<English>%s1  (%d2)</English>
 		<Portuguese>%s1  (%d2)</Portuguese>
