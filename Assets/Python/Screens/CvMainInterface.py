@@ -6276,6 +6276,15 @@ class CvMainInterface:
 						aParts.append(aLetters[i])
 				szLines += u"\n" + tRow[0] + u": " + u"/".join(aParts)
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (the production of the good per turn, what is left after the colony's own use: green with a plus sign, red when negative)
+			iNet = pCity.calculateNetYield(iYield)
+			if iNet > 0:
+				szNet = u"<color=0,255,0,255>+%d</color>" % iNet
+			elif iNet < 0:
+				szNet = u"<color=255,0,0,255>%d</color>" % iNet
+			else:
+				szNet = u"0"
+			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_NET", (szNet,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			return szLines
 		except:
 			self.tipError("getTraderChildText")
