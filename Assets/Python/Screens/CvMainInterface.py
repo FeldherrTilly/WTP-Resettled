@@ -4807,7 +4807,13 @@ class CvMainInterface:
 			else:
 				t["still"] = 0
 			t["last"] = (iSX, iSY)
-			if t["still"] < 3 and t["tries"] < 90:
+			# (a city that has not moved yet is standing still too: the camera may start late. It counts as arrived when the city is near the
+			# middle of the screen; a city that the camera cannot center (map edge) counts after about a second)
+			xCheck = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getXResolution()
+			yCheck = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE).getYResolution()
+			bCentered = (abs(iSX - xCheck / 2) < xCheck * 0.3 and abs(iSY - yCheck / 2) < yCheck * 0.3)
+			bReady = (t["still"] >= 4 and (bCentered or t["tries"] >= 60))
+			if not bReady and t["tries"] < 150:
 				return
 			self.tCityJump = None
 			screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
