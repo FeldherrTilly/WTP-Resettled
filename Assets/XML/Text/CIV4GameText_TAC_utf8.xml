@@ -3942,6 +3942,18 @@
 		<Russian>Сейчас ни одна колония не экспортирует и не импортирует этот товар.</Russian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_NET</Tag>
+		<English>Per turn: %s1</English>
+		<German>Pro Runde: %s1</German>
+		<Russian>За ход: %s1</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADERS_NET_ALL</Tag>
+		<English>All colonies, per turn: %s1</English>
+		<German>Alle Kolonien, pro Runde: %s1</German>
+		<Russian>Все колонии, за ход: %s1</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_MORE</Tag>
 		<English>and %d1 more</English>
 		<German>und %d1 weitere</German>
