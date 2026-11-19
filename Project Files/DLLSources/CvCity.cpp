@@ -5519,7 +5519,9 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 						if (!pyl.hasAnyYield() && bPrintWarning)
 						{
 							CvWString szBuffer = gDLL->getText("TXT_KEY_NO_RAW_ON_FIELD", getNameKey(),GC.getYieldInfo(eYieldProduced).getChar());
+							WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 							gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldProduced).getButton(), COLOR_RED, true, true);
+							WtpHudMessages::setPriority(false);
 						}
 					}
 				}
@@ -14815,7 +14817,9 @@ bool CvCity::LbD_try_escape(CvUnit* convUnit, int base, int mod_crim, int mod_se
 	//ray16
 	CvWString szBuffer = gDLL->getText("TXT_KEY_LBD_ESCAPE", getNameKey());
 	//Ende ray16
+	WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 	gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, buttonStringForMessage, COLOR_WHITE, true, true);
+	WtpHudMessages::setPriority(false);
 
 	return true;
 }
@@ -14914,7 +14918,9 @@ bool CvCity::LbD_try_revolt(CvUnit* convUnit, int base, int mod_crim, int mod_sl
 
 	// AddMessage
 	CvWString szBuffer = gDLL->getText("TXT_KEY_LBD_REVOLT", getNameKey());
+	WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 	gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, buttonStringForMessage, COLOR_WHITE, true, true);
+	WtpHudMessages::setPriority(false);
 
 	return true;
 }
