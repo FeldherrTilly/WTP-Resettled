@@ -80,7 +80,7 @@
 		<German>Routenverwaltung aufrufen, um Transportrouten einzurichten und zuzuweisen.[NEWLINE][NEWLINE]Handelsrouten-Manager: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</German>
 		<Italian>Automatizza questo trasporto scegliendo le rotte commerciali che dovrebbe seguire.</Italian>
 		<Spanish>Automatizar este transporte seleccionando las rutas comerciales que debe seguir.</Spanish>
-		<Russian>Автоматизируйте этот транспорт, выбрав транспортные маршруты, по которым он должен следовать</Russian>
+		<Russian>Автоматизируйте этот транспорт, выбрав транспортные маршруты, по которым он должен следовать[NEWLINE][NEWLINE]Менеджер торговых маршрутов: [COLOR:140:255:40:255]Shift+Alt+T[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_COMMAND_CLEAR_SPECIALTY</Tag>
