@@ -1544,14 +1544,14 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FATHER_JOINED_TEAM</Tag>
-		<English>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] has been able to enlist the support of [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</English>
-		<Portuguese>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] conseguiu o apoio de [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</Portuguese>
-		<French>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] a rejoint [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</French>
-		<German>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] hat die Unterstützung von [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] gewinnen können.</German>
-		<Italian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] si è unito alla squadra [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Italian>
-		<Spanish>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [NUM1:se ha:se ha:se han:se han] unido a [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Spanish>
-		<Russian>[COLOR_HIGHLIGHT_TEXT]%s1_person[COLOR_REVERT] вошел в состав Континентального конгресса [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Russian>
-		<Hungarian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] mellé állt.</Hungarian>
+		<English>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]has been able to enlist the support of[COLOR_REVERT] [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</English>
+		<Portuguese>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]conseguiu o apoio de[COLOR_REVERT] [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT].</Portuguese>
+		<French>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]a rejoint[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</French>
+		<German>[COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]hat die Unterstützung von[COLOR_REVERT] [COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] gewinnen können.</German>
+		<Italian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]si è unito alla squadra[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Italian>
+		<Spanish>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED][NUM1:se ha:se ha:se han:se han] unido a[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Spanish>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]%s1_person[COLOR_REVERT] [COLOR_CULTURE_STORED]вошел в состав Континентального конгресса[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT].</Russian>
+		<Hungarian>[COLOR_FONT_CREAM]%s1_person[COLOR_REVERT] [COLOR_HIGHLIGHT_TEXT]%s2_team[COLOR_REVERT] [COLOR_CULTURE_STORED]mellé állt[COLOR_REVERT].</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_FATHER_JOINED_UNKNOWN</Tag>
