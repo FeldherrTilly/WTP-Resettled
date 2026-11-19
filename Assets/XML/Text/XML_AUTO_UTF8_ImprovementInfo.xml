@@ -29,7 +29,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Руины</Russian>
+		<Russian>[COLOR_CAT_TERRAIN]Руины[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_CITY_RUINS_PEDIA</Tag>
@@ -67,7 +67,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Фруктовая плантация</Russian>
+		<Russian>[COLOR_CAT_FOOD]Фруктовая плантация[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_FRUIT_PLANTATION_PEDIA</Tag>
@@ -105,7 +105,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большая фруктовая плантация</Russian>
+		<Russian>[COLOR_CAT_FOOD]Большая фруктовая плантация[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_FRUIT_PLANTATION_PEDIA</Tag>
@@ -143,7 +143,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Лагерь сборщиков</Russian>
+		<Russian>[COLOR_CAT_GOLD]Лагерь сборщиков[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_COLLECTORS_POST_PEDIA</Tag>
@@ -181,7 +181,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Хранилище сборщиков</Russian>
+		<Russian>[COLOR_CAT_GOLD]Хранилище сборщиков[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_COLLECTORS_DEPOT_PEDIA</Tag>
@@ -219,7 +219,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Лагерь плантаторов</Russian>
+		<Russian>[COLOR_CAT_GOLD]Лагерь плантаторов[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_COLLECTORS_POST2_PEDIA</Tag>
@@ -257,7 +257,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Хранилище плантаторов</Russian>
+		<Russian>[COLOR_CAT_GOLD]Хранилище плантаторов[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_COLLECTORS_DEPOT2_PEDIA</Tag>
@@ -295,7 +295,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Ферма</Russian>
+		<Russian>[COLOR_CAT_FOOD]Ферма[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_FARM_PEDIA</Tag>
@@ -333,7 +333,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большая ферма</Russian>
+		<Russian>[COLOR_CAT_FOOD]Большая ферма[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_FARM_PEDIA</Tag>
@@ -357,7 +357,7 @@
 			<Plural>0</Plural>
 		</German>
 		<French>Moulin àvent</French>
-		<Russian>Ветряк</Russian>
+		<Russian>[COLOR_CAT_FOOD]Ветряк[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_WIND_MILL_PEDIA</Tag>
@@ -381,7 +381,7 @@
 			<Plural>0</Plural>
 		</German>
 		<French>Bas-fourneaux</French>
-		<Russian>Железная мельница</Russian>
+		<Russian>[COLOR_CAT_PROD]Железная мельница[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_IRON_MILL_PEDIA</Tag>
@@ -405,7 +405,7 @@
 			<Plural>0</Plural>
 		</German>
 		<French>Dépôt d'approvisionnement</French>
-		<Russian>Склад припасов</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Склад припасов[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_SUPPLY_DEPOT_PEDIA</Tag>
@@ -429,7 +429,7 @@
 			<Plural>0</Plural>
 		</German>
 		<French>Grand dépôt d'approvisionnement</French>
-		<Russian>Большой склад припасов</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Большой склад припасов[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_SUPPLY_DEPOT_PEDIA</Tag>
@@ -453,7 +453,7 @@
 			<Plural>0</Plural>
 		</German>
 		<French>Canal</French>
-		<Russian>Канал</Russian>
+		<Russian>[COLOR_CAT_GOLD]Канал[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_CANAL_PEDIA</Tag>
@@ -491,7 +491,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Форт</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Форт[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_FORT_PEDIA</Tag>
@@ -529,7 +529,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большой форт</Russian>
+		<Russian>[COLOR_CAT_MILITARY]Большой форт[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_FORT_PEDIA</Tag>
@@ -574,7 +574,7 @@
 			<Gender>Female</Gender>
 			<Plural>1</Plural>
 		</Spanish>
-		<Russian>Древние руины</Russian>
+		<Russian>[COLOR_CAT_RESEARCH]Древние руины[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_GOODY_HUT2_PEDIA</Tag>
@@ -612,7 +612,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Обломки корабля</Russian>
+		<Russian>[COLOR_CAT_RESEARCH]Обломки корабля[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_GOODY_HUT3_PEDIA</Tag>
@@ -650,7 +650,7 @@
 			<Gender>Neutral</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Кораблекрушение</Russian>
+		<Russian>[COLOR_CAT_RESEARCH]Кораблекрушение[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_GOODY_HUT4_PEDIA</Tag>
@@ -688,7 +688,7 @@
 			<Gender>Neutral</Gender>
 			<Plural>1</Plural>
 		</Spanish>
-		<Russian>Лагерь с костром</Russian>
+		<Russian>[COLOR_CAT_RESEARCH]Лагерь с костром[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_GOODY_HUT5_PEDIA</Tag>
@@ -712,7 +712,7 @@
 			<Plural>0</Plural>
 		</German>
 		<French>Camps des maraudeurs</French>
-		<Russian>Лагерь разбойников</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Лагерь разбойников[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_GOODY_HUT6_PEDIA</Tag>
@@ -736,7 +736,7 @@
 			<Gender>Neuter</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Логово животных</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Логово животных[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_GOODY_HUT7_PEDIA</Tag>
@@ -760,7 +760,7 @@
 			<Gender>Neuter</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Деревня враждебных индейцев</Russian>
+		<Russian>[COLOR_WARNING_TEXT]Деревня враждебных индейцев[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_GOODY_HUT8_PEDIA</Tag>
@@ -831,7 +831,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Домик лесорубов</Russian>
+		<Russian>[COLOR_CAT_PROD]Домик лесорубов[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LODGE_PEDIA</Tag>
@@ -869,7 +869,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Лагерь лесорубов</Russian>
+		<Russian>[COLOR_CAT_PROD]Лагерь лесорубов[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LUMBERJACK_CAMP_PEDIA</Tag>
@@ -907,7 +907,7 @@
 			<Gender>Female</Gender>
 			<Plural>1</Plural>
 		</Spanish>
-		<Russian>Лесопилка</Russian>
+		<Russian>[COLOR_CAT_PROD]Лесопилка[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LUMBERMILL_PEDIA</Tag>
@@ -945,7 +945,7 @@
 			<Gender>Female</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Шахта</Russian>
+		<Russian>[COLOR_CAT_PROD]Шахта[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_MINE_PEDIA</Tag>
@@ -983,7 +983,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большая шахта</Russian>
+		<Russian>[COLOR_CAT_PROD]Большая шахта[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_DEEP_MINE_PEDIA</Tag>
@@ -1021,7 +1021,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Монастырь</Russian>
+		<Russian>[COLOR_CAT_RESEARCH]Монастырь[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_MONASTERY_PEDIA</Tag>
@@ -1059,7 +1059,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большой монастырь</Russian>
+		<Russian>[COLOR_CAT_RESEARCH]Большой монастырь[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_MONASTERY_PEDIA</Tag>
@@ -1097,7 +1097,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Пастбище</Russian>
+		<Russian>[COLOR_CAT_FOOD]Пастбище[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_PASTURE_PEDIA</Tag>
@@ -1121,7 +1121,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Загон для скота</Russian>
+		<Russian>[COLOR_CAT_FOOD]Загон для скота[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_PEN_PEDIA</Tag>
@@ -1145,7 +1145,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Большой загон для скота</Russian>
+		<Russian>[COLOR_CAT_FOOD]Большой загон для скота[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_PEN_PEDIA</Tag>
@@ -1183,7 +1183,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большое пастбище</Russian>
+		<Russian>[COLOR_CAT_FOOD]Большое пастбище[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_PASTURE_PEDIA</Tag>
@@ -1209,7 +1209,7 @@
 		</German>
 		<Italian>Piantagione</Italian>
 		<Spanish>Plantacion</Spanish>
-		<Russian>Плантация</Russian>
+		<Russian>[COLOR_CAT_GOLD]Плантация[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_PLANTATION_PEDIA</Tag>
@@ -1247,7 +1247,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большая плантация</Russian>
+		<Russian>[COLOR_CAT_GOLD]Большая плантация[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_PLANTATION_PEDIA</Tag>
@@ -1285,7 +1285,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Каменоломня</Russian>
+		<Russian>[COLOR_CAT_PROD]Каменоломня[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_QUARRY_PEDIA</Tag>
@@ -1323,7 +1323,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Большая каменоломня</Russian>
+		<Russian>[COLOR_CAT_PROD]Большая каменоломня[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_QUARRY_PEDIA</Tag>
@@ -1361,7 +1361,7 @@
 			<Gender>Male</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Домик охотника</Russian>
+		<Russian>[COLOR_CAT_GOLD]Домик охотника[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_TRAPPER_HUT_PEDIA</Tag>
@@ -1399,7 +1399,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Лагерь охотников</Russian>
+		<Russian>[COLOR_CAT_GOLD]Лагерь охотников[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_TRAPPER_CAMP_PEDIA</Tag>
@@ -1437,7 +1437,7 @@
 			<Gender>Male</Gender>
 			<Plural>0:1</Plural>
 		</Spanish>
-		<Russian>Виноградник</Russian>
+		<Russian>[COLOR_CAT_FOOD]Виноградник[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_VINEYARD_PEDIA</Tag>
@@ -1477,7 +1477,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Старый виноградник</Russian>
+		<Russian>[COLOR_CAT_FOOD]Старый виноградник[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_VINEYARD_PEDIA</Tag>
@@ -1540,7 +1540,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Речная паромная переправа</Russian>
+		<Russian>[COLOR_CAT_GOLD]Речная паромная переправа[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_RAFT_STATION_PEDIA</Tag>
@@ -1555,7 +1555,7 @@
 		<Portuguese>[ICON_BULLET]Permite que todas as unidades terrestres cruzem [LINK=TERRAIN_LARGE_RIVERS]grandes rios[\LINK]</Portuguese>
 		<French>[ICON_BULLET]Permet à toutes les unités terrestres de traverser [LINK=TERRAIN_LARGE_RIVERS]grands fleuves[\LINK]</French>
 		<German>[ICON_BULLET]Erlaubt es allen Landeinheiten einen [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]Großen Fluss[\LINK][COLOR_REVERT] zu überqueren.</German>
-		<Russian>[ICON_BULLET]Позволяет всем сухопутным юнитам пересекать [LINK=TERRAIN_LARGE_RIVERS]большие реки[\LINK]</Russian>
+		<Russian>[ICON_BULLET]Позволяет всем сухопутным юнитам пересекать [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]большие реки[\LINK][COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_IS_CANAL</Tag>
@@ -1580,7 +1580,7 @@
 			<Gender>Neuter</Gender>
 			<Plural>1</Plural>
 		</German>
-		<Russian>Рыболовные сети</Russian>
+		<Russian>[COLOR_CAT_FOOD]Рыболовные сети[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_FISHING_NETS_PEDIA</Tag>
@@ -1603,7 +1603,7 @@
 			<Gender>Neuter</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Охотничье укрытие</Russian>
+		<Russian>[COLOR_CAT_FOOD]Охотничье укрытие[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_HUNTERS_STAGE_PEDIA</Tag>
@@ -1626,7 +1626,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Соляной рудник</Russian>
+		<Russian>[COLOR_CAT_GOLD]Соляной рудник[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_SALINA_PEDIA</Tag>
@@ -1650,7 +1650,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</German>
-		<Russian>Большой соляной рудник</Russian>
+		<Russian>[COLOR_CAT_GOLD]Большой соляной рудник[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_LARGE_SALINA_PEDIA</Tag>
@@ -1665,7 +1665,7 @@
 		<Portuguese>[ICON_BULLET]Só pode ser construído em [LINK=TERRAIN_LARGE_RIVERS]rios grandes[\LINK]</Portuguese>
 		<French>[ICON_BULLET]Ne peut être construit que sur[LINK=TERRAIN_LARGE_RIVERS]large rivers[\LINK]</French>
 		<German>[ICON_BULLET]Kann nur auf [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]Großen Flüssen[\LINK][COLOR_REVERT] gebaut werden.</German>
-		<Russian>[ICON_BULLET]Можно строить только на [LINK=TERRAIN_LARGE_RIVERS]больших реках[\LINK]</Russian>
+		<Russian>[ICON_BULLET]Можно строить только на [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]больших реках[\LINK][COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_BUILD_ONLY_LAKE</Tag>
@@ -1673,19 +1673,19 @@
 		<Portuguese>[ICON_BULLET]Só pode ser construído em [LINK=TERRAIN_LAKE]lagos de água doce[\LINK] ou [LINK=TERRAIN_ICE_LAKE]lagos de gelo[\LINK].</Portuguese>
 		<French>[ICON_BULLET]Ne peut être construit que sur les [LINK=TERRAIN_LAKE]lacs d'eau douce[\LINK], les [LINK=TERRAIN_ICE_LAKE]lacs de glace[\LINK], les [LINK=TERRAIN_ICE_LAKE]côtes[\LINK] ou les [LINK=TERRAIN_ICE_LAKE]côtes peu profondes[\LINK].</French>
 		<German>[ICON_BULLET]Kann nur auf [COLOR:215:200:150:255][LINK=TERRAIN_LAKE]Süßwassersee[\LINK][COLOR_REVERT], [COLOR:215:200:150:255][LINK=TERRAIN_ICE_LAKE]Eisseen[\LINK][COLOR_REVERT], [COLOR:215:200:150:255][LINK=TERRAIN_ICE_LAKE]Küsten[\LINK][COLOR_REVERT] oderr [COLOR:215:200:150:255][LINK=TERRAIN_ICE_LAKE]flachen Küsten[\LINK][COLOR_REVERT] gebaut werden.</German>
-		<Russian>[ICON_BULLET]Можно строить только на [LINK=TERRAIN_LAKE]пресноводном[\LINK] или [LINK=TERRAIN_ICE_LAKE]замёрзшем[\LINK] озёрах.</Russian>
+		<Russian>[ICON_BULLET]Можно строить только на [COLOR:215:200:150:255][LINK=TERRAIN_LAKE]пресноводном[\LINK][COLOR_REVERT] или [COLOR:215:200:150:255][LINK=TERRAIN_ICE_LAKE]замёрзшем[\LINK][COLOR_REVERT] озёрах.</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_BUILD_ONLY_SALTWATER</Tag>
 		<English>[ICON_BULLET]Can only be built on [COLOR:215:200:150:255][LINK=TERRAIN_SHALLOW_COAST]shallow coasts[\LINK][COLOR_REVERT], [COLOR:215:200:150:255][LINK=TERRAIN_COAST]coasts[\LINK][COLOR_REVERT], or [COLOR:215:200:150:255][LINK=TERRAIN_OCEAN]ocean[\LINK][COLOR_REVERT].</English>
 		<Portuguese>[ICON_BULLET]Só pode ser construído em [LINK=TERRAIN_SHALLOW_COAST]costas rasas[\LINK], [LINK=TERRAIN_COAST]costas[\LINK] ou [LINK=TERRAIN_OCEAN]oceano[\LINK].</Portuguese>
-		<Russian>[ICON_BULLET]Можно строить только на [LINK=TERRAIN_COAST]побережье[\LINK], [LINK=TERRAIN_SHALLOW_COAST]мелководье[\LINK] или в [LINK=TERRAIN_OCEAN]океане[\LINK].</Russian>
+		<Russian>[ICON_BULLET]Можно строить только на [COLOR:215:200:150:255][LINK=TERRAIN_COAST]побережье[\LINK][COLOR_REVERT], [COLOR:215:200:150:255][LINK=TERRAIN_SHALLOW_COAST]мелководье[\LINK][COLOR_REVERT] или в [COLOR:215:200:150:255][LINK=TERRAIN_OCEAN]океане[\LINK][COLOR_REVERT].</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_BUILD_ONLY_FRESHWATER</Tag>
 		<English>[ICON_BULLET]Can only be built on [COLOR:215:200:150:255][LINK=TERRAIN_LAKE]fresh water lakes[\LINK][COLOR_REVERT], [COLOR:215:200:150:255][LINK=TERRAIN_ICE_LAKE]ice lakes[\LINK][COLOR_REVERT], or [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]large rivers[\LINK][COLOR_REVERT].</English>
 		<Portuguese>[ICON_BULLET]Só pode ser construído em [LINK=TERRAIN_LAKE]lagos de água doce[\LINK], [LINK=TERRAIN_ICE_LAKE]lagos de gelo[\LINK] ou [LINK=TERRAIN_LARGE_RIVERS]rios grandes[\LINK].</Portuguese>
-		<Russian>[ICON_BULLET]Можно строить только на [LINK=TERRAIN_LAKE]пресноводном[\LINK] и [LINK=TERRAIN_ICE_LAKE]замёрзшем[\LINK] озёрах или на [LINK=TERRAIN_LARGE_RIVERS]больших реках[\LINK].</Russian>
+		<Russian>[ICON_BULLET]Можно строить только на [COLOR:215:200:150:255][LINK=TERRAIN_LAKE]пресноводном[\LINK][COLOR_REVERT] и [COLOR:215:200:150:255][LINK=TERRAIN_ICE_LAKE]замёрзшем[\LINK][COLOR_REVERT] озёрах или на [COLOR:215:200:150:255][LINK=TERRAIN_LARGE_RIVERS]больших реках[\LINK][COLOR_REVERT].</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_GOODY_FOR_SPAWNING_UNITS</Tag>
@@ -1748,7 +1748,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Глиняный карьер</Russian>
+		<Russian>[COLOR_CAT_PROD]Глиняный карьер[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_CLAY_PIT_PEDIA</Tag>
@@ -1786,7 +1786,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Открытый глиняный рудник</Russian>
+		<Russian>[COLOR_CAT_PROD]Открытый глиняный рудник[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_OPEN_CLAY_MINE_PEDIA</Tag>
@@ -1824,7 +1824,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Торфяной карьер</Russian>
+		<Russian>[COLOR_CAT_PROD]Торфяной карьер[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_PEAT_PIT_PEDIA</Tag>
@@ -1862,7 +1862,7 @@
 			<Gender>Female</Gender>
 			<Plural>0</Plural>
 		</Spanish>
-		<Russian>Открытая торфяная шахта</Russian>
+		<Russian>[COLOR_CAT_PROD]Открытая торфяная шахта[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_IMPROVEMENT_OPEN_PEAT_MINE_PEDIA</Tag>
