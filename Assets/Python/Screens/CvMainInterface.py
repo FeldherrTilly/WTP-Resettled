@@ -1050,10 +1050,10 @@ class CvMainInterface:
 		self.appendtoHideState(screen, "MilitaryAdvisorButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
 		iBtnX += self.ADVISOR_BUTTON_SPACING
 
-		# WTP: Trade Route Manager (anchored to the military advisor: the same distance as the other buttons; the symbol of the Domestic Advisor, it has more empty border, so it is drawn larger)
-		screen.setImageButton("TradeRouteManagerButton", "Art/Interface/Game Hud/Actions/automate_city_high_res.dds", iBtnX - self.ADVISOR_BUTTON_SIZE / 6, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE * 4 / 3) / 2, self.ADVISOR_BUTTON_SIZE * 4 / 3, self.ADVISOR_BUTTON_SIZE * 4 / 3, WidgetTypes.WIDGET_GENERAL, self.BUTTON_TRADE_ROUTE_MANAGER, -1 )
+		# WTP: Trade Route Manager (anchored to the military advisor: the same distance as the other buttons; the symbol of the Domestic Advisor)
+		screen.setImageButton("TradeRouteManagerButton", "Art/Interface/Game Hud/Actions/automate_city_high_res.dds", iBtnX, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE) / 2, self.ADVISOR_BUTTON_SIZE, self.ADVISOR_BUTTON_SIZE, WidgetTypes.WIDGET_GENERAL, self.BUTTON_TRADE_ROUTE_MANAGER, -1 )
 		screen.setImageShape("TradeRouteManagerButton", ImageShapes.IMAGE_SHAPE_ELLIPSE, -1)
-		screen.setHitMargins("TradeRouteManagerButton", self.ADVISOR_BUTTON_SIZE * 4 / 3 / 6, self.ADVISOR_BUTTON_SIZE * 4 / 3 / 6)
+		screen.setHitMargins("TradeRouteManagerButton", self.ADVISOR_BUTTON_SIZE / 6, self.ADVISOR_BUTTON_SIZE / 6)
 		self.appendtoHideState(screen, "TradeRouteManagerButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
 		iBtnX += self.ADVISOR_BUTTON_SPACING * 2
 
