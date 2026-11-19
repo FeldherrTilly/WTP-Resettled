@@ -7614,18 +7614,16 @@ void CvGame::setFatherTeam(AssertCallerData assertData, FatherTypes eFather, Tea
 					CvPlayer& kPlayer = GET_PLAYER((PlayerTypes) iI);
 					if (kPlayer.isAlive())
 					{
-						bool bFatherMessageOnTop = false;
 						if (GET_TEAM(kPlayer.getTeam()).isHasMet(eTeam))
 						{
 							szBuffer = gDLL->getText("TXT_KEY_FATHER_JOINED_TEAM", GC.getFatherInfo(eFather).getTextKeyWide(), GET_TEAM(getFatherTeam(eFather)).getName().GetCString());
-							bFatherMessageOnTop = true; // WTP: a founding father joined a team (ours or another one): shown at the top of the message panel
 						}
 						else
 						{
 							szBuffer = gDLL->getText("TXT_KEY_FATHER_JOINED_UNKNOWN", GC.getFatherInfo(eFather).getTextKeyWide());
 						}
 
-						WtpHudMessages::setPriority(bFatherMessageOnTop);
+						WtpHudMessages::setPriority(true); // WTP: founding father messages are shown at the top of the message panel
 						gDLL->UI().addPlayerMessage(((PlayerTypes)iI), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, "AS2D_GLOBECIRCUMNAVIGATED", MESSAGE_TYPE_MAJOR_EVENT, NULL, COLOR_HIGHLIGHT_TEXT);
 						WtpHudMessages::setPriority(false);
 					}
