@@ -5531,8 +5531,21 @@ int CvUnit::loadYieldAmount(YieldTypes eYield, int iAmount, bool bTrade)
 	return iAmount; //R&R mod, vetiarvind, max yield import limit
 }
 
-// WTP: fills all free cargo slots with goods of the city, one slot after the other, always with the most valuable good (the sell price in Europe for
-// 100 units) that can still be loaded and would fill at least 15% of a slot (without livestock, building material, military goods, raw materials); the same good again as long as the city has more of it
+// WTP: fills all free cargo slots with goods of the city, one slot after the other, always with the most valuable good (the sell price for 100 units in the
+// harbour where the whole load of a sea transport sells best, see below) that can still be loaded and would fill at least 15% of a slot (without livestock, building material, military goods, raw materials); the same good again as long as the city has more of it
+static int wtpHarbourProfit(const CvPlayer& kOwner, int iHarbour, YieldTypes eYield, int iAmount)
+{
+	if (iHarbour == 1)
+	{
+		return kOwner.getSellToAfricaProfit(eYield, iAmount);
+	}
+	if (iHarbour == 2)
+	{
+		return kOwner.getSellToPortRoyalProfit(eYield, iAmount);
+	}
+	return kOwner.getSellToEuropeProfit(eYield, iAmount);
+}
+
 void CvUnit::loadAllYieldsByValue()
 {
 	bool abExcluded[NUM_YIELD_TYPES];
@@ -5578,6 +5591,78 @@ void CvUnit::loadAllYieldsByValue()
 	const CvPlayer& kOwner = GET_PLAYER(getOwnerINLINE());
 	// goods that would fill less than 15% of a slot are skipped
 	const int iMinAmount = (15 * GC.getGameINLINE().getCargoYieldCapacity() + 99) / 100;
+	// all goods of one trip should sell best in one harbour: for every harbour the ship can reach the whole load (what is on board plus what the
+	// free slots would take, the best goods for this harbour first) is valued, the harbour with the highest total value decides the order of loading
+	int iHarbour = 0;
+	const CvCity* const pLoadCity = plot()->getPlotCity();
+	if (getDomainType() == DOMAIN_SEA && pLoadCity != NULL)
+	{
+		const int iHarbours = (getUnitInfo().isHiddenNationality() || getUnitInfo().isSlaveShip()) ? 3 : 2;
+		const int iFreeSlots = std::max(0, cargoSpace() - getCargo());
+		const int iCapacity = GC.getGameINLINE().getCargoYieldCapacity();
+		int iBestTotal = -1;
+		for (int iH = 0; iH < iHarbours; ++iH)
+		{
+			int aiAvailable[NUM_YIELD_TYPES];
+			for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+			{
+				aiAvailable[eYield] = (isHuman() && !isAutomated()) ? pLoadCity->getYieldStored(eYield) : pLoadCity->getExportAvailable(eYield);
+			}
+			int iTotal = 0;
+			// what is on board already
+			int aiOnBoard[NUM_YIELD_TYPES];
+			for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+			{
+				aiOnBoard[i] = 0;
+			}
+			CvPlot* pShipPlot = plot();
+			for (CLLNode<IDInfo>* pNode = pShipPlot->headUnitNode(); pNode != NULL; pNode = pShipPlot->nextUnitNode(pNode))
+			{
+				const CvUnit* pLoopCargo = ::getUnit(pNode->m_data);
+				if (pLoopCargo != NULL && pLoopCargo->getTransportUnit() == this && pLoopCargo->getYield() != NO_YIELD)
+				{
+					aiOnBoard[pLoopCargo->getYield()] += pLoopCargo->getYieldStored();
+				}
+			}
+			for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+			{
+				if (aiOnBoard[eYield] > 0)
+				{
+					iTotal += wtpHarbourProfit(kOwner, iH, eYield, aiOnBoard[eYield]);
+				}
+			}
+			for (int iSlot = 0; iSlot < iFreeSlots; ++iSlot)
+			{
+				YieldTypes eSlotBest = NO_YIELD;
+				int iSlotBestValue = 0;
+				for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+				{
+					const int iAmount = std::min(iCapacity, aiAvailable[eYield]);
+					if (abExcluded[eYield] || iAmount < iMinAmount || !canLoadYield(plot(), eYield, false))
+					{
+						continue;
+					}
+					const int iValue = wtpHarbourProfit(kOwner, iH, eYield, iAmount);
+					if (iValue > iSlotBestValue)
+					{
+						iSlotBestValue = iValue;
+						eSlotBest = eYield;
+					}
+				}
+				if (eSlotBest == NO_YIELD)
+				{
+					break;
+				}
+				iTotal += iSlotBestValue;
+				aiAvailable[eSlotBest] -= std::min(iCapacity, aiAvailable[eSlotBest]);
+			}
+			if (iTotal > iBestTotal)
+			{
+				iBestTotal = iTotal;
+				iHarbour = iH;
+			}
+		}
+	}
 	for (int iGuard = 0; iGuard < 100; ++iGuard)
 	{
 		YieldTypes eBest = NO_YIELD;
@@ -5588,7 +5673,7 @@ void CvUnit::loadAllYieldsByValue()
 			{
 				continue;
 			}
-			const int iValue = kOwner.getSellToEuropeProfit(eYield, 100);
+			const int iValue = wtpHarbourProfit(kOwner, iHarbour, eYield, 100);
 			if (iValue > iBestValue)
 			{
 				iBestValue = iValue;
