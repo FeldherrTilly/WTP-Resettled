@@ -2697,12 +2697,18 @@ class CvMainInterface:
 												CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iAmountYield)
 												CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iAmountYield)
 
-												if (CityProducedYield > 0):
-													ActualYield = ProducedYield * CityActualYield / CityProducedYield
+												# WTP fix for the original WTP mod: the green and red numbers of the production bar showed an estimate (the output of the workers
+												# with the bonuses, scaled with actual / planned and rounded down), which is neither the real production (the free output of the
+												# building was missing) nor the real shortfall (the rounding turned a shortfall of 1 into 2). Now the numbers are the real ones:
+												# what the colony makes of this good (the same number as in the tooltip: "Total ...") and what could not be made because of missing
+												# raw materials, both with the bonuses (the shortfall, as in the tooltips, is counted before the bonuses and then multiplied by them)
+												if (ProducedYield > 0):
+													iBarModifier = pHeadSelectedCity.getBaseYieldRateModifier(iAmountYield, 0)
+													ActualYield = CityActualYield * iBarModifier / 100
+													UnproducedYield = (CityProducedYield - CityActualYield) * iBarModifier / 100
 												else:
-													ActualYield = ProducedYield
-
-												UnproducedYield = ProducedYield - ActualYield
+													ActualYield = 0
+													UnproducedYield = 0
 
 												if (bTwoYields == False):
 													if (ActualYield > 0):
