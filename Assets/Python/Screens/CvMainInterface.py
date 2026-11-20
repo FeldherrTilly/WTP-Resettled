@@ -2682,48 +2682,33 @@ class CvMainInterface:
 
 								SzText = ""
 								bTwoYields = False
-								for iArrayProfession in range(gc.getNumProfessionInfos()):
-									if (gc.getProfessionInfo(iArrayProfession).getSpecialBuilding() == iSpecialBuildingType):
-										if (not gc.getProfessionInfo(iArrayProfession).isWorkPlot() and gc.getProfessionInfo(iArrayProfession).isCitizen()):
-											if gc.getCivilizationInfo(pHeadSelectedCity.getCivilizationType()).isValidProfession(iArrayProfession):
-												iAmountYield = gc.getProfessionInfo(iArrayProfession).getYieldsProduced(0) #MultipleYieldsProduced Start
-												ProducedYield = 0
-												for pCitizen in CitizenSpecialBuildingIndexArray[iSpecialBuildingType]:
-													if (pCitizen.getProfession() == iArrayProfession):
-														ProducedYield += pHeadSelectedCity.getProfessionOutput(iArrayProfession, pCitizen)
-
-												ProducedYield = ProducedYield * pHeadSelectedCity.getBaseYieldRateModifier(iAmountYield, 0) / 100
-
-												CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iAmountYield)
-												CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iAmountYield)
-
-												# WTP fix for the original WTP mod: the green and red numbers of the production bar showed an estimate (the output of the workers
-												# with the bonuses, scaled with actual / planned and rounded down), which is neither the real production (the free output of the
-												# building was missing) nor the real shortfall (the rounding turned a shortfall of 1 into 2). Now the numbers are the real ones:
-												# what the colony makes of this good (the same number as in the tooltip: "Total ...") and what could not be made because of missing
-												# raw materials, both with the bonuses (the shortfall, as in the tooltips, is counted before the bonuses and then multiplied by them)
-												if (ProducedYield > 0):
-													iBarModifier = pHeadSelectedCity.getBaseYieldRateModifier(iAmountYield, 0)
-													ActualYield = CityActualYield * iBarModifier / 100
-													UnproducedYield = (CityProducedYield - CityActualYield) * iBarModifier / 100
-												else:
-													ActualYield = 0
-													UnproducedYield = 0
-
-												if (bTwoYields == False):
-													if (ActualYield > 0):
-														bTwoYields = True
-														SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
-													if (UnproducedYield > 0):
-														SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
-												else:
-													if (iAmountYield != iYield):
-														if (ActualYield > 0):
-															SzText += u"<color=255,255,255> /" + "</color>"
-															SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
-														if (UnproducedYield > 0):
-															SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
-        
+								# WTP fix for the original WTP mod: the green and red numbers of the production bar showed an estimate (the output of the workers
+								# with the bonuses, scaled with actual / planned and rounded down), which is neither the real production (the free output of the
+								# building was missing) nor the real shortfall (the rounding turned a shortfall of 1 into 2). Now the numbers are the real ones:
+								# what the colony makes of this good (the same number as in the tooltip: "Total ...") and what could not be made because of missing
+								# raw materials, both with the bonuses (the shortfall, as in the tooltips, is counted before the bonuses and then multiplied by them).
+								# It is also shown when nobody works in the building: the free output of the building is produced anyway (e.g. +2 / +2).
+								aBarYields = [iYield]
+								if (iSecondYield != -1 and iSecondYield != iYield):
+									aBarYields.append(iSecondYield)
+								for iBarYield in aBarYields:
+									iBarModifier = pHeadSelectedCity.getBaseYieldRateModifier(iBarYield, 0)
+									CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iBarYield)
+									CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iBarYield)
+									ActualYield = CityActualYield * iBarModifier / 100
+									UnproducedYield = (CityProducedYield - CityActualYield) * iBarModifier / 100
+									if (bTwoYields == False):
+										if (ActualYield > 0):
+											bTwoYields = True
+											SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
+										if (UnproducedYield > 0):
+											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
+									else:
+										if (ActualYield > 0):
+											SzText += u"<color=255,255,255> /" + "</color>"
+											SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
+										if (UnproducedYield > 0):
+											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
 								szName = "WorkerOutputText" + str(iYield)
 								if (iSecondYield == -1 or iSecondYield == iYield):
 									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , 0), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
