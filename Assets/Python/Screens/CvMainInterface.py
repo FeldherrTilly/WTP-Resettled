@@ -4048,6 +4048,8 @@ class CvMainInterface:
 					aiIndent.append(int(fIndent * iChar))
 			# the hint at the end: the tooltip can be frozen with X (the frozen window does not have it)
 			aszHint = self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT", ()), iCharsPerLine)
+			if self.isPopupWidgetTip():
+				aszHint = [] # (no freezing in the popup of the game)
 			aszLines += aszHint
 			aiPara += [-1] * len(aszHint)
 			aiIndent += [0] * len(aszHint)
@@ -4925,6 +4927,9 @@ class CvMainInterface:
 	def getTipPlacement( self, iWidth, iHeight, iCursorX, iCursorY, xRes, yRes ):
 		if self.iTipMode == 1:
 			return (HELTTEXT_AREA_X_MARGIN, max(4, yRes - SADDLE_HEIGHT - iHeight))
+		if self.isPopupWidgetTip():
+			# (the popup stands in the middle of the screen, about half of its width: the left edge is free)
+			return (max(4, int(xRes * 0.01)), max(4, min(yRes - iHeight - 4, iCursorY - iHeight / 2)))
 		iGap = max(48, int(yRes * 0.04))
 		tRect = self.getTipAvoidRect(iCursorX, iCursorY)
 		if tRect is not None:
@@ -8893,9 +8898,20 @@ class CvMainInterface:
 		return self.bHudHover
 
 	# called by the game when it asks for the help text of a widget under the cursor (CvScreensInterface.getWidgetHelp)
+	iLastWidgetType = -1 # the widget type of the last help text that was shown as the own tooltip
+
+	# the own tooltip of a button of the list of the game popups (what a colony builds: WIDGET_TRAIN / WIDGET_CONSTRUCT / WIDGET_CONVINCE):
+	# the popup is above all screens of python, so the tooltip stands beside it (the left edge of the screen) and cannot be frozen (the keys go to the popup)
+	def isPopupWidgetTip( self ):
+		try:
+			return self.bHudHover and not CyInterface().isCityScreenUp() and self.iLastWidgetType in (int(WidgetTypes.WIDGET_TRAIN), int(WidgetTypes.WIDGET_CONSTRUCT), int(WidgetTypes.WIDGET_CONVINCE))
+		except:
+			return False
+
 	def widgetHelpSeen( self, szText, eWidgetType ):
 		if not self.bHoverTip:
 			return
+		self.iLastWidgetType = int(eWidgetType)
 		try:
 			if self.bTipFrozen and self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
 				return
