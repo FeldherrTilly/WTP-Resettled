@@ -78,6 +78,7 @@ FRAME_ORANGE_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameOrange.dds"
 FRAME_DARK_ART = "Art/Interface/Screens/TradeRoutes/WTPFrameDark.dds"
 HOVER_LAYERS = 1
 MARGIN_X = 2
+ICON_SIZE = 40 # the picture of a good in the rows (was 32, a quarter larger now; its frames grow with it)
 MARGIN_Y = 3
 # the font of all texts
 TEXT_FONT = "3b"
@@ -1598,8 +1599,8 @@ class CvTradeRouteScreen:
 				if iIndex >= len(self.aYields):
 					break
 				iX = self.OX + 22
-				iY = self.OY + self.LIST_Y + iSlot * self.ROW_H + (self.ROW_H - 32) / 2
-				if iCX >= iX - 8 and iCX < iX + 40 and iCY >= iY - 8 and iCY < iY + 40:
+				iY = self.OY + self.LIST_Y + iSlot * self.ROW_H + (self.ROW_H - ICON_SIZE) / 2
+				if iCX >= iX - 8 and iCX < iX + ICON_SIZE + 8 and iCY >= iY - 8 and iCY < iY + ICON_SIZE + 8:
 					return self.aYields[iIndex]
 		except:
 			pass
@@ -1653,7 +1654,7 @@ class CvTradeRouteScreen:
 			if iYield in self.aYields:
 				iSlot = self.aYields.index(iYield) - self.iFirst
 				if iSlot >= 0 and iSlot < self.iVisible:
-					return (self.OX + 22 + 16, self.OY + self.LIST_Y + iSlot * self.ROW_H + self.ROW_H / 2)
+					return (self.OX + 22 + ICON_SIZE / 2, self.OY + self.LIST_Y + iSlot * self.ROW_H + self.ROW_H / 2)
 		except:
 			pass
 		return None
@@ -1678,9 +1679,9 @@ class CvTradeRouteScreen:
 				szArt = FRAME_RED_ART
 			elif iState == 3:
 				szArt = FRAME_IMP_ART
-			iOuter = 8
-			iInner = 6
-			aRects = [(iX - iOuter, iY - iOuter, 32 + 2 * iOuter, 32 + 2 * iOuter, szArt), (iX - iInner, iY - iInner, 32 + 2 * iInner, 32 + 2 * iInner, FRAME_DARK_ART)]
+			iOuter = 9
+			iInner = 7
+			aRects = [(iX - iOuter, iY - iOuter, ICON_SIZE + 2 * iOuter, ICON_SIZE + 2 * iOuter, szArt), (iX - iInner, iY - iInner, ICON_SIZE + 2 * iInner, ICON_SIZE + 2 * iInner, FRAME_DARK_ART)]
 		for i in range(2):
 			szName = "TRSfo" + str(iSlot) + "_" + str(i)
 			self.drop(szName)
@@ -1714,10 +1715,10 @@ class CvTradeRouteScreen:
 			iRawState = 0
 			if pRawCity != None and not pRawCity.isNone():
 				iRawState = self.getRawState(pRawCity, iYield)
-			self.drawOuterFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, iRawState)
-			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - 32) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
+			self.drawOuterFrame(iSlot, self.OX + 22, iY + (self.ROW_H - ICON_SIZE) / 2, iRawState)
+			self.drawFrame(iSlot, self.OX + 22, iY + (self.ROW_H - ICON_SIZE) / 2, d["imp"] or d["feeder"], d["exp"] or d["auto"])
 			self.drop(szIcon)
-			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - 32) / 2, 32, 32, WidgetTypes.WIDGET_HELP_YIELD, iYield, self.iCity) # (the city: the tooltip of the good then shows what the colony makes of it, also on the map, where no colony is selected)
+			screen.setImageButton(szIcon, gc.getYieldInfo(iYield).getButton(), self.OX + 22, iY + (self.ROW_H - ICON_SIZE) / 2, ICON_SIZE, ICON_SIZE, WidgetTypes.WIDGET_HELP_YIELD, iYield, self.iCity) # (the city: the tooltip of the good then shows what the colony makes of it, also on the map, where no colony is selected)
 			# import block
 			iX = self.OX + self.BLOCK_IMP_X
 			self.drawSpin(iSlot, 0, d["impLimit"], iX, iY, iBase + F_IMP_MINUS, iBase + F_IMP_PLUS)
@@ -1741,15 +1742,15 @@ class CvTradeRouteScreen:
 			self.drawCheck("TRSc" + str(iSlot) + "_ff", szFilter, self.isInFilter(iYield), self.OX + self.iViewX + (160 - self.CHECK_W) / 2, iY + 2 + self.CHECK_H + 2, BTN_FILTER + iSlot)
 		self.drawWarn() # (the notice stays on top of the rows)
 
-	# the frame around the picture of a good (32 x 32 at iX, iY): a colored rectangle behind the picture that is a little larger than it (thin
+	# the frame around the picture of a good (ICON_SIZE x ICON_SIZE at iX, iY): a colored rectangle behind the picture that is a little larger than it (thin
 	# strips were drawn as dots by the game); import and export: the upper half and the lower half
 	def drawFrame( self, iSlot, iX, iY, bImp, bExp ):
 		screen = self.pHost
-		iGap = 3
+		iGap = 4
 		x0 = iX - iGap
 		y0 = iY - iGap
-		iW = 32 + 2 * iGap
-		iH = 32 + 2 * iGap
+		iW = ICON_SIZE + 2 * iGap
+		iH = ICON_SIZE + 2 * iGap
 		iMid = iH / 2
 		aRects = []
 		if bImp and bExp:
