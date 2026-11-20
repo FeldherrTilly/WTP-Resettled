@@ -1959,16 +1959,28 @@
 		<Russian>За ход: %s1</Russian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_USE</Tag>
+		<English>Planned use: %s1</English>
+		<German>Geplanter Verbrauch: %s1</German>
+		<Russian>Плановый расход: %s1</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_RAW_MISSING</Tag>
+		<English>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]missing for the full production[COLOR_REVERT]</English>
+		<German>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]fehlen für die volle Produktion[COLOR_REVERT]</German>
+		<Russian>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]не хватает для полного производства[COLOR_REVERT]</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_NET_ALL</Tag>
 		<English>All colonies, per turn: %s1</English>
 		<German>Alle Kolonien, pro Runde: %s1</German>
 		<Russian>Все колонии, за ход: %s1</Russian>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_WTP_NOT_MADE_RAW_MISSING</Tag>
-		<English>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] cannot be made (raw materials missing)</English>
-		<German>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] nicht herstellbar (Rohstoffe fehlen)</German>
-		<Russian>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] не произведено (не хватает сырья)</Russian>
+		<Tag>TXT_KEY_WTP_RAW_MISSING_FOR_FULL_PRODUCTION</Tag>
+		<English>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] [COLOR_YELLOW]missing for the full production[COLOR_REVERT]</English>
+		<German>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] [COLOR_YELLOW]fehlen für die volle Produktion[COLOR_REVERT]</German>
+		<Russian>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] [COLOR_YELLOW]не хватает для полного производства[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_MORE</Tag>

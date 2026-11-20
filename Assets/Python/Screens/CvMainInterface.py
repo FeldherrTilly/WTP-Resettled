@@ -2682,47 +2682,55 @@ class CvMainInterface:
 
 								SzText = ""
 								bTwoYields = False
+								# WTP fix for the original WTP mod: the green and red numbers of the production bar showed an estimate (the output of the workers
+								# with the bonuses, scaled with actual / planned and rounded down), which is neither the real production (the free output of the
+								# building was missing) nor the real shortfall (the rounding turned a shortfall of 1 into 2). Now the numbers are the real ones:
+								# what the colony makes of this good (the same number as in the tooltip: "Total ...") and what could not be made because of missing
+								# raw materials. The shortfall is the same number as in the tooltips ("from lack of ...", "cannot be made"), i.e. before the bonuses: with the bonuses
+								# it would be rounded differently again (13 would become 14).
+								# It is also shown when nobody works in the building: the free output of the building is produced anyway (e.g. +2 / +2).
+								# all the goods of the building (there can be more than two: butcher, dairy, roaster), each one once, in the order of the professions
+								aBarYields = [iYield]
 								for iArrayProfession in range(gc.getNumProfessionInfos()):
 									if (gc.getProfessionInfo(iArrayProfession).getSpecialBuilding() == iSpecialBuildingType):
 										if (not gc.getProfessionInfo(iArrayProfession).isWorkPlot() and gc.getProfessionInfo(iArrayProfession).isCitizen()):
 											if gc.getCivilizationInfo(pHeadSelectedCity.getCivilizationType()).isValidProfession(iArrayProfession):
-												iAmountYield = gc.getProfessionInfo(iArrayProfession).getYieldsProduced(0) #MultipleYieldsProduced Start
-												ProducedYield = 0
-												for pCitizen in CitizenSpecialBuildingIndexArray[iSpecialBuildingType]:
-													if (pCitizen.getProfession() == iArrayProfession):
-														ProducedYield += pHeadSelectedCity.getProfessionOutput(iArrayProfession, pCitizen)
-
-												ProducedYield = ProducedYield * pHeadSelectedCity.getBaseYieldRateModifier(iAmountYield, 0) / 100
-
-												CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iAmountYield)
-												CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iAmountYield)
-
-												if (CityProducedYield > 0):
-													ActualYield = ProducedYield * CityActualYield / CityProducedYield
-												else:
-													ActualYield = ProducedYield
-
-												UnproducedYield = ProducedYield - ActualYield
-
-												if (bTwoYields == False):
-													if (ActualYield > 0):
-														bTwoYields = True
-														SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
-													if (UnproducedYield > 0):
-														SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
-												else:
-													if (iAmountYield != iYield):
-														if (ActualYield > 0):
-															SzText += u"<color=255,255,255> /" + "</color>"
-															SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
-														if (UnproducedYield > 0):
-															SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
-        
+												iBarYieldOfProfession = gc.getProfessionInfo(iArrayProfession).getYieldsProduced(0)
+												if (iBarYieldOfProfession >= 0 and iBarYieldOfProfession < YieldTypes.NUM_YIELD_TYPES and not iBarYieldOfProfession in aBarYields):
+													aBarYields.append(iBarYieldOfProfession)
+								for iBarYield in aBarYields:
+									iBarModifier = pHeadSelectedCity.getBaseYieldRateModifier(iBarYield, 0)
+									CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iBarYield)
+									CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iBarYield)
+									ActualYield = CityActualYield * iBarModifier / 100
+									UnproducedYield = CityProducedYield - CityActualYield
+									if (bTwoYields == False):
+										if (ActualYield > 0):
+											bTwoYields = True
+											SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
+										if (UnproducedYield > 0):
+											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
+									else:
+										if (ActualYield > 0):
+											SzText += u"<color=255,255,255> /" + "</color>"
+											SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
+										if (UnproducedYield > 0):
+											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
+								# WTP: the text grows to the left, over the picture of the good, when there are several numbers (e.g. "+2 -13 / +2 -12"):
+								# the longer it is, the smaller the font (the picture and the numbers must not cover each other)
+								iBarTextLength = len(re.sub(u"<[^>]*>", u"", SzText).strip()) # (without the space in front of the first number, it is not visible)
+								iBarFontDelta = 0
+								if iBarTextLength > 15:
+									iBarFontDelta = -2
+								elif iBarTextLength > 11:
+									iBarFontDelta = -1
+								if STANDARD_FONT_SIZE + iBarFontDelta < 1:
+									iBarFontDelta = 1 - STANDARD_FONT_SIZE
 								szName = "WorkerOutputText" + str(iYield)
 								if (iSecondYield == -1 or iSecondYield == iYield):
-									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , 0), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
+									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , iBarFontDelta), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
 								else:
-									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , 0), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_TWO_YIELDS, iYield, iSecondYield)
+									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , iBarFontDelta), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_TWO_YIELDS, iYield, iSecondYield)
 
 								CitizenHideList.append(szName)
 								CitizenHideList.append("ProductionBox" + str(iSpecialBuildingType)) # R&R, Robert Surcouf Fix Production box
@@ -6276,6 +6284,12 @@ class CvMainInterface:
 						aParts.append(aLetters[i])
 				szLines += u"\n" + tRow[0] + u": " + u"/".join(aParts)
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (the planned use of the good in the colony, also when nothing is used up at the moment because another raw material is missing completely:
+			# the same number as the line "converted to" in the tooltip of the good inside the city)
+			if iYield != YieldTypes.YIELD_FOOD:
+				iPlannedUse = pCity.getRawYieldConsumed(iYield)
+				if iPlannedUse > 0:
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_USE", (u"<color=255,0,0,255>-%d</color>" % iPlannedUse,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			# (the production of the good per turn, what is left after the colony's own use: green with a plus sign, red when negative)
 			iNet = pCity.calculateNetYield(iYield)
 			if iNet > 0:
@@ -6285,6 +6299,12 @@ class CvMainInterface:
 			else:
 				szNet = u"0"
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_NET", (szNet,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (how many of this raw material are missing in the colony for the full production: the same calculation as the line in the tooltip of the
+			# raw material inside the city, see CvGameTextMgr::setYieldHelp: what the workers want to use up, minus the stock and what the colony makes of it)
+			if iYield != YieldTypes.YIELD_FOOD:
+				iMissingRaw = pCity.getRawYieldConsumed(iYield) - pCity.getYieldStored(iYield) - pCity.calculateActualYieldProduced(iYield) * pCity.getBaseYieldRateModifier(iYield, 0) / 100
+				if iMissingRaw > 0:
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_RAW_MISSING", (-iMissingRaw, unichr(gc.getYieldInfo(iYield).getChar())))
 			return szLines
 		except:
 			self.tipError("getTraderChildText")
@@ -9152,11 +9172,39 @@ class CvMainInterface:
 			pass
 		return True
 
+	bTradeReturnPending = False # the way back of a jump that started in a city screen waits until the city screen of the colony of the jump is left
+
 	# the window that was opened by a jump is closed by the player: back to where the jump started
 	def tradeWindowClosed( self ):
 		try:
 			if len(self.aTradeReturn) == 0:
 				return
+			if not self.aTradeReturn[-1]["map"] and CyInterface().isCityScreenUp():
+				# (the jump started in a city screen: closing the window (ok / cancel) does not take the player back, he stays in the city screen of the
+				# colony of the jump; leaving that city screen is what takes him back, see checkTradeReturnPending)
+				self.bTradeReturnPending = True
+				return
+			self.doTradeReturn()
+		except:
+			self.tReopenTrade = None
+
+	# the city screen of the colony of a jump is left (the window is closed): now the way back, to the colony the jump started in
+	def checkTradeReturnPending( self ):
+		if not self.bTradeReturnPending:
+			return
+		try:
+			if len(self.aTradeReturn) == 0:
+				self.bTradeReturnPending = False
+				return
+			if CyInterface().isCityScreenUp() or self.isTradeWindowOpen() or self.tReopenTrade is not None:
+				return
+			self.bTradeReturnPending = False
+			self.doTradeReturn()
+		except:
+			self.bTradeReturnPending = False
+
+	def doTradeReturn( self ):
+		try:
 			tR = self.aTradeReturn.pop()
 			# (the tooltip that was frozen in the colony of the jump goes: the one of the starting colony is made again)
 			self.unfreezeAllTips()
@@ -11692,6 +11740,7 @@ class CvMainInterface:
 		self.updateCursorTooltip()
 		self.pollWidgetHelp()
 		self.updatePostJump()
+		self.checkTradeReturnPending()
 		self.updateCityJump()
 		try:
 			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
