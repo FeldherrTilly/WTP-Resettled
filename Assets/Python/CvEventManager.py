@@ -157,6 +157,7 @@ class CvEventManager:
 			CvUtil.EventCreateTradeRoute: ('CreateTradeRoute', self.__eventCreateTradeRouteApply, self.__eventCreateTradeRouteBegin),
 			CvUtil.EventEditTradeRoute: ('EditTradeRoute', self.__eventEditTradeRouteApply, self.__eventEditTradeRouteBegin),
 			CvUtil.EventDiploYieldAmount: ('DiploYieldAmount', self.__eventDiploYieldAmountApply, self.__eventDiploYieldAmountBegin),
+			CvUtil.EventRenameWaypoint: ('RenameWaypoint', self.__eventRenameWaypointApply, self.__eventRenameWaypointBegin),
 
 # Dale - AoD: AoDCheatMenu START
 			CvUtil.EventAoDCheatMenu: ('AoDCheatMenu', self.AoDCheatMenuApply, self.AoDCheatMenuBegin),
@@ -222,8 +223,37 @@ class CvEventManager:
 			if ( CvDebugTools.g_CvDebugTools.notifyInput(argsList) ):
 				return 0
 
+		# WTP: nested tooltips. Esc unfreezes the last frozen tooltip, X (short press) freezes the tooltip that is shown,
+		# X held closes all frozen ones
+		if (eventType == self.EventKeyDown):
+			try:
+				if int(key) == int(InputTypes.KB_ESCAPE) and CvScreensInterface.mainInterface.isTipFrozen():
+					CvScreensInterface.mainInterface.unfreezeCursorTooltip()
+					return 1
+				if int(key) == int(InputTypes.KB_X) and not self.bCtrl and not self.bShift and not self.bAlt:
+					if CvScreensInterface.mainInterface.keyXDown():
+						return 1
+				if int(key) == int(InputTypes.KB_X) and self.bShift and not self.bCtrl and not self.bAlt and CvScreensInterface.mainInterface.isTipFrozen():
+					# Shift + X stacks the frozen tooltips
+					if CvScreensInterface.mainInterface.stackFrozenTips():
+						return 1
+			except:
+				pass
+		elif (eventType == self.EventKeyUp):
+			try:
+				if int(key) == int(InputTypes.KB_X):
+					if CvScreensInterface.mainInterface.keyXUp():
+						return 1
+			except:
+				pass
+
 		if ( eventType == self.EventKeyDown ):
 			theKey=int(key)
+
+			# WTP: Ctrl+Shift+T switches the hover tooltip (own tooltip window at the cursor) on and off
+			if (theKey == int(InputTypes.KB_T) and self.bCtrl and self.bShift and not self.bAlt):
+				CvScreensInterface.mainInterface.toggleHoverTip()
+				return 1
 
 			if (theKey == int(InputTypes.KB_I) and self.bCtrl and not self.bShift and not self.bAlt):
 				CvScreensInterface.mainInterface.toggleTerritorialInfluence()
@@ -392,6 +422,12 @@ class CvEventManager:
 	def onWindowActivation(self, argsList):
 		'Called when the game window activates or deactivates'
 		bActive = argsList[0]
+		# the frozen tooltips are drawn again (their widgets are gone after alt-tab)
+		try:
+			if bActive:
+				CvScreensInterface.mainInterface.windowActivated()
+		except:
+			pass
 
 	def onCityScreenOpen(self, argsList):
 		'Called when the game window activates or deactivates'
@@ -598,6 +634,12 @@ class CvEventManager:
 		iNumUnits = argsList[2]
 		listUnitIds = argsList[3]
 
+		try:
+			# the target of an order to move can become a waypoint of the unit (tooltips of units, "Set waypoint...")
+			CvScreensInterface.mainInterface.onWaypointMission(eOwner, eMission, listUnitIds)
+		except:
+			pass
+
 		if (not self.__LOG_PUSH_MISSION):
 			return
 		if pHeadUnit:
@@ -697,6 +739,11 @@ class CvEventManager:
 	def onUnitSelected(self, argsList):
 		pUnit = argsList[0]
 		CvAdvisorUtils.unitSelectedFeats(pUnit)
+		try:
+			# a unit is activated: its tooltip is frozen until the unit gets an order
+			CvScreensInterface.mainInterface.onUnitActivated(pUnit)
+		except:
+			pass
 		
 	def onMissionaryConvertedUnit(self, argsList):
 		pUnit = argsList[0]
@@ -1144,6 +1191,21 @@ class CvEventManager:
 		'Wonder Movie Apply'
 		if (getChtLvl() > 0):
 			CvDebugTools.CvDebugTools().applyWonderMovie( (popupReturn) )
+
+	# the small window to rename a waypoint of the tooltips of units (argsList: (number of the waypoint, its name with the number in front))
+	def __eventRenameWaypointBegin(self, argsList):
+		popup = CyPopup(CvUtil.EventRenameWaypoint, EventContextTypes.EVENTCONTEXT_ALL, True)
+		popup.setUserData((argsList[0],))
+		popup.setBodyString(localText.getText("TXT_KEY_WTP_WAYPOINT_RENAME", ()), CvUtil.FONT_CENTER_JUSTIFY)
+		popup.createEditBox(argsList[1], 0)
+		popup.setEditBoxMaxCharCount(30, 30, 0)
+		popup.launch(True, PopupStates.POPUPSTATE_IMMEDIATE)
+
+	def __eventRenameWaypointApply(self, playerID, userData, popupReturn):
+		try:
+			CvScreensInterface.mainInterface.applyWaypointRename(playerID, userData[0], popupReturn.getEditBoxString(0))
+		except:
+			pass
 
 	def __eventEditUnitNameBegin(self, argsList):
 		pUnit = argsList
