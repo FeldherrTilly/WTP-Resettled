@@ -741,10 +741,12 @@ class CvAfricaScreen:
 				elif (inputClass.getData1() == self.SELL_ALL) :
 					#player = gc.getPlayer(gc.getGame().getActivePlayer()) #R&R, vetiarvind, navigation sectors 
 					transport = player.getUnit(inputClass.getData2())
+					# WTP: Shift + click: the goods of all ships in the port are sold (the game refuses the goods that are not traded, e.g. boycotted)
+					bAllShips = inputClass.isShiftKeyDown()
 					(unit, iter) = player.firstUnit()
 					while (unit):
 						if (unit.getUnitTravelState() == UnitTravelStates.UNIT_TRAVEL_STATE_IN_AFRICA and unit.isCargo() and unit.isGoods()):
-							if (unit.getTransportUnit().getID() == transport.getID()):
+							if (bAllShips or unit.getTransportUnit().getID() == transport.getID()):
 								CyMessageControl().sendPlayerAction(player.getID(), PlayerActionTypes.PLAYER_ACTION_SELL_YIELD_UNIT_AFRICA, 0, unit.getYieldStored(), unit.getID())
 						(unit, iter) = player.nextUnit(iter)
 					screen.setSoundId(CyAudioGame().Play2DSound("AS2D_BUILD_BANK"))
@@ -891,7 +893,7 @@ class CvAfricaScreen:
 			if iData1 == self.SAIL_TO_NEW_WORLD:
 				return localText.getText("TXT_KEY_SAIL", ())
 			elif iData1 == self.SELL_ALL:
-				return localText.getText("TXT_KEY_SELL_ALL", ())
+				return localText.getText("TXT_KEY_SELL_ALL", ()) + u"\n" + localText.getText("TXT_KEY_WTP_SELL_ALL_SHIFT_HELP", ())
 			elif iData1 == self.LOAD_ALL:
 				return localText.getText("TXT_KEY_LOAD_ALL_EUROPE", ())
 			elif iData1 == self.BUY_UNIT_BUTTON_ID:
