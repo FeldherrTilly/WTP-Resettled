@@ -6274,6 +6274,12 @@ class CvMainInterface:
 						aParts.append(aLetters[i])
 				szLines += u"\n" + tRow[0] + u": " + u"/".join(aParts)
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (the planned use of the good in the colony, also when nothing is used up at the moment because another raw material is missing completely:
+			# the same number as the line "converted to" in the tooltip of the good inside the city)
+			if iYield != YieldTypes.YIELD_FOOD:
+				iPlannedUse = pCity.getRawYieldConsumed(iYield)
+				if iPlannedUse > 0:
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_USE", (-iPlannedUse,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			# (the production of the good per turn, what is left after the colony's own use: green with a plus sign, red when negative)
 			iNet = pCity.calculateNetYield(iYield)
 			if iNet > 0:
