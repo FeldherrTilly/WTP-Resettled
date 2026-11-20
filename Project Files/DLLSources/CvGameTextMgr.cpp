@@ -786,6 +786,44 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 					szString.append(NEWLINE);
 					szString.append(gDLL->getText("TXT_KEY_WTP_CARGO_VALUE_HELP", szValues.GetCString()));
 					szString.append(CvWString::format(L"%c", GC.getSymbolID(GOLD_CHAR)));
+					// one line per good on board (marked with >>, the Python tooltip folds them into the child window of the line Total value):
+					// amount and the value in every harbour, the best harbour for this good in green
+					for (YieldTypes eRow = FIRST_YIELD; eRow < NUM_YIELD_TYPES; ++eRow)
+					{
+						if (aiOnBoard[eRow] <= 0)
+						{
+							continue;
+						}
+						int aiRow[3];
+						aiRow[0] = kCargoOwner.getSellToEuropeProfit(eRow, aiOnBoard[eRow]);
+						aiRow[1] = kCargoOwner.getSellToAfricaProfit(eRow, aiOnBoard[eRow]);
+						aiRow[2] = kCargoOwner.getSellToPortRoyalProfit(eRow, aiOnBoard[eRow]);
+						int iRowBest = 0;
+						for (int iH = 1; iH < iHarbours; ++iH)
+						{
+							if (aiRow[iH] > aiRow[iRowBest])
+							{
+								iRowBest = iH;
+							}
+						}
+						szString.append(CvWString::format(L"\n\x00BB%d%c (", aiOnBoard[eRow], GC.getYieldInfo(eRow).getChar()));
+						for (int iH = 0; iH < iHarbours; ++iH)
+						{
+							if (iH > 0)
+							{
+								szString.append(L" / ");
+							}
+							if (iH == iRowBest)
+							{
+								szString.append(CvWString::format(SETCOLR L"%d" ENDCOLR, TEXT_COLOR("COLOR_POSITIVE_TEXT"), aiRow[iH]));
+							}
+							else
+							{
+								szString.append(CvWString::format(L"%d", aiRow[iH]));
+							}
+						}
+						szString.append(CvWString::format(L"%c)", GC.getSymbolID(GOLD_CHAR)));
+					}
 				}
 			}
 
