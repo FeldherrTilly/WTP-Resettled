@@ -8922,6 +8922,7 @@ class CvMainInterface:
 	iReopenWait = 0 # frames the city screen gets to draw itself before the window is opened again
 
 	def checkReopenTradeWindow( self ):
+		self.checkTradeReturnPending()
 		if self.tReopenTrade is None:
 			return
 		if self.iReopenWait > 0:
@@ -9172,11 +9173,39 @@ class CvMainInterface:
 			pass
 		return True
 
+	bTradeReturnPending = False # the way back of a jump that started in a city screen waits until the city screen of the colony of the jump is left
+
 	# the window that was opened by a jump is closed by the player: back to where the jump started
 	def tradeWindowClosed( self ):
 		try:
 			if len(self.aTradeReturn) == 0:
 				return
+			if not self.aTradeReturn[-1]["map"] and CyInterface().isCityScreenUp():
+				# (the jump started in a city screen: closing the window (ok / cancel) does not take the player back, he stays in the city screen of the
+				# colony of the jump; leaving that city screen is what takes him back, see checkTradeReturnPending)
+				self.bTradeReturnPending = True
+				return
+			self.doTradeReturn()
+		except:
+			self.tReopenTrade = None
+
+	# the city screen of the colony of a jump is left (the window is closed): now the way back, to the colony the jump started in
+	def checkTradeReturnPending( self ):
+		if not self.bTradeReturnPending:
+			return
+		try:
+			if len(self.aTradeReturn) == 0:
+				self.bTradeReturnPending = False
+				return
+			if CyInterface().isCityScreenUp() or self.isTradeWindowOpen() or self.tReopenTrade is not None:
+				return
+			self.bTradeReturnPending = False
+			self.doTradeReturn()
+		except:
+			self.bTradeReturnPending = False
+
+	def doTradeReturn( self ):
+		try:
 			tR = self.aTradeReturn.pop()
 			# (the tooltip that was frozen in the colony of the jump goes: the one of the starting colony is made again)
 			self.unfreezeAllTips()
