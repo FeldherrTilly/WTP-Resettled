@@ -4567,8 +4567,10 @@ class CvMainInterface:
 			szFirst = re.sub(u"<[^>]*>", u"", szHeader).split(u",")[0].strip()
 			tName = re.search(u"\\(([^()]*)\\)\\s*$", szFirst)
 			if tName is None:
-				return None
-			szType = tName.group(1).strip()
+				# (a ship without a name of its own: the header is the name of its type, e.g. "Smuggling Ship")
+				szType = szFirst
+			else:
+				szType = tName.group(1).strip()
 			for eType in range(gc.getNumUnitInfos()):
 				pInfo = gc.getUnitInfo(eType)
 				if pInfo.getCargoSpace() > 0 and (pInfo.getDomainType() == DomainTypes.DOMAIN_SEA or pInfo.getDomainType() == DomainTypes.DOMAIN_LAND) and pInfo.getDescription() == szType:
