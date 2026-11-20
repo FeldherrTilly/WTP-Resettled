@@ -3313,6 +3313,12 @@ void CvUnit::doCommand(CommandTypes eCommand, int iData1, int iData2)
 			break;
 
 		case COMMAND_LOAD_CARGO:
+			if (iData1 == 1)
+			{
+				// WTP: fill all free cargo slots (Shift + click on the button)
+				loadAllYieldsByValue();
+			}
+			else
 			{
 				CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_LOAD_CARGO);
 				gDLL->getInterfaceIFace()->addPopup(pInfo);
@@ -5503,6 +5509,81 @@ int CvUnit::loadYieldAmount(YieldTypes eYield, int iAmount, bool bTrade)
 	groupTransportedYieldUnits(pUnit);
 
 	return iAmount; //R&R mod, vetiarvind, max yield import limit
+}
+
+// WTP: fills all free cargo slots with goods of the city, one slot after the other, always with the most valuable good (the sell price in Europe for
+// 100 units) that can still be loaded and would fill at least 15% of a slot (without livestock, building material, military goods, raw materials); the same good again as long as the city has more of it
+void CvUnit::loadAllYieldsByValue()
+{
+	bool abExcluded[NUM_YIELD_TYPES];
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		abExcluded[i] = false;
+	}
+	// not loaded: livestock, building material, military goods and all raw materials (goods that a profession turns into another good)
+	static const char* const aszExcluded[] = {
+		"YIELD_CLAY", "YIELD_STONE", "YIELD_TOOLS", "YIELD_HORSES", "YIELD_SAILCLOTH", "YIELD_HARDWOOD", "YIELD_ROPE", // building material
+		"YIELD_MUSKETS", "YIELD_BLADES", "YIELD_CANNONS", "YIELD_BLACK_POWDER", "YIELD_BAKERY_GOODS" // military goods
+	};
+	for (int i = 0; i < (int)(sizeof(aszExcluded) / sizeof(aszExcluded[0])); ++i)
+	{
+		const int iYield = GC.getInfoTypeForString(aszExcluded[i], true);
+		if (iYield >= 0 && iYield < NUM_YIELD_TYPES)
+		{
+			abExcluded[iYield] = true;
+		}
+	}
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (GC.getYieldInfo(eYield).isLivestock())
+		{
+			abExcluded[eYield] = true;
+		}
+	}
+	for (int iProf = 0; iProf < GC.getNumProfessionInfos(); ++iProf)
+	{
+		const CvProfessionInfo& kProfession = GC.getProfessionInfo((ProfessionTypes)iProf);
+		if (kProfession.getNumYieldsProduced() > 0)
+		{
+			for (int k = 0; k < kProfession.getNumYieldsConsumed(); ++k)
+			{
+				const int iConsumed = kProfession.getYieldsConsumed(k);
+				if (iConsumed >= 0 && iConsumed < NUM_YIELD_TYPES)
+				{
+					abExcluded[iConsumed] = true;
+				}
+			}
+		}
+	}
+	const CvPlayer& kOwner = GET_PLAYER(getOwnerINLINE());
+	// goods that would fill less than 15% of a slot are skipped
+	const int iMinAmount = (15 * GC.getGameINLINE().getCargoYieldCapacity() + 99) / 100;
+	for (int iGuard = 0; iGuard < 100; ++iGuard)
+	{
+		YieldTypes eBest = NO_YIELD;
+		int iBestValue = -1;
+		for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+		{
+			if (abExcluded[eYield] || !canLoadYield(plot(), eYield, false) || getMaxLoadYieldAmount(eYield) < iMinAmount)
+			{
+				continue;
+			}
+			const int iValue = kOwner.getSellToEuropeProfit(eYield, 100);
+			if (iValue > iBestValue)
+			{
+				iBestValue = iValue;
+				eBest = eYield;
+			}
+		}
+		if (eBest == NO_YIELD)
+		{
+			break;
+		}
+		if (loadYield(eBest, false) <= 0)
+		{
+			abExcluded[eBest] = true;
+		}
+	}
 }
 
 // Returns how much of eYield the city can safely export (stored minus auto-maintain threshold, clamped to zero).
