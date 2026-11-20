@@ -3345,4 +3345,10 @@
 		<German>Zum Ende der Runde noch einmal fragen</German>
 		<Russian>Спросить снова в конце хода</Russian>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_PORT_ROYAL_TAX_RATE</Tag>
+		<English>Port tax: %d1%% (on every sale)</English>
+		<German>Hafensteuer: %d1%% (auf jeden Verkauf)</German>
+		<Russian>Портовый налог: %d1%% (с каждой продажи)</Russian>
+	</TEXT>
 </Civ4GameText>
