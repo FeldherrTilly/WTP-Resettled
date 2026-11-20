@@ -4048,6 +4048,8 @@ class CvMainInterface:
 					aiIndent.append(int(fIndent * iChar))
 			# the hint at the end: the tooltip can be frozen with X (the frozen window does not have it)
 			aszHint = self.wrapMessage(localText.getText("TXT_KEY_WTP_TIP_FREEZE_HINT", ()), iCharsPerLine)
+			if self.isPopupWidgetTip():
+				aszHint = [] # (no freezing in the popup of the game)
 			aszLines += aszHint
 			aiPara += [-1] * len(aszHint)
 			aiIndent += [0] * len(aszHint)
@@ -4305,6 +4307,7 @@ class CvMainInterface:
 				aRest.insert(iCmdAt, [localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()), u"\n".join(aCommands)])
 				aFinal = aRest
 			aFinal = self.foldUnitGroups(aFinal)
+			aFinal = self.foldSellPrices(aFinal)
 			aNew = []
 			for aEntry in aFinal:
 				if aEntry[1] is not None:
@@ -4314,6 +4317,32 @@ class CvMainInterface:
 		except:
 			self.dTipDetails = {}
 		return aszParas
+
+	# the sell prices of a cargo slot (the lines Europe / Africa / Port Royal and the line Total): only the line Total stays, the three markets are its
+	# child tooltip
+	def foldSellPrices( self, aFinal ):
+		try:
+			szEurope = self.normTipText(localText.getText("TXT_KEY_EUROPE_PRICE_HELP", ()))
+			szAfrica = self.normTipText(localText.getText("TXT_KEY_AFRICA_PRICE_HELP", ()))
+			szRoyal = self.normTipText(localText.getText("TXT_KEY_PORT_ROYAL_PRICE_HELP", ()))
+			szTotal = self.normTipText(localText.getText("TXT_KEY_WTP_TOTAL_PRICE_HELP", ()))
+			if min(len(szEurope), len(szAfrica), len(szRoyal), len(szTotal)) < 3:
+				return aFinal
+			aNewFinal = []
+			k = 0
+			while k < len(aFinal):
+				if k + 3 < len(aFinal) and aFinal[k][1] is None and aFinal[k + 1][1] is None and aFinal[k + 2][1] is None and aFinal[k + 3][1] is None and self.normTipText(aFinal[k][0]).find(szEurope) == 0 and self.normTipText(aFinal[k + 1][0]).find(szAfrica) == 0 and self.normTipText(aFinal[k + 2][0]).find(szRoyal) == 0 and self.normTipText(aFinal[k + 3][0]).find(szTotal) == 0:
+					aMarkets = []
+					for j in range(3):
+						aMarkets.append(aFinal[k + j][0].rstrip().rstrip(u",").strip())
+					aNewFinal.append([aFinal[k + 3][0], u"\n".join(aMarkets)])
+					k += 4
+				else:
+					aNewFinal.append(aFinal[k])
+					k += 1
+			return aNewFinal
+		except:
+			return aFinal
 
 	# a line of the units that the game lists in groups (a plot with more than 10 units: "Free Colonist (3) 2, Master Potter (1) 2, ...")
 	def isUnitGroupLine( self, szText ):
@@ -4538,8 +4567,10 @@ class CvMainInterface:
 			szFirst = re.sub(u"<[^>]*>", u"", szHeader).split(u",")[0].strip()
 			tName = re.search(u"\\(([^()]*)\\)\\s*$", szFirst)
 			if tName is None:
-				return None
-			szType = tName.group(1).strip()
+				# (a ship without a name of its own: the header is the name of its type, e.g. "Smuggling Ship")
+				szType = szFirst
+			else:
+				szType = tName.group(1).strip()
 			for eType in range(gc.getNumUnitInfos()):
 				pInfo = gc.getUnitInfo(eType)
 				if pInfo.getCargoSpace() > 0 and (pInfo.getDomainType() == DomainTypes.DOMAIN_SEA or pInfo.getDomainType() == DomainTypes.DOMAIN_LAND) and pInfo.getDescription() == szType:
@@ -4925,6 +4956,9 @@ class CvMainInterface:
 	def getTipPlacement( self, iWidth, iHeight, iCursorX, iCursorY, xRes, yRes ):
 		if self.iTipMode == 1:
 			return (HELTTEXT_AREA_X_MARGIN, max(4, yRes - SADDLE_HEIGHT - iHeight))
+		if self.isPopupWidgetTip():
+			# (the popup stands in the middle of the screen, about half of its width: the left edge is free)
+			return (max(4, int(xRes * 0.01)), max(4, min(yRes - iHeight - 4, iCursorY - iHeight / 2)))
 		iGap = max(48, int(yRes * 0.04))
 		tRect = self.getTipAvoidRect(iCursorX, iCursorY)
 		if tRect is not None:
@@ -7447,7 +7481,7 @@ class CvMainInterface:
 		try:
 			if (bWpLine or bWpRow or bCmdRow or bCityRow) and bShift:
 				bWheel = True
-			elif iPara >= 0 and not bWpWindow and not bPromoLine and bShift and len(self.getTextPediaAllTargets(aszTopParas[iPara])) > 0 and self.getBlockUnit(iFz, aszTopParas, iPara) is None:
+			elif iPara >= 0 and not bWpWindow and not bPromoLine and bShift and len(self.getPediaLineTargets(iFz, aszTopParas, iPara, True)) > 0 and self.getBlockUnit(iFz, aszTopParas, iPara) is None:
 				bWheel = True
 		except:
 			pass
@@ -7462,7 +7496,7 @@ class CvMainInterface:
 				elif bWpRow or bCmdRow or bCityRow:
 					aTargets = range(iWpRowCount)
 				else:
-					aTargets = self.getTextPediaAllTargets(aszTopParas[iPara])
+					aTargets = self.getPediaLineTargets(iFz, aszTopParas, iPara, True)
 				if iPara != self.iTipSelPara or iFz != self.iTipSelLevel:
 					self.iTipSelPara = iPara
 					self.iTipSelLevel = iFz
@@ -7658,6 +7692,16 @@ class CvMainInterface:
 						szMarkOrig = aDetailLines[iSel]
 						aDetailLines[iSel] = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", szMarkOrig) + u"</color>"
 						szDetail = u"\n".join(aDetailLines)
+				elif iSel >= 0 and self.isBuildingsRow(iFz, aszTopParas, iPara):
+					# the line "Buildings": the building of the list that the wheel has chosen is yellow in its child window
+					aBuildingTargets = self.getPediaLineTargets(iFz, aszTopParas, iPara, True)
+					if iSel < len(aBuildingTargets):
+						aSegs = szDetail.split(u", ")
+						for k in range(len(aSegs)):
+							if re.sub(u"<[^>]*>", u"", aSegs[k]).strip().lower() == aBuildingTargets[iSel][0].lower():
+								aSegs[k] = u"<color=255,255,0,255>" + re.sub(u"<color=[^>]*>|</color>", u"", aSegs[k]) + u"</color>"
+								break
+						szDetail = u", ".join(aSegs)
 				self.showSecondTip(screen, szDetail, iCY, tTop, iFz)
 				if tWp is not None and iPara == tWp["cmd"] and self.bSecondTipShown:
 					# the child window of the line "Commands" of a unit: its first line is "Set waypoint..."
@@ -8334,13 +8378,40 @@ class CvMainInterface:
 			pass
 		return False
 
+	# the folded line "Buildings" of a city tooltip: the names of the buildings are in its child window
+	def isBuildingsRow( self, iLevel, aszParas, iPara ):
+		try:
+			if iLevel >= 0 and iLevel < len(self.aFrozen) and iPara >= 0 and iPara < len(aszParas):
+				return self.aFrozen[iLevel][4].has_key(iPara) and self.normTipText(aszParas[iPara]) == self.normTipText(localText.getText("TXT_KEY_WTP_TIP_BUILDINGS", ()))
+		except:
+			pass
+		return False
+
+	# the text of a line of a frozen tooltip that the Colopedia targets are taken from: the folded line "Buildings" has the names of the buildings
+	# in its child window, so the buildings of the list are the targets of the line (mouse wheel: one after the other)
+	def getPediaLineText( self, iLevel, aszParas, iPara ):
+		if self.isBuildingsRow(iLevel, aszParas, iPara):
+			return self.aFrozen[iLevel][4][iPara]
+		return aszParas[iPara]
+
+	# the targets of a line (all of them in the order of the wheel, or the default ones); the line "Buildings": only the buildings of its list
+	def getPediaLineTargets( self, iLevel, aszParas, iPara, bAll ):
+		szText = self.getPediaLineText(iLevel, aszParas, iPara)
+		if bAll:
+			aTargets = self.getTextPediaAllTargets(szText)
+		else:
+			aTargets = self.getTextPediaTargets(szText)
+		if self.isBuildingsRow(iLevel, aszParas, iPara):
+			aTargets = [t for t in aTargets if t[1] == CvScreenEnums.PEDIA_BUILDING]
+		return aTargets
+
 	def getTipSecondTextBase( self, iPara, iSel = -1, aszParas = None, iLevel = -1 ):
 		try:
 			if aszParas is None:
 				aszParas = []
 			szLine = aszParas[iPara]
-			aTargets = self.getTextPediaTargets(szLine)
-			aAll = self.getTextPediaAllTargets(szLine)
+			aTargets = self.getPediaLineTargets(iLevel, aszParas, iPara, False)
+			aAll = self.getPediaLineTargets(iLevel, aszParas, iPara, True)
 			eTalk = -1
 			if iSel < 0:
 				eTalk = self.getTalkPlayer(aszParas, iPara)
@@ -8678,7 +8749,7 @@ class CvMainInterface:
 					return
 				if self.runCityCommand(aszCmd, iCmd) or self.runUnitCommand(aszParas, iPara):
 					return
-				aTargets = self.getTextPediaTargets(aszParas[iPara])
+				aTargets = self.getPediaLineTargets(iLevel, aszParas, iPara, False)
 				eTalk = -1
 				pSelect = None
 				tBlock = None
@@ -8739,7 +8810,7 @@ class CvMainInterface:
 				elif tBlock is not None:
 					pass
 				elif iPara == self.iTipSelPara and iLevel == self.iTipSelLevel:
-					aTargets = self.getTextPediaAllTargets(aszParas[iPara])
+					aTargets = self.getPediaLineTargets(iLevel, aszParas, iPara, True)
 					# the target chosen with shift + mouse wheel
 					self.openPediaTargetIndex(aTargets, self.iTipSelIdx)
 				else:
@@ -8856,9 +8927,20 @@ class CvMainInterface:
 		return self.bHudHover
 
 	# called by the game when it asks for the help text of a widget under the cursor (CvScreensInterface.getWidgetHelp)
+	iLastWidgetType = -1 # the widget type of the last help text that was shown as the own tooltip
+
+	# the own tooltip of a button of the list of the game popups (what a colony builds: WIDGET_TRAIN / WIDGET_CONSTRUCT / WIDGET_CONVINCE):
+	# the popup is above all screens of python, so the tooltip stands beside it (the left edge of the screen) and cannot be frozen (the keys go to the popup)
+	def isPopupWidgetTip( self ):
+		try:
+			return self.bHudHover and not CyInterface().isCityScreenUp() and self.iLastWidgetType in (int(WidgetTypes.WIDGET_TRAIN), int(WidgetTypes.WIDGET_CONSTRUCT), int(WidgetTypes.WIDGET_CONVINCE))
+		except:
+			return False
+
 	def widgetHelpSeen( self, szText, eWidgetType ):
 		if not self.bHoverTip:
 			return
+		self.iLastWidgetType = int(eWidgetType)
 		try:
 			if self.bTipFrozen and self.getFrozenAt(gc.getGame().getCursorClientX(), gc.getGame().getCursorClientY()) >= 0:
 				return

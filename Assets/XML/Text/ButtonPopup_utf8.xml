@@ -235,6 +235,18 @@
 		<Hungarian>[COLOR_HIGHLIGHT_TEXT]Import beállítás[COLOR_REVERT][NEWLINE]Import elindítása 75%-nál[NEWLINE]Import leállítása 100%-nál[NEWLINE]A fenntartandó szinthez képest (az Export melletti bal oldali szám)</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_IMPORT_GOOD_TITLE</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Import %s1 %s2[COLOR_REVERT]</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]%s1 %s2 importieren[COLOR_REVERT]</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Импорт: %s1 %s2[COLOR_REVERT]</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_EXPORT_GOOD_TITLE</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Export %s1 %s2[COLOR_REVERT]</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]%s1 %s2 exportieren[COLOR_REVERT]</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Экспорт: %s1 %s2[COLOR_REVERT]</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TRADEROUTE_WIN_EXPORT_HELP</Tag>
 		<English>[COLOR_HIGHLIGHT_TEXT]Export this good[COLOR_REVERT][NEWLINE]Left: maintain level[NEWLINE]Import if warehouse is below this level or export if warehouse exceeds this level.</English>
 		<Portuguese>[COLOR_HIGHLIGHT_TEXT]Exportar este bem[COLOR_REVERT][NEWLINE]Esquerda: manter o nível[NEWLINE]Importar se o armazém estiver abaixo deste nível ou exportar se o armazém exceder este nível.</Portuguese>

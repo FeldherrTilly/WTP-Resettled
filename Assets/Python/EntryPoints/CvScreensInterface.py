@@ -92,6 +92,15 @@ def getGotoWaypoints(argsList):
 	except:
 		return u""
 
+# WTP: the entry "Set waypoint..." of the window "Select destination" (called by the DLL): the same as the line of the tooltip of the unit
+def startGotoWaypointMode(argsList):
+	try:
+		pUnit = gc.getPlayer(gc.getGame().getActivePlayer()).getUnit(argsList[0])
+		if pUnit is not None and not pUnit.isNone():
+			mainInterface.startWaypointMode(pUnit)
+	except:
+		pass
+
 def numPlotListButtons():
 	return mainInterface.numPlotListButtons()
 

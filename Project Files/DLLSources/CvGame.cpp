@@ -2885,8 +2885,16 @@ void CvGame::handleActionEx(int iAction, bool bClicked)
 		}
 		else if (GC.getActionInfo(iAction).getCommandType() == COMMAND_LOAD_CARGO)
 		{
-			CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_LOAD_CARGO);
-			gDLL->getInterfaceIFace()->addPopup(pInfo);
+			if (bShift && bClicked)
+			{
+				// WTP: Shift + click on the button: all free cargo slots are filled at once, the most valuable good first (iData1 = 1, see CvUnit::doCommand)
+				selectionListGameNetMessage(GAMEMESSAGE_DO_COMMAND, COMMAND_LOAD_CARGO, 1, -1, 0, bAlt);
+			}
+			else
+			{
+				CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_LOAD_CARGO);
+				gDLL->getInterfaceIFace()->addPopup(pInfo);
+			}
 			bSkip = true;
 		}
 
