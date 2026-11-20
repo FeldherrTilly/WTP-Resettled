@@ -216,6 +216,24 @@ class CvEventManager:
 		eventType,key,mx,my,px,py = argsList
 		game = gc.getGame()
 
+		# WTP: Ctrl + Shift + W A S D move the message panel (two keys at once: diagonal)
+		aMoveKeys = [int(InputTypes.KB_A), int(InputTypes.KB_D), int(InputTypes.KB_W), int(InputTypes.KB_S)] # left, right, up, down
+		if (eventType == self.EventKeyUp):
+			try:
+				CvScreensInterface.mainInterface.releaseMessageArrow(aMoveKeys.index(int(key)))
+			except:
+				pass
+		elif (eventType == self.EventKeyDown and self.bShift and self.bCtrl and not self.bAlt):
+			try:
+				if int(key) == int(InputTypes.KB_Q) and CvScreensInterface.mainInterface.isMessagePanelShown():
+					CvScreensInterface.mainInterface.resetMessagePanel()
+					return 1
+				if int(key) in aMoveKeys and CvScreensInterface.mainInterface.isMessagePanelShown():
+					CvScreensInterface.mainInterface.pressMessageArrow(aMoveKeys.index(int(key)))
+					return 1
+			except:
+				pass
+
 		if (self.bAllowCheats):
 			# notify debug tools of input to allow it to override the control
 			argsList = (eventType,key,self.bCtrl,self.bShift,self.bAlt,mx,my,px,py,gc.getGame().isNetworkMultiPlayer())

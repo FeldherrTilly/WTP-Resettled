@@ -5197,7 +5197,9 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 						if (!pyl.hasAnyYield() && bPrintWarning)
 						{
 							CvWString szBuffer = gDLL->getText("TXT_KEY_NO_RAW_ON_FIELD", getNameKey(),GC.getYieldInfo(eYieldProduced).getChar());
+							WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 							gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldProduced).getButton(), COLOR_RED, true, true);
+							WtpHudMessages::setPriority(false);
 						}
 					}
 				}
@@ -5435,8 +5437,13 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 						 eYieldConsumed = eYieldConsumed2;
 					}
 				}
-				CvWString szBuffer = gDLL->getText("TXT_KEY_NO_RAW", getNameKey(),GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar());
+				// WTP: the message names the amount that is missing per turn (consumption minus what is produced and stored)
+				int iMissing = aiConsumedYields[eYieldConsumed] - aiProducedYields[eYieldConsumed] * getBaseYieldRateModifier(eYieldConsumed) / 100 - getYieldStored(eYieldConsumed);
+				iMissing = std::max(1, iMissing);
+				CvWString szBuffer = gDLL->getText("TXT_KEY_WTP_NO_RAW_AMOUNT", getNameKey(), GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar(), iMissing);
+				WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 				gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldConsumed).getButton(), COLOR_RED, true, true);
+				WtpHudMessages::setPriority(false);
 			}
 		}
 	}
@@ -5461,7 +5468,9 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 					}
 				}
 				CvWString szBuffer = gDLL->getText("TXT_KEY_ALMOST_NO_RAW", getNameKey(),GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar());
+				WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 				gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldConsumed).getButton(), COLOR_RED, true, true);
+				WtpHudMessages::setPriority(false);
 			}
 		}
 	}
@@ -5484,7 +5493,9 @@ void CvCity::calculateNetYields(int aiYields[NUM_YIELD_TYPES], int* aiProducedYi
 						 eYieldConsumed = eYieldConsumed2;
 					}
 					CvWString szBuffer = gDLL->getText("TXT_KEY_NOT_ENOUGH_RAW", getNameKey(),GC.getYieldInfo(eYieldConsumed).getChar(), GC.getYieldInfo(eYieldProduced).getChar());
+					WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 					gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYieldConsumed).getButton(), COLOR_RED, true, true);
+					WtpHudMessages::setPriority(false);
 				}
 			}
 		}
@@ -7883,6 +7894,10 @@ void CvCity::doYields()
 
 	// R&R, ray, adjustment for less Custom House messages
 	int iCustomHouseProfit = 0;
+	// WTP: the messages about the storage surplus (sold / lost) of one city are merged to one message each: all yield icons, then the sum
+	CvWString szSurplusSoldYields;
+	int iSurplusSoldGold = 0;
+	CvWString szSurplusLostYields;
 	bool bPrintOnce = false;
 
 	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
@@ -7927,7 +7942,9 @@ void CvCity::doYields()
 
 							if (iTurns == 2 || iTurns == 1) {
 								CvWString szBuffer = gDLL->getText("TXT_KEY_MISC_STUDENT_ALMOST_GRADUATED", iTurns, getNameKey(), GC.getBuildingInfo(eSchoolBuilding).getTextKeyWide());
+								WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 								gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_CULTUREEXPANDS", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(YIELD_EDUCATION).getButton(), COLOR_WHITE, true, true);
+								WtpHudMessages::setPriority(false);
 
 							}
 							// TAC - Messages - Ray - END
@@ -8044,15 +8061,14 @@ void CvCity::doYields()
 						}
 						else
 						{
-							CvWString szBuffer = gDLL->getText("TXT_KEY_GOODS_LOST_SOLD", iLoss, GC.getYieldInfo(eYield).getChar(), getNameKey(), iProfit);
-							gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), NULL, MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYield).getButton(), COLOR_WHITE, true, true);
+							szSurplusSoldYields.append(CvWString::format(L"%c", GC.getYieldInfo(eYield).getChar()));
+							iSurplusSoldGold += iProfit;
 						}
 						// R&R, ray , Changes to Custom House - END
 					}
 					else
 					{
-						CvWString szBuffer = gDLL->getText("TXT_KEY_GOODS_LOST", iLoss, GC.getYieldInfo(eYield).getChar(), getNameKey());
-						gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, GC.getYieldInfo(eYield).getButton(), COLOR_RED, true, true);
+						szSurplusLostYields.append(CvWString::format(L"%c", GC.getYieldInfo(eYield).getChar()));
 					}
 				}
 				else if (!bPrintOnce && (iMaxCapacity - iTotalYields) > 0 && (iMaxCapacity - iTotalYields) < (iMaxCapacity / 10)) //only do this message once
@@ -8075,6 +8091,21 @@ void CvCity::doYields()
 			}
 		}
 		doAutoExport(eYield); // auto traderoute - Nightinggale
+	}
+
+	if (!szSurplusSoldYields.empty())
+	{
+		CvWString szBuffer = gDLL->getText("TXT_KEY_WTP_SURPLUS_SOLD", getNameKey(), szSurplusSoldYields.GetCString(), iSurplusSoldGold);
+		WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
+		gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), NULL, MESSAGE_TYPE_MINOR_EVENT, NULL, COLOR_WHITE, true, true);
+		WtpHudMessages::setPriority(false);
+	}
+	if (!szSurplusLostYields.empty())
+	{
+		CvWString szBuffer = gDLL->getText("TXT_KEY_WTP_SURPLUS_LOST", getNameKey(), szSurplusLostYields.GetCString());
+		WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
+		gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, NULL, COLOR_RED, true, true);
+		WtpHudMessages::setPriority(false);
 	}
 
 	// R&R, ray, adjustment for less Custom House messages
@@ -14412,7 +14443,9 @@ bool CvCity::LbD_try_escape(CvUnit* convUnit, int base, int mod_crim, int mod_se
 	//ray16
 	CvWString szBuffer = gDLL->getText("TXT_KEY_LBD_ESCAPE", getNameKey());
 	//Ende ray16
+	WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 	gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, buttonStringForMessage, COLOR_WHITE, true, true);
+	WtpHudMessages::setPriority(false);
 
 	return true;
 }
@@ -14511,7 +14544,9 @@ bool CvCity::LbD_try_revolt(CvUnit* convUnit, int base, int mod_crim, int mod_sl
 
 	// AddMessage
 	CvWString szBuffer = gDLL->getText("TXT_KEY_LBD_REVOLT", getNameKey());
+	WtpHudMessages::setPriority(true); // WTP: shown at the top of the message panel
 	gDLL->UI().addPlayerMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, coord(), "AS2D_DEAL_CANCELLED", MESSAGE_TYPE_MINOR_EVENT, buttonStringForMessage, COLOR_WHITE, true, true);
+	WtpHudMessages::setPriority(false);
 
 	return true;
 }

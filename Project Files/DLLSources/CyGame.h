@@ -166,7 +166,25 @@ public:
 	int getReplayMessagePlayer(int i) const;
 	ColorTypes getReplayMessageColor(int i) const;
 	std::wstring getReplayMessageText(int i) const;
+	void setWheelCapture(bool bOn) const; // WTP: the mouse wheel is collected for the amount dialog (python) instead of zooming the map
+	int takeWheelNotches() const; // WTP: the notches of the wheel since the last call (positive: away from the user)
+	bool isCtrlKeyPressed() const;
+	bool isShiftKeyPressed() const; // WTP: is the shift key down (frozen tooltip: shift + mouse wheel)
+	int getCursorClientX() const; // WTP: mouse position in the game window (-1 if unknown)
+	int getCursorClientY() const;
 	uint getNumReplayMessages() const;
+	// WTP: the messages of the turn for the message panel of the main interface
+	int getNumHudMessages() const;
+	std::wstring getHudMessageText(int i) const;
+	int getHudMessageX(int i) const;
+	int getHudMessageY(int i) const;
+	int getNumHudMessagesPrevious() const;
+	int getNumHudPriority() const;
+	void addHudMessage(std::wstring szText, bool bPriority) const; // WTP: a message of the Python code for the message panel (priority: at the top)
+	int getNumHudPriorityPrevious() const;
+	std::wstring getHudMessagePreviousText(int i) const;
+	int getHudMessagePreviousX(int i) const;
+	int getHudMessagePreviousY(int i) const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);
