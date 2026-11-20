@@ -2720,9 +2720,9 @@ class CvMainInterface:
 								# the longer it is, the smaller the font (the picture and the numbers must not cover each other)
 								iBarTextLength = len(re.sub(u"<[^>]*>", u"", SzText).strip()) # (without the space in front of the first number, it is not visible)
 								iBarFontDelta = 0
-								if iBarTextLength > 13:
+								if iBarTextLength > 15:
 									iBarFontDelta = -2
-								elif iBarTextLength > 9:
+								elif iBarTextLength > 11:
 									iBarFontDelta = -1
 								if STANDARD_FONT_SIZE + iBarFontDelta < 1:
 									iBarFontDelta = 1 - STANDARD_FONT_SIZE
