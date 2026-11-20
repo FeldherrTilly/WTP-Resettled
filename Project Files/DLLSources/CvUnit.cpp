@@ -5685,6 +5685,7 @@ void CvUnit::loadAllYieldsByValue()
 			}
 		}
 	}
+	const bool bSeaTarget = (getDomainType() == DOMAIN_SEA && canReachHarbour(iHarbour));
 	for (int iGuard = 0; iGuard < 100; ++iGuard)
 	{
 		YieldTypes eBest = NO_YIELD;
@@ -5696,6 +5697,11 @@ void CvUnit::loadAllYieldsByValue()
 				continue;
 			}
 			const int iValue = wtpHarbourProfit(kOwner, iHarbour, eYield, 100);
+			// a good that cannot be sold in the target harbour (boycott, not tradable there) is skipped
+			if (bSeaTarget && iValue <= 0)
+			{
+				continue;
+			}
 			if (iValue > iBestValue)
 			{
 				iBestValue = iValue;
