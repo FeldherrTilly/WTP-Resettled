@@ -5532,13 +5532,48 @@ int CvUnit::loadYieldAmount(YieldTypes eYield, int iAmount, bool bTrade)
 }
 
 // WTP: fills all free cargo slots with goods of the city, one slot after the other, always with the most valuable good (the sell price in Europe for
-// 100 units) that can still be loaded and would fill at least 15% of a slot; the same good again as long as the city has more of it
+// 100 units) that can still be loaded and would fill at least 15% of a slot (without livestock, building material, military goods, raw materials); the same good again as long as the city has more of it
 void CvUnit::loadAllYieldsByValue()
 {
 	bool abExcluded[NUM_YIELD_TYPES];
 	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
 	{
 		abExcluded[i] = false;
+	}
+	// not loaded: livestock, building material, military goods and all raw materials (goods that a profession turns into another good)
+	static const char* const aszExcluded[] = {
+		"YIELD_CLAY", "YIELD_STONE", "YIELD_TOOLS", "YIELD_HORSES", "YIELD_SAILCLOTH", "YIELD_HARDWOOD", "YIELD_ROPE", // building material
+		"YIELD_MUSKETS", "YIELD_BLADES", "YIELD_CANNONS", "YIELD_BLACK_POWDER", "YIELD_BAKERY_GOODS" // military goods
+	};
+	for (int i = 0; i < (int)(sizeof(aszExcluded) / sizeof(aszExcluded[0])); ++i)
+	{
+		const int iYield = GC.getInfoTypeForString(aszExcluded[i], true);
+		if (iYield >= 0 && iYield < NUM_YIELD_TYPES)
+		{
+			abExcluded[iYield] = true;
+		}
+	}
+	for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+	{
+		if (GC.getYieldInfo(eYield).isLivestock())
+		{
+			abExcluded[eYield] = true;
+		}
+	}
+	for (int iProf = 0; iProf < GC.getNumProfessionInfos(); ++iProf)
+	{
+		const CvProfessionInfo& kProfession = GC.getProfessionInfo((ProfessionTypes)iProf);
+		if (kProfession.getNumYieldsProduced() > 0)
+		{
+			for (int k = 0; k < kProfession.getNumYieldsConsumed(); ++k)
+			{
+				const int iConsumed = kProfession.getYieldsConsumed(k);
+				if (iConsumed >= 0 && iConsumed < NUM_YIELD_TYPES)
+				{
+					abExcluded[iConsumed] = true;
+				}
+			}
+		}
 	}
 	const CvPlayer& kOwner = GET_PLAYER(getOwnerINLINE());
 	// goods that would fill less than 15% of a slot are skipped
