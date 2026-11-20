@@ -9074,7 +9074,9 @@ void CvGameTextMgr::setYieldHelp(CvWStringBuffer &szBuffer, CvCity& city, YieldT
 
 
 	int iConsumed = aiRawConsumedYields[eYieldType];
-	if (iConsumed > 0)
+	// WTP: also when nothing is used up at all this turn because a second raw material is missing completely (e.g. upholstered furniture without down):
+	// the planned use (getRawYieldConsumed) is what tells that this raw material is wanted, so the line with the missing amount must still be shown
+	if (iConsumed > 0 || (eYieldType != YIELD_FOOD && city.getRawYieldConsumed(eYieldType) > 0))
 	{
 		// R&R, ray , MYCP partially based on code of Aymerick - START
 		std::vector<YieldTypes> eConverted;
@@ -9135,21 +9137,21 @@ void CvGameTextMgr::setYieldHelp(CvWStringBuffer &szBuffer, CvCity& city, YieldT
 				szYieldsList += CvWString::format(L"%c", GC.getYieldInfo(*it).getChar());
 			}
 			iBaseProduction -= iUnproduced;
-			szBuffer.append(NEWLINE);
-			szBuffer.append(gDLL->getText("TXT_KEY_MISC_CONSUMED_CITY_YIELD_SPECIFIC", -iTempConsumed, info.getChar(), szYieldsList.GetCString()));
-			// WTP: how many of the goods made of this raw material cannot be made because the colony lacks raw materials (the red numbers of the city)
-			std::set<YieldTypes> sConvertedShown;
-			for (std::vector<YieldTypes>::iterator itMade = eConverted.begin(); itMade != eConverted.end(); ++itMade)
+			// (when nothing is used up because the other raw material is missing completely, the planned use is shown: that is what the workers try to make)
+			const int iShownConsumed = (iTempConsumed != 0) ? iTempConsumed : city.getRawYieldConsumed(eYieldType);
+			if (iShownConsumed != 0)
 			{
-				if (sConvertedShown.insert(*itMade).second)
-				{
-					const int iNotMade = city.yields().getBaseRawYieldProduced(*itMade) - aiRawProducedYields[*itMade];
-					if (iNotMade > 0)
-					{
-						szBuffer.append(NEWLINE);
-						szBuffer.append(gDLL->getText("TXT_KEY_WTP_NOT_MADE_RAW_MISSING", -iNotMade, GC.getYieldInfo(*itMade).getChar()));
-					}
-				}
+				szBuffer.append(NEWLINE);
+				szBuffer.append(gDLL->getText("TXT_KEY_MISC_CONSUMED_CITY_YIELD_SPECIFIC", -iShownConsumed, info.getChar(), szYieldsList.GetCString()));
+			}
+			// WTP: how many of this raw material are missing for the full production: what the workers want to use up, minus the stock and what the colony
+			// makes of it this turn (the same calculation as the game uses for its deficit, see CvCity::calculateNetYields). The numbers of the production bar
+			// and of the tooltips of the goods ("from lack of ...") are the goods that cannot be made because of that, a different thing with more raw materials.
+			const int iMissingRaw = city.getRawYieldConsumed(eYieldType) - city.getYieldStored(eYieldType) - aiRawProducedYields[eYieldType] * city.getBaseYieldRateModifier(eYieldType) / 100;
+			if (iMissingRaw > 0)
+			{
+				szBuffer.append(NEWLINE);
+				szBuffer.append(gDLL->getText("TXT_KEY_WTP_RAW_MISSING_FOR_FULL_PRODUCTION", -iMissingRaw, info.getChar()));
 			}
 		}
 		// R&R, ray , MYCP partially based on code of Aymerick - END
