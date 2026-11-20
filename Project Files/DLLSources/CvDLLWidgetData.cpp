@@ -2755,6 +2755,12 @@ void CvDLLWidgetData::parseActionHelp(const CvWidgetDataStruct &widgetDataStruct
 			szBuffer.append(NEWLINE);
 			szBuffer.append(gDLL->getText("TXT_KEY_MISC_TAX_RATE", kTaxPlayer.getTaxRate(), kTaxPlayer.NBMOD_GetMaxTaxRate()));
 		}
+		// WTP: the button of Port Royal shows the port tax that is deducted from every sale there (no tax rate of the king)
+		else if (eControl == CONTROL_PORT_ROYAL_SCREEN)
+		{
+			szBuffer.append(NEWLINE);
+			szBuffer.append(gDLL->getText("TXT_KEY_WTP_PORT_ROYAL_TAX_RATE", GC.getDefineINT("PORT_ROYAL_PORT_TAX")));
+		}
 	}
 
 	if (GC.getActionInfo(widgetDataStruct.m_iData1).getInterfaceModeType() != NO_INTERFACEMODE)

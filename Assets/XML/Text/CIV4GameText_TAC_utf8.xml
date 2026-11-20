@@ -3894,6 +3894,12 @@
 		<Russian>Порт-Рояль</Russian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_PORT_ROYAL_TAX_RATE</Tag>
+		<English>Port tax: %d1%% (on every sale)</English>
+		<German>Hafensteuer: %d1%% (auf jeden Verkauf)</German>
+		<Russian>Портовый налог: %d1%% (с каждой продажи)</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TOTAL_PRICE_HELP</Tag>
 		<English>[NEWLINE]	Total[TAB][TAB]</English>
 		<German>[NEWLINE]	Gesamt[TAB][TAB]</German>
