@@ -6010,6 +6010,12 @@ class CvMainInterface:
 						aParts.append(aLetters[i])
 				szLines += u"\n" + tRow[0] + u": " + u"/".join(aParts)
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_STOCK", (pCity.getYieldStored(iYield),)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (the planned use of the good in the colony, also when nothing is used up at the moment because another raw material is missing completely:
+			# the same number as the line "converted to" in the tooltip of the good inside the city)
+			if iYield != YieldTypes.YIELD_FOOD:
+				iPlannedUse = pCity.getRawYieldConsumed(iYield)
+				if iPlannedUse > 0:
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_USE", (u"<color=255,0,0,255>-%d</color>" % iPlannedUse,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			# (the production of the good per turn, what is left after the colony's own use: green with a plus sign, red when negative)
 			iNet = pCity.calculateNetYield(iYield)
 			if iNet > 0:
@@ -6019,6 +6025,12 @@ class CvMainInterface:
 			else:
 				szNet = u"0"
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_NET", (szNet,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (how many of this raw material are missing in the colony for the full production: the same calculation as the line in the tooltip of the
+			# raw material inside the city, see CvGameTextMgr::setYieldHelp: what the workers want to use up, minus the stock and what the colony makes of it)
+			if iYield != YieldTypes.YIELD_FOOD:
+				iMissingRaw = pCity.getRawYieldConsumed(iYield) - pCity.getYieldStored(iYield) - pCity.calculateActualYieldProduced(iYield) * pCity.getBaseYieldRateModifier(iYield, 0) / 100
+				if iMissingRaw > 0:
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_RAW_MISSING", (-iMissingRaw, unichr(gc.getYieldInfo(iYield).getChar())))
 			return szLines
 		except:
 			self.tipError("getTraderChildText")
@@ -8803,11 +8815,39 @@ class CvMainInterface:
 			pass
 		return True
 
+	bTradeReturnPending = False # the way back of a jump that started in a city screen waits until the city screen of the colony of the jump is left
+
 	# the window that was opened by a jump is closed by the player: back to where the jump started
 	def tradeWindowClosed( self ):
 		try:
 			if len(self.aTradeReturn) == 0:
 				return
+			if not self.aTradeReturn[-1]["map"] and CyInterface().isCityScreenUp():
+				# (the jump started in a city screen: closing the window (ok / cancel) does not take the player back, he stays in the city screen of the
+				# colony of the jump; leaving that city screen is what takes him back, see checkTradeReturnPending)
+				self.bTradeReturnPending = True
+				return
+			self.doTradeReturn()
+		except:
+			self.tReopenTrade = None
+
+	# the city screen of the colony of a jump is left (the window is closed): now the way back, to the colony the jump started in
+	def checkTradeReturnPending( self ):
+		if not self.bTradeReturnPending:
+			return
+		try:
+			if len(self.aTradeReturn) == 0:
+				self.bTradeReturnPending = False
+				return
+			if CyInterface().isCityScreenUp() or self.isTradeWindowOpen() or self.tReopenTrade is not None:
+				return
+			self.bTradeReturnPending = False
+			self.doTradeReturn()
+		except:
+			self.bTradeReturnPending = False
+
+	def doTradeReturn( self ):
+		try:
 			tR = self.aTradeReturn.pop()
 			# (the tooltip that was frozen in the colony of the jump goes: the one of the starting colony is made again)
 			self.unfreezeAllTips()
@@ -10220,6 +10260,7 @@ class CvMainInterface:
 		self.updateCursorTooltip()
 		self.pollWidgetHelp()
 		self.updatePostJump()
+		self.checkTradeReturnPending()
 		self.updateCityJump()
 		return
 

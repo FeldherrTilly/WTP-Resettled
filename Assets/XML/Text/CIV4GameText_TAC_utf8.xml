@@ -3948,6 +3948,18 @@
 		<Russian>За ход: %s1</Russian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_USE</Tag>
+		<English>Planned use: %s1</English>
+		<German>Geplanter Verbrauch: %s1</German>
+		<Russian>Плановый расход: %s1</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_TRADER_RAW_MISSING</Tag>
+		<English>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]missing for the full production[COLOR_REVERT]</English>
+		<German>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]fehlen für die volle Produktion[COLOR_REVERT]</German>
+		<Russian>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]не хватает для полного производства[COLOR_REVERT]</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_NET_ALL</Tag>
 		<English>All colonies, per turn: %s1</English>
 		<German>Alle Kolonien, pro Runde: %s1</German>
