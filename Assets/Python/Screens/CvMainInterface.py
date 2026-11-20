@@ -8922,7 +8922,6 @@ class CvMainInterface:
 	iReopenWait = 0 # frames the city screen gets to draw itself before the window is opened again
 
 	def checkReopenTradeWindow( self ):
-		self.checkTradeReturnPending()
 		if self.tReopenTrade is None:
 			return
 		if self.iReopenWait > 0:
@@ -11741,6 +11740,7 @@ class CvMainInterface:
 		self.updateCursorTooltip()
 		self.pollWidgetHelp()
 		self.updatePostJump()
+		self.checkTradeReturnPending()
 		self.updateCityJump()
 		try:
 			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
