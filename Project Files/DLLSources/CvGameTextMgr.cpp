@@ -755,22 +755,30 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 				}
 				if (bAnyGoods)
 				{
-					// Port Royal only for the ships that may sail there (smuggling and slave ships)
-					const bool bPortRoyal = pUnit->getUnitInfo().isHiddenNationality() || pUnit->getUnitInfo().isSlaveShip();
-					const int iHarbours = bPortRoyal ? 3 : 2;
-					int iBest = 0;
-					for (int iH = 1; iH < iHarbours; ++iH)
+					// only the harbours this ship can sail to
+					int aiReach[3];
+					int iHarbours = 0;
+					for (int iH = 0; iH < 3; ++iH)
 					{
-						if (aiHarbour[iH] > aiHarbour[iBest])
+						if (pUnit->canReachHarbour(iH))
 						{
-							iBest = iH;
+							aiReach[iHarbours++] = iH;
+						}
+					}
+					int iBest = (iHarbours > 0) ? aiReach[0] : 0;
+					for (int iR = 1; iR < iHarbours; ++iR)
+					{
+						if (aiHarbour[aiReach[iR]] > aiHarbour[iBest])
+						{
+							iBest = aiReach[iR];
 						}
 					}
 					const char* aszHarbour[3] = {"TXT_KEY_WTP_HARBOR_EUROPE", "TXT_KEY_WTP_HARBOR_AFRICA", "TXT_KEY_WTP_HARBOR_PORT_ROYAL"};
 					CvWString szValues;
-					for (int iH = 0; iH < iHarbours; ++iH)
+					for (int iI = 0; iI < iHarbours; ++iI)
 					{
-						if (iH > 0)
+						const int iH = aiReach[iI];
+						if (iI > 0)
 						{
 							szValues.append(L" / ");
 						}
@@ -783,6 +791,8 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 							szValues.append(CvWString::format(L"%s %d", gDLL->getText(aszHarbour[iH]).GetCString(), aiHarbour[iH]));
 						}
 					}
+					if (iHarbours > 0)
+					{
 					szString.append(NEWLINE);
 					szString.append(gDLL->getText("TXT_KEY_WTP_CARGO_VALUE_HELP", szValues.GetCString()));
 					szString.append(CvWString::format(L"%c", GC.getSymbolID(GOLD_CHAR)));
@@ -798,18 +808,19 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 						aiRow[0] = kCargoOwner.getSellToEuropeProfit(eRow, aiOnBoard[eRow]);
 						aiRow[1] = kCargoOwner.getSellToAfricaProfit(eRow, aiOnBoard[eRow]);
 						aiRow[2] = kCargoOwner.getSellToPortRoyalProfit(eRow, aiOnBoard[eRow]);
-						int iRowBest = 0;
-						for (int iH = 1; iH < iHarbours; ++iH)
+						int iRowBest = aiReach[0];
+						for (int iR = 1; iR < iHarbours; ++iR)
 						{
-							if (aiRow[iH] > aiRow[iRowBest])
+							if (aiRow[aiReach[iR]] > aiRow[iRowBest])
 							{
-								iRowBest = iH;
+								iRowBest = aiReach[iR];
 							}
 						}
 						szString.append(CvWString::format(L"\n\x00BB%d%c (", aiOnBoard[eRow], GC.getYieldInfo(eRow).getChar()));
-						for (int iH = 0; iH < iHarbours; ++iH)
+						for (int iI = 0; iI < iHarbours; ++iI)
 						{
-							if (iH > 0)
+							const int iH = aiReach[iI];
+							if (iI > 0)
 							{
 								szString.append(L" / ");
 							}
@@ -823,6 +834,7 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 							}
 						}
 						szString.append(CvWString::format(L"%c)", GC.getSymbolID(GOLD_CHAR)));
+					}
 					}
 				}
 			}

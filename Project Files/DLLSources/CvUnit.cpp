@@ -5533,6 +5533,25 @@ int CvUnit::loadYieldAmount(YieldTypes eYield, int iAmount, bool bTrade)
 
 // WTP: fills all free cargo slots with goods of the city, one slot after the other, always with the most valuable good (the sell price for 100 units in the
 // harbour where the whole load of a sea transport sells best, see below) that can still be loaded and would fill at least 15% of a slot (without livestock, building material, military goods, raw materials); the same good again as long as the city has more of it
+// WTP: can this ship sell in the harbour at all (ship type and the rights of the player), regardless of moves left or where it is now
+bool CvUnit::canReachHarbour(int iHarbour) const
+{
+	const CvPlayer& kOwner = GET_PLAYER(getOwnerINLINE());
+	if (getDomainType() != DOMAIN_SEA || (kOwner.getParent() == NO_PLAYER && !kOwner.isEurope()))
+	{
+		return false;
+	}
+	if (iHarbour == 1)
+	{
+		return getUnitInfo().canSailToAfrica() && kOwner.canTradeWithAfrica();
+	}
+	if (iHarbour == 2)
+	{
+		return (getUnitInfo().isHiddenNationality() || getUnitInfo().isSlaveShip()) && kOwner.canTradeWithPortRoyal();
+	}
+	return getUnitInfo().canSailToEurope() && kOwner.canTradeWithEurope();
+}
+
 static int wtpHarbourProfit(const CvPlayer& kOwner, int iHarbour, YieldTypes eYield, int iAmount)
 {
 	if (iHarbour == 1)
@@ -5597,12 +5616,15 @@ void CvUnit::loadAllYieldsByValue()
 	const CvCity* const pLoadCity = plot()->getPlotCity();
 	if (getDomainType() == DOMAIN_SEA && pLoadCity != NULL)
 	{
-		const int iHarbours = (getUnitInfo().isHiddenNationality() || getUnitInfo().isSlaveShip()) ? 3 : 2;
 		const int iFreeSlots = std::max(0, cargoSpace() - getCargo());
 		const int iCapacity = GC.getGameINLINE().getCargoYieldCapacity();
 		int iBestTotal = -1;
-		for (int iH = 0; iH < iHarbours; ++iH)
+		for (int iH = 0; iH < 3; ++iH)
 		{
+			if (!canReachHarbour(iH))
+			{
+				continue;
+			}
 			int aiAvailable[NUM_YIELD_TYPES];
 			for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
 			{
