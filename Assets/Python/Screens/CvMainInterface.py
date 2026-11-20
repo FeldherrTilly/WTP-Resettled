@@ -2688,9 +2688,15 @@ class CvMainInterface:
 								# what the colony makes of this good (the same number as in the tooltip: "Total ...") and what could not be made because of missing
 								# raw materials, both with the bonuses (the shortfall, as in the tooltips, is counted before the bonuses and then multiplied by them).
 								# It is also shown when nobody works in the building: the free output of the building is produced anyway (e.g. +2 / +2).
+								# all the goods of the building (there can be more than two: butcher, dairy, roaster), each one once, in the order of the professions
 								aBarYields = [iYield]
-								if (iSecondYield != -1 and iSecondYield != iYield):
-									aBarYields.append(iSecondYield)
+								for iArrayProfession in range(gc.getNumProfessionInfos()):
+									if (gc.getProfessionInfo(iArrayProfession).getSpecialBuilding() == iSpecialBuildingType):
+										if (not gc.getProfessionInfo(iArrayProfession).isWorkPlot() and gc.getProfessionInfo(iArrayProfession).isCitizen()):
+											if gc.getCivilizationInfo(pHeadSelectedCity.getCivilizationType()).isValidProfession(iArrayProfession):
+												iBarYieldOfProfession = gc.getProfessionInfo(iArrayProfession).getYieldsProduced(0)
+												if (iBarYieldOfProfession >= 0 and iBarYieldOfProfession < YieldTypes.NUM_YIELD_TYPES and not iBarYieldOfProfession in aBarYields):
+													aBarYields.append(iBarYieldOfProfession)
 								for iBarYield in aBarYields:
 									iBarModifier = pHeadSelectedCity.getBaseYieldRateModifier(iBarYield, 0)
 									CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iBarYield)
