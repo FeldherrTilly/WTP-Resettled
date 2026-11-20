@@ -4307,6 +4307,7 @@ class CvMainInterface:
 				aRest.insert(iCmdAt, [localText.getText("TXT_KEY_WTP_TIP_COMMANDS", ()), u"\n".join(aCommands)])
 				aFinal = aRest
 			aFinal = self.foldUnitGroups(aFinal)
+			aFinal = self.foldSellPrices(aFinal)
 			aNew = []
 			for aEntry in aFinal:
 				if aEntry[1] is not None:
@@ -4316,6 +4317,32 @@ class CvMainInterface:
 		except:
 			self.dTipDetails = {}
 		return aszParas
+
+	# the sell prices of a cargo slot (the lines Europe / Africa / Port Royal and the line Total): only the line Total stays, the three markets are its
+	# child tooltip
+	def foldSellPrices( self, aFinal ):
+		try:
+			szEurope = self.normTipText(localText.getText("TXT_KEY_EUROPE_PRICE_HELP", ()))
+			szAfrica = self.normTipText(localText.getText("TXT_KEY_AFRICA_PRICE_HELP", ()))
+			szRoyal = self.normTipText(localText.getText("TXT_KEY_PORT_ROYAL_PRICE_HELP", ()))
+			szTotal = self.normTipText(localText.getText("TXT_KEY_WTP_TOTAL_PRICE_HELP", ()))
+			if min(len(szEurope), len(szAfrica), len(szRoyal), len(szTotal)) < 3:
+				return aFinal
+			aNewFinal = []
+			k = 0
+			while k < len(aFinal):
+				if k + 3 < len(aFinal) and aFinal[k][1] is None and aFinal[k + 1][1] is None and aFinal[k + 2][1] is None and aFinal[k + 3][1] is None and self.normTipText(aFinal[k][0]).find(szEurope) == 0 and self.normTipText(aFinal[k + 1][0]).find(szAfrica) == 0 and self.normTipText(aFinal[k + 2][0]).find(szRoyal) == 0 and self.normTipText(aFinal[k + 3][0]).find(szTotal) == 0:
+					aMarkets = []
+					for j in range(3):
+						aMarkets.append(aFinal[k + j][0].rstrip().rstrip(u",").strip())
+					aNewFinal.append([aFinal[k + 3][0], u"\n".join(aMarkets)])
+					k += 4
+				else:
+					aNewFinal.append(aFinal[k])
+					k += 1
+			return aNewFinal
+		except:
+			return aFinal
 
 	# a line of the units that the game lists in groups (a plot with more than 10 units: "Free Colonist (3) 2, Master Potter (1) 2, ...")
 	def isUnitGroupLine( self, szText ):
