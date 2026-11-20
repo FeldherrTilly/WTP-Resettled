@@ -6283,6 +6283,12 @@ class CvMainInterface:
 			else:
 				szNet = u"0"
 			szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_NET", (szNet,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+			# (how many of this raw material are missing in the colony for the full production: the same calculation as the line in the tooltip of the
+			# raw material inside the city, see CvGameTextMgr::setYieldHelp: what the workers want to use up, minus the stock and what the colony makes of it)
+			if iYield != YieldTypes.YIELD_FOOD:
+				iMissingRaw = pCity.getRawYieldConsumed(iYield) - pCity.getYieldStored(iYield) - pCity.calculateActualYieldProduced(iYield) * pCity.getBaseYieldRateModifier(iYield, 0) / 100
+				if iMissingRaw > 0:
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_RAW_MISSING", (-iMissingRaw,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			return szLines
 		except:
 			self.tipError("getTraderChildText")
