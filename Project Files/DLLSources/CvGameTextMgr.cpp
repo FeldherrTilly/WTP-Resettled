@@ -9241,10 +9241,12 @@ void CvGameTextMgr::setYieldHelp(CvWStringBuffer &szBuffer, CvCity& city, YieldT
 				szYieldsList += CvWString::format(L"%c", GC.getYieldInfo(*it).getChar());
 			}
 			iBaseProduction -= iUnproduced;
-			if (iTempConsumed != 0)
+			// (when nothing is used up because the other raw material is missing completely, the planned use is shown: that is what the workers try to make)
+			const int iShownConsumed = (iTempConsumed != 0) ? iTempConsumed : city.getRawYieldConsumed(eYieldType);
+			if (iShownConsumed != 0)
 			{
 				szBuffer.append(NEWLINE);
-				szBuffer.append(gDLL->getText("TXT_KEY_MISC_CONSUMED_CITY_YIELD_SPECIFIC", -iTempConsumed, info.getChar(), szYieldsList.GetCString()));
+				szBuffer.append(gDLL->getText("TXT_KEY_MISC_CONSUMED_CITY_YIELD_SPECIFIC", -iShownConsumed, info.getChar(), szYieldsList.GetCString()));
 			}
 			// WTP: how many of this raw material are missing for the full production: what the workers want to use up, minus the stock and what the colony
 			// makes of it this turn (the same calculation as the game uses for its deficit, see CvCity::calculateNetYields). The numbers of the production bar
