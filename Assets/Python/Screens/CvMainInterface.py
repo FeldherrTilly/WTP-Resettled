@@ -2686,7 +2686,8 @@ class CvMainInterface:
 								# with the bonuses, scaled with actual / planned and rounded down), which is neither the real production (the free output of the
 								# building was missing) nor the real shortfall (the rounding turned a shortfall of 1 into 2). Now the numbers are the real ones:
 								# what the colony makes of this good (the same number as in the tooltip: "Total ...") and what could not be made because of missing
-								# raw materials, both with the bonuses (the shortfall, as in the tooltips, is counted before the bonuses and then multiplied by them).
+								# raw materials. The shortfall is the same number as in the tooltips ("from lack of ...", "cannot be made"), i.e. before the bonuses: with the bonuses
+								# it would be rounded differently again (13 would become 14).
 								# It is also shown when nobody works in the building: the free output of the building is produced anyway (e.g. +2 / +2).
 								# all the goods of the building (there can be more than two: butcher, dairy, roaster), each one once, in the order of the professions
 								aBarYields = [iYield]
@@ -2702,7 +2703,7 @@ class CvMainInterface:
 									CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iBarYield)
 									CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iBarYield)
 									ActualYield = CityActualYield * iBarModifier / 100
-									UnproducedYield = (CityProducedYield - CityActualYield) * iBarModifier / 100
+									UnproducedYield = CityProducedYield - CityActualYield
 									if (bTwoYields == False):
 										if (ActualYield > 0):
 											bTwoYields = True
