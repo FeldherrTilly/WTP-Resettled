@@ -3333,6 +3333,12 @@ void CvUnit::doCommand(CommandTypes eCommand, int iData1, int iData2)
 			break;
 
 		case COMMAND_LOAD_CARGO:
+			if (iData1 == 1)
+			{
+				// WTP: fill all free cargo slots (Shift + click on the button)
+				loadAllYieldsByValue();
+			}
+			else
 			{
 				CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_LOAD_CARGO);
 				gDLL->getInterfaceIFace()->addPopup(pInfo);
@@ -5523,6 +5529,44 @@ int CvUnit::loadYieldAmount(YieldTypes eYield, int iAmount, bool bTrade)
 	groupTransportedYieldUnits(pUnit);
 
 	return iAmount; //R&R mod, vetiarvind, max yield import limit
+}
+
+// WTP: fills all free cargo slots with goods of the city, one slot after the other, always with the most valuable good (the sell price in Europe for
+// 100 units) that can still be loaded; the same good again as long as the city has more of it
+void CvUnit::loadAllYieldsByValue()
+{
+	bool abExcluded[NUM_YIELD_TYPES];
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		abExcluded[i] = false;
+	}
+	const CvPlayer& kOwner = GET_PLAYER(getOwnerINLINE());
+	for (int iGuard = 0; iGuard < 100; ++iGuard)
+	{
+		YieldTypes eBest = NO_YIELD;
+		int iBestValue = -1;
+		for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
+		{
+			if (abExcluded[eYield] || !canLoadYield(plot(), eYield, false) || getMaxLoadYieldAmount(eYield) <= 0)
+			{
+				continue;
+			}
+			const int iValue = kOwner.getSellToEuropeProfit(eYield, 100);
+			if (iValue > iBestValue)
+			{
+				iBestValue = iValue;
+				eBest = eYield;
+			}
+		}
+		if (eBest == NO_YIELD)
+		{
+			break;
+		}
+		if (loadYield(eBest, false) <= 0)
+		{
+			abExcluded[eBest] = true;
+		}
+	}
 }
 
 // Returns how much of eYield the city can safely export (stored minus auto-maintain threshold, clamped to zero).
