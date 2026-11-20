@@ -6292,11 +6292,6 @@ class CvMainInterface:
 			# (how many of this raw material are missing in the colony for the full production: the same calculation as the line in the tooltip of the
 			# raw material inside the city, see CvGameTextMgr::setYieldHelp: what the workers want to use up, minus the stock and what the colony makes of it)
 			if iYield != YieldTypes.YIELD_FOOD:
-				# (the planned use of the colony: what the workers want to use up, also when nothing is used up at the moment because another raw
-				# material of their profession is missing completely)
-				iDemand = pCity.getRawYieldConsumed(iYield)
-				if iDemand > 0:
-					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_DEMAND", (u"<color=255,0,0,255>-%d</color>" % iDemand,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 				iMissingRaw = pCity.getRawYieldConsumed(iYield) - pCity.getYieldStored(iYield) - pCity.calculateActualYieldProduced(iYield) * pCity.getBaseYieldRateModifier(iYield, 0) / 100
 				if iMissingRaw > 0:
 					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_RAW_MISSING", (-iMissingRaw,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
