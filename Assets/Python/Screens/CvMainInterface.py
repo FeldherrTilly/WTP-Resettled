@@ -6294,7 +6294,7 @@ class CvMainInterface:
 			if iYield != YieldTypes.YIELD_FOOD:
 				iMissingRaw = pCity.getRawYieldConsumed(iYield) - pCity.getYieldStored(iYield) - pCity.calculateActualYieldProduced(iYield) * pCity.getBaseYieldRateModifier(iYield, 0) / 100
 				if iMissingRaw > 0:
-					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_RAW_MISSING", (-iMissingRaw,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_RAW_MISSING", (-iMissingRaw, unichr(gc.getYieldInfo(iYield).getChar())))
 			return szLines
 		except:
 			self.tipError("getTraderChildText")

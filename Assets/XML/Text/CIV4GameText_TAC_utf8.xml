@@ -1966,9 +1966,9 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_RAW_MISSING</Tag>
-		<English>[COLOR_YELLOW]%d1 missing for the full production[COLOR_REVERT]</English>
-		<German>[COLOR_YELLOW]%d1 fehlen für die volle Produktion[COLOR_REVERT]</German>
-		<Russian>[COLOR_YELLOW]%d1 не хватает для полного производства[COLOR_REVERT]</Russian>
+		<English>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]missing for the full production[COLOR_REVERT]</English>
+		<German>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]fehlen für die volle Produktion[COLOR_REVERT]</German>
+		<Russian>[ICON_BULLET][COLOR_WARNING_TEXT]%d1%s2[COLOR_REVERT] [COLOR_YELLOW]не хватает для полного производства[COLOR_REVERT]</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADERS_NET_ALL</Tag>
