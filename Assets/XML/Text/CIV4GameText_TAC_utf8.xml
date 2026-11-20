@@ -1960,9 +1960,9 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_USE</Tag>
-		<English>Planned use: %d1</English>
-		<German>Geplanter Verbrauch: %d1</German>
-		<Russian>Плановый расход: %d1</Russian>
+		<English>Planned use: %s1</English>
+		<German>Geplanter Verbrauch: %s1</German>
+		<Russian>Плановый расход: %s1</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_TIP_TRADER_RAW_MISSING</Tag>

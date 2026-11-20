@@ -6279,7 +6279,7 @@ class CvMainInterface:
 			if iYield != YieldTypes.YIELD_FOOD:
 				iPlannedUse = pCity.getRawYieldConsumed(iYield)
 				if iPlannedUse > 0:
-					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_USE", (-iPlannedUse,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
+					szLines += u"\n" + localText.getText("TXT_KEY_WTP_TIP_TRADER_USE", (u"<color=255,0,0,255>-%d</color>" % iPlannedUse,)) + u" " + unichr(gc.getYieldInfo(iYield).getChar())
 			# (the production of the good per turn, what is left after the colony's own use: green with a plus sign, red when negative)
 			iNet = pCity.calculateNetYield(iYield)
 			if iNet > 0:
