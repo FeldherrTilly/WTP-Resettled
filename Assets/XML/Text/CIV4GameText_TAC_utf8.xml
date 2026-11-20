@@ -3333,4 +3333,351 @@
 		<Russian>Испанским</Russian>
 		<Hungarian>Spanyol Királyi:Spanyol Királyi</Hungarian>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_EXPORT_OPTIONS</Tag>
+		<English>Export options</English>
+		<German>Export-Optionen</German>
+		<Russian>Параметры экспорта</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_FAVORITE</Tag>
+		<English>Favorite</English>
+		<German>Favorit</German>
+		<Russian>Избранное</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_FAVORITE_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Favorite[COLOR_REVERT][NEWLINE]Marks this good as a favorite. The favorites view (drop down at the bottom right) lists only the favorite goods. Favorites apply to all cities and are saved with the game.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Favorit[COLOR_REVERT][NEWLINE]Markiert diese Ware als Favorit. Die Favoritenansicht (Auswahlmenü unten rechts) zeigt nur die Favoriten. Favoriten gelten für alle Städte und werden mit dem Spielstand gespeichert.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Избранное[COLOR_REVERT][NEWLINE]Отмечает этот товар как избранный. В режиме избранного (выпадающий список справа внизу) показываются только избранные товары. Избранное действует для всех городов и сохраняется вместе с игрой.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TIP_RAW_NOTE</Tag>
+		<English>Producing: %s1_Reason</English>
+		<German>Produziert: %s1_Reason</German>
+		<Russian>Производство: %s1_Reason</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_1</Tag>
+		<English>Unsaved changes</English>
+		<German>Nicht gespeicherte Änderungen</German>
+		<Russian>Несохранённые изменения</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_2</Tag>
+		<English>There are changes that are not saved yet. They only take effect when the window is closed with OK.</English>
+		<German>Es gibt Änderungen, die noch nicht gespeichert sind. Sie gelten nur, wenn das Fenster mit OK geschlossen wird.</German>
+		<Russian>Есть изменения, которые ещё не сохранены. Они вступят в силу, только если закрыть окно кнопкой «OK».</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_OK_HELP</Tag>
+		<English>Apply the changes and close the window</English>
+		<German>Änderungen übernehmen und das Fenster schließen</German>
+		<Russian>Применить изменения и закрыть окно</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE</Tag>
+		<English>Close</English>
+		<German>Schließen</German>
+		<Russian>Закрыть</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_UNSAVED_CLOSE_HELP</Tag>
+		<English>The changes are discarded</English>
+		<German>Die Änderungen werden verworfen</German>
+		<Russian>Изменения будут отброшены</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_HINT</Tag>
+		<English>[COLOR:140:255:40:255]Shift + mouse wheel[COLOR_REVERT] over a number: +/- 50 ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 10), [COLOR:140:255:40:255]mouse wheel[COLOR_REVERT]: turns the page    [COLOR:140:255:40:255]Num 1-0[COLOR_REVERT]: view    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: cancel</English>
+		<German>[COLOR:140:255:40:255]Umschalt + Mausrad[COLOR_REVERT] über einer Zahl: +/- 50 ([COLOR:140:255:40:255]Strg[COLOR_REVERT]: +/- 10), [COLOR:140:255:40:255]Mausrad[COLOR_REVERT]: blättert um    [COLOR:140:255:40:255]Num 1-0[COLOR_REVERT]: Ansicht    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: Abbrechen</German>
+		<Russian>[COLOR:140:255:40:255]Shift + колесо мыши[COLOR_REVERT] над числом: +/- 50 ([COLOR:140:255:40:255]Ctrl[COLOR_REVERT]: +/- 10), [COLOR:140:255:40:255]колесо мыши[COLOR_REVERT]: перелистывает страницу    [COLOR:140:255:40:255]Num 1-0[COLOR_REVERT]: режим    [COLOR:140:255:40:255]Esc[COLOR_REVERT]: отмена</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_IMPORT_OPTIONS</Tag>
+		<English>Import options</English>
+		<German>Import-Optionen</German>
+		<Russian>Параметры импорта</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_MOVE_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Move window[COLOR_REVERT][NEWLINE]Moves the window; hold the button to keep moving. The arrow keys do the same. Shift: double steps, Ctrl: half steps, both: a third.[NEWLINE]Ctrl+Shift+Q: back to the default place.[NEWLINE]Position: %d1, %d2</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Fenster verschieben[COLOR_REVERT][NEWLINE]Verschiebt das Fenster; Knopf gedrückt halten, um weiterzuschieben. Die Pfeiltasten machen dasselbe. Umschalt: doppelte Schritte, Strg: halbe Schritte, beide: ein Drittel.[NEWLINE]Strg+Umschalt+Q: zurück auf die Standardposition.[NEWLINE]Position: %d1, %d2</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Переместить окно[COLOR_REVERT][NEWLINE]Перемещает окно; удерживайте кнопку для непрерывного перемещения. Стрелки на клавиатуре делают то же самое. Shift: двойные шаги, Ctrl: половинные шаги, оба: треть шага.[NEWLINE]Ctrl+Shift+Q: вернуть на место по умолчанию.[NEWLINE]Положение: %d1, %d2</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE</Tag>
+		<English>Page %d1 / %d2</English>
+		<German>Seite %d1 / %d2</German>
+		<Russian>Страница %d1 / %d2</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE_NEXT_HELP</Tag>
+		<English>Next page</English>
+		<German>Nächste Seite</German>
+		<Russian>Следующая страница</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PAGE_PREV_HELP</Tag>
+		<English>Previous page</English>
+		<German>Vorherige Seite</German>
+		<Russian>Предыдущая страница</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET0_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Clear All[COLOR_REVERT][NEWLINE]Removes all import and export settings of this city.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic and goods whose automatic export you set by hand are not changed. The switch turns itself off when no good has automatic export any more.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alles löschen[COLOR_REVERT][NEWLINE]Entfernt alle Import- und Export-Einstellungen dieser Stadt.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert, ebenso Waren, bei denen du den automatischen Export von Hand gesetzt hast. Der Schalter geht von selbst aus, wenn keine Ware mehr automatischen Export hat.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Очистить всё[COLOR_REVERT][NEWLINE]Удаляет все настройки импорта и экспорта этого города.[NEWLINE][NEWLINE]Действует для всех товаров текущего режима просмотра (выбранного в выпадающем списке справа внизу, каким бы он ни был) на всех страницах, а не только на видимой. Товары, которыми управляет «Рыночная автоматика», и товары, у которых авто-экспорт задан вручную, не меняются. Переключатель выключается сам, когда ни у одного товара больше нет авто-экспорта.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET1_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Import all goods[COLOR_REVERT][NEWLINE]Turns import on for all goods.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren importieren[COLOR_REVERT][NEWLINE]Schaltet den Import für alle Waren ein.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Импорт всех товаров[COLOR_REVERT][NEWLINE]Включает импорт для всех товаров.[NEWLINE][NEWLINE]Действует для всех товаров текущего режима просмотра (выбранного в выпадающем списке справа внизу, каким бы он ни был) на всех страницах, а не только на видимой.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Auto-export all goods[COLOR_REVERT][NEWLINE]Turns automatic export on for all goods. Click again to switch it off.[NEWLINE][NEWLINE]Applies to all goods listed in the current view (the view chosen in the drop down at the bottom right, whatever it is), on all pages, not only to the ones visible on this page. Goods managed by Market automatic and goods whose automatic export you set by hand are not changed. The switch turns itself off when no good has automatic export any more.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Alle Waren automatisch exportieren[COLOR_REVERT][NEWLINE]Schaltet den automatischen Export für alle Waren ein. Erneut klicken schaltet ihn wieder aus.[NEWLINE][NEWLINE]Gilt für alle Waren, die in der aktuellen Ansicht aufgelistet sind (die unten rechts im Auswahlmenü gewählte Ansicht, egal welche), auf allen Seiten, nicht nur für die auf dieser Seite sichtbaren. Waren, die von „Markt-Automatik" verwaltet werden, bleiben unverändert.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Авто-экспорт всех товаров[COLOR_REVERT][NEWLINE]Включает автоматический экспорт для всех товаров. Повторный щелчок выключает его.[NEWLINE][NEWLINE]Действует для всех товаров текущего режима просмотра (выбранного в выпадающем списке справа внизу, каким бы он ни был) на всех страницах, а не только на видимой.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT</Tag>
+		<English>Building material</English>
+		<German>Baumaterial</German>
+		<Russian>Стройматериалы</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET2_SHORT_ON</Tag>
+		<English>Auto-export all goods: ON</English>
+		<German>Automatischer Export aller Güter: AN</German>
+		<Russian>Авто-экспорт всех товаров: ВКЛ.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET3_SHORT_ON</Tag>
+		<English>Building material: ON</English>
+		<German>Baumaterial: AN</German>
+		<Russian>Стройматериалы: ВКЛ.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT</Tag>
+		<English>Market automatic</English>
+		<German>Markt-Automatik</German>
+		<Russian>Рыночная автоматика</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET4_SHORT_ON</Tag>
+		<English>Market automatic: ON</English>
+		<German>Markt-Automatik: AN</German>
+		<Russian>Рыночная автоматика: ВКЛ.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_CLEAR_HELP</Tag>
+		<English>Clear the search</English>
+		<German>Suche löschen</German>
+		<Russian>Очистить поиск</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Search goods[COLOR_REVERT][NEWLINE]Type the name of a good: all goods that contain it are listed. Tab completes the grey suggestion. Enter confirms the good (the exact one, or the nearest) and empties the field for the next one: all confirmed goods stay listed in the filter view (kept for the next time, also after closing the window). Backspace on an empty field takes back the last one, X empties the filter.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Ware suchen[COLOR_REVERT][NEWLINE]Name einer Ware tippen: alle Waren, die ihn enthalten, werden angezeigt. Tab übernimmt den grauen Vorschlag. Enter bestätigt die Ware (die genaue oder die nächstliegende) und leert das Feld für die nächste: alle bestätigten Waren bleiben in der Filteransicht (auch nach dem Schließen des Fensters für das nächste Mal gemerkt). Rücktaste bei leerem Feld nimmt die letzte zurück, X leert den Filter.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Поиск товаров[COLOR_REVERT][NEWLINE]Введите название товара: показываются все товары, содержащие его. Tab принимает серую подсказку. Enter подтверждает товар (точное совпадение или ближайшее) и очищает поле для следующего: все подтверждённые товары остаются в списке режима фильтра (сохраняется и на будущее, в том числе после закрытия окна). Backspace в пустом поле отменяет последний, X очищает фильтр.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SEARCH_HINT</Tag>
+		<English>Search goods</English>
+		<German>Ware suchen</German>
+		<Russian>Поиск товаров</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_ALL</Tag>
+		<English>All goods</English>
+		<German>Alle Waren</German>
+		<Russian>Все товары</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_FAV</Tag>
+		<English>Favorites</English>
+		<German>Favoriten</German>
+		<Russian>Избранное</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]View[COLOR_REVERT][NEWLINE]Switches between all goods, your favorite goods, only the goods that are marked (import, feeder, export or auto export) in this city, the goods the presets Building material and Market automatic ask for, the goods this city produces, and the goods its current production needs.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Ansicht[COLOR_REVERT][NEWLINE]Wechselt zwischen allen Waren, deinen Favoriten, nur den Waren, die in dieser Stadt markiert sind (Import, Feeder, Export oder Auto-Export), den Waren, die die Presets Baumaterial und Markt-Automatik anfordern, den Waren, die diese Stadt produziert, und den Waren, die ihre aktuelle Produktion benötigt.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Режим просмотра[COLOR_REVERT][NEWLINE]Переключает между всеми товарами, вашими избранными, только отмеченными в этом городе (импорт, фидер, экспорт или авто-экспорт), товарами, которые запрашивают шаблоны «Стройматериалы» и «Рыночная автоматика», товарами, которые производит этот город, и товарами, нужными для его текущего производства.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_MARKED</Tag>
+		<English>Marked only</English>
+		<German>Nur markierte</German>
+		<Russian>Только отмеченные</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_NEEDED</Tag>
+		<English>Needed goods</English>
+		<German>Benötigte Waren</German>
+		<Russian>Нужные товары</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_PRODUCED</Tag>
+		<English>Produced goods</English>
+		<German>Produzierte Waren</German>
+		<Russian>Производимые товары</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_VIEW_FILTER</Tag>
+		<English>Filter</English>
+		<German>Filter</German>
+		<French>Filtre</French>
+		<Italian>Filtro</Italian>
+		<Spanish>Filtro</Spanish>
+		<Portuguese>Filtro</Portuguese>
+		<Russian>Фильтр</Russian>
+		<Hungarian>Szűrő</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_FILTER_HELP</Tag>
+		<English>[COLOR_HIGHLIGHT_TEXT]Filter[COLOR_REVERT][NEWLINE]Adds this good to the filter or takes it out again. The filter view (drop down at the bottom right) lists the goods of your searches: confirmed goods (Enter) stay in it, also for the next time and for all cities, and are saved with the game.</English>
+		<German>[COLOR_HIGHLIGHT_TEXT]Filter[COLOR_REVERT][NEWLINE]Nimmt diese Ware in den Filter auf oder wieder heraus. Die Filteransicht (Auswahlmenü unten rechts) zeigt die Waren deiner Suchen: bestätigte Waren (Enter) bleiben darin, auch für das nächste Mal und für alle Städte, und werden mit dem Spielstand gespeichert.</German>
+		<Russian>[COLOR_HIGHLIGHT_TEXT]Фильтр[COLOR_REVERT][NEWLINE]Добавляет этот товар в фильтр или убирает его оттуда. В режиме фильтра (выпадающий список справа внизу) показываются товары из ваших поисков: подтверждённые товары (Enter) остаются в нём, в том числе на будущее и для всех городов, и сохраняются вместе с игрой.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_MARKET_VIEW_HINT</Tag>
+		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] works in the view "All goods" only. While it is on, the goods it manages cannot be changed by the buttons Clear All, Import all goods, Auto-export all goods or presets, only by hand (you get a notice then, with a button to set the good back).</English>
+		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] funktioniert nur in der Ansicht „Alle Waren". Solange er an ist, können die Waren, die er verwaltet, nicht durch die Knöpfe Alles löschen, Alle Waren importieren, Alle Waren automatisch exportieren oder Presets verändert werden, nur von Hand (dann erscheint ein Hinweis mit einem Knopf, der die Ware zurücksetzt).</German>
+		<Russian>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Защита шаблонов:[COLOR_REVERT] работает только в режиме «Все товары». Пока она включена, товары, которыми она управляет, нельзя изменить кнопками «Очистить всё», «Импорт всех товаров», «Авто-экспорт всех товаров» или шаблонами, только вручную (тогда появится уведомление с кнопкой, возвращающей товар в прежнее состояние).</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_1</Tag>
+		<English>Preset protection: %s1_good is managed by Market automatic</English>
+		<German>Preset-Schutz: %s1_good wird von der Markt-Automatik verwaltet</German>
+		<Russian>Защита шаблонов: %s1_good управляется «Рыночной автоматикой»</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_MANUAL_2</Tag>
+		<English>Your change differs from the setting Market automatic makes for this good.</English>
+		<German>Deine Änderung weicht von der Einstellung ab, die „Markt-Automatik" für diese Ware setzt.</German>
+		<Russian>Ваше изменение отличается от настройки, которую «Рыночная автоматика» задаёт для этого товара.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_RESET</Tag>
+		<English>Reset</English>
+		<German>Zurücksetzen</German>
+		<Russian>Сбросить</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_IGNORE</Tag>
+		<English>Ignore</English>
+		<German>Ignorieren</German>
+		<Russian>Игнорировать</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_1</Tag>
+		<English>Preset protection: %s1_count goods not changed (managed by Market automatic)</English>
+		<German>Preset-Schutz: %s1_count Waren nicht geändert (von der Markt-Automatik verwaltet)</German>
+		<Russian>Защита шаблонов: товаров не изменено: %s1_count (ими управляет «Рыночная автоматика»)</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_SKIPPED_2</Tag>
+		<English>%s1_goods - only manual changes are possible for them while it is on.</English>
+		<German>%s1_goods - solange er an ist, sind für sie nur manuelle Änderungen möglich.</German>
+		<Russian>%s1_goods - пока она включена, для них возможны только ручные изменения.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_1</Tag>
+		<English>Preset protection: Market automatic</English>
+		<German>Preset-Schutz: Markt-Automatik</German>
+		<Russian>Защита шаблонов: «Рыночная автоматика»</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_VIEW_2</Tag>
+		<English>can only be switched on or off in the view "All goods".</English>
+		<German>kann nur in der Ansicht „Alle Waren" ein- und ausgeschaltet werden.</German>
+		<Russian>можно включить или выключить только в режиме «Все товары».</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_1</Tag>
+		<English>Preset protection: %s1_count goods asked for by presets are switched off</English>
+		<German>Preset-Schutz: %s1_count Waren, die Presets anfordern, sind ausgeschaltet</German>
+		<Russian>Защита шаблонов: выключено товаров, запрошенных шаблонами: %s1_count</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WARN_PRESET_2</Tag>
+		<English>%s1_goods - Reset puts them back. Ignore: they no longer count for the presets (a preset none of whose goods is active any more switches itself off).</English>
+		<German>%s1_goods - Zurücksetzen stellt sie wieder her. Ignorieren: sie zählen dann nicht mehr für die Presets (ein Preset, von dem keine Ware mehr aktiv ist, schaltet sich selbst aus).</German>
+		<Russian>%s1_goods - «Сбросить» возвращает их обратно. «Игнорировать»: они больше не учитываются для шаблонов (шаблон, ни один товар которого больше не активен, выключается сам).</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_BUILD_PROTECT_HINT</Tag>
+		<English>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset protection:[COLOR_REVERT] while the preset is on, you get a notice when its goods are switched off again (by hand or by Clear All), with a button to put them back. If you ignore it and none of its goods is active any more, the preset switches itself off. The notice names every good with all the presets that ask for it.</English>
+		<German>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Preset-Schutz:[COLOR_REVERT] solange das Preset an ist, erscheint ein Hinweis, wenn seine Waren wieder ausgeschaltet werden (von Hand oder durch Alles löschen), mit einem Knopf, der sie zurücksetzt. Ignorierst du ihn und ist keine seiner Waren mehr aktiv, schaltet sich das Preset selbst aus. Der Hinweis nennt jede Ware mit allen Presets, die sie anfordern.</German>
+		<Russian>[NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Защита шаблонов:[COLOR_REVERT] пока шаблон включён, вы получаете уведомление, когда его товары снова выключаются (вручную или кнопкой «Очистить всё»), с кнопкой, возвращающей их обратно. Если проигнорировать его и ни один товар шаблона больше не активен, шаблон выключается сам. В уведомлении названы все товары со всеми шаблонами, которые их запрашивают.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT</Tag>
+		<English>Livestock</English>
+		<German>Viehzucht</German>
+		<Russian>Скот</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_SHORT_ON</Tag>
+		<English>Livestock: ON</English>
+		<German>Viehzucht: AN</German>
+		<Russian>Скот: ВКЛ.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET5_HELP</Tag>
+		<English>Livestock: import and feeder for all livestock (horses, cattle, geese, goats, pigs, sheep, chicken), import limit and maintain level 150. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
+		<German>Viehzucht: Import und Feeder für alles Vieh (Pferde, Rinder, Gänse, Ziegen, Schweine, Schafe, Hühner), Importlimit und Maintain-Level 150. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
+		<Russian>Скот: импорт и фидер для всего скота (лошади, коровы, гуси, козы, свиньи, овцы, куры), ограничение на импорт и поддерживаемый уровень 150. Повторный щелчок выключает его: выключаются только товары, которые включил шаблон, товары, заданные ранее вручную, остаются как есть.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT</Tag>
+		<English>Military goods</English>
+		<German>Militärgüter</German>
+		<Russian>Военные товары</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_SHORT_ON</Tag>
+		<English>Military goods: ON</English>
+		<German>Militärgüter: AN</German>
+		<Russian>Военные товары: ВКЛ.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_PRESET6_HELP</Tag>
+		<English>Military goods: import and feeder for muskets, blades, cannons, black powder, bakery goods (provisions) and horses, at most 100 imported. Click again to switch it off: only the goods the preset turned on are switched off again, goods set by hand before stay as they are.</English>
+		<German>Militärgüter: Import und Feeder für Musketen, Säbel, Kanonen, Schießpulver, Proviant (Backwaren) und Pferde, höchstens 100 importiert. Noch einmal klicken schaltet es aus: nur die Waren, die das Preset eingeschaltet hat, werden wieder ausgeschaltet, vorher von Hand gesetzte Waren bleiben.</German>
+		<Russian>Военные товары: импорт и фидер для мушкетов, клинков, пушек, чёрного пороха, выпечки (провиант) и лошадей, импортируется не более 100. Повторный щелчок выключает его: выключаются только товары, которые включил шаблон, товары, заданные ранее вручную, остаются как есть.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_ON_BY</Tag>
+		<English>Switched on by: </English>
+		<German>Eingeschaltet durch: </German>
+		<Russian>Включено через: </Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_HAND</Tag>
+		<English>by hand</English>
+		<German>von Hand</German>
+		<Russian>вручную</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_MARKET</Tag>
+		<English>market automatic</English>
+		<German>Market automatic</German>
+		<Russian>рыночная автоматика</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_LIMIT</Tag>
+		<English>Import limit</English>
+		<German>Importlimit</German>
+		<Russian>Ограничение на импорт</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_SRC_MAINTAIN</Tag>
+		<English>Maintain level</English>
+		<German>Maintain-Level</German>
+		<Russian>Поддерживаемый уровень</Russian>
+	</TEXT>
 </Civ4GameText>

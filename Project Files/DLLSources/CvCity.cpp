@@ -337,6 +337,8 @@ void CvCity::uninit()
 	// transport feeder - start - Nightinggale
 	m_em_bTradeImportsMaintain.reset();
 	// transport feeder - end - Nightinggale
+	m_em_iTradeImportDomains.reset(); // WTP
+	m_em_iTradeExportDomains.reset(); // WTP
 }
 
 // FUNCTION: reset()
@@ -922,6 +924,10 @@ void CvCity::doTask(TaskTypes eTask, int iData1, int iData2, bool bOption, bool 
 
 	// transport feeder - start - Nightinggale
 	case TASK_YIELD_TRADEROUTE:
+		// WTP: iData1 holds the yield (lowest 8 bits), the land / sea settings of the import (bits 8-9) and of the export (bits 10-11)
+		setImportDomains((YieldTypes)(iData1 & 0xFF), (iData1 >> 8) & 3);
+		setExportDomains((YieldTypes)(iData1 & 0xFF), (iData1 >> 10) & 3);
+		iData1 &= 0xFF;
 		setAutoExport((YieldTypes)iData1, bCtrl); // auto traderoute - Nightinggale
 
 		// change all traderoute settings for a single yield in one go as setImportsMaintain() needs to be called after updating the other settings
@@ -13959,6 +13965,52 @@ void CvCity::setAutoThresholdCache()
 // transport feeder - end - Nightinggale
 
 // auto traderoute - start - Nightinggale
+// WTP: land only / sea only imports and exports
+void CvCity::setImportDomains(YieldTypes eYield, int iDomains)
+{
+	m_em_iTradeImportDomains.set(eYield, (unsigned short)(iDomains & 3));
+}
+
+void CvCity::setExportDomains(YieldTypes eYield, int iDomains)
+{
+	m_em_iTradeExportDomains.set(eYield, (unsigned short)(iDomains & 3));
+}
+
+namespace
+{
+	bool isDomainAllowed(int iDomains, DomainTypes eDomain)
+	{
+		if (iDomains == 0 || iDomains == 3)
+		{
+			return true;
+		}
+		if (eDomain == DOMAIN_LAND)
+		{
+			return (iDomains & 1) != 0;
+		}
+		if (eDomain == DOMAIN_SEA)
+		{
+			return (iDomains & 2) != 0;
+		}
+		return true;
+	}
+}
+
+bool CvCity::isImportAllowedForDomain(YieldTypes eYield, DomainTypes eDomain) const
+{
+	return isDomainAllowed(m_em_iTradeImportDomains.get(eYield), eDomain);
+}
+
+bool CvCity::isExportAllowedForDomain(YieldTypes eYield, DomainTypes eDomain) const
+{
+	return isDomainAllowed(m_em_iTradeExportDomains.get(eYield), eDomain);
+}
+
+int CvCity::getTradeRouteTaskData(YieldTypes eYield) const
+{
+	return ((int)eYield & 0xFF) | ((m_em_iTradeImportDomains.get(eYield) & 3) << 8) | ((m_em_iTradeExportDomains.get(eYield) & 3) << 10);
+}
+
 void CvCity::setAutoExport(YieldTypes eYield, bool bExport)
 {
 	m_em_bTradeAutoExport.set(eYield, bExport);
@@ -14007,10 +14059,14 @@ void CvCity::handleAutoTraderouteSetup(bool bReset, bool bImportAll, bool bAutoE
 				int iMaintainLevel   = getMaintainLevel(eYield);
 				int iImportLimitLevel= getImportsLimit(eYield);
 
-				int iBuffer = iMaintainLevel & 0xFFFF; // lowest 16 bits
-				iBuffer |= (iImportLimitLevel & 0xFFFF) << 16; // next 16 bits
+				// the layout is the one of NetworkDataTradeRouteInts (import limit in the lower, maintain level in the upper 16 bits)
+				// as read by TASK_YIELD_TRADEROUTE. It was the other way round here (also in the original mod), which swapped both values for
+				// every good. Tested in game (test/auto-traderoute-packing): before 50 / 100 -> after 100 / 50, with this packing it stays 50 / 100.
+				NetworkDataTradeRouteInts buffer;
+				buffer.iImportLimitLevel = (unsigned short)iImportLimitLevel;
+				buffer.iMaintainLevel    = (unsigned short)iMaintainLevel;
 
-				doTask(TASK_YIELD_TRADEROUTE, eYield, iBuffer, bImport, bExport, bMaintainImport, bAutoExport);
+				doTask(TASK_YIELD_TRADEROUTE, getTradeRouteTaskData(eYield), buffer.iNetwork, bImport, bExport, bMaintainImport, bAutoExport);
 			}
 		}
 	}
@@ -15667,3 +15723,31 @@ int CvCity::getExportAvailable(YieldTypes eYield) const
 	return std::max(0, getYieldStored(eYield)
 		- getAutoMaintainThreshold(eYield));
 }
+// WTP: the levels that the automatic market import sets for a good (the same numbers as updateAutoMarketImport starts with, before a
+// higher level set by hand is taken over); false if the market does not ask for the good
+bool CvCity::getAutoMarketImportLevels(YieldTypes eYield, int& iMaintainLevel, int& iImportLimit) const
+{
+	if (eYield < FIRST_YIELD || eYield >= NUM_YIELD_TYPES || !GC.getYieldInfo(eYield).isCargo())
+	{
+		return false;
+	}
+	YieldCargoArray<int> aiDemand;
+	getYieldDemands(aiDemand);
+	const InfoArray<YieldTypes>& kYieldArray = GC.getDomesticDemandYieldTypes();
+	for (int i = 0; i < kYieldArray.getLength(); ++i)
+	{
+		if (kYieldArray.get(i) == eYield)
+		{
+			const int iDemand = aiDemand.get(eYield);
+			if (iDemand <= 0)
+			{
+				return false;
+			}
+			iMaintainLevel = std::max(iDemand * GLOBAL_DEFINE_AUTO_MARKET_IMPORT_MAINTAIN_TURNS, GLOBAL_DEFINE_AUTO_MARKET_IMPORT_MIN_LEVEL);
+			iImportLimit = std::max(std::max(iDemand * GLOBAL_DEFINE_AUTO_MARKET_IMPORT_LIMIT_TURNS, GLOBAL_DEFINE_AUTO_MARKET_IMPORT_MIN_LEVEL), iMaintainLevel);
+			return true;
+		}
+	}
+	return false;
+}
+

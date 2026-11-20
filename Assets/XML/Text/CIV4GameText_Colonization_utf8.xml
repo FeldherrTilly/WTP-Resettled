@@ -2234,6 +2234,17 @@
 		<Hungarian>A szállítás teljes automatizálása</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_TRADEROUTE_WIN_PRESET_BUILD_HELP</Tag>
+		<English>Building material: import and feeder for clay, stone, tools, horses, sailcloth, hardwood, rope (levels 100/150)</English>
+		<Portuguese>Material de construção: importar e alimentador para argila, pedra, ferramentas, cavalos, lona, madeira de lei, cordas (níveis 100/150)</Portuguese>
+		<French>Matériaux : importation et approvisionnement pour argile, pierre, outils, chevaux, toile, bois dur, cordes (niveaux 100/150)</French>
+		<German>Baumaterial: Import und Feeder für Lehm, Stein, Werkzeug, Pferde, Segeltuch, Hartholz, Seile (Mengen 100/150)</German>
+		<Italian>Materiali edili: importazione e rifornimento per argilla, pietra, attrezzi, cavalli, tela, legno duro, corde (livelli 100/150)</Italian>
+		<Spanish>Materiales: importación y abastecimiento de arcilla, piedra, herramientas, caballos, lona, madera dura, cuerdas (niveles 100/150)</Spanish>
+		<Russian>Стройматериалы: импорт и подвоз глины, камня, инструментов, лошадей, парусины, твёрдой древесины, канатов (уровни 100/150)</Russian>
+		<Hungarian>Építőanyag: agyag, kő, szerszám, ló, vitorlavászon, keményfa, kötél importja és utánpótlása (szintek 100/150)</Hungarian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_ACTION_AUTOMATE_FULL_HELP</Tag>
 		<English>Automate this unit</English>
 		<Portuguese>Automatizar unidade</Portuguese>

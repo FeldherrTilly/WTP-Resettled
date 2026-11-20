@@ -1190,6 +1190,10 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 						const bool bExport          = (pPopupReturn->getCheckboxBitfield(eExportYield) & 0x01);
 						const bool bMaintainImport  = (pPopupReturn->getCheckboxBitfield(eYield)       & 0x02);
 						const bool bAutoExport      = (pPopupReturn->getCheckboxBitfield(eExportYield) & 0x02);
+						// WTP: land only / sea only (bit 1 = land, bit 2 = sea)
+						// the popup has no land / sea checkboxes: the settings made in the new window stay as they are
+						const int iImportDomains    = pCity->getImportDomains(eYield);
+						const int iExportDomains    = pCity->getExportDomains(eYield);
 						const int iImportLimitLevel =  pPopupReturn->getSpinnerWidgetValue(eYield);
 						const int iMaintainLevel    =  pPopupReturn->getSpinnerWidgetValue(eExportYield);
 
@@ -1198,6 +1202,8 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 							|| bExport != pCity->isExport(eYield)
 							|| bMaintainImport != pCity->getImportsMaintain(eYield)
 							|| bAutoExport != pCity->isAutoExport(eYield) // auto traderoute - Nightinggale
+							|| iImportDomains != pCity->getImportDomains(eYield)
+							|| iExportDomains != pCity->getExportDomains(eYield)
 							|| iMaintainLevel != pCity->getMaintainLevel(eYield)
 							|| iImportLimitLevel != pCity->getImportsLimit(eYield) // R&R mod, vetiarvind, max yield import limit
 							)
@@ -1210,7 +1216,7 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 							buffer.iImportLimitLevel = iImportLimitLevel;
 							buffer.iMaintainLevel    = iMaintainLevel;
 
-							gDLL->sendDoTask(info.getData1(), TASK_YIELD_TRADEROUTE, eYield, buffer.iNetwork, bImport, bExport, bMaintainImport, bAutoExport);
+							gDLL->sendDoTask(info.getData1(), TASK_YIELD_TRADEROUTE, (int)eYield | (iImportDomains << 8) | (iExportDomains << 10), buffer.iNetwork, bImport, bExport, bMaintainImport, bAutoExport);
 						}
 						// R&R mod, vetiarvind, max yield import limit - end
 						// transport feeder - end - Nightinggale
@@ -3625,6 +3631,21 @@ bool CvDLLButtonPopup::launchYieldImportExportPopup(CvPopup* pPopup, CvPopupInfo
 	{
 		return false;
 	}
+
+	// WTP: the settings are made in an own window (python: wider, with the land / sea checkboxes and the mouse wheel); if it cannot
+	// be opened the popup of the game is used as before
+	{
+		CyArgsList argsList;
+		argsList.add(pCity->getID());
+		argsList.add(info.getOption1() ? 1 : 0);
+		long lOpened = 0;
+		gDLL->getPythonIFace()->callFunction(PYScreensModule, "askTradeRouteSetup", argsList.makeFunctionArgs(), &lOpened);
+		if (lOpened != 0)
+		{
+			return false;
+		}
+	}
+
 	gDLL->getInterfaceIFace()->popupSetBodyString(pPopup, gDLL->getText("TXT_KEY_POPUP_IMPORT_TITLE", pCity->getNameKey()));
 
 	// auto traderoute - start - Nightinggale
