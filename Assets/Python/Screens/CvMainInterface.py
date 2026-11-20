@@ -4046,6 +4046,7 @@ class CvMainInterface:
 				aFinal = aRest
 			aFinal = self.foldUnitGroups(aFinal)
 			aFinal = self.foldSellPrices(aFinal)
+			aFinal = self.foldCargoValue(aFinal)
 			aNew = []
 			for aEntry in aFinal:
 				if aEntry[1] is not None:
@@ -4057,6 +4058,31 @@ class CvMainInterface:
 		return aszParas
 
 	# the sell prices of a cargo slot (the lines Europe / Africa / Port Royal and the line Total): only the line Total stays, the three markets are its
+	# the line "Total value" of a loaded sea transport: the lines of the goods on board (marked with >> by the DLL) become its child window
+	def foldCargoValue( self, aFinal ):
+		try:
+			szPrefix = self.getTipPrefix("TXT_KEY_WTP_CARGO_VALUE_HELP", (u"",))
+			if len(szPrefix) < 3:
+				return aFinal
+			aNewFinal = []
+			k = 0
+			while k < len(aFinal):
+				if aFinal[k][1] is None and self.normTipText(aFinal[k][0]).find(szPrefix) == 0:
+					aRows = []
+					j = k + 1
+					while j < len(aFinal) and aFinal[j][1] is None and self.normTipText(aFinal[j][0]).find(u"\u00bb") == 0:
+						aRows.append(aFinal[j][0].replace(u"\u00bb", u"", 1))
+						j += 1
+					if len(aRows) > 0:
+						aNewFinal.append([aFinal[k][0], u"\n".join(aRows)])
+						k = j
+						continue
+				aNewFinal.append(aFinal[k])
+				k += 1
+			return aNewFinal
+		except:
+			return aFinal
+
 	# child tooltip
 	def foldSellPrices( self, aFinal ):
 		try:
