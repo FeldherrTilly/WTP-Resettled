@@ -1437,6 +1437,13 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 				gDLL->sendPushMission(info.getData1(), MISSION_MOVE_TO, pCity->getX(), pCity->getY(), 0, false);
 			}
 		}
+		else if (pPopupReturn->getButtonClicked() == -5)
+		{
+			// WTP: "Set waypoint...": the unit is selected and the next order to move of it is saved as a waypoint (python)
+			CyArgsList argsListWp;
+			argsListWp.add(info.getData1());
+			gDLL->getPythonIFace()->callFunction(PYScreensModule, "startGotoWaypointMode", argsListWp.makeFunctionArgs());
+		}
 		else if (pPopupReturn->getButtonClicked() == -2)
 		{
 			CvUnit* pUnit = GET_PLAYER(GC.getGameINLINE().getActivePlayer()).getUnit(info.getData1());
@@ -4155,6 +4162,10 @@ bool CvDLLButtonPopup::launchGotoMenuPopup(CvPopup* pPopup, CvPopupInfo &info)
 	int iLoop;
 
 	gDLL->getInterfaceIFace()->popupSetHeaderString(pPopup, gDLL->getText("TXT_KEY_COMMAND_GOTO_MENU_TITLE"));
+
+	// WTP: the function "Set waypoint..." of the tooltips of the mod is always the first entry (button -5: python takes over the unit)
+	gDLL->getInterfaceIFace()->popupAddGenericButton(pPopup, L"  " + gDLL->getText("TXT_KEY_WTP_TIP_WAYPOINT_SET_ROW"), ARTFILEMGR.getInterfaceArtInfo("INTERFACE_BUTTONS_CITYSELECTION")->getPath(), -5, WIDGET_GENERAL, pUnit->getID(), -1);
+	bValid = true;
 
 	// WTP, Schmiddie, Unit Travel Restrictions - START
 	if (pUnit->getUnitInfo().canSailToEurope() && (pUnit->canCrossOcean(pUnit->plot(), UNIT_TRAVEL_STATE_TO_EUROPE) || pUnit->canAutoCrossOcean(pUnit->plot())))

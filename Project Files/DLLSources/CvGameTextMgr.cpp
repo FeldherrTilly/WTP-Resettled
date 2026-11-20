@@ -490,15 +490,16 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 		}
 		// R&R, ray, Port Royal - END
 
-		// WTP: more than one cargo slot with this yield: a fourth line with the sell prices of the total amount
-		if (m_iYieldTotalForHelp > pUnit->getYieldStored())
+		// WTP: a fourth line with the sell prices of the total amount of this yield in all cargo slots of the unit (also with one slot only: the
+		// lines of the three markets are the child tooltip of this line in the tooltip of the mod, see foldUnitDetails in CvMainInterface.py)
 		{
+			const int iYieldTotal = std::max(m_iYieldTotalForHelp, (int)pUnit->getYieldStored());
 			const CvPlayer& kOwner = GET_PLAYER(pUnit->getOwnerINLINE());
 			szString.append(L", ");
 			szString.append(gDLL->getText("TXT_KEY_WTP_TOTAL_PRICE_HELP"));
-			szTempBuffer.Format(L"%d%c (%d / %d / %d%c)", m_iYieldTotalForHelp, GC.getYieldInfo(pUnit->getYield()).getChar(),
-				kOwner.getSellToEuropeProfit(pUnit->getYield(), m_iYieldTotalForHelp), kOwner.getSellToAfricaProfit(pUnit->getYield(), m_iYieldTotalForHelp),
-				kOwner.getSellToPortRoyalProfit(pUnit->getYield(), m_iYieldTotalForHelp), GC.getSymbolID(GOLD_CHAR));
+			szTempBuffer.Format(L"%d%c (%d / %d / %d%c)", iYieldTotal, GC.getYieldInfo(pUnit->getYield()).getChar(),
+				kOwner.getSellToEuropeProfit(pUnit->getYield(), iYieldTotal), kOwner.getSellToAfricaProfit(pUnit->getYield(), iYieldTotal),
+				kOwner.getSellToPortRoyalProfit(pUnit->getYield(), iYieldTotal), GC.getSymbolID(GOLD_CHAR));
 			szString.append(szTempBuffer);
 		}
 	}
