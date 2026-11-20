@@ -2718,7 +2718,7 @@ class CvMainInterface:
 											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
 								# WTP: the text grows to the left, over the picture of the good, when there are several numbers (e.g. "+2 -13 / +2 -12"):
 								# the longer it is, the smaller the font (the picture and the numbers must not cover each other)
-								iBarTextLength = len(re.sub(u"<[^>]*>", u"", SzText))
+								iBarTextLength = len(re.sub(u"<[^>]*>", u"", SzText).strip()) # (without the space in front of the first number, it is not visible)
 								iBarFontDelta = 0
 								if iBarTextLength > 13:
 									iBarFontDelta = -2
