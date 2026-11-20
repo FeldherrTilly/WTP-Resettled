@@ -7447,7 +7447,7 @@ class CvMainInterface:
 		try:
 			if (bWpLine or bWpRow or bCmdRow or bCityRow) and bShift:
 				bWheel = True
-			elif iPara >= 0 and not bWpWindow and not bPromoLine and bShift and len(self.getTextPediaAllTargets(aszTopParas[iPara])) > 0 and self.getBlockUnit(iFz, aszTopParas, iPara) is None:
+			elif iPara >= 0 and not bWpWindow and not bPromoLine and bShift and len(self.getTextPediaAllTargets(self.getPediaLineText(iFz, aszTopParas, iPara))) > 0 and self.getBlockUnit(iFz, aszTopParas, iPara) is None:
 				bWheel = True
 		except:
 			pass
@@ -7462,7 +7462,7 @@ class CvMainInterface:
 				elif bWpRow or bCmdRow or bCityRow:
 					aTargets = range(iWpRowCount)
 				else:
-					aTargets = self.getTextPediaAllTargets(aszTopParas[iPara])
+					aTargets = self.getTextPediaAllTargets(self.getPediaLineText(iFz, aszTopParas, iPara))
 				if iPara != self.iTipSelPara or iFz != self.iTipSelLevel:
 					self.iTipSelPara = iPara
 					self.iTipSelLevel = iFz
@@ -8334,11 +8334,23 @@ class CvMainInterface:
 			pass
 		return False
 
+	# the text of a line of a frozen tooltip that the Colopedia targets are taken from: the folded line "Buildings" of a city tooltip has the
+	# names of the buildings in its child window, so the buildings of the list are the targets of the line (mouse wheel: one after the other)
+	def getPediaLineText( self, iLevel, aszParas, iPara ):
+		try:
+			if iLevel >= 0 and iLevel < len(self.aFrozen) and iPara >= 0 and iPara < len(aszParas):
+				dDetails = self.aFrozen[iLevel][4]
+				if dDetails.has_key(iPara) and self.normTipText(aszParas[iPara]) == self.normTipText(localText.getText("TXT_KEY_WTP_TIP_BUILDINGS", ())):
+					return dDetails[iPara]
+		except:
+			pass
+		return aszParas[iPara]
+
 	def getTipSecondTextBase( self, iPara, iSel = -1, aszParas = None, iLevel = -1 ):
 		try:
 			if aszParas is None:
 				aszParas = []
-			szLine = aszParas[iPara]
+			szLine = self.getPediaLineText(iLevel, aszParas, iPara)
 			aTargets = self.getTextPediaTargets(szLine)
 			aAll = self.getTextPediaAllTargets(szLine)
 			eTalk = -1
@@ -8678,7 +8690,7 @@ class CvMainInterface:
 					return
 				if self.runCityCommand(aszCmd, iCmd) or self.runUnitCommand(aszParas, iPara):
 					return
-				aTargets = self.getTextPediaTargets(aszParas[iPara])
+				aTargets = self.getTextPediaTargets(self.getPediaLineText(iLevel, aszParas, iPara))
 				eTalk = -1
 				pSelect = None
 				tBlock = None
@@ -8739,7 +8751,7 @@ class CvMainInterface:
 				elif tBlock is not None:
 					pass
 				elif iPara == self.iTipSelPara and iLevel == self.iTipSelLevel:
-					aTargets = self.getTextPediaAllTargets(aszParas[iPara])
+					aTargets = self.getTextPediaAllTargets(self.getPediaLineText(iLevel, aszParas, iPara))
 					# the target chosen with shift + mouse wheel
 					self.openPediaTargetIndex(aTargets, self.iTipSelIdx)
 				else:
