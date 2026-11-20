@@ -3369,4 +3369,28 @@
 		<German>Umschalt + Klick: verkauft die Waren aller Schiffe im Hafen.</German>
 		<Russian>Shift + щелчок: продаёт товары со всех кораблей в порту.</Russian>
 	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_CARGO_VALUE_HELP</Tag>
+		<English>Total value: %s1</English>
+		<German>Gesamtwert: %s1</German>
+		<Russian>Общая стоимость: %s1</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HARBOR_EUROPE</Tag>
+		<English>Europe</English>
+		<German>Europa</German>
+		<Russian>Европа</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HARBOR_AFRICA</Tag>
+		<English>Africa</English>
+		<German>Afrika</German>
+		<Russian>Африка</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_HARBOR_PORT_ROYAL</Tag>
+		<English>Port Royal</English>
+		<German>Port Royal</German>
+		<Russian>Порт-Рояль</Russian>
+	</TEXT>
 </Civ4GameText>
