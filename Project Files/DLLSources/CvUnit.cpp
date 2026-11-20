@@ -5532,7 +5532,7 @@ int CvUnit::loadYieldAmount(YieldTypes eYield, int iAmount, bool bTrade)
 }
 
 // WTP: fills all free cargo slots with goods of the city, one slot after the other, always with the most valuable good (the sell price in Europe for
-// 100 units) that can still be loaded; the same good again as long as the city has more of it
+// 100 units) that can still be loaded and would fill at least 15% of a slot; the same good again as long as the city has more of it
 void CvUnit::loadAllYieldsByValue()
 {
 	bool abExcluded[NUM_YIELD_TYPES];
@@ -5541,13 +5541,15 @@ void CvUnit::loadAllYieldsByValue()
 		abExcluded[i] = false;
 	}
 	const CvPlayer& kOwner = GET_PLAYER(getOwnerINLINE());
+	// goods that would fill less than 15% of a slot are skipped
+	const int iMinAmount = (15 * GC.getGameINLINE().getCargoYieldCapacity() + 99) / 100;
 	for (int iGuard = 0; iGuard < 100; ++iGuard)
 	{
 		YieldTypes eBest = NO_YIELD;
 		int iBestValue = -1;
 		for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_YIELD_TYPES; ++eYield)
 		{
-			if (abExcluded[eYield] || !canLoadYield(plot(), eYield, false) || getMaxLoadYieldAmount(eYield) <= 0)
+			if (abExcluded[eYield] || !canLoadYield(plot(), eYield, false) || getMaxLoadYieldAmount(eYield) < iMinAmount)
 			{
 				continue;
 			}
