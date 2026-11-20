@@ -1940,6 +1940,18 @@ class CvTradeRouteScreen:
 			aszKey = {F_IMP_MINUS: "TXT_KEY_WTP_TRADEROUTE_WIN_IMPORT_HELP", F_IMP_PLUS: "TXT_KEY_WTP_TRADEROUTE_WIN_IMPORT_HELP", F_IMP_CHECK: "TXT_KEY_WTP_TRADEROUTE_WIN_IMPORT_HELP", F_IMP_FEEDER: "TXT_KEY_WTP_TRADEROUTE_WIN_FEEDER_HELP", F_IMP_LAND: "TXT_KEY_POPUP_IMPORT_LAND_HELP", F_IMP_SEA: "TXT_KEY_POPUP_IMPORT_SEA_HELP", F_EXP_MINUS: "TXT_KEY_WTP_TRADEROUTE_WIN_EXPORT_HELP", F_EXP_PLUS: "TXT_KEY_WTP_TRADEROUTE_WIN_EXPORT_HELP", F_EXP_CHECK: "TXT_KEY_WTP_TRADEROUTE_WIN_EXPORT_HELP", F_EXP_AUTO: "TXT_KEY_WTP_TRADEROUTE_WIN_AUTO_EXPORT_HELP", F_EXP_LAND: "TXT_KEY_POPUP_EXPORT_LAND_HELP", F_EXP_SEA: "TXT_KEY_POPUP_EXPORT_SEA_HELP"}
 			if aszKey.has_key(iField):
 				szHelp = localText.getText(aszKey[iField], ())
+				if iField == F_IMP_CHECK or iField == F_EXP_CHECK:
+					# the title line of the button names the good (Export [picture] Cattle instead of Export this good)
+					try:
+						iNamed = self.aYields[self.iFirst + (iCode - BTN_ROW) / 16]
+						szKeyTitle = "TXT_KEY_WTP_TRADEROUTE_IMPORT_GOOD_TITLE"
+						if iField == F_EXP_CHECK:
+							szKeyTitle = "TXT_KEY_WTP_TRADEROUTE_EXPORT_GOOD_TITLE"
+						iNewLine = szHelp.find(u"\n")
+						if iNewLine > 0:
+							szHelp = localText.getText(szKeyTitle, (unichr(gc.getYieldInfo(iNamed).getChar()), gc.getYieldInfo(iNamed).getDescription())) + szHelp[iNewLine:]
+					except:
+						pass
 				try:
 					szHelp += self.getSourceHelp((iCode - BTN_ROW) / 16, iField)
 				except:
