@@ -2716,11 +2716,21 @@ class CvMainInterface:
 											SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
 										if (UnproducedYield > 0):
 											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
+								# WTP: the text grows to the left, over the picture of the good, when there are several numbers (e.g. "+2 -13 / +2 -12"):
+								# the longer it is, the smaller the font (the picture and the numbers must not cover each other)
+								iBarTextLength = len(re.sub(u"<[^>]*>", u"", SzText))
+								iBarFontDelta = 0
+								if iBarTextLength > 13:
+									iBarFontDelta = -2
+								elif iBarTextLength > 9:
+									iBarFontDelta = -1
+								if STANDARD_FONT_SIZE + iBarFontDelta < 1:
+									iBarFontDelta = 1 - STANDARD_FONT_SIZE
 								szName = "WorkerOutputText" + str(iYield)
 								if (iSecondYield == -1 or iSecondYield == iYield):
-									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , 0), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
+									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , iBarFontDelta), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
 								else:
-									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , 0), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_TWO_YIELDS, iYield, iSecondYield)
+									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , iBarFontDelta), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_TWO_YIELDS, iYield, iSecondYield)
 
 								CitizenHideList.append(szName)
 								CitizenHideList.append("ProductionBox" + str(iSpecialBuildingType)) # R&R, Robert Surcouf Fix Production box
