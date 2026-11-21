@@ -188,6 +188,8 @@ enum SavegameVariableTypes
 	CitySave_ForeignBuildingBurnTimer,
 
 	CitySave_AutoAssignTarget, // WTP: the colony takes colonists of the job automation
+	CitySave_tradeImportDomains, // WTP: import for land / sea transports only
+	CitySave_tradeExportDomains, // WTP: export for land / sea transports only
 	NUM_CITYSAVE_ENUM_VALUES,
 };
 
@@ -315,6 +317,8 @@ const char* getSavedEnumNameCity(SavegameVariableTypes eType)
 		case CitySave_SlaveEmancipationPendingUnrest: return "CitySave_SlaveEmancipationPendingUnrest";
 		case CitySave_ForeignBuildingBurnTimer: return "CitySave_ForeignBuildingBurnTimer";
 		case CitySave_AutoAssignTarget: return "CitySave_AutoAssignTarget";
+		case CitySave_tradeImportDomains: return "CitySave_tradeImportDomains";
+		case CitySave_tradeExportDomains: return "CitySave_tradeExportDomains";
 	}
 	FAssertMsg(0, "Missing case");
 	return "";
@@ -410,6 +414,8 @@ void CvCity::resetSavedData(int iID, PlayerTypes eOwner, Coordinates resetCoord,
 	m_em_iTradeThreshold.reset();
  	m_em_bTradeImportsMaintain.reset();
 	m_em_bTradeAutoExport.reset();
+	m_em_iTradeImportDomains.reset();
+	m_em_iTradeExportDomains.reset();
 	m_em_bTradeStopAutoImport.reset();
 	m_em_iTradeMaxThreshold.reset();
 
@@ -550,6 +556,8 @@ void CvCity::read(CvSavegameReader reader)
 		case CitySave_tradeImports                               : reader.Read(m_em_bTradeImports)                          ; break;
 		case CitySave_tradeExports                               : reader.Read(m_em_bTradeExports)                          ; break;
 		case CitySave_tradeAutoExports                           : reader.Read(m_em_bTradeAutoExport)                       ; break;
+		case CitySave_tradeImportDomains                         : reader.Read(m_em_iTradeImportDomains)                    ; break;
+		case CitySave_tradeExportDomains                         : reader.Read(m_em_iTradeExportDomains)                    ; break;
 		case CitySave_tradeThreshold                             : reader.Read(m_em_iTradeThreshold)                        ; break;
 		case CitySave_tradeImportsMaintain                       : reader.Read(m_em_bTradeImportsMaintain)                  ; break;
 		case CitySave_tradeStopAutoImport                        : reader.Read(m_em_bTradeStopAutoImport)                   ; break;
@@ -710,6 +718,8 @@ void CvCity::write(CvSavegameWriter writer)
 	writer.Write(CitySave_tradeImports, m_em_bTradeImports);
 	writer.Write(CitySave_tradeExports, m_em_bTradeExports);
 	writer.Write(CitySave_tradeAutoExports, m_em_bTradeAutoExport);
+	writer.Write(CitySave_tradeImportDomains, m_em_iTradeImportDomains);
+	writer.Write(CitySave_tradeExportDomains, m_em_iTradeExportDomains);
 	writer.Write(CitySave_tradeThreshold, m_em_iTradeThreshold);
  	writer.Write(CitySave_tradeImportsMaintain, m_em_bTradeImportsMaintain);
 	writer.Write(CitySave_tradeStopAutoImport, m_em_bTradeStopAutoImport);

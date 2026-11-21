@@ -234,6 +234,56 @@ class CvEventManager:
 			except:
 				pass
 
+		# WTP: Esc held with stacked import / export windows (jumps from the tooltips) closes all of them (the key up can come when no window is open)
+		try:
+			if eventType == self.EventKeyUp and int(key) == int(InputTypes.KB_ESCAPE):
+				CvScreensInterface.mainInterface.bEscHeld = False
+		except:
+			pass
+
+		# WTP: the import / export window of the city screen takes all keys while it is open (Esc closes it)
+		if (CvScreensInterface.tradeRouteScreen.isOpen()):
+			# WTP: nested tooltips in the window: X freezes the tooltip (a short press), unless the search field was clicked (then X is a
+			# letter of the search); Esc takes back the last frozen tooltip first, Shift + X stacks them
+			try:
+				tWin = CvScreensInterface.tradeRouteScreen
+				mi = CvScreensInterface.mainInterface
+				if (eventType == self.EventKeyDown):
+					if int(key) == int(InputTypes.KB_ESCAPE) and mi.isTipFrozen():
+						mi.unfreezeCursorTooltip()
+						return 1
+					if int(key) == int(InputTypes.KB_ESCAPE) and len(mi.aTradeReturn) > 0:
+						mi.keyEscDown()
+					if int(key) == int(InputTypes.KB_X) and not tWin.bSearchSelected and not self.bCtrl and not self.bAlt:
+						if not self.bShift:
+							if mi.keyXDown():
+								return 1
+						elif mi.isTipFrozen() and mi.stackFrozenTips():
+							return 1
+				elif (eventType == self.EventKeyUp):
+					if int(key) == int(InputTypes.KB_X) and mi.bXHeld:
+						if mi.keyXUp():
+							return 1
+			except:
+				pass
+			if (eventType == self.EventKeyDown):
+				try:
+					CvScreensInterface.tradeRouteScreen.handleKey(int(key), self.bCtrl, self.bShift, self.bAlt)
+				except:
+					# (a failed key must not stay unseen: the error goes to the log, the window is drawn again from its data)
+					try:
+						import traceback
+						CvUtil.pyPrint("TradeRouteScreen key: " + traceback.format_exc())
+						CvScreensInterface.tradeRouteScreen.recoverFromError()
+					except:
+						pass
+			elif (eventType == self.EventKeyUp):
+				try:
+					CvScreensInterface.tradeRouteScreen.handleKeyUp(int(key))
+				except:
+					pass
+			return 1
+
 		if (self.bAllowCheats):
 			# notify debug tools of input to allow it to override the control
 			argsList = (eventType,key,self.bCtrl,self.bShift,self.bAlt,mx,my,px,py,gc.getGame().isNetworkMultiPlayer())
@@ -444,6 +494,12 @@ class CvEventManager:
 	def onWindowActivation(self, argsList):
 		'Called when the game window activates or deactivates'
 		bActive = argsList[0]
+		# the import / export window is closed and opened again, so that the city screen is drawn again
+		try:
+			if bActive:
+				CvScreensInterface.mainInterface.windowActivatedTradeWindow()
+		except:
+			pass
 
 	def onCityScreenOpen(self, argsList):
 		'Called when the game window activates or deactivates'
