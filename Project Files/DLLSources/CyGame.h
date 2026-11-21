@@ -194,6 +194,14 @@ public:
 	bool isChurchPlayer(int /*PlayerTypes*/ ePlayer);
 	// R&R, ray, the Church - END
 
+	// WTP: helpers for the python windows: mouse wheel, cursor position, control / shift key
+	void setWheelCapture(bool bOn) const; // the mouse wheel is collected (takeWheelNotches) instead of zooming the map
+	int takeWheelNotches() const; // the notches of the wheel since the last call (positive: away from the user)
+	bool isCtrlKeyPressed() const;
+	bool isShiftKeyPressed() const; // is the shift key down
+	int getCursorClientX() const; // mouse position in the game window (-1 if unknown)
+	int getCursorClientY() const;
+
 protected:
 	const CvGame* const m_pGame;
 };
