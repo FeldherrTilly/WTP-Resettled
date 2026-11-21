@@ -10,6 +10,7 @@ import CvAchieveAdvisor
 # Achievements END
 # TAC - Trade Route Advisor - koma13 - START
 import CvTradeRoutesAdvisor
+import CvTransportRoutesOverview
 # TAC - Trade Route Advisor - koma13 - END
 import CvTradeRouteScreen
 import CvYieldAmountScreen
@@ -155,6 +156,17 @@ def showTradeRoutesAdvisor(argsList):
 	if (-1 != CyGame().getActivePlayer()):
 		tradeRoutesAdvisor.interfaceScreen()
 # TAC - Trade Routes Advisor - koma13 - END
+
+# WTP: overview of the trade route assignments of all transports (button of the trade routes tab of the domestic advisor)
+transportRoutesOverview = CvTransportRoutesOverview.CvTransportRoutesOverview()
+# WTP: the DLL offers a numbered name for a transport that was just automated / got its first trade route
+def askTransportName(argsList):
+	CvTransportRoutesOverview.offerTransportName(argsList[0], argsList[1])
+
+def showTransportRoutesOverview(argsList):
+	DesyncDetectorInstance = gc.startDesyncMonitor()
+	if (-1 != CyGame().getActivePlayer()):
+		transportRoutesOverview.interfaceScreen()
 
 revolutionAdvisor = CvRevolutionAdvisor.CvRevolutionAdvisor()
 def showRevolutionAdvisorScreen(argsList):
@@ -668,7 +680,25 @@ def update (argsList):
 	if (yieldAmountScreen.isOpen() and yieldAmountScreen.isEmbedded() and argsList[0] != YIELD_AMOUNT and not yieldAmountScreen.isHostMain()): # (on the main interface its own update does it: not twice per frame)
 		yieldAmountScreen.update(argsList[1])
 
+# WTP: diplomacy opened from the native info tab of the domestic advisor
+bReturnToDomesticAfterDiplomacy = False
+
+# WTP: screen id of a trade screen opened from the exported goods tab of the domestic advisor (-1: none)
+iReturnToDomesticScreen = -1
+
 def onClose (argsList):
+	global iReturnToDomesticScreen
+	# WTP: back to the domestic advisor (exported goods tab) when the trade screen opened from there is closed
+	if (iReturnToDomesticScreen != -1 and argsList[0] == iReturnToDomesticScreen):
+		iReturnToDomesticScreen = -1
+		try:
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+			popupInfo.setText(u"showDomesticAdvisor")
+			popupInfo.addPopup(CyGame().getActivePlayer())
+		except:
+			pass
+
 	# allows overides for mods
 	if (CvScreenUtilsInterface.getScreenUtils().onClose(argsList)):
 		return
@@ -867,6 +897,7 @@ HandleCloseMap = {  DAWN_OF_MAN : dawnOfMan,
 					TRADE_ROUTES_ADVISOR : tradeRoutesAdvisor,
 					YIELD_AMOUNT : yieldAmountScreen,
 				# TAC - Trade Routes Advisor - koma13 - END
+					TRANSPORT_ROUTES_OVERVIEW : transportRoutesOverview,
 				}
 #######################################################################################
 ## Handle Mouseover Map
@@ -942,6 +973,7 @@ HandleInputMap = {  MAIN_INTERFACE : mainInterface,
 					TRADE_ROUTES_ADVISOR : tradeRoutesAdvisor,
 					YIELD_AMOUNT : yieldAmountScreen,
 				# TAC - Trade Routes Advisor - koma13 - END
+					TRANSPORT_ROUTES_OVERVIEW : transportRoutesOverview,
 					XML_EDITOR : xmlEditor,
 				}
 

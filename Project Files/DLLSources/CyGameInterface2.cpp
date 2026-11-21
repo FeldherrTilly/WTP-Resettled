@@ -100,6 +100,7 @@ void CyGamePythonInterface2(python::class_<CyGame>& x)
 		.def("isArrowKeyPressed", &CyGame::isArrowKeyPressed, "bool (int iDir) - is an arrow key down (0 left, 1 right, 2 up, 3 down)")
 		.def("sendYieldTransfer", &CyGame::sendYieldTransfer, "void (int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) - transfers goods like the amount popup (bPlayerAction: Europe / Africa / Port Royal)")
 		.def("sendDiploYieldAmount", &CyGame::sendDiploYieldAmount, "void (int iYield, int iAmount, int iFromPlayer) - sets the amount of goods of a diplomacy deal")
+		.def("openDomesticMarket", &CyGame::openDomesticMarket, "void (int iCityID) - opens the domestic market popup of the city")
 		.def("getReplayInfo", &CyGame::getReplayInfo, python::return_value_policy<python::manage_new_object>())
 		;
 }

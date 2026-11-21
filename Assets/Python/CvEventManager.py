@@ -159,6 +159,7 @@ class CvEventManager:
 			CvUtil.EventEditTradeRoute: ('EditTradeRoute', self.__eventEditTradeRouteApply, self.__eventEditTradeRouteBegin),
 			CvUtil.EventDiploYieldAmount: ('DiploYieldAmount', self.__eventDiploYieldAmountApply, self.__eventDiploYieldAmountBegin),
 			CvUtil.EventRenameWaypoint: ('RenameWaypoint', self.__eventRenameWaypointApply, self.__eventRenameWaypointBegin),
+			CvUtil.EventRenameTransport: ('RenameTransport', self.__eventRenameTransportApply, self.__eventRenameTransportBegin),
 
 # Dale - AoD: AoDCheatMenu START
 			CvUtil.EventAoDCheatMenu: ('AoDCheatMenu', self.AoDCheatMenuApply, self.AoDCheatMenuBegin),
@@ -333,6 +334,19 @@ class CvEventManager:
 			if (theKey == int(InputTypes.KB_T) and self.bCtrl and self.bShift and not self.bAlt):
 				CvScreensInterface.mainInterface.toggleHoverTip()
 				return 1
+
+			# WTP: Shift+Alt+T opens the Trade Route Manager (the overview of all transports)
+			if (theKey == int(InputTypes.KB_T) and self.bShift and self.bAlt and not self.bCtrl):
+				try:
+					import CvTransportRoutesOverview
+					CvTransportRoutesOverview.g_FromHotkey = True
+					popupInfo = CyPopupInfo()
+					popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+					popupInfo.setText(u"showTransportRoutesOverview")
+					popupInfo.addPopup(gc.getGame().getActivePlayer())
+					return 1
+				except:
+					pass
 
 			if (theKey == int(InputTypes.KB_I) and self.bCtrl and not self.bShift and not self.bAlt):
 				CvScreensInterface.mainInterface.toggleTerritorialInfluence()
@@ -1345,6 +1359,23 @@ class CvEventManager:
 			CvScreensInterface.mainInterface.applyWaypointRename(playerID, userData[0], popupReturn.getEditBoxString(0))
 		except:
 			pass
+
+	# WTP: the transport overview asks for the name of a transport (the popup is made there)
+	def __eventRenameTransportBegin(self, argsList):
+		return
+
+	def __eventRenameTransportApply(self, playerID, userData, popupReturn):
+		iUnitID = userData[0]
+		unit = gc.getPlayer(playerID).getUnit(iUnitID)
+		if unit is None or unit.isNone():
+			return
+		if popupReturn.getButtonClicked() != 0: # Cancel: the old name stays
+			return
+		newName = popupReturn.getEditBoxString(0).strip()
+		if (len(newName) > 25):
+			newName = newName[:25]
+		if len(newName) > 0 and newName != unit.getNameNoDesc():
+			unit.setName(newName)
 
 	def __eventEditUnitNameBegin(self, argsList):
 		pUnit = argsList

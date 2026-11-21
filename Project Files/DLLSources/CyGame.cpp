@@ -7,6 +7,8 @@
 #include "CvDLLWidgetData.h"
 #include "CvGameTextMgr.h"
 #include "CvDLLInterfaceIFaceBase.h"
+#include "CvPopupInfo.h"
+#include "CvDLLInterfaceIFaceBase.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
 #include "CyPlayer.h"
@@ -834,6 +836,16 @@ int CyGame::getHudMessagePreviousY(int i) const
 
 
 
+
+void CyGame::openDomesticMarket(int iCityID) const
+{
+	CvCity* pCity = GET_PLAYER(GC.getGameINLINE().getActivePlayer()).getCity(iCityID);
+	if (pCity != NULL)
+	{
+		CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_DOMESTIC_MARKET, iCityID);
+		gDLL->getInterfaceIFace()->addPopup(pInfo, NO_PLAYER, true);
+	}
+}
 
 uint CyGame::getNumReplayMessages() const
 {

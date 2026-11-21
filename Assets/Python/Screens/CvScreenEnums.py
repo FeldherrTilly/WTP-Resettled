@@ -42,6 +42,8 @@ TRADE_ROUTES_ADVISOR = 31
 AFRICA_SCREEN = 32
 # RaR, ray, Port Royal
 PORT_ROYAL_SCREEN = 33
+# WTP: overview of the trade route assignments of all transports
+TRANSPORT_ROUTES_OVERVIEW = 34
 
 # WTP: dialog for the amount of goods to transfer (shift + transfer)
 YIELD_AMOUNT = 35

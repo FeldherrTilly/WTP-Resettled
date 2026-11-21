@@ -191,6 +191,7 @@ public:
 	std::wstring getHudMessagePreviousText(int i) const;
 	int getHudMessagePreviousX(int i) const;
 	int getHudMessagePreviousY(int i) const;
+	void openDomesticMarket(int iCityID) const; // WTP: opens the domestic market popup of a city
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);

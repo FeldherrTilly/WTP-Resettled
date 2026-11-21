@@ -211,6 +211,8 @@ GO_TO_CITY = 1003
 
 # Achievements START
 ACHIEVE_ADVISOR_SCREEN_MI = 4200
+WTP_CYCLE_PREV = 4300 # arrows above the R / C button: the previous / next automated transport (data2: the automate type)
+WTP_CYCLE_NEXT = 4301
 # Achievements END
 
 # R&R, Robert Surcouf VET NewCapacity Help - Start
@@ -287,6 +289,18 @@ g_pSelectedUnit = 0
 # WTP: the tooltip settings (options screen / Ctrl+Shift+T) are kept in a file in the game folder, so they stay after a restart
 TIP_DELAYS = (0, 250, 500, 800, 1200, 2000, -1) # milliseconds, -1: never by itself, only the key X shows the tooltip
 TIP_SETTINGS_FILE = "WTP_TooltipSettings.ini"
+# WTP: a transport that was just automated (R menu / full automation) stays the selected unit and is followed on the map
+# until another unit is selected or the turn ends
+g_LastSelUnit = -1
+g_LastSelAuto = -1
+g_FollowUnit = -1
+g_FollowTicks = 0 # (time.time() of the game is far too coarse here, so the first updates are counted)
+g_FollowTurn = -1
+g_FollowX = -1
+g_FollowY = -1
+# WTP: the transport the cycle arrows above the R / C button were last built for and their automate type
+g_CycleUnit = -1
+g_CycleType = -1
 
 def wtpLoadTipSettings():
 	# (mode, delay index, quick): default is the game tooltip (2), the delay "medium" (2) for the case that the hover tooltip is chosen
@@ -320,6 +334,7 @@ class CvMainInterface:
 	"Main Interface Screen"
 
 	BUTTON_TERRITORIAL_INFLUENCE = 750
+	BUTTON_TRADE_ROUTE_MANAGER = 765 # WTP: HUD button next to the military advisor: opens the Trade Route Manager
 	BUTTON_AUTO_ASSIGN_TARGET = 755 # WTP: city screen: the colony takes colonists of the job automation
 	BUTTON_TIP_LINE = 762 # WTP: a line of a frozen hover tooltip (right click: Colopedia)
 	dMessagePediaChars = {}
@@ -1036,6 +1051,13 @@ class CvMainInterface:
 		screen.setImageShape("MilitaryAdvisorButton", ImageShapes.IMAGE_SHAPE_ELLIPSE, -1)
 		screen.setHitMargins("MilitaryAdvisorButton", self.ADVISOR_BUTTON_SIZE / 6, self.ADVISOR_BUTTON_SIZE / 6)
 		self.appendtoHideState(screen, "MilitaryAdvisorButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
+		iBtnX += self.ADVISOR_BUTTON_SPACING
+
+		# WTP: Trade Route Manager (anchored to the military advisor: the same distance as the other buttons; the symbol of the Domestic Advisor)
+		screen.setImageButton("TradeRouteManagerButton", "Art/Interface/Game Hud/Actions/automate_city_high_res.dds", iBtnX, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE) / 2, self.ADVISOR_BUTTON_SIZE, self.ADVISOR_BUTTON_SIZE, WidgetTypes.WIDGET_GENERAL, self.BUTTON_TRADE_ROUTE_MANAGER, -1 )
+		screen.setImageShape("TradeRouteManagerButton", ImageShapes.IMAGE_SHAPE_ELLIPSE, -1)
+		screen.setHitMargins("TradeRouteManagerButton", self.ADVISOR_BUTTON_SIZE / 6, self.ADVISOR_BUTTON_SIZE / 6)
+		self.appendtoHideState(screen, "TradeRouteManagerButton", HIDE_TYPE_MAP, HIDE_LEVEL_HIDE)
 		iBtnX += self.ADVISOR_BUTTON_SPACING * 2
 
 		screen.setImageButton( "FatherAdvisorButton", ArtFileMgr.getInterfaceArtInfo("INTERFACE_FOUNDING_FATHER").getPath(), iBtnX, (TOP_CENTER_HUD_HEIGHT - self.ADVISOR_BUTTON_SIZE) / 2, self.ADVISOR_BUTTON_SIZE, self.ADVISOR_BUTTON_SIZE, WidgetTypes.WIDGET_ACTION, gc.getControlInfo(ControlTypes.CONTROL_FATHER_SCREEN).getActionInfoIndex(), -1 )
@@ -2029,8 +2051,85 @@ class CvMainInterface:
 			pass
 		return False
 
+	# WTP: the automate type a HUD button stands for (R button: trade routes, C button: full automation), -1 for other buttons
+	def getAutomateTypeOfButton(self, iAction):
+		try:
+			szButton = gc.getActionInfo(iAction).getButton().lower()
+			if "automate_city_high_res" in szButton:
+				return int(AutomateTypes.AUTOMATE_TRANSPORT_ROUTES)
+			if "automate_transport_high_res" in szButton:
+				return int(AutomateTypes.AUTOMATE_TRANSPORT_FULL)
+		except:
+			pass
+		return -1
+
+	# WTP: the own units (not in a ship) automated with this type, sorted by id
+	def getAutomatedUnits(self, iType):
+		aUnits = []
+		try:
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			(pUnit, iter) = pPlayer.firstUnit()
+			while (pUnit):
+				if not pUnit.isCargo() and not pUnit.isDelayedDeath():
+					if int(pUnit.getGroup().getAutomateType()) == iType:
+						aUnits.append(pUnit.getID())
+				(pUnit, iter) = pPlayer.nextUnit(iter)
+		except:
+			pass
+		aUnits.sort()
+		return aUnits
+
+	# WTP: select and center the next / previous transport of the list (the arrows above the R / C button)
+	def cycleAutomated(self, iDirection, iType):
+		try:
+			aUnits = self.getAutomatedUnits(iType)
+			if len(aUnits) == 0:
+				return
+			pCurrent = CyInterface().getHeadSelectedUnit()
+			iIndex = -1
+			if pCurrent != None and not pCurrent.isNone() and pCurrent.getID() in aUnits:
+				iIndex = (aUnits.index(pCurrent.getID()) + iDirection) % len(aUnits)
+			elif pCurrent != None and not pCurrent.isNone():
+				# the selected transport is not automated (any more): go on from its place in the order of the ids
+				iIndex = 0
+				if iDirection > 0:
+					for iPos in range(len(aUnits)):
+						if aUnits[iPos] > pCurrent.getID():
+							iIndex = iPos
+							break
+				else:
+					iIndex = len(aUnits) - 1
+					for iPos in range(len(aUnits) - 1, -1, -1):
+						if aUnits[iPos] < pCurrent.getID():
+							iIndex = iPos
+							break
+			else:
+				iIndex = 0
+			pUnit = gc.getPlayer(gc.getGame().getActivePlayer()).getUnit(aUnits[iIndex])
+			if pUnit != None and not pUnit.isNone():
+				CyInterface().selectUnit(pUnit, True, False, True)
+				pUnit.centerCamera()
+		except:
+			pass
+
+	# WTP: is the selected transport automated the way this button does it? R button (trade routes) / Shift+Alt+C button (full automation)
+	def isAutomateMarked(self, iAction, pUnit):
+		try:
+			szButton = gc.getActionInfo(iAction).getButton().lower()
+			if "automate_city_high_res" in szButton:
+				iType = int(AutomateTypes.AUTOMATE_TRANSPORT_ROUTES)
+			elif "automate_transport_high_res" in szButton:
+				iType = int(AutomateTypes.AUTOMATE_TRANSPORT_FULL)
+			else:
+				return False
+			return int(pUnit.getGroup().getAutomateType()) == iType
+		except:
+			return False
+
 	def updateSelectionButtons( self ):
 		global g_pSelectedUnit
+		global g_CycleUnit
+		global g_CycleType
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
 
 		# Find out our resolution
@@ -2330,9 +2429,13 @@ class CvMainInterface:
 					if iSpaceNeeded > iMaxSpace:
 						ACTION_BUTTON_X_STEP = ACTION_BUTTON_X_STEP * iMaxSpace / iSpaceNeeded
 
+					if pHeadSelectedUnit.getID() != g_CycleUnit:
+						g_CycleUnit = -1 # the arrows stay only for the transport they were shown for
 					ActionButtonList = []
 					for iRing in range(40):
 						screen.deleteWidget("WtpPortRing" + str(iRing))
+					screen.deleteWidget("WtpCycleLeft")
+					screen.deleteWidget("WtpCycleRight")
 					for i in actions:
 						if CyInterface().canHandleAction(i, True):
 							Xcord = ACTION_BUTTON_X_BEGIN - iCount * ACTION_BUTTON_X_STEP - LARGE_BUTTON_SIZE
@@ -2345,6 +2448,7 @@ class CvMainInterface:
 								screen.overlayButtonGFC(szName, ArtFileMgr.getInterfaceArtInfo("INTERFACE_DISABLED_BUTTON").getPath())
 							elif pHeadSelectedUnit.isActionRecommended(i) and not self.isOwnShipInPort(i):
 								# (WTP: the buttons to sail to Europe / Africa / Port Royal are marked with a ring when an own ship is in that port)
+								# (WTP: the buttons to sail to Europe / Africa / Port Royal are marked when an own ship is in that port)
 								screen.overlayButtonGFC(szName, ArtFileMgr.getInterfaceArtInfo("INTERFACE_HIGHLIGHTED_BUTTON").getPath())
 							if CyInterface().canHandleAction(i, False) and self.isOwnShipInPort(i):
 								# WTP: a ring above the sail button (Europe / Africa / Port Royal) whose port has an own ship, a bit larger than the button
@@ -2353,6 +2457,27 @@ class CvMainInterface:
 								screen.addDDSGFC(szRing, "Art/Interface/Game Hud/Actions/port_ring.dds", int(Xcord) - LARGE_BUTTON_SIZE - iRingPad, int(Ycord) - LARGE_BUTTON_SIZE - iRingPad, LARGE_BUTTON_SIZE * 2 + iRingPad * 2, LARGE_BUTTON_SIZE * 2 + iRingPad * 2, WidgetTypes.WIDGET_GENERAL, -1, -1)
 								screen.setHitTest(szRing, HitTestTypes.HITTEST_NOHIT)
 								ActionButtonList.append(szRing)
+							if (CyInterface().canHandleAction(i, False) and self.isOwnShipInPort(i)) or self.isAutomateMarked(i, pHeadSelectedUnit):
+								# WTP: a ring above the sail buttons (Europe / Africa / Port Royal) whose port has an own ship, a bit larger than the button;
+								# the same ring marks the R button / full automation button of an automated transport
+							# arrows above the R / C button: cycle through the other transports automated the same way (R: trade routes, C: full
+							# automation). They stay while the transport is selected after its automation was switched off (to go on from there)
+							iCycleType = self.getAutomateTypeOfButton(i)
+							if iCycleType != -1:
+								bArrows = False
+								if self.isAutomateMarked(i, pHeadSelectedUnit):
+									g_CycleUnit = pHeadSelectedUnit.getID()
+									g_CycleType = iCycleType
+									bArrows = len(self.getAutomatedUnits(iCycleType)) > 1
+								elif pHeadSelectedUnit.getID() == g_CycleUnit and iCycleType == g_CycleType:
+									bArrows = len(self.getAutomatedUnits(iCycleType)) > 0
+								if bArrows:
+									iArrow = LARGE_BUTTON_SIZE * 3 / 4
+									iArrowY = int(Ycord) - (LARGE_BUTTON_SIZE * 3 / 4) - iArrow + (LARGE_BUTTON_SIZE / 5) # just above the visible top of the ring (the ring art has a transparent margin)
+									screen.setImageButton("WtpCycleLeft", ArtFileMgr.getInterfaceArtInfo("INTERFACE_CITY_LEFT_ARROW").getPath(), int(Xcord) - iArrow - 2, iArrowY, iArrow, iArrow, WidgetTypes.WIDGET_GENERAL, WTP_CYCLE_PREV, iCycleType)
+									screen.setImageButton("WtpCycleRight", ArtFileMgr.getInterfaceArtInfo("INTERFACE_CITY_RIGHT_ARROW").getPath(), int(Xcord) + 2, iArrowY, iArrow, iArrow, WidgetTypes.WIDGET_GENERAL, WTP_CYCLE_NEXT, iCycleType)
+									ActionButtonList.append("WtpCycleLeft")
+									ActionButtonList.append("WtpCycleRight")
 							ActionButtonList.append(szName)
 
 							iCount += 1
@@ -9763,6 +9888,12 @@ class CvMainInterface:
 				AUTOMATION_MANAGMENT_PANEL_UP, BUILDING_MANAGMENT_PANEL_UP = False, False
 				self.updateSelectionButtons()
 
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and (inputClass.getData1() == WTP_CYCLE_PREV or inputClass.getData1() == WTP_CYCLE_NEXT)):
+				if inputClass.getData1() == WTP_CYCLE_PREV:
+					self.cycleAutomated(-1, inputClass.getData2())
+				else:
+					self.cycleAutomated(1, inputClass.getData2())
+
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_CLOSE_SCREEN):
 				CyInterface().clearSelectedCities()
 
@@ -9780,6 +9911,9 @@ class CvMainInterface:
 
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TERRITORIAL_INFLUENCE):
 				self.toggleTerritorialInfluence()
+
+			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_TRADE_ROUTE_MANAGER):
+				self.openTradeRouteManager()
 
 
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_AUTO_ASSIGN_TARGET):
@@ -9867,6 +10001,18 @@ class CvMainInterface:
 		dMessageCharWidths[szWidthChar] = 667
 	for szWidthChar, iWidthChar in ((u"M", 833), (u"W", 944), (u"I", 278), (u"J", 500), (u" ", 278), (u".", 278), (u",", 278), (u":", 278), (u";", 278), (u"!", 278), (u"'", 191), (u"-", 333), (u"(", 333), (u")", 333)):
 		dMessageCharWidths[szWidthChar] = iWidthChar
+
+	# WTP: the HUD button of the Trade Route Manager (the same as the hotkey Shift+Alt+T, see CvEventManager)
+	def openTradeRouteManager(self):
+		try:
+			import CvTransportRoutesOverview
+			CvTransportRoutesOverview.g_FromHotkey = True
+			popupInfo = CyPopupInfo()
+			popupInfo.setButtonPopupType(ButtonPopupTypes.BUTTONPOPUP_PYTHON_SCREEN)
+			popupInfo.setText(u"showTransportRoutesOverview")
+			popupInfo.addPopup(gc.getGame().getActivePlayer())
+		except:
+			pass
 
 	# WTP: panel of the city screen to upgrade a building (click on the building): the buildings of the same slot that can be
 	# constructed now, with the hammers; the buttons are the construction buttons of the game (tooltip of the building, a click
@@ -11490,6 +11636,67 @@ class CvMainInterface:
 			pass
 			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
 		self.updateBuildingUpgradePanel()
+		self.updateAutomatedFollow()
+		return
+
+	# WTP: the game selects the next unit when a transport gets automated: the transport stays selected (the game does its
+	# selection change within a moment, so the transport is selected again during the first updates) and the camera follows it
+	def updateAutomatedFollow(self):
+		global g_LastSelUnit, g_LastSelAuto, g_FollowUnit, g_FollowTicks, g_FollowTurn, g_FollowX, g_FollowY
+		try:
+			iPlayer = gc.getGame().getActivePlayer()
+			if iPlayer == -1:
+				return
+			pPlayer = gc.getPlayer(iPlayer)
+			iRoutes = int(AutomateTypes.AUTOMATE_TRANSPORT_ROUTES)
+			iFull = int(AutomateTypes.AUTOMATE_TRANSPORT_FULL)
+			fNow = time.time()
+			pSel = CyInterface().getHeadSelectedUnit()
+			iSel = -1
+			iSelAuto = -1
+			if pSel != None and not pSel.isNone() and pSel.getOwner() == iPlayer:
+				iSel = pSel.getID()
+				iSelAuto = int(pSel.getGroup().getAutomateType())
+
+			# the unit selected a moment ago got an automation of the transport menus
+			if g_LastSelUnit != -1 and g_LastSelAuto != iRoutes and g_LastSelAuto != iFull and g_LastSelUnit != g_FollowUnit:
+				pPrev = pPlayer.getUnit(g_LastSelUnit)
+				if pPrev != None and not pPrev.isNone():
+					iNow = int(pPrev.getGroup().getAutomateType())
+					if iNow == iRoutes or iNow == iFull:
+						g_FollowUnit = g_LastSelUnit
+						g_FollowTicks = 0
+						g_FollowTurn = gc.getGame().getGameTurn()
+						g_FollowX = -1
+						g_FollowY = -1
+
+			if g_FollowUnit != -1:
+				pFollow = pPlayer.getUnit(g_FollowUnit)
+				if pFollow == None or pFollow.isNone() or g_FollowTurn != gc.getGame().getGameTurn():
+					g_FollowUnit = -1
+				elif g_FollowTicks < 8:
+					g_FollowTicks += 1
+					if iSel != g_FollowUnit:
+						CyInterface().selectUnit(pFollow, True, False, True)
+						pFollow.centerCamera()
+						g_FollowX = pFollow.getX()
+						g_FollowY = pFollow.getY()
+					elif pFollow.getX() != g_FollowX or pFollow.getY() != g_FollowY:
+						pFollow.centerCamera()
+						g_FollowX = pFollow.getX()
+						g_FollowY = pFollow.getY()
+				elif iSel == g_FollowUnit:
+					if pFollow.getX() != g_FollowX or pFollow.getY() != g_FollowY:
+						pFollow.centerCamera()
+						g_FollowX = pFollow.getX()
+						g_FollowY = pFollow.getY()
+				else:
+					g_FollowUnit = -1 # another unit was selected: the following ends
+
+			g_LastSelUnit = iSel
+			g_LastSelAuto = iSelAuto
+		except:
+			pass
 		return
 
 	# Adds Mouse Over Help to General Widgets
@@ -11525,6 +11732,8 @@ class CvMainInterface:
 				return localText.getText("TXT_KEY_INTERFACE_ACHIEVE_ADVISOR", ("F10", ""));
 			elif iData1 == self.BUTTON_TERRITORIAL_INFLUENCE:
 				return localText.getText("TXT_KEY_INTERFACE_TERRITORIAL_INFLUENCE", ("Ctrl+I", ""));
+			elif iData1 == self.BUTTON_TRADE_ROUTE_MANAGER:
+				return localText.getText("TXT_KEY_INTERFACE_TRADE_ROUTE_MANAGER", ("Shift+Alt+T", ""));
 			elif iData1 == self.BUTTON_AUTO_ASSIGN_TARGET:
 				pCity = CyInterface().getHeadSelectedCity()
 				if pCity and pCity.isAutoAssignTarget():
