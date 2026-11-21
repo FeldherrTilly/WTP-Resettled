@@ -227,7 +227,6 @@ void CvPlayerAI::AI_doTurnPre()
 {
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPRE);
 	WtpTiming::PlayerScope wtpPlayerTimer(WtpTiming::PS_AI_DOTURNPRE, (int)getID());
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPRE);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPre (native)" : "CvPlayerAI::AI_doTurnPre");
 #endif
@@ -431,7 +430,6 @@ void CvPlayerAI::AI_doTurnPost()
 {
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPOST);
 	WtpTiming::PlayerScope wtpPlayerTimer(WtpTiming::PS_AI_DOTURNPOST, (int)getID());
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_DOTURNPOST);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_doTurnPost (native)" : "CvPlayerAI::AI_doTurnPost");
 #endif
@@ -1282,7 +1280,6 @@ void CvPlayerAI::AI_unitUpdate()
 {
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_UNITUPDATE);
 	WtpTiming::PlayerScope wtpPlayerTimer(WtpTiming::PS_AI_UNITUPDATE, (int)getID());
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_AI_UNITUPDATE);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayerAI::AI_unitUpdate (native)" : "CvPlayerAI::AI_unitUpdate");
 #endif

@@ -3603,6 +3603,7 @@ void CvSelectionGroup::setAutomateType(AutomateTypes eNewValue, bool bImplicit)
 		else if (eOldValue == AUTOMATE_NATIVE_SUPPLY && eNewValue != AUTOMATE_NATIVE_TRADE && getHeadUnit() != NULL)
 		{
 			static_cast<CvUnitAI*>(getHeadUnit())->AI_clearNativeTradeHome();
+		}
 		// WTP: automatic job assignment: the colonist gets its job (none: the automation is off again); switched off, it drops it
 		if (eNewValue == AUTOMATE_ASSIGN_JOB && getHeadUnit() != NULL)
 		{
@@ -3622,6 +3623,7 @@ void CvSelectionGroup::setAutomateType(AutomateTypes eNewValue, bool bImplicit)
 			&& static_cast<CvUnitAI*>(getHeadUnit())->AI_getWfTask() == CvUnitAI::WF_TRAVEL)
 		{
 			static_cast<CvUnitAI*>(getHeadUnit())->AI_clearWfTask();
+		}
 		// WTP: treasure automation of a ship: it keeps the role when the automation of the group is lost on the way to or from
 		// Europe (implicit), and drops it when switched off or to another automation
 		if (eNewValue == AUTOMATE_TREASURE_SHIP && getHeadUnit() != NULL)
@@ -3631,7 +3633,6 @@ void CvSelectionGroup::setAutomateType(AutomateTypes eNewValue, bool bImplicit)
 		else if (eOldValue == AUTOMATE_TREASURE_SHIP && (eNewValue != NO_AUTOMATE || !bImplicit) && getHeadUnit() != NULL)
 		{
 			static_cast<CvUnitAI*>(getHeadUnit())->AI_setTreasureShip(false);
-		}
 		}
 
 		// if canceling automation, cancel on cargo as well

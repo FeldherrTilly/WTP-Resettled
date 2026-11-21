@@ -2173,7 +2173,6 @@ void CvPlayer::doTurn()
 {
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_PLAYER_DOTURN);
 	WtpTiming::PlayerScope wtpPlayerTimer(WtpTiming::PS_DOTURN, (int)getID());
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_PLAYER_DOTURN);
 #ifdef PROFILING_ENABLED
 	Profiler profileSession(isNative() ? "CvPlayer::doTurn (native)" : "CvPlayer::doTurn");
 #endif

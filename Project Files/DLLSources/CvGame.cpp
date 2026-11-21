@@ -5595,8 +5595,6 @@ void CvGame::doTurn()
 	}
 	WtpTiming::flush(getGameTurn());
 	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_DOTURN);
-	WtpTiming::flush(getGameTurn());
-	WtpTiming::Scope wtpTimer(WtpTiming::SLOT_GAME_DOTURN);
 	MOD_PROFILE("CvGame::doTurn");
 	PROFILE_FUNC();
 

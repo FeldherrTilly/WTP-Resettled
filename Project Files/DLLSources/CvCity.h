@@ -804,6 +804,8 @@ public:
 	void applyTradeRoutePreset(int iPreset);
 	void setImportFeeder(YieldTypes eYield, int iMaintainLevel, int iImportLimit);
 	bool getAutoMarketImportLevels(YieldTypes eYield, int& iMaintainLevel, int& iImportLimit) const; // WTP: the levels the automatic market import sets for the good (false: the market does not ask for it)
+	bool isAutoMarketImport() const { return m_bAutoMarketImport; }
+	void updateAutoMarketImport();
 	int getImportsLimit(YieldTypes eYield) const;
 	// R&R mod, vetiarvind, max yield import limit - End
 	// R&R, ray, finishing Custom House Screen START
@@ -945,6 +947,7 @@ protected:
 	mutable EnumMap<YieldTypes,bool> m_em_bYieldRankValid;
 
 	bool m_bAutoAssignTarget; // WTP: the colony takes colonists of the job automation
+	bool m_bAutoMarketImport; // WTP: trade route preset 1, the market goods imports are updated every few turns
 	bool m_bHasHurried; // Needed to remember (cache) if a hurry was conducted and we should complete the current build
 	int m_iSlaveWorkerProductionBonus;
 
