@@ -1510,6 +1510,10 @@ class CvMainInterface:
 		except:
 			pass
 
+		# WTP: while the amount dialog is drawn on this screen the interface must not be redrawn: the redraw then treats the city
+		# screen like the map (minimap, date, money text, dark goods bar appear); the dirty bits stay set and are handled afterwards
+			if CvScreensInterface.yieldAmountScreen.isHostMain():
+				return 0
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
 
 		if not INITIALIZED:
@@ -1970,6 +1974,34 @@ class CvMainInterface:
 		return 0
 
 	# Will hide and show the selection buttons and their associated buttons
+	# WTP: is an own ship in the port of this sail command (Europe / Africa / Port Royal)?
+	def isOwnShipInPort(self, iAction):
+		try:
+			# the sail buttons are automate actions (AUTOMATE_SAIL_TO_*), recognized by their button art (the Africa / Port Royal
+			# automate types are not exposed to Python); the plain sail commands are handled as well
+			kAction = gc.getActionInfo(iAction)
+			szButton = kAction.getButton().lower()
+			iCommand = kAction.getCommandType()
+			if iCommand == CommandTypes.COMMAND_SAIL_TO_EUROPE or "sail_to_mother" in szButton:
+				eState = UnitTravelStates.UNIT_TRAVEL_STATE_IN_EUROPE
+			elif iCommand == CommandTypes.COMMAND_SAIL_TO_AFRICA or "sail_to_africa" in szButton:
+				eState = UnitTravelStates.UNIT_TRAVEL_STATE_IN_AFRICA
+			elif iCommand == CommandTypes.COMMAND_SAIL_TO_PORT_ROYAL or "sail_to_portroyal" in szButton:
+				eState = UnitTravelStates.UNIT_TRAVEL_STATE_IN_PORT_ROYAL
+			else:
+				return False
+			pPlayer = gc.getPlayer(gc.getGame().getActivePlayer())
+			(pUnit, iter) = pPlayer.firstUnit()
+			while (pUnit):
+				# the ships in a port have this travel state (the docks list of the player only holds the colonists)
+				if gc.getUnitInfo(pUnit.getUnitType()).getDomainType() == DomainTypes.DOMAIN_SEA:
+					if (pUnit.getUnitTravelState() == eState and not pUnit.isCargo() and not pUnit.isDelayedDeath()):
+						return True
+				(pUnit, iter) = pPlayer.nextUnit(iter)
+		except:
+			pass
+		return False
+
 	def updateSelectionButtons( self ):
 		global g_pSelectedUnit
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE )
@@ -2272,6 +2304,8 @@ class CvMainInterface:
 						ACTION_BUTTON_X_STEP = ACTION_BUTTON_X_STEP * iMaxSpace / iSpaceNeeded
 
 					ActionButtonList = []
+					for iRing in range(40):
+						screen.deleteWidget("WtpPortRing" + str(iRing))
 					for i in actions:
 						if CyInterface().canHandleAction(i, True):
 							Xcord = ACTION_BUTTON_X_BEGIN - iCount * ACTION_BUTTON_X_STEP - LARGE_BUTTON_SIZE
@@ -2282,8 +2316,16 @@ class CvMainInterface:
 							screen.setHitMargins(szName, 18, 18)
 							if not CyInterface().canHandleAction(i, False):
 								screen.overlayButtonGFC(szName, ArtFileMgr.getInterfaceArtInfo("INTERFACE_DISABLED_BUTTON").getPath())
-							elif pHeadSelectedUnit.isActionRecommended(i):
+							elif pHeadSelectedUnit.isActionRecommended(i) and not self.isOwnShipInPort(i):
+								# (WTP: the buttons to sail to Europe / Africa / Port Royal are marked with a ring when an own ship is in that port)
 								screen.overlayButtonGFC(szName, ArtFileMgr.getInterfaceArtInfo("INTERFACE_HIGHLIGHTED_BUTTON").getPath())
+							if CyInterface().canHandleAction(i, False) and self.isOwnShipInPort(i):
+								# WTP: a ring above the sail button (Europe / Africa / Port Royal) whose port has an own ship, a bit larger than the button
+								szRing = "WtpPortRing" + str(iCount)
+								iRingPad = -(LARGE_BUTTON_SIZE / 4)
+								screen.addDDSGFC(szRing, "Art/Interface/Game Hud/Actions/port_ring.dds", int(Xcord) - LARGE_BUTTON_SIZE - iRingPad, int(Ycord) - LARGE_BUTTON_SIZE - iRingPad, LARGE_BUTTON_SIZE * 2 + iRingPad * 2, LARGE_BUTTON_SIZE * 2 + iRingPad * 2, WidgetTypes.WIDGET_GENERAL, -1, -1)
+								screen.setHitTest(szRing, HitTestTypes.HITTEST_NOHIT)
+								ActionButtonList.append(szRing)
 							ActionButtonList.append(szName)
 
 							iCount += 1
@@ -11253,6 +11295,7 @@ class CvMainInterface:
 			self.updateMessageScroll()
 		except:
 			pass
+			CvScreensInterface.yieldAmountScreen.update(fDelta) # (the mouse wheel of the amount dialog)
 		return
 
 	# Adds Mouse Over Help to General Widgets

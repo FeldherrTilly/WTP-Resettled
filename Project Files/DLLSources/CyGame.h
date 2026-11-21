@@ -226,6 +226,11 @@ public:
 	int getCursorClientX() const; // mouse position in the game window (-1 if unknown)
 	int getCursorClientY() const;
 
+	// WTP: the amount dialog of the transfers (python)
+	bool isArrowKeyPressed(int iDir) const; // 0: left, 1: right, 2: up, 3: down
+	void sendYieldTransfer(int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) const; // the amount dialog sends the transfer of goods
+	void sendDiploYieldAmount(int iYield, int iAmount, int iFromPlayer) const; // the amount dialog sets the amount of goods of a diplomacy deal
+
 protected:
 	const CvGame* const m_pGame;
 };

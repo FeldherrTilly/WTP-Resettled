@@ -1094,3 +1094,64 @@ int CyGame::getCursorClientY() const
 	POINT pt;
 	return wtpGetCursor(pt) ? (int)pt.y : -1;
 }
+
+
+
+
+
+
+// WTP: the amount dialog (python, CvYieldAmountScreen) replaces the spin box popup of the transfer with the shift key: the same actions
+// as CvDLLButtonPopup::handleSelectYieldAmountPopup (iData3: the command, or the player action in Europe / Africa / Port Royal)
+void CyGame::sendYieldTransfer(int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) const
+{
+	const PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
+	if (ePlayer == NO_PLAYER || iAmount <= 0 || iYield < 0 || iYield >= NUM_YIELD_TYPES)
+	{
+		return;
+	}
+	if (GET_PLAYER(ePlayer).getUnit(iUnitID) == NULL)
+	{
+		return;
+	}
+	if (bPlayerAction)
+	{
+		gDLL->sendPlayerAction(ePlayer, (PlayerActionTypes)iData3, iYield, iAmount, iUnitID);
+	}
+	else
+	{
+		gDLL->sendDoCommand(iUnitID, (CommandTypes)iData3, iYield, iAmount, false);
+	}
+}
+
+// WTP: an arrow key is down (0: left, 1: right, 2: up, 3: down), asked directly from the keyboard: the harbor screens do not pass the
+// arrow keys on to the key event of the game, the amount dialog is moved with them
+bool CyGame::isArrowKeyPressed(int iDir) const
+{
+	static const int aiKeys[4] = { VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN };
+	if (iDir < 0 || iDir > 3)
+	{
+		return false;
+	}
+	HWND hWnd = GetForegroundWindow();
+	DWORD iProcess = 0;
+	if (hWnd == NULL || GetWindowThreadProcessId(hWnd, &iProcess) == 0 || iProcess != GetCurrentProcessId())
+	{
+		return false;
+	}
+	return (GetAsyncKeyState(aiKeys[iDir]) & 0x8000) != 0;
+}
+
+// WTP: the amount of goods of a diplomacy deal (the same as CvDLLButtonPopup::handleSelectYieldAmountPopup does)
+void CyGame::sendDiploYieldAmount(int iYield, int iAmount, int iFromPlayer) const
+{
+	const PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
+	if (ePlayer == NO_PLAYER || iAmount <= 0 || iYield < 0 || iYield >= NUM_YIELD_TYPES || iFromPlayer < 0 || iFromPlayer >= MAX_PLAYERS)
+	{
+		return;
+	}
+	gDLL->sendPlayerAction(ePlayer, PLAYER_ACTION_SET_DIPLO_YIELD_AMOUNT, iYield, iAmount, iFromPlayer);
+	gDLL->updateDiplomacyAttitude(true);
+}
+
+
+

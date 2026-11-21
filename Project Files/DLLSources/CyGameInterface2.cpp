@@ -97,6 +97,9 @@ void CyGamePythonInterface2(python::class_<CyGame>& x)
 		.def("getHudMessagePreviousText", &CyGame::getHudMessagePreviousText, "wstring (int)")
 		.def("getHudMessagePreviousX", &CyGame::getHudMessagePreviousX, "int (int)")
 		.def("getHudMessagePreviousY", &CyGame::getHudMessagePreviousY, "int (int)")
+		.def("isArrowKeyPressed", &CyGame::isArrowKeyPressed, "bool (int iDir) - is an arrow key down (0 left, 1 right, 2 up, 3 down)")
+		.def("sendYieldTransfer", &CyGame::sendYieldTransfer, "void (int iUnitID, int iData3, int iYield, int iAmount, bool bPlayerAction) - transfers goods like the amount popup (bPlayerAction: Europe / Africa / Port Royal)")
+		.def("sendDiploYieldAmount", &CyGame::sendDiploYieldAmount, "void (int iYield, int iAmount, int iFromPlayer) - sets the amount of goods of a diplomacy deal")
 		.def("getReplayInfo", &CyGame::getReplayInfo, python::return_value_policy<python::manage_new_object>())
 		;
 }
