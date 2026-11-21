@@ -6374,7 +6374,6 @@ void CvUnit::unloadAll()
 	}
 }
 
-bool CvUnit::canLearn() const
 void CvUnit::unloadAllTransportsOnPlot()
 {
 	CvPlot* pPlot = plot();
@@ -6405,6 +6404,7 @@ void CvUnit::unloadAllTransportsOnPlot()
 	}
 }
 
+bool CvUnit::canLearn() const
 {
 	UnitTypes eUnitType = getLearnUnitType(plot());
 	if(eUnitType == NO_UNIT)
