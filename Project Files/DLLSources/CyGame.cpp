@@ -827,7 +827,7 @@ bool CyGame::isChurchPlayer(int /*PlayerTypes*/ ePlayer)
 }
 // R&R, ray, the Church - END
 
-// WTP: the mouse wheel for the import / export window: the window procedure of the game window is replaced while the window is open,
+// WTP: the mouse wheel for the python windows (import / export, amount dialog, nested tooltips): the window procedure of the game window is replaced while the window is open,
 // the wheel messages are counted (and not passed on: the map does not zoom), everything else goes to the original procedure
 #ifndef WM_MOUSEWHEEL
 #define WM_MOUSEWHEEL 0x020A
@@ -893,6 +893,11 @@ int CyGame::takeWheelNotches() const
 bool CyGame::isCtrlKeyPressed() const
 {
 	return (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+}
+
+bool CyGame::isShiftKeyPressed() const
+{
+	return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 }
 
 // WTP: the mouse position in the game window (the window is moved with the mouse)
