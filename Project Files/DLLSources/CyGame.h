@@ -179,6 +179,18 @@ public:
 	void setHideYieldHelp(bool bNewValue); // WTP: no game help for the goods pictures of the import / export window in the city screen (own tooltip)
 	void setHideGameHelp(bool bNewValue); // WTP: no game help text for HUD elements while the diplomacy screen is open (own tooltip on)
 	uint getNumReplayMessages() const;
+	// WTP: the messages of the turn for the message panel of the main interface
+	int getNumHudMessages() const;
+	std::wstring getHudMessageText(int i) const;
+	int getHudMessageX(int i) const;
+	int getHudMessageY(int i) const;
+	int getNumHudMessagesPrevious() const;
+	int getNumHudPriority() const;
+	void addHudMessage(std::wstring szText, bool bPriority) const; // WTP: a message of the Python code for the message panel (priority: at the top)
+	int getNumHudPriorityPrevious() const;
+	std::wstring getHudMessagePreviousText(int i) const;
+	int getHudMessagePreviousX(int i) const;
+	int getHudMessagePreviousY(int i) const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);

@@ -7522,7 +7522,9 @@ void CvGame::setFatherTeam(AssertCallerData assertData, FatherTypes eFather, Tea
 							szBuffer = gDLL->getText("TXT_KEY_FATHER_JOINED_UNKNOWN", GC.getFatherInfo(eFather).getTextKeyWide());
 						}
 
+						WtpHudMessages::setPriority(true); // WTP: founding father messages are shown at the top of the message panel
 						gDLL->UI().addPlayerMessage(((PlayerTypes)iI), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, "AS2D_GLOBECIRCUMNAVIGATED", MESSAGE_TYPE_MAJOR_EVENT, NULL, COLOR_HIGHLIGHT_TEXT);
+						WtpHudMessages::setPriority(false);
 					}
 				}
 				szBuffer = gDLL->getText("TXT_KEY_FATHER_JOINED_TEAM", GC.getFatherInfo(eFather).getTextKeyWide(), GET_TEAM(getFatherTeam(eFather)).getName().GetCString());
