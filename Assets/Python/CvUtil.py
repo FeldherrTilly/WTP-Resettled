@@ -79,10 +79,7 @@ EventKeyUp=7
 
 # List of unreported Events
 # Dale - AoD: AoDCheatMenu START
-SilentEvents = [EventEditCityName, EventEditUnitName, EventCreateTradeRoute, EventEditTradeRoute, EventDiploYieldAmount, EventRenameWaypoint, EventAoDCheatMenu, EventDoEuropeScreen]
-<<<<<<< NOT-PURE
-SilentEvents = [EventEditCityName, EventEditUnitName, EventCreateTradeRoute, EventEditTradeRoute, EventDiploYieldAmount, EventRenameTransport, EventAoDCheatMenu, EventDoEuropeScreen]
->>>>>>>
+SilentEvents = [EventEditCityName, EventEditUnitName, EventCreateTradeRoute, EventEditTradeRoute, EventDiploYieldAmount, EventRenameWaypoint, EventRenameTransport, EventAoDCheatMenu, EventDoEuropeScreen]
 # Dale - AoD: AoDCheatMenu END
 
 # Popup defines (TODO: Expose these from C++)

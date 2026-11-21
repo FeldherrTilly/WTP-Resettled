@@ -2474,6 +2474,8 @@
 		<Spanish>%s1 lleva %s2 a %s3</Spanish>
 		<Russian>%s1 привозит %s2 в %s3</Russian>
 		<Hungarian>%s1 elviszi ide: %s3 - %s2</Hungarian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_ACTION_AUTOMATE_ASSIGN_JOB</Tag>
 		<English>Auto Assign Job</English>
 		<Portuguese>Atribuir trabalho automaticamente</Portuguese>
@@ -2771,8 +2773,6 @@
 		<Hungarian> - kevés élelem</Hungarian>
 	</TEXT>
 	<TEXT>
-	</TEXT>
-	<TEXT>
 		<Tag>TXT_KEY_INTERFACE_TRADE_ROUTE_MANAGER</Tag>
 		<English>[COLOR_YELLOW]Trade Route Manager[COLOR_REVERT]: the overview of all transports and their trade routes. Hotkey: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</English>
 		<Portuguese>[COLOR_YELLOW]Gerenciador de rotas comerciais[COLOR_REVERT]: a visão geral de todos os transportes e suas rotas comerciais. Tecla de atalho: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Portuguese>
@@ -2782,15 +2782,6 @@
 		<Spanish>[COLOR_YELLOW]Gestor de rutas comerciales[COLOR_REVERT]: la vista general de todos los transportes y sus rutas comerciales. Atajo: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Spanish>
 		<Russian>[COLOR_YELLOW]Менеджер торговых маршрутов[COLOR_REVERT]: обзор всех транспортов и их торговых маршрутов. Горячая клавиша: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Russian>
 		<Hungarian>[COLOR_YELLOW]Kereskedelmi útvonalak kezelője[COLOR_REVERT]: az összes szállítás és kereskedelmi útvonaluk áttekintése. Gyorsbillentyű: [COLOR:140:255:40:255]%s1[COLOR_REVERT]</Hungarian>
-		<Tag>TXT_KEY_AUTO_ASSIGN_MENU_LOW_FOOD</Tag>
-		<English> - little [ICON_FOOD]</English>
-		<Portuguese> - pouca [ICON_FOOD]</Portuguese>
-		<French> - peu de [ICON_FOOD]</French>
-		<German> - wenig [ICON_FOOD]</German>
-		<Italian> - poco [ICON_FOOD]</Italian>
-		<Spanish> - poca [ICON_FOOD]</Spanish>
-		<Russian> - мало [ICON_FOOD]</Russian>
-		<Hungarian> - kevés [ICON_FOOD]</Hungarian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_AUTO_ASSIGN_MENU_LOW_FOOD</Tag>
