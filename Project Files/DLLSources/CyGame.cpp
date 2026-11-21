@@ -6,6 +6,7 @@
 #include "CyGame.h"
 #include "CvDLLWidgetData.h"
 #include "CvGameTextMgr.h"
+#include "CvDLLInterfaceIFaceBase.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
 #include "CyPlayer.h"
@@ -774,6 +775,63 @@ void CyGame::setHideYieldHelp(bool bNewValue)
 {
 	wtpSetHideYieldHelp(bNewValue);
 }
+
+
+
+int CyGame::getNumHudMessages() const
+{
+	return WtpHudMessages::getNum();
+}
+std::wstring CyGame::getHudMessageText(int i) const
+{
+	return std::wstring(WtpHudMessages::getText(i).GetCString());
+}
+int CyGame::getHudMessageX(int i) const
+{
+	return WtpHudMessages::getX(i);
+}
+int CyGame::getHudMessageY(int i) const
+{
+	return WtpHudMessages::getY(i);
+}
+void CyGame::addHudMessage(std::wstring szText, bool bPriority) const
+{
+	if (bPriority)
+	{
+		WtpHudMessages::addTop(CvWString(szText));
+		return;
+	}
+	WtpHudMessages::add(CvWString(szText), -1, -1);
+}
+
+int CyGame::getNumHudPriority() const
+{
+	return WtpHudMessages::getNumPriority();
+}
+
+int CyGame::getNumHudPriorityPrevious() const
+{
+	return WtpHudMessages::getNumPriorityPrevious();
+}
+
+int CyGame::getNumHudMessagesPrevious() const
+{
+	return WtpHudMessages::getNumPrevious();
+}
+std::wstring CyGame::getHudMessagePreviousText(int i) const
+{
+	return std::wstring(WtpHudMessages::getPreviousText(i).GetCString());
+}
+int CyGame::getHudMessagePreviousX(int i) const
+{
+	return WtpHudMessages::getPreviousX(i);
+}
+int CyGame::getHudMessagePreviousY(int i) const
+{
+	return WtpHudMessages::getPreviousY(i);
+}
+
+
 
 
 

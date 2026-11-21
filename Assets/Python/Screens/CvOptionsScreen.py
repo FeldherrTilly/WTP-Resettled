@@ -278,10 +278,8 @@ class CvOptionsScreen:
 
 			bContinue = true
 
-			if iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_1:
-				if GlobalDefines.USE_MODDERS_PLAYEROPTION_1 == 0:
-					bContinue = false
-			elif iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_2:
+			# WTP: PLAYEROPTION_MODDER_1 is the option "New message panel" (always shown)
+			if iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_2:
 				if GlobalDefines.USE_MODDERS_PLAYEROPTION_2 == 0:
 					bContinue = false
 			elif iOptionLoop == PlayerOptionTypes.PLAYEROPTION_MODDER_3:
