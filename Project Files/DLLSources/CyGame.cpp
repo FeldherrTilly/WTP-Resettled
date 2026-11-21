@@ -4,6 +4,8 @@
 
 #include "CvGameCoreDLL.h"
 #include "CyGame.h"
+#include "CvDLLWidgetData.h"
+#include "CvGameTextMgr.h"
 #include "CvDLLInterfaceIFaceBase.h"
 #include "CvGameAI.h"
 #include "CyGlobalContext.h"
@@ -662,6 +664,120 @@ std::wstring CyGame::getReplayMessageText(int i) const
 {
 	return (NULL != m_pGame ? m_pGame->getReplayMessageText(i) : L"");
 }
+
+
+
+
+int CyGame::getMiddleClickX() const
+{
+	return m_pGame ? m_pGame->getMiddleClickX() : -1;
+}
+
+int CyGame::getMiddleClickY() const
+{
+	return m_pGame ? m_pGame->getMiddleClickY() : -1;
+}
+
+bool CyGame::takeMiddleClick()
+{
+	if (m_pGame)
+	{
+		return pointer(CREATE_ASSERT_DATA)->takeMiddleClick();
+	}
+	return false;
+}
+
+
+
+// WTP: the cursor goes to a place of the game window (the nested tooltips take the cursor along when their windows jump to a waypoint)
+void CyGame::setCursorClient(int iX, int iY) const
+{
+	HWND hWnd = GetForegroundWindow();
+	DWORD iProcess = 0;
+	if (hWnd == NULL || GetWindowThreadProcessId(hWnd, &iProcess) == 0 || iProcess != GetCurrentProcessId())
+	{
+		return;
+	}
+	POINT pt;
+	pt.x = iX;
+	pt.y = iY;
+	if (ClientToScreen(hWnd, &pt))
+	{
+		SetCursorPos(pt.x, pt.y);
+	}
+}
+
+
+// WTP: the last help text of a widget of the interface (see CvDLLWidgetData::parseHelp)
+extern CvWString wtpGetWidgetHelpText();
+extern int wtpGetWidgetHelpCount();
+extern int wtpGetWidgetHelpType();
+extern void wtpSetHideGameHelp(bool b);
+extern void wtpSetInternalHelp(bool b);
+extern void wtpSetHideYieldHelp(bool b);
+extern bool wtpIsDiplomacyUp();
+std::wstring CyGame::getWidgetHelpText() const
+{
+	return std::wstring(wtpGetWidgetHelpText().GetCString());
+}
+int CyGame::getWidgetHelpCount() const
+{
+	return wtpGetWidgetHelpCount();
+}
+int CyGame::getWidgetHelpType() const
+{
+	return wtpGetWidgetHelpType();
+}
+std::wstring CyGame::getWidgetHelpFor(int eWidgetType, int iData1, int iData2, bool bOption) const
+{
+	// the same text the game gets from CvDLLWidgetData::parseHelp for this widget; asked for inside the Python help callback, so that the
+	// own tooltip window is made before the game shows its own tooltip (changing the screen afterwards makes the game tooltip disappear)
+	CvWidgetDataStruct widgetData;
+	widgetData.m_iData1 = iData1;
+	widgetData.m_iData2 = iData2;
+	widgetData.m_bOption = bOption;
+	widgetData.m_eWidgetType = (WidgetTypes)eWidgetType;
+	CvWStringBuffer szBuffer;
+	wtpSetInternalHelp(true);
+	CvDLLWidgetData::getInstance().parseHelp(szBuffer, widgetData);
+	wtpSetInternalHelp(false);
+	return std::wstring(szBuffer.getCString());
+}
+
+std::wstring CyGame::getCityBarHelpFor(int iPlayer, int iCityID) const
+{
+	// the text that the game shows when the cursor is on the banner of the city (CvGameTextMgr::setCityBarHelp); only for cities of a player
+	if (iPlayer < 0 || iPlayer >= MAX_PLAYERS)
+	{
+		return std::wstring();
+	}
+	CvCity* pCity = GET_PLAYER((PlayerTypes)iPlayer).getCity(iCityID);
+	if (pCity == NULL)
+	{
+		return std::wstring();
+	}
+	CvWStringBuffer szBuffer;
+	GAMETEXT.setCityBarHelp(szBuffer, pCity);
+	return std::wstring(szBuffer.getCString());
+}
+
+bool CyGame::isDiplomacyUp() const
+{
+	return wtpIsDiplomacyUp();
+}
+
+void CyGame::setHideGameHelp(bool bNewValue)
+{
+	wtpSetHideGameHelp(bNewValue);
+}
+
+void CyGame::setHideYieldHelp(bool bNewValue)
+{
+	wtpSetHideYieldHelp(bNewValue);
+}
+
+
+
 int CyGame::getNumHudMessages() const
 {
 	return WtpHudMessages::getNum();
@@ -714,10 +830,6 @@ int CyGame::getHudMessagePreviousY(int i) const
 {
 	return WtpHudMessages::getPreviousY(i);
 }
-
-
-
-
 
 
 

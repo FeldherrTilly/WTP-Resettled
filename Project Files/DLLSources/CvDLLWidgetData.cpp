@@ -225,7 +225,49 @@ void CvDLLWidgetData::freeInstance()
 	m_pInst = NULL;
 }
 
+// WTP: the last help text the game asked for (every widget of the interface), for the own tooltip window of the main interface (python)
+static CvWString g_szWtpWidgetHelp;
+static int g_iWtpWidgetHelpCount = 0;
+static int g_iWtpWidgetHelpType = 0;
+CvWString wtpGetWidgetHelpText() { return g_szWtpWidgetHelp; }
+int wtpGetWidgetHelpCount() { return g_iWtpWidgetHelpCount; }
+int wtpGetWidgetHelpType() { return g_iWtpWidgetHelpType; }
+// WTP: with the diplomacy screen open the game shows the help of the HUD elements itself, python cannot clear it there. While the own
+// tooltip is on (set from python) the DLL gives the game an empty text then; the text for python is kept
+static bool g_bWtpHideGameHelp = false;
+static bool g_bWtpInternalHelp = false;
+void wtpSetHideGameHelp(bool b) { g_bWtpHideGameHelp = b; }
+void wtpSetInternalHelp(bool b) { g_bWtpInternalHelp = b; }
+// WTP: the import / export window in the city screen: the help of the pictures of the goods (WIDGET_HELP_YIELD) is shown by the own tooltip
+// only (python sets this while the window is open in the city screen), the game gets an empty text
+static bool g_bWtpHideYieldHelp = false;
+void wtpSetHideYieldHelp(bool b) { g_bWtpHideYieldHelp = b; }
+bool wtpIsDiplomacyUp() { return gDLL->isDiplomacy() || gDLL->isMPDiplomacyScreenUp(); }
+
 void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
+{
+	parseHelpInner(szBuffer, widgetDataStruct);
+	g_szWtpWidgetHelp = szBuffer.getCString();
+	g_iWtpWidgetHelpType = (int)widgetDataStruct.m_eWidgetType;
+	g_iWtpWidgetHelpCount++;
+	if (g_bWtpHideGameHelp && !g_bWtpInternalHelp && (gDLL->isDiplomacy() || gDLL->isMPDiplomacyScreenUp()))
+	{
+		szBuffer.clear();
+	}
+	else if (g_bWtpHideYieldHelp && !g_bWtpInternalHelp && widgetDataStruct.m_eWidgetType == WIDGET_HELP_YIELD)
+	{
+		szBuffer.clear();
+	}
+	// WTP: the list of the game popup of a colony (what to build): the own tooltip of the main interface shows the help (beside the popup),
+	// the game gets an empty text. Not in the city screen: there the list is not covered by the popup and the game tooltip stays
+	else if (g_bWtpHideGameHelp && !g_bWtpInternalHelp && gDLL->getInterfaceIFace()->isPopupUp() && !gDLL->getInterfaceIFace()->isCityScreenUp()
+		&& (widgetDataStruct.m_eWidgetType == WIDGET_TRAIN || widgetDataStruct.m_eWidgetType == WIDGET_CONSTRUCT || widgetDataStruct.m_eWidgetType == WIDGET_CONVINCE))
+	{
+		szBuffer.clear();
+	}
+}
+
+void CvDLLWidgetData::parseHelpInner(CvWStringBuffer &szBuffer, const CvWidgetDataStruct &widgetDataStruct)
 {
 	CxDesyncMonitor StartAsyncExecution;
 
