@@ -167,6 +167,18 @@ public:
 	ColorTypes getReplayMessageColor(int i) const;
 	std::wstring getReplayMessageText(int i) const;
 	uint getNumReplayMessages() const;
+	// WTP: the messages of the turn for the message panel of the main interface
+	int getNumHudMessages() const;
+	std::wstring getHudMessageText(int i) const;
+	int getHudMessageX(int i) const;
+	int getHudMessageY(int i) const;
+	int getNumHudMessagesPrevious() const;
+	int getNumHudPriority() const;
+	void addHudMessage(std::wstring szText, bool bPriority) const; // WTP: a message of the Python code for the message panel (priority: at the top)
+	int getNumHudPriorityPrevious() const;
+	std::wstring getHudMessagePreviousText(int i) const;
+	int getHudMessagePreviousX(int i) const;
+	int getHudMessagePreviousY(int i) const;
 	CyReplayInfo* getReplayInfo() const;
 	void saveReplay(int iPlayer);
 	void addPlayer(int /*PlayerTypes*/ eNewPlayer, int /*LeaderHeadTypes*/ eLeader, int /*CivilizationTypes*/ eCiv);
