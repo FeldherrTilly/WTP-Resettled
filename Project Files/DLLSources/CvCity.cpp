@@ -394,6 +394,20 @@ void CvCity::kill()
 
 	removeTradeRoutes();
 
+	// WTP: private routes from or to this colony go with it (the export and import settings do not remove them)
+	{
+		CvPlayer& kOwner = GET_PLAYER(getOwnerINLINE());
+		std::vector<CvTradeRoute*> aRoutes;
+		kOwner.getTradeRoutes(aRoutes);
+		for (uint i = 0; i < aRoutes.size(); ++i)
+		{
+			if (aRoutes[i]->isPrivate() && (aRoutes[i]->getSourceCity() == getIDInfo() || aRoutes[i]->getDestinationCity() == getIDInfo()))
+			{
+				kOwner.removeTradeRoute(aRoutes[i]->getID());
+			}
+		}
+	}
+
 	if (isNative())
 	{
 		std::vector<CvUnit*> aUnits;
@@ -966,6 +980,11 @@ void CvCity::doTask(TaskTypes eTask, int iData1, int iData2, bool bOption, bool 
 		doAutoExport((YieldTypes) iData1); // auto traderoute - Nightinggale
 		break;
 	// transport feeder - end - Nightinggale
+
+	// WTP: trade route presets of the city screen
+	case TASK_TRADEROUTE_PRESET:
+		applyTradeRoutePreset(iData1);
+		break;
 
 	// auto traderoute - start - Nightinggale
 	case TASK_AUTO_TRADEROUTE:
@@ -13547,7 +13566,7 @@ void CvCity::removeExport(YieldTypes eYield, bool bUpdateRoutes)
 				for (uint i = 0; i < aiRoutes.size(); ++i)
 				{
 					CvTradeRoute* pRoute = aiRoutes[i];
-					if (pRoute != NULL && pRoute->getSourceCity() == getIDInfo() && pRoute->getYield() == eYield)
+					if (pRoute != NULL && pRoute->getSourceCity() == getIDInfo() && pRoute->getYield() == eYield && !pRoute->isPrivate())
 					{
 						aiRouteIds.push_back(pRoute->getID());
 					}
@@ -13581,7 +13600,7 @@ void CvCity::updateExport(YieldTypes eYield)
 			for (uint i = 0; i < aiRoutes.size(); ++i)
 			{
 				CvTradeRoute* pRoute = aiRoutes[i];
-				if (pRoute != NULL && pRoute->getSourceCity() == getIDInfo() && pRoute->getYield() == eYield)
+				if (pRoute != NULL && pRoute->getSourceCity() == getIDInfo() && pRoute->getYield() == eYield && !pRoute->isPrivate())
 				{
 					++iExportCount;
 				}
@@ -13681,7 +13700,7 @@ void CvCity::removeImport(YieldTypes eYield, bool bUpdateRoutes)
 				for (uint i = 0; i < aiRoutes.size(); ++i)
 				{
 					CvTradeRoute* pRoute = aiRoutes[i];
-					if (pRoute != NULL && pRoute->getDestinationCity() == getIDInfo() && pRoute->getYield() == eYield)
+					if (pRoute != NULL && pRoute->getDestinationCity() == getIDInfo() && pRoute->getYield() == eYield && !pRoute->isPrivate())
 					{
 						aiRouteIds.push_back(pRoute->getID());
 					}
@@ -13715,7 +13734,7 @@ void CvCity::updateImport(YieldTypes eYield)
 			for (uint i = 0; i < aiRoutes.size(); ++i)
 			{
 				CvTradeRoute* pRoute = aiRoutes[i];
-				if (pRoute != NULL && pRoute->getDestinationCity() == getIDInfo() && pRoute->getYield() == eYield)
+				if (pRoute != NULL && pRoute->getDestinationCity() == getIDInfo() && pRoute->getYield() == eYield && !pRoute->isPrivate())
 				{
 					++iImportCount;
 				}
@@ -14010,10 +14029,14 @@ void CvCity::handleAutoTraderouteSetup(bool bReset, bool bImportAll, bool bAutoE
 				int iMaintainLevel   = getMaintainLevel(eYield);
 				int iImportLimitLevel= getImportsLimit(eYield);
 
-				int iBuffer = iMaintainLevel & 0xFFFF; // lowest 16 bits
-				iBuffer |= (iImportLimitLevel & 0xFFFF) << 16; // next 16 bits
+				// same layout as CvDLLButtonPopup::OnOkClicked() and the reader in doTask(TASK_YIELD_TRADEROUTE) (NetworkDataTradeRouteInts):
+				// the import limit in the lower, the maintain level in the upper 16 bits
+				// (it was packed the other way round here, which swapped both values of every good)
+				NetworkDataTradeRouteInts buffer;
+				buffer.iImportLimitLevel = (unsigned short)iImportLimitLevel;
+				buffer.iMaintainLevel    = (unsigned short)iMaintainLevel;
 
-				doTask(TASK_YIELD_TRADEROUTE, eYield, iBuffer, bImport, bExport, bMaintainImport, bAutoExport);
+				doTask(TASK_YIELD_TRADEROUTE, eYield, buffer.iNetwork, bImport, bExport, bMaintainImport, bAutoExport);
 			}
 		}
 	}
@@ -15669,4 +15692,48 @@ int CvCity::getExportAvailable(YieldTypes eYield) const
 
 	return std::max(0, getYieldStored(eYield)
 		- getAutoMaintainThreshold(eYield));
+}
+
+// WTP: trade route presets of the city screen (TASK_TRADEROUTE_PRESET). 0: building material: clay, stone and tools imported
+// with the feeder (at least 100, at most 150); horses, sailcloth, hardwood and rope imported with the feeder, their levels
+// unchanged; 1 and 2: the goods the domestic market of the colony asks for, imported with the feeder (20/20 or 40/40). Export
+// settings stay as they are
+void CvCity::applyTradeRoutePreset(int iPreset)
+{
+	if (iPreset == 0)
+	{
+		const YieldTypes aeMaterial[3] = { YIELD_CLAY, YIELD_STONE, YIELD_TOOLS };
+		for (int i = 0; i < 3; ++i)
+		{
+			setImportFeeder(aeMaterial[i], 100, 150);
+		}
+		const YieldTypes aeOther[4] = { YIELD_HORSES, YIELD_SAILCLOTH, YIELD_HARDWOOD, YIELD_ROPE };
+		for (int i = 0; i < 4; ++i)
+		{
+			setImportFeeder(aeOther[i], getMaintainLevel(aeOther[i]), getImportsLimit(aeOther[i]));
+		}
+	}
+	else if (iPreset == 1 || iPreset == 2)
+	{
+		const int iLevel = (iPreset == 1) ? 20 : 40;
+		YieldCargoArray<int> aiDemand;
+		getYieldDemands(aiDemand);
+		for (YieldTypes eYield = FIRST_YIELD; eYield < NUM_CARGO_YIELD_TYPES; ++eYield)
+		{
+			if (aiDemand.get(eYield) > 0)
+			{
+				setImportFeeder(eYield, iLevel, iLevel);
+			}
+		}
+	}
+}
+
+// WTP: import with the feeder: the transports keep at least iMaintainLevel in the colony and bring at most iImportLimit; the
+// export and auto export settings of the yield stay as they are
+void CvCity::setImportFeeder(YieldTypes eYield, int iMaintainLevel, int iImportLimit)
+{
+	NetworkDataTradeRouteInts buffer;
+	buffer.iImportLimitLevel = (unsigned short)iImportLimit;
+	buffer.iMaintainLevel = (unsigned short)iMaintainLevel;
+	doTask(TASK_YIELD_TRADEROUTE, eYield, buffer.iNetwork, true, isExport(eYield), true, isAutoExport(eYield));
 }
