@@ -457,3 +457,22 @@ def handleExitButtonInput ( argsList ):
 	getTabControl().destroy()
 
 	return 1
+
+
+######################################## WTP: STORAGE MULTIPLIER ########################################
+
+def wtpOptionWarning ( szKey ):
+	"Warning window with OK only: the change comes at the start of the next turn or after loading"
+	popup = CyPopup(-1,EventContextTypes.NO_EVENTCONTEXT, True)
+	popup.setHeaderString("", CvUtil.FONT_CENTER_JUSTIFY)
+	popup.setBodyString(localText.getText(szKey, ()), CvUtil.FONT_LEFT_JUSTIFY)
+	popup.launch(true, PopupStates.POPUPSTATE_IMMEDIATE)
+
+def handleWtpStorageDropdownInput ( argsList ):
+	"WTP: storage multiplier (index of WtpGameOptions.STORAGE_PERCENTS)"
+	iValue, szName = argsList
+	import WtpGameOptions
+	if WtpGameOptions.load()[0] != iValue:
+		WtpGameOptions.setStorage(iValue)
+		wtpOptionWarning("TXT_KEY_WTP_OPT_STORAGE_WARN")
+	return 1
