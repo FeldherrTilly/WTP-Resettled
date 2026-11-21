@@ -81,7 +81,6 @@ void CvUnitAI::AI_reset()
 bool CvUnitAI::AI_update()
 {
 	WtpTiming::UnitScope wtpTimer((int)AI_getUnitAIType(), isNative(), (int)getOwnerINLINE(), getID(), getX_INLINE(), getY_INLINE());
-	WtpTiming::UnitScope wtpTimer((int)AI_getUnitAIType(), isNative());
 #ifdef PROFILING_ENABLED
 	// WTP: one sample per unit AI type, natives separately
 	static std::string aszProfileNames[2][NUM_UNITAI_TYPES + 1];
