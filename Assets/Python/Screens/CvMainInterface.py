@@ -2447,19 +2447,16 @@ class CvMainInterface:
 							if not CyInterface().canHandleAction(i, False):
 								screen.overlayButtonGFC(szName, ArtFileMgr.getInterfaceArtInfo("INTERFACE_DISABLED_BUTTON").getPath())
 							elif pHeadSelectedUnit.isActionRecommended(i) and not self.isOwnShipInPort(i):
-								# (WTP: the buttons to sail to Europe / Africa / Port Royal are marked with a ring when an own ship is in that port)
 								# (WTP: the buttons to sail to Europe / Africa / Port Royal are marked when an own ship is in that port)
 								screen.overlayButtonGFC(szName, ArtFileMgr.getInterfaceArtInfo("INTERFACE_HIGHLIGHTED_BUTTON").getPath())
-							if CyInterface().canHandleAction(i, False) and self.isOwnShipInPort(i):
-								# WTP: a ring above the sail button (Europe / Africa / Port Royal) whose port has an own ship, a bit larger than the button
+							if (CyInterface().canHandleAction(i, False) and self.isOwnShipInPort(i)) or self.isAutomateMarked(i, pHeadSelectedUnit):
+								# WTP: a ring above the sail buttons (Europe / Africa / Port Royal) whose port has an own ship, a bit larger than the button;
+								# the same ring marks the R button / full automation button of an automated transport
 								szRing = "WtpPortRing" + str(iCount)
 								iRingPad = -(LARGE_BUTTON_SIZE / 4)
 								screen.addDDSGFC(szRing, "Art/Interface/Game Hud/Actions/port_ring.dds", int(Xcord) - LARGE_BUTTON_SIZE - iRingPad, int(Ycord) - LARGE_BUTTON_SIZE - iRingPad, LARGE_BUTTON_SIZE * 2 + iRingPad * 2, LARGE_BUTTON_SIZE * 2 + iRingPad * 2, WidgetTypes.WIDGET_GENERAL, -1, -1)
 								screen.setHitTest(szRing, HitTestTypes.HITTEST_NOHIT)
 								ActionButtonList.append(szRing)
-							if (CyInterface().canHandleAction(i, False) and self.isOwnShipInPort(i)) or self.isAutomateMarked(i, pHeadSelectedUnit):
-								# WTP: a ring above the sail buttons (Europe / Africa / Port Royal) whose port has an own ship, a bit larger than the button;
-								# the same ring marks the R button / full automation button of an automated transport
 							# arrows above the R / C button: cycle through the other transports automated the same way (R: trade routes, C: full
 							# automation). They stay while the transport is selected after its automation was switched off (to go on from there)
 							iCycleType = self.getAutomateTypeOfButton(i)
@@ -9966,6 +9963,7 @@ class CvMainInterface:
 				self.iMessagePage = 0
 				self.updateMessagePanel()
 			elif (inputClass.getButtonType() == WidgetTypes.WIDGET_GENERAL and inputClass.getData1() == self.BUTTON_MESSAGE_LINE):
+				if (inputClass.getFlags() & MouseFlags.MOUSE_RBUTTONUP):
 					# right click: Colopedia page of the first named thing of the message, Ctrl + right click: of the second one
 					iContact = self.getMessageContact(inputClass.getData2())
 					if iContact >= 0 and not inputClass.isCtrlKeyDown():

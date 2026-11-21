@@ -297,6 +297,10 @@ class CvEventManager:
 			elif (eventType == self.EventKeyUp):
 				try:
 					CvScreensInterface.yieldAmountScreen.handleKeyUp(int(key))
+				except:
+					pass
+			return 1
+
 		if (self.bAllowCheats):
 			# notify debug tools of input to allow it to override the control
 			argsList = (eventType,key,self.bCtrl,self.bShift,self.bAlt,mx,my,px,py,gc.getGame().isNetworkMultiPlayer())
