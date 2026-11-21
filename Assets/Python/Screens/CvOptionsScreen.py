@@ -386,6 +386,21 @@ class CvOptionsScreen:
 		tab.attachDropDown("LangHBox", szWidgetName, szDropdownDesc, aszDropdownElements, self.callbackIFace, szCallbackFunction, szWidgetName, iInitialSelection)
 		tab.setLayoutFlag(szWidgetName, "LAYOUT_LEFT")
 
+		# WTP: storage multiplier (applied from the next turn or after loading)
+		import WtpGameOptions
+		aiWtpValues = WtpGameOptions.load()
+		tab.attachSpacer("GameOuterVBox")
+		tab.attachHBox("GameOuterVBox", "WtpStorageHBox")
+		tab.attachLabel("WtpStorageHBox", "WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE", ()))
+		tab.setToolTip("WtpStorageLabel", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
+		tab.attachSpacer("WtpStorageHBox")
+		aszWtpStorage = ()
+		for iWtpPercent in WtpGameOptions.STORAGE_PERCENTS:
+			aszWtpStorage = aszWtpStorage + ("%d%%" % iWtpPercent,)
+		tab.attachDropDown("WtpStorageHBox", "WtpStorageDropdownBox", "WtpStorageDropdownBox", aszWtpStorage, self.callbackIFace, "handleWtpStorageDropdownInput", "WtpStorageDropdownBox", aiWtpValues[0])
+		tab.setLayoutFlag("WtpStorageDropdownBox", "LAYOUT_LEFT")
+		tab.setToolTip("WtpStorageDropdownBox", localText.getText("TXT_KEY_WTP_OPT_STORAGE_HELP", ()))
+
 		########## Lower Panel
 
 		tab.attachHSeparator("GameVBox", "GameExitSeparator")

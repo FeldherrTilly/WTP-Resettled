@@ -2375,6 +2375,12 @@
 		<Hungarian>Úticél kiválasztása</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_RAW_MISSING_FOR_FULL_PRODUCTION</Tag>
+		<English>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] [COLOR_YELLOW]missing for the full production[COLOR_REVERT]</English>
+		<German>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] [COLOR_YELLOW]fehlen für die volle Produktion[COLOR_REVERT]</German>
+		<Russian>[ICON_BULLET][COLOR_WARNING_TEXT]%D1%F2[COLOR_REVERT] [COLOR_YELLOW]не хватает для полного производства[COLOR_REVERT]</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_COMMAND_GOTO_MENU_SELECTION</Tag>
 		<English>%s1  (%d2)</English>
 		<Portuguese>%s1  (%d2)</Portuguese>
@@ -3344,6 +3350,18 @@
 		</Spanish>
 		<Russian>Испанским</Russian>
 		<Hungarian>Spanyol Királyi:Spanyol Királyi</Hungarian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_EDUCATION_ASK_LATER</Tag>
+		<English>Ask me again at the end of the turn</English>
+		<German>Zum Ende der Runde noch einmal fragen</German>
+		<Russian>Спросить снова в конце хода</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_PORT_ROYAL_TAX_RATE</Tag>
+		<English>Port tax: %d1%% (on every sale)</English>
+		<German>Hafensteuer: %d1%% (auf jeden Verkauf)</German>
+		<Russian>Портовый налог: %d1%% (с каждой продажи)</Russian>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_WTP_BUILDING_UPGRADE_HEADER</Tag>

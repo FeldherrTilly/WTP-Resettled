@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!-- WTP: texts of the game options for the storage multiplier -->
+<Civ4GameText xmlns="http://www.firaxis.com">
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_STORAGE</Tag>
+		<English>Storage multiplier:</English>
+		<German>Lager-Multiplikator:</German>
+		<Russian>Множитель хранилища:</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_STORAGE_HELP</Tag>
+		<English>Storage of the Warehouse, Warehouse Expansions, Custom House and Custom Office in percent of the normal value (100% = as in the game speed alone, 50% = half, 200% = double). Applies to all colonies. The change comes into effect at the start of the next turn or when a savegame is loaded.</English>
+		<German>Lagerkapazität von Lagerhaus, Lagerhaus-Erweiterungen, Zollhaus und Zollamt in Prozent des normalen Werts (100% = wie durch die Spielgeschwindigkeit allein, 50% = halb, 200% = doppelt). Gilt für alle Kolonien. Die Änderung wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.</German>
+		<Russian>Ёмкость хранилища, расширенного хранилища, Таможни и Центрального таможенного управления в процентах от обычного значения (100% = как при одной лишь скорости игры, 50% = половина, 200% = вдвое больше). Действует для всех колоний. Изменение вступает в силу в начале следующего хода или при загрузке сохранённой игры.</Russian>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_WTP_OPT_STORAGE_WARN</Tag>
+		<English>Storage multiplier changed. The new value comes into effect at the start of the next turn or when a savegame is loaded.[NEWLINE][NEWLINE]Caution: if the storage becomes smaller, the storage of colonies can suddenly overflow. The goods above the new limit are lost (sold) as with any surplus.</English>
+		<German>Lager-Multiplikator geändert. Der neue Wert wirkt ab dem Beginn der nächsten Runde oder nach dem Laden eines Spielstands.[NEWLINE][NEWLINE]Achtung: Wird das Lager kleiner, können die Lager der Kolonien plötzlich überlaufen. Waren über der neuen Grenze gehen verloren (werden verkauft) wie bei jedem Überschuss.</German>
+		<Russian>Множитель хранилища изменён. Новое значение вступит в силу в начале следующего хода или при загрузке сохранённой игры.[NEWLINE][NEWLINE]Внимание: если хранилище уменьшится, хранилища колоний могут внезапно переполниться. Товары сверх нового предела теряются (продаются), как при любом излишке.</Russian>
+	</TEXT>
+</Civ4GameText>

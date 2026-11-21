@@ -16,6 +16,7 @@ import sys
 import CvWorldBuilderScreen
 import CvAdvisorUtils
 import CvRandomEventInterface
+import WtpGameOptions
 
 gc = CyGlobalContext()
 localText = CyTranslator()
@@ -572,10 +573,13 @@ class CvEventManager:
 		return ""
 
 	def onLoadGame(self, argsList):
+		# WTP: storage multiplier of the game options
+		WtpGameOptions.applyToGame("LoadGame")
 		return 0
 
 	def onGameStart(self, argsList):
 		'Called at the start of the game'
+		WtpGameOptions.applyToGame("GameStart")
 		if (gc.getGame().getGameTurnYear() == GlobalDefines.START_YEAR and not gc.getGame().isOption(GameOptionTypes.GAMEOPTION_ADVANCED_START)):
 			for iPlayer in range(gc.getMAX_PLAYERS()):
 				player = gc.getPlayer(iPlayer)
@@ -606,6 +610,8 @@ class CvEventManager:
 
 	def onBeginGameTurn(self, argsList):
 		'Called at the beginning of the end of each turn'
+		# WTP: storage multiplier of the game options
+		WtpGameOptions.applyToGame("BeginGameTurn")
 		iGameTurn = argsList[0]
 
 	def onEndGameTurn(self, argsList):
@@ -614,6 +620,9 @@ class CvEventManager:
 
 	def onBeginPlayerTurn(self, argsList):
 		'Called at the beginning of a players turn'
+		# WTP: storage multiplier of the game options (also here: the active player starts his turn)
+		if iPlayer == gc.getGame().getActivePlayer():
+			WtpGameOptions.applyToGame("BeginPlayerTurn")
 		iGameTurn, iPlayer = argsList
 		CvRandomEventInterface.checkEuropeanBorderDisputeKingWarDemand(iPlayer)
 		CvRandomEventInterface.checkTradeQuestLeadershipChanges(iPlayer)
