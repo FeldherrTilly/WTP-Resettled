@@ -2023,4 +2023,16 @@
 		<DefineName>PIRATE_BARBARIAN_MOVES</DefineName>
 		<iDefineIntVal>7</iDefineIntVal>
 	</Define>
+	<!-- WTP: factor for the map scroll speed (edge scrolling) while the shift key is held. 1.0 = no change, 2.0 = twice as fast, default 2.5 -->
+	<Define>
+		<DefineName>SHIFT_SCROLL_SPEED_MULTIPLIER</DefineName>
+		<fDefineFloatVal>2.5</fDefineFloatVal>
+	</Define>
+	<Define>
+		<!-- NOTE: WAREHOUSE_STORAGE_PERCENT is replaced at every turn start / game load by the game options (WTP_GameOptions.ini, WtpGameOptions.py); edit it there. The value here is only the start value. -->
+		<!-- WTP: storage of Warehouse, Warehouse Expansion 1+2, Custom House and Custom Office in percent (100 = unchanged, 130 = +30%).
+		     Comes on top of the game speed factor (iStoragePercent in CIV4GameSpeedInfo.xml). Needs the capacity of the cities to be recalculated, i.e. a new turn. -->
+		<DefineName>WAREHOUSE_STORAGE_PERCENT</DefineName>
+		<iDefineIntVal>100</iDefineIntVal>
+	</Define>
 </Civ4Defines>
