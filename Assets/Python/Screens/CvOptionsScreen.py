@@ -260,7 +260,11 @@ class CvOptionsScreen:
 		tab.setLayoutFlag("GamePanel", "LAYOUT_SIZE_HEXPANDING")
 		tab.setLayoutFlag("GamePanel", "LAYOUT_SIZE_VEXPANDING")
 
-		tab.attachHBox("GamePanel", "GameHBox")
+		# WTP: one box in the scroll panel holds all options (the tooltip options and those below scroll with the others)
+		tab.attachVBox("GamePanel", "GameOuterVBox")
+		tab.setLayoutFlag("GameOuterVBox", "LAYOUT_SIZE_HEXPANDING")
+
+		tab.attachHBox("GameOuterVBox", "GameHBox")
 		tab.setLayoutFlag("GameHBox", "LAYOUT_SIZE_HEXPANDING")
 
 		tab.attachVBox("GameHBox", "GameVBox1")
