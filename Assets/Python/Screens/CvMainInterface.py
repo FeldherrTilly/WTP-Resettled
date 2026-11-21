@@ -2253,47 +2253,55 @@ class CvMainInterface:
 
 								SzText = ""
 								bTwoYields = False
+								# WTP fix for the original WTP mod: the green and red numbers of the production bar showed an estimate (the output of the workers
+								# with the bonuses, scaled with actual / planned and rounded down), which is neither the real production (the free output of the
+								# building was missing) nor the real shortfall (the rounding turned a shortfall of 1 into 2). Now the numbers are the real ones:
+								# what the colony makes of this good (the same number as in the tooltip: "Total ...") and what could not be made because of missing
+								# raw materials. The shortfall is the same number as in the tooltips ("from lack of ...", "cannot be made"), i.e. before the bonuses: with the bonuses
+								# it would be rounded differently again (13 would become 14).
+								# It is also shown when nobody works in the building: the free output of the building is produced anyway (e.g. +2 / +2).
+								# all the goods of the building (there can be more than two: butcher, dairy, roaster), each one once, in the order of the professions
+								aBarYields = [iYield]
 								for iArrayProfession in range(gc.getNumProfessionInfos()):
 									if (gc.getProfessionInfo(iArrayProfession).getSpecialBuilding() == iSpecialBuildingType):
 										if (not gc.getProfessionInfo(iArrayProfession).isWorkPlot() and gc.getProfessionInfo(iArrayProfession).isCitizen()):
 											if gc.getCivilizationInfo(pHeadSelectedCity.getCivilizationType()).isValidProfession(iArrayProfession):
-												iAmountYield = gc.getProfessionInfo(iArrayProfession).getYieldsProduced(0) #MultipleYieldsProduced Start
-												ProducedYield = 0
-												for pCitizen in CitizenSpecialBuildingIndexArray[iSpecialBuildingType]:
-													if (pCitizen.getProfession() == iArrayProfession):
-														ProducedYield += pHeadSelectedCity.getProfessionOutput(iArrayProfession, pCitizen)
-
-												ProducedYield = ProducedYield * pHeadSelectedCity.getBaseYieldRateModifier(iAmountYield, 0) / 100
-
-												CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iAmountYield)
-												CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iAmountYield)
-
-												if (CityProducedYield > 0):
-													ActualYield = ProducedYield * CityActualYield / CityProducedYield
-												else:
-													ActualYield = ProducedYield
-
-												UnproducedYield = ProducedYield - ActualYield
-
-												if (bTwoYields == False):
-													if (ActualYield > 0):
-														bTwoYields = True
-														SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
-													if (UnproducedYield > 0):
-														SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
-												else:
-													if (iAmountYield != iYield):
-														if (ActualYield > 0):
-															SzText += u"<color=255,255,255> /" + "</color>"
-															SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
-														if (UnproducedYield > 0):
-															SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
-        
+												iBarYieldOfProfession = gc.getProfessionInfo(iArrayProfession).getYieldsProduced(0)
+												if (iBarYieldOfProfession >= 0 and iBarYieldOfProfession < YieldTypes.NUM_YIELD_TYPES and not iBarYieldOfProfession in aBarYields):
+													aBarYields.append(iBarYieldOfProfession)
+								for iBarYield in aBarYields:
+									iBarModifier = pHeadSelectedCity.getBaseYieldRateModifier(iBarYield, 0)
+									CityProducedYield = pHeadSelectedCity.getBaseRawYieldProduced(iBarYield)
+									CityActualYield = pHeadSelectedCity.calculateActualYieldProduced(iBarYield)
+									ActualYield = CityActualYield * iBarModifier / 100
+									UnproducedYield = CityProducedYield - CityActualYield
+									if (bTwoYields == False):
+										if (ActualYield > 0):
+											bTwoYields = True
+											SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
+										if (UnproducedYield > 0):
+											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
+									else:
+										if (ActualYield > 0):
+											SzText += u"<color=255,255,255> /" + "</color>"
+											SzText += u"<color=0,255,0> +" + str(ActualYield) + "</color>"
+										if (UnproducedYield > 0):
+											SzText += u"<color=255,0,0> -" + str(UnproducedYield) + "</color>"
+								# WTP: the text grows to the left, over the picture of the good, when there are several numbers (e.g. "+2 -13 / +2 -12"):
+								# the longer it is, the smaller the font (the picture and the numbers must not cover each other)
+								iBarTextLength = len(re.sub(u"<[^>]*>", u"", SzText).strip()) # (without the space in front of the first number, it is not visible)
+								iBarFontDelta = 0
+								if iBarTextLength > 15:
+									iBarFontDelta = -2
+								elif iBarTextLength > 11:
+									iBarFontDelta = -1
+								if STANDARD_FONT_SIZE + iBarFontDelta < 1:
+									iBarFontDelta = 1 - STANDARD_FONT_SIZE
 								szName = "WorkerOutputText" + str(iYield)
 								if (iSecondYield == -1 or iSecondYield == iYield):
-									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , 0), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
+									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , iBarFontDelta), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_YIELD, iYield, -1)
 								else:
-									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , 0), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_TWO_YIELDS, iYield, iSecondYield)
+									screen.setLabelAt(szName, "ProductionBox" + str(iSpecialBuildingType), self.setFontSize(SzText , iBarFontDelta), CvUtil.FONT_RIGHT_JUSTIFY, (BUILDING_GRID[iSpecialBuildingType][3] + STACK_BAR_HEIGHT) *2 / 3, STACK_BAR_HEIGHT *2 /5, -1.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_HELP_TWO_YIELDS, iYield, iSecondYield)
 
 								CitizenHideList.append(szName)
 								CitizenHideList.append("ProductionBox" + str(iSpecialBuildingType)) # R&R, Robert Surcouf Fix Production box
@@ -3338,11 +3346,10 @@ class CvMainInterface:
 				iWidth = int((25 * xResolution) / 100)
 				yCoord = yResolution - SADDLE_HEIGHT * 14/16 - self.SCORE_TEXT_BOTTOM_MARGIN_SMALL
 
-				# Scrollable Scoreboard
-				if (not pHeadSelectedCity):
-					screen.addTableControlGFC("ScoreBackground", 1, xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, yCoord - (iBtnHeight * (iCount - 1)), iWidth, (iBtnHeight * (iCount - 1)), False, False, 0, 0, TableStyles.TABLE_STYLE_STANDARD)
-					screen.enableSelect("ScoreBackground", False)
-					screen.setTableColumnHeader("ScoreBackground", 0, "", iWidth - 10)
+				# Scrollable Scoreboard: the rows are collected first, the table is as wide as the longest entry (created after the loop)
+				aScoreRows = []
+				iTableY = yCoord # the yCoord is changed below
+				iMaxTextWidth = 0
 
 				i = 0
 				while (i < gc.getMAX_CIV_TEAMS()):
@@ -3425,8 +3432,9 @@ class CvMainInterface:
 
 									szBuffer = szBuffer + "</font>"
 
-									if ( CyInterface().determineWidth( szBuffer ) > iWidth ):
-										iWidth = CyInterface().determineWidth( szBuffer )
+									iTextWidth = CyInterface().determineWidth( szBuffer )
+									if ( iTextWidth > iMaxTextWidth ):
+										iMaxTextWidth = iTextWidth
 
 									szName = "ScoreText" + str(ePlayer)
 									if ( CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW or CyInterface().isInAdvancedStart() or pHeadSelectedCity != None):
@@ -3434,9 +3442,7 @@ class CvMainInterface:
 									else:
 										yCoord = yResolution - SADDLE_HEIGHT - self.SCORE_TEXT_BOTTOM_MARGIN_SMALL
 
-									if not pHeadSelectedCity:
-										iRow = screen.appendTableRow("ScoreBackground")
-										screen.setTableText("ScoreBackground", 0, iRow, szBuffer, "", WidgetTypes.WIDGET_CONTACT_CIV, ePlayer, -1, CvUtil.FONT_RIGHT_JUSTIFY)
+									aScoreRows.append((szBuffer, ePlayer))
 
 									CyInterface().checkFlashReset(ePlayer)
 
@@ -3452,6 +3458,14 @@ class CvMainInterface:
 					yCoord = yResolution - SADDLE_HEIGHT - self.SCORE_BACKGROUND_BOTTOM_MARGIN_SMALL
 
 				if not pHeadSelectedCity:
+					# width of the longest entry plus room for the table border and the scroll bar (never wider than before)
+					iWidth = min(iWidth, iMaxTextWidth + 20)
+					screen.addTableControlGFC("ScoreBackground", 1, xResolution - self.SCORE_BACKGROUND_SIDE_MARGIN/2 - iWidth, iTableY + int(yResolution * 0.066) - (iBtnHeight * 7), iWidth, (iBtnHeight * 7), False, False, 0, 0, TableStyles.TABLE_STYLE_STANDARD)
+					screen.enableSelect("ScoreBackground", False)
+					screen.setTableColumnHeader("ScoreBackground", 0, "", iWidth - 10)
+					for (szRowText, ePlayerRow) in aScoreRows:
+						iRow = screen.appendTableRow("ScoreBackground")
+						screen.setTableText("ScoreBackground", 0, iRow, szRowText, "", WidgetTypes.WIDGET_CONTACT_CIV, ePlayerRow, -1, CvUtil.FONT_RIGHT_JUSTIFY)
 					screen.show("ScoreBackground")
 
 	# Will update the help Strings

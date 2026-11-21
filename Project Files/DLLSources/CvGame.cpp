@@ -19,6 +19,7 @@
 #include "CyArgsList.h"
 #include "CvInfos.h"
 #include "CvPopupInfo.h"
+#include "CvDLLButtonPopup.h"
 #include "FProfiler.h"
 #include "CvReplayInfo.h"
 #include "CyPlot.h"
@@ -1760,6 +1761,16 @@ void CvGame::updateTestEndTurn()
 		{
 			if (!(GET_PLAYER(getActivePlayer()).hasBusyUnit()) && !(GET_PLAYER(getActivePlayer()).hasReadyUnit(bAny)))
 			{
+				// WTP: students whose specialty is to be chosen at the end of the turn: the popups open now, the turn does not end yet
+				if (WtpDeferredEducation::relaunch())
+				{
+					return;
+				}
+				// WTP: the cities whose project is finished next turn with missing materials: the panel to buy them
+				if (WtpBuyMaterialsPanel::relaunch())
+				{
+					return;
+				}
 				if (!(gDLL->getInterfaceIFace()->isForcePopup()))
 				{
 					gDLL->getInterfaceIFace()->setForcePopup(true);
