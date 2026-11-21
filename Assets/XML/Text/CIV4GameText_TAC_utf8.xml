@@ -3346,6 +3346,12 @@
 		<Hungarian>Spanyol Királyi:Spanyol Királyi</Hungarian>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_WTP_BUILDING_UPGRADE_HEADER</Tag>
+		<English>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]Upgrade %s1_building to:</English>
+		<German>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]%s1_building ausbauen zu:</German>
+		<Russian>[COLOR_SELECTED_TEXT]%s2_city[COLOR_REVERT][NEWLINE][NEWLINE]Улучшить %s1_building до:</Russian>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_WTP_YIELD_AMOUNT_MAX</Tag>
 		<English>Max</English>
 		<German>Max</German>

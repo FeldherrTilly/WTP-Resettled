@@ -1271,7 +1271,8 @@ void CvDLLWidgetData::doConstruct(const CvWidgetDataStruct &widgetDataStruct)
 
 	if (widgetDataStruct.m_iData2 != FFreeList::INVALID_INDEX)
 	{
-		gDLL->sendPushOrder(widgetDataStruct.m_iData2, ORDER_CONSTRUCT, eBuilding, false, false, false);
+		// WTP: (the building upgrade panel of the city screen) like a ctrl click on the construction list: put the building on top of the queue, the current project stays in the queue
+		gDLL->sendPushOrder(widgetDataStruct.m_iData2, ORDER_CONSTRUCT, eBuilding, false, false, true);
 	}
 	else
 	{
