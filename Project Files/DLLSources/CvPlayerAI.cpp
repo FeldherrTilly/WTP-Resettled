@@ -23838,6 +23838,8 @@ bool CvPlayerAI::AI_hasWfShip() const
 		}
 	}
 	return false;
+}
+
 // WTP: automatic job assignment for a human player's colonist (AUTOMATE_ASSIGN_JOB). The travel times of the workforce plan are
 // made once per turn for the human player (the AI makes them at the start of its plan)
 void CvPlayerAI::AI_wfEnsureTravel(const CvUnit& kColonist)
