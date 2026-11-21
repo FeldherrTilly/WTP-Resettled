@@ -735,6 +735,30 @@ class CvMainInterface:
 		else:
 			HELPTEXT_AREA_Y_MARGIN = 0
 
+	# text of the HUD split at its number: (text before, number, text after). The number is found by its digits in the text of any language
+	def splitAtNumber( self, szText, iNumber ):
+		szNumber = u"%d" % iNumber
+		iPos = szText.find(szNumber)
+		if iPos < 0:
+			return (szText, u"", u"")
+		return (szText[:iPos], szNumber, szText[iPos + len(szNumber):])
+
+	# width of a text of the HUD font in pixels (the game measures it; if it cannot, an estimate by the characters)
+	def getHudTextWidth( self, szText ):
+		if len(szText) == 0:
+			return 0
+		try:
+			iWidth = CyInterface().determineWidth(self.setFontSize(szText, 0))
+			if iWidth > 0:
+				return iWidth
+		except:
+			pass
+		return int(len(szText) * 11)
+
+	def hideUpkeepLine( self, screen, szName ):
+		for szPart in ("Text", "Sign", "Amount", "Rest"):
+			screen.hide(szName + szPart)
+
 	# Wraps <Font> tags around text
 	def setFontSize( self, Text, relativeSize ):
 		size = STANDARD_FONT_SIZE + relativeSize
@@ -2769,6 +2793,40 @@ class CvMainInterface:
 					screen.moveItem("GoldPile", iPileX, 8, -0.3)
 				except:
 					pass
+				# WTP: below the gold the military upkeep, below that the domestic market income of the last turn
+				pPlayer = gc.getPlayer(ePlayer)
+				iUpkeep = pPlayer.getMilitaryUpkeep()
+				# the two amounts end at the same place (right aligned): every line is split at its number into text, amount and rest
+				iIncome = pPlayer.getDomesticMarketIncome()
+				aLines = []
+				if (iUpkeep > 0):
+					aLines.append(("MilitaryUpkeep", 42, self.splitAtNumber(localText.getText("TXT_KEY_MILITARY_UPKEEP_GOLD_STR", (iUpkeep,)), iUpkeep)))
+				else:
+					self.hideUpkeepLine(screen, "MilitaryUpkeep")
+				aLines.append(("DomesticIncome", 62, self.splitAtNumber(localText.getText("TXT_KEY_DOMESTIC_MARKET_INCOME_STR", (iIncome,)), iIncome)))
+				# the sign (+ / -) of a line is its own label, the signs end at the same place, then a gap, then the amounts end at the same place
+				iPrefixW = 0
+				iSignW = 0
+				iAmountW = 0
+				iGap = 6
+				aSplit = []
+				for (szName, iY, aParts) in aLines:
+					szPrefix = aParts[0].rstrip()
+					szSign = u""
+					if len(szPrefix) > 0 and szPrefix[-1] in u"+-":
+						szSign = szPrefix[-1]
+						szPrefix = szPrefix[:-1].rstrip()
+					aSplit.append((szName, iY, szPrefix, szSign, aParts[1], aParts[2]))
+					iPrefixW = max(iPrefixW, self.getHudTextWidth(szPrefix))
+					iSignW = max(iSignW, self.getHudTextWidth(szSign))
+					iAmountW = max(iAmountW, self.getHudTextWidth(aParts[1]))
+				iSignX = 17 + iPrefixW + iGap + iSignW
+				iRightX = iSignX + iGap + iAmountW
+				for (szName, iY, szPrefix, szSign, szAmount, szRest) in aSplit:
+					screen.setLabel(szName + "Text", "Background", self.setFontSize(szPrefix, 0), CvUtil.FONT_LEFT_JUSTIFY, 17, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					screen.setLabel(szName + "Sign", "Background", self.setFontSize(szSign, 0), CvUtil.FONT_RIGHT_JUSTIFY, iSignX, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					screen.setLabel(szName + "Amount", "Background", self.setFontSize(szAmount, 0), CvUtil.FONT_RIGHT_JUSTIFY, iRightX, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
+					screen.setLabel(szName + "Rest", "Background", self.setFontSize(szRest, 0), CvUtil.FONT_LEFT_JUSTIFY, iRightX, iY, -0.3, FontTypes.GAME_FONT, WidgetTypes.WIDGET_GENERAL, -1, -1 )
 
 		return 0
 
@@ -3200,6 +3258,8 @@ class CvMainInterface:
 
 			screen.hide("TimeText")
 			screen.hide("GoldText")
+			self.hideUpkeepLine(screen, "MilitaryUpkeep")
+			self.hideUpkeepLine(screen, "DomesticIncome")
 
 		else: # CITY SCREEN IS DOWN
 			self.MINIMAP_SIDE_MARGIN = MINIMAP_HEIGHT * 13 / 100
@@ -3336,6 +3396,8 @@ class CvMainInterface:
 			# GOLD
 			screen.hide("TimeText")
 			screen.hide("GoldText")
+			self.hideUpkeepLine(screen, "MilitaryUpkeep")
+			self.hideUpkeepLine(screen, "DomesticIncome")
 			screen.registerHideList(ResourceHideList, len(ResourceHideList), RESOURCE_TABLE_HIDE)
 
 		# EMPHISIZE DISPLAY
@@ -3424,6 +3486,8 @@ class CvMainInterface:
 		if (CyEngine().isGlobeviewUp() or CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_HIDE_ALL):
 			screen.hide("TimeText")
 			screen.hide("GoldText")
+			self.hideUpkeepLine(screen, "MilitaryUpkeep")
+			self.hideUpkeepLine(screen, "DomesticIncome")
 			for iYield in EMPHASIZEYIELDS:
 				screen.hide("MapYieldBox" + str(iYield))
 				screen.hide("MapYieldIcon" + str(iYield))
@@ -3440,6 +3504,8 @@ class CvMainInterface:
 		else:
 			screen.show("TimeText")
 			screen.show("GoldText")
+			for szPart in ("Text", "Sign", "Amount", "Rest"):
+				screen.show("DomesticIncome" + szPart)
 			screen.setTableColumnHeader("CityBuildQueue", 0, u"", QueueWidth - (QueueWidth * 3 / 10))
 			screen.setTableColumnHeader("CityBuildQueue", 1, u"", QueueWidth * 3 / 10)
 

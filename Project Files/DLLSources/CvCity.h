@@ -399,6 +399,12 @@ public:
 	int getYieldRushed(YieldTypes eYield) const;
 	void changeYieldRushed(YieldTypes eYield, int iChange);
 	void calculateNetYields(int aiYields[], int* aiProducedYields = NULL, int* aiConsumedYields = NULL, bool bPrintWarning = false) const;
+	// WTP: storage overflow of the turn change (doYields and the forecast of the tooltip use the same functions)
+	bool calculateProjectReserve(const int aiYields[NUM_YIELD_TYPES], int aiProjectReserve[NUM_YIELD_TYPES]) const;
+	void calculateDomesticMarketSales(const int aiYields[NUM_YIELD_TYPES], const int aiProjectReserve[NUM_YIELD_TYPES], int aiSold[NUM_YIELD_TYPES], int aiProfit[NUM_YIELD_TYPES]) const;
+	int calculateOverflowSaleProfit(YieldTypes eYield, int iLoss, TradeLocationTypes* peBestPort) const;
+	void calculateStorageOverflow(const int aiYields[NUM_YIELD_TYPES], const int aiProjectReserve[NUM_YIELD_TYPES], bool bProtectProject, int aiLoss[NUM_YIELD_TYPES], bool abOverflow[NUM_YIELD_TYPES], int* piCutAtStart, int* piCutLeft) const;
+	void calculateStorageOverflowForecast(int aiLoss[NUM_YIELD_TYPES], int aiGold[NUM_YIELD_TYPES]) const; // In python (CyCity::getStorageOverflowForecast)
 	int calculateNetYield(YieldTypes eYield) const;
 	int calculateActualYieldProduced(YieldTypes eYield) const;
 	int calculateActualYieldConsumed(YieldTypes eYield) const;

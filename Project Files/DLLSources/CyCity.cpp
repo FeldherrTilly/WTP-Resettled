@@ -885,6 +885,31 @@ boost::python::list CyCity::calculateNetYieldList() const
 	return result;
 }
 
+boost::python::list CyCity::getStorageOverflowForecast() const
+{
+	boost::python::list result;
+
+	if (m_pCity == NULL)
+	{
+		return result;
+	}
+
+	int aiLoss[NUM_YIELD_TYPES];
+	int aiGold[NUM_YIELD_TYPES];
+	m_pCity->calculateStorageOverflowForecast(aiLoss, aiGold);
+
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		result.append(aiLoss[i]);
+	}
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		result.append(aiGold[i]);
+	}
+
+	return result;
+}
+
 int CyCity::calculateActualYieldProduced(int /*YieldTypes*/ eYield) const
 {
 	return m_pCity ? m_pCity->calculateActualYieldProduced((YieldTypes)eYield) : -1;

@@ -504,7 +504,7 @@ def handleExitButtonInput ( argsList ):
 	return 1
 
 
-######################################## WTP: STORAGE MULTIPLIER ########################################
+######################################## WTP: STORAGE / UPKEEP MULTIPLIER ########################################
 
 def wtpOptionWarning ( szKey ):
 	"Warning window with OK only: the change comes at the start of the next turn or after loading"
@@ -520,4 +520,21 @@ def handleWtpStorageDropdownInput ( argsList ):
 	if WtpGameOptions.load()[0] != iValue:
 		WtpGameOptions.setStorage(iValue)
 		wtpOptionWarning("TXT_KEY_WTP_OPT_STORAGE_WARN")
+	return 1
+
+def handleWtpUpkeepDropdownInput ( argsList ):
+	"WTP: military upkeep multiplier (index of WtpGameOptions.UPKEEP_PERCENTS)"
+	iValue, szName = argsList
+	import WtpGameOptions
+	if WtpGameOptions.load()[1] != iValue:
+		WtpGameOptions.setUpkeep(iValue)
+		wtpOptionWarning("TXT_KEY_WTP_OPT_UPKEEP_WARN")
+	return 1
+
+def handleWtpUpkeepSpeedClicked ( argsList ):
+	"WTP: military upkeep depends on the game speed (on / off)"
+	bValue, szName = argsList
+	import WtpGameOptions
+	WtpGameOptions.setSpeedDependence(bValue)
+	wtpOptionWarning("TXT_KEY_WTP_OPT_UPKEEP_SPEED_WARN")
 	return 1

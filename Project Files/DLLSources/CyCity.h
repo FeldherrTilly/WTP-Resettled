@@ -207,6 +207,7 @@ public:
 	int getYieldRushed(int /*YieldTypes*/ eYield) const;
 	int calculateNetYield(int /*YieldTypes*/ eYield) const;
 	python::list calculateNetYieldList() const;
+	python::list getStorageOverflowForecast() const; // WTP: NUM_YIELD_TYPES pieces lost / sold per good, then NUM_YIELD_TYPES gold
 	int calculateActualYieldProduced(int /*YieldTypes*/ eYield) const;
 	int calculateActualYieldConsumed(int /*YieldTypes*/ eYield) const;
 

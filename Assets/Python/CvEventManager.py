@@ -573,7 +573,7 @@ class CvEventManager:
 		return ""
 
 	def onLoadGame(self, argsList):
-		# WTP: storage multiplier of the game options
+		# WTP: storage / upkeep multiplier of the game options
 		WtpGameOptions.applyToGame("LoadGame")
 		return 0
 
@@ -610,9 +610,9 @@ class CvEventManager:
 
 	def onBeginGameTurn(self, argsList):
 		'Called at the beginning of the end of each turn'
-		# WTP: storage multiplier of the game options
-		WtpGameOptions.applyToGame("BeginGameTurn")
 		iGameTurn = argsList[0]
+		# WTP: storage / upkeep multiplier of the game options
+		WtpGameOptions.applyToGame("BeginGameTurn")
 
 	def onEndGameTurn(self, argsList):
 		'Called at the end of the end of each turn'
@@ -620,10 +620,10 @@ class CvEventManager:
 
 	def onBeginPlayerTurn(self, argsList):
 		'Called at the beginning of a players turn'
-		# WTP: storage multiplier of the game options (also here: the active player starts his turn)
+		iGameTurn, iPlayer = argsList
+		# WTP: storage / upkeep multiplier of the game options (also here: the active player starts his turn)
 		if iPlayer == gc.getGame().getActivePlayer():
 			WtpGameOptions.applyToGame("BeginPlayerTurn")
-		iGameTurn, iPlayer = argsList
 		CvRandomEventInterface.checkEuropeanBorderDisputeKingWarDemand(iPlayer)
 		CvRandomEventInterface.checkTradeQuestLeadershipChanges(iPlayer)
 
